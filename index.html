@@ -14,6 +14,10 @@
 .paypal-native-wrap{width:100%;text-align:center}.paypal-native-form{margin:0}.paypal-native-button{width:min(100%,360px);min-height:58px;border:1px solid #f0b90b;border-radius:8px;background:linear-gradient(180deg,#ffd76a,#ffc439);color:#111;font:800 12px Orbitron,sans-serif;letter-spacing:.06em;display:inline-flex;align-items:center;justify-content:center;gap:12px;padding:14px 18px;cursor:pointer;box-shadow:0 8px 28px rgba(255,196,57,.16);transition:transform .2s,box-shadow .2s,filter .2s}.paypal-native-button:hover{transform:translateY(-2px);filter:brightness(1.04);box-shadow:0 12px 34px rgba(255,196,57,.25)}.paypal-native-button:active{transform:translateY(0)}.paypal-mark{width:25px;height:25px;border-radius:50%;background:#003087;color:#fff;display:grid;place-items:center;font:900 15px Arial}.paypal-arrow{font-size:18px}.paypal-native-note{margin-top:10px;color:var(--muted);font-size:9px;line-height:1.5}.paypal-panel #paypal{min-height:120px}
 @media(max-width:900px){.hero-grid,.donategrid,.adminbox{grid-template-columns:1fr}.navlinks{display:none}.menu{display:block}.network{max-width:500px;margin:auto}.g3{grid-template-columns:1fr 1fr}.g4{grid-template-columns:1fr 1fr}}@media(max-width:600px){.section{padding:70px 0}.stats,.dstats,.g3,.g4{grid-template-columns:1fr}.hero h1{font-size:48px}.status{display:none}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+.paypal-frame-wrap{width:100%;display:flex;justify-content:center;align-items:flex-start;min-height:550px;overflow:hidden;border-radius:18px;background:rgba(0,0,0,.18)}
+.paypal-frame-wrap iframe{display:block;width:382px;max-width:100%;height:550px;border:0;background:transparent}
+@media(max-width:440px){.paypal-frame-wrap{min-height:520px}.paypal-frame-wrap iframe{width:100%;height:550px}}
 </style>
 </head>
 <body class="lock">
@@ -46,50 +50,7 @@ async function updates(){let r=await sel('cr_updates');if(r.error)return;let a=(
 async function announcements(){let r=await sel('cr_announcements');if(r.error)return;let a=(r.data||[]).filter(x=>x.active!==false&&new Date(x.starts_at||0)<=new Date()&&(!x.expires_at||new Date(x.expires_at)>new Date()));$('#announcements').innerHTML=a.map(x=>`<div class="announcement ${esc(x.severity)}"><strong>${esc(x.title)}</strong><div>${esc(x.message)}</div></div>`).join('')}
 async function campaigns(){let r=await sel('cr_donation_campaigns');if(r.error)return;let a=(r.data||[]).filter(x=>x.active!==false).sort((x,y)=>Number(y.featured)-Number(x.featured));$('#campaigns').innerHTML=a.map((x,i)=>`<button class="campaign ${i===0?'active':''}" data-id="${esc(x.id)}">${esc(x.name)}</button>`).join('');if(a.length){campaign=a[0];$$('.campaign').forEach(b=>b.onclick=()=>{campaign=a.find(x=>x.id===b.dataset.id);$$('.campaign').forEach(z=>z.classList.toggle('active',z===b));$('#goal').textContent=campaign.goal_amount?money(campaign.goal_amount,campaign.currency||'USD'):'—';paypal()});$('#goal').textContent=campaign.goal_amount?money(campaign.goal_amount,campaign.currency||'USD'):'—';paypal()}}
 async function stats(){let r=await sel('cr_public_donation_stats');if(r.error)return;let total=0,count=0;(r.data||[]).forEach(x=>{total+=Number(x.total_amount)||0;count+=Number(x.donation_count)||0});$('#total').textContent=money(total);$('#count').textContent=count;$('#adminstats').innerHTML=(r.data||[]).map(x=>`<div class="card"><div class="meta">${esc(x.currency)}</div><h3>${esc(x.campaign_id||'All campaigns')}</h3><p>${money(x.total_amount,x.currency)} · ${x.donation_count} donations</p></div>`).join('')||'<div class="card"><p>No verified donations yet.</p></div>'}
-async function paypal(){
-  const box=$('#paypal'),status=$('#paypal-status');
-  box.innerHTML='<div class="paypal-loading">Preparing secure PayPal donation...</div>';
-  if(status)status.textContent='';
-  const hostedButtonId=PAYPAL_HOSTED_BUTTON_FALLBACK;
-  try{
-    if(db){
-      const {data,error}=await db.from('cr_donation_settings')
-        .select('id,site_name,paypal_environment,paypal_hosted_button_id,paypal_business,default_currency,donations_enabled')
-        .eq('site_name','CrowRules Entertainment')
-        .eq('donations_enabled',true)
-        .order('updated_at',{ascending:false})
-        .limit(1);
-      if(!error&&data&&data.length&&data[0].paypal_hosted_button_id){
-        settings=data[0];
-      }
-    }
-  }catch(e){console.warn('PayPal settings lookup failed; using verified hosted button ID.',e)}
-  const id=(typeof settings!=='undefined'&&settings&&settings.paypal_hosted_button_id)||hostedButtonId;
-  if(!id){
-    box.innerHTML='<div class="paypal-error">PayPal Hosted Button ID is missing.</div>';
-    return;
-  }
-  const env=(typeof settings!=='undefined'&&settings&&settings.paypal_environment)||'production';
-  if(env!=='production'){
-    box.innerHTML='<div class="paypal-error">PayPal is configured for sandbox. Set the environment to production for live donations.</div>';
-    return;
-  }
-  const itemName=campaign?.paypal_item_name||campaign?.name||'CrowRules Entertainment Support';
-  const safeName=esc(itemName);
-  const safeId=esc(id);
-  box.innerHTML=`<div class="paypal-native-wrap">
-    <form action="https://www.paypal.com/donate" method="post" target="_blank" rel="noopener" class="paypal-native-form">
-      <input type="hidden" name="hosted_button_id" value="${safeId}">
-      <input type="hidden" name="currency_code" value="USD">
-      <button type="submit" class="paypal-native-button" aria-label="Donate with PayPal">
-        <span class="paypal-mark">P</span><span>DONATE WITH PAYPAL</span><span class="paypal-arrow">→</span>
-      </button>
-    </form>
-    <div class="paypal-native-note">Secure donation page hosted by PayPal · ${safeName}</div>
-  </div>`;
-  if(status)status.innerHTML='<span class="paypal-ready">PayPal Secure Donation Ready</span>';
-}
-
+function paypal(){const box=$('#paypal'),status=$('#paypal-status');if(!box)return;box.innerHTML=`<div class="paypal-frame-wrap"><iframe src="https://www.paypal.com/giving/campaigns?campaign_id=9NLV7DEE95E8A" title="PayPal donate campaign card" frameborder="0" width="382" height="550" scrolling="no"></iframe></div>`;if(status)status.innerHTML='<span class="paypal-ready">PayPal Secure Donation Ready</span>';}
 async function isAdmin(){if(!db||!user)return false;let r=await db.from('cr_admins').select('user_id').eq('user_id',user.id).maybeSingle();return !r.error&&!!r.data}
 async function auth(){admin=await isAdmin();$('#authstate').textContent=user?`Signed in as ${user.email}${admin?' — ADMIN ACCESS':' — not an approved admin'}`:'Not signed in.';$('#tools').style.display=admin?'block':'none';$('#admin').classList.toggle('visible',!!user)}
 function subscribe(){db.channel('crowrules-business-hub-v2').on('postgres_changes',{event:'*',schema:'public',table:'cr_news'},news).on('postgres_changes',{event:'*',schema:'public',table:'cr_updates'},updates).on('postgres_changes',{event:'*',schema:'public',table:'cr_announcements'},announcements).on('postgres_changes',{event:'*',schema:'public',table:'cr_donation_campaigns'},campaigns).on('postgres_changes',{event:'*',schema:'public',table:'cr_donation_events'},stats).subscribe()}
