@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#050609" />
+  <meta name="description" content="Back Deck Live — Live from the Back Deck. Straight from Tacoma." />
+  <title>Back Deck Live v1.0 | CrowRules Entertainment</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #050609;
+      --bg2: #090b10;
+      --panel: rgba(15, 18, 25, .78);
+      --panel2: rgba(10, 12, 17, .92);
+      --text: #f5f7fb;
+      --muted: #9da5b5;
+      --line: rgba(255,255,255,.10);
+      --accent: #d9e1ec;
+      --live: #ff3150;
+      --shadow: 0 25px 80px rgba(0,0,0,.55);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(85,100,130,.14), transparent 35%),
+        radial-gradient(circle at 20% 30%, rgba(255,255,255,.035), transparent 28%),
+        var(--bg);
+      color: var(--text);
+      font-family: "Montserrat", sans-serif;
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    /* =========================
+       INTRO
+    ========================== */
+
+    #intro {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background: #020306;
+      transition:
+        opacity 1s ease,
+        visibility 1s ease;
+    }
+
+    #intro.hide {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .intro-noise {
+      position: absolute;
+      inset: 0;
+      opacity: .12;
+      background-image:
+        repeating-linear-gradient(
+          0deg,
+          transparent 0,
+          transparent 2px,
+          rgba(255,255,255,.05) 3px
+        );
+      animation: scan 4s linear infinite;
+    }
+
+    @keyframes scan {
+      from { transform: translateY(-20px); }
+      to { transform: translateY(20px); }
+    }
+
+    .intro-stars {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 12% 22%, white 0 1px, transparent 2px),
+        radial-gradient(circle at 74% 18%, white 0 1px, transparent 2px),
+        radial-gradient(circle at 88% 47%, white 0 1px, transparent 2px),
+        radial-gradient(circle at 42% 32%, white 0 1px, transparent 2px),
+        radial-gradient(circle at 58% 75%, white 0 1px, transparent 2px),
+        radial-gradient(circle at 24% 68%, white 0 1px, transparent 2px);
+      opacity: .3;
+    }
+
+    .deck-scene {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 31%;
+      background:
+        linear-gradient(to top, #020306 0%, rgba(3,5,8,.9) 65%, transparent 100%);
+      clip-path: polygon(
+        0 48%,
+        8% 43%,
+        16% 47%,
+        25% 40%,
+        34% 45%,
+        43% 36%,
+        52% 44%,
+        61% 39%,
+        70% 45%,
+        79% 37%,
+        88% 43%,
+        100% 38%,
+        100% 100%,
+        0 100%
+      );
+    }
+
+    .deck-lights {
+      position: absolute;
+      bottom: 24%;
+      width: 100%;
+      display: flex;
+      justify-content: space-evenly;
+      opacity: 0;
+      animation: lightsIn 1.2s ease forwards 1s;
+    }
+
+    .deck-light {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow:
+        0 0 8px rgba(255,255,255,.8),
+        0 0 28px rgba(255,255,255,.4);
+      animation: bulb 1.8s ease-in-out infinite alternate;
+    }
+
+    @keyframes lightsIn {
+      to { opacity: .9; }
+    }
+
+    @keyframes bulb {
+      from { opacity: .35; transform: scale(.85); }
+      to { opacity: 1; transform: scale(1.15); }
+    }
+
+    .intro-content {
+      position: relative;
+      z-index: 5;
+      width: min(900px, 92%);
+      text-align: center;
+      transform: translateY(25px);
+      opacity: 0;
+      animation: introRise 1.2s cubic-bezier(.2,.8,.2,1) forwards .45s;
+    }
+
+    @keyframes introRise {
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .intro-overline {
+      font-family: "Orbitron", sans-serif;
+      font-size: .75rem;
+      letter-spacing: .42em;
+      color: var(--muted);
+      margin-bottom: 22px;
+    }
+
+    .intro-title {
+      font-family: "Orbitron", sans-serif;
+      font-size: clamp(2.8rem, 9vw, 7rem);
+      font-weight: 900;
+      line-height: .95;
+      letter-spacing: .03em;
+      text-shadow:
+        0 0 20px rgba(255,255,255,.14),
+        0 0 70px rgba(255,255,255,.08);
+    }
+
+    .intro-title span {
+      display: block;
+    }
+
+    .intro-title .red {
+      color: var(--live);
+      text-shadow: 0 0 30px rgba(255,49,80,.35);
+    }
+
+    .intro-tagline {
+      margin-top: 28px;
+      color: #c4cad5;
+      font-size: clamp(.85rem, 2vw, 1.1rem);
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .intro-status {
+      margin-top: 34px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 17px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 999px;
+      background: rgba(255,255,255,.035);
+      font-size: .72rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--live);
+      box-shadow: 0 0 12px var(--live);
+      animation: livePulse 1.2s infinite;
+    }
+
+    @keyframes livePulse {
+      50% {
+        opacity: .35;
+        transform: scale(.7);
+      }
+    }
+
+    /* =========================
+       HEADER
+    ========================== */
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 18px 5%;
+      border-bottom: 1px solid transparent;
+      transition: .3s ease;
+    }
+
+    header.scrolled {
+      background: rgba(4,5,8,.82);
+      backdrop-filter: blur(18px);
+      border-color: var(--line);
+    }
+
+    .nav {
+      max-width: 1400px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: "Orbitron", sans-serif;
+      font-weight: 800;
+      letter-spacing: .08em;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 12px;
+      font-size: 1.1rem;
+      background: rgba(255,255,255,.04);
+    }
+
+    .brand small {
+      display: block;
+      color: var(--muted);
+      font-family: "Montserrat", sans-serif;
+      font-size: .52rem;
+      letter-spacing: .2em;
+      margin-top: 2px;
+    }
+
+    nav {
+      display: flex;
+      gap: 25px;
+      align-items: center;
+    }
+
+    nav a {
+      font-size: .78rem;
+      color: #b9c0cc;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      transition: .25s ease;
+    }
+
+    nav a:hover {
+      color: #fff;
+    }
+
+    .nav-live {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: #fff;
+    }
+
+    .mobile-toggle {
+      display: none;
+      border: 1px solid var(--line);
+      background: transparent;
+      color: #fff;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    /* =========================
+       HERO
+    ========================== */
+
+    .hero {
+      min-height: 100vh;
+      position: relative;
+      display: flex;
+      align-items: center;
+      padding: 150px 5% 100px;
+      overflow: hidden;
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+      background-size: 70px 70px;
+      mask-image: linear-gradient(to bottom, black, transparent 80%);
+      transform: perspective(600px) rotateX(60deg) scale(1.7) translateY(20%);
+      transform-origin: center bottom;
+      opacity: .35;
+    }
+
+    .hero-glow {
+      position: absolute;
+      width: 650px;
+      height: 650px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(110,125,150,.11), transparent 65%);
+      right: -150px;
+      top: 15%;
+      animation: drift 10s ease-in-out infinite alternate;
+    }
+
+    @keyframes drift {
+      to {
+        transform: translate(-100px, 50px) scale(1.15);
+      }
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 3;
+      width: min(1400px, 100%);
+      margin: auto;
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      align-items: center;
+      gap: 70px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      color: #b5bdc9;
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .24em;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-family: "Orbitron", sans-serif;
+      font-size: clamp(3rem, 7vw, 6.8rem);
+      line-height: .94;
+      letter-spacing: -.04em;
+      margin-bottom: 28px;
+    }
+
+    h1 .live-word {
+      color: var(--live);
+      text-shadow: 0 0 35px rgba(255,49,80,.22);
+    }
+
+    .hero-copy {
+      max-width: 680px;
+      color: #adb5c2;
+      font-size: 1.05rem;
+      line-height: 1.85;
+    }
+
+    .hero-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 13px;
+      margin-top: 32px;
+    }
+
+    .btn {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: .25s ease;
+      font-weight: 700;
+      font-size: .8rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .btn-primary {
+      background: #f1f4f8;
+      color: #080a0e;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 35px rgba(255,255,255,.12);
+    }
+
+    .btn-dark {
+      background: rgba(255,255,255,.035);
+      color: #fff;
+    }
+
+    .btn-dark:hover {
+      background: rgba(255,255,255,.08);
+    }
+
+    /* Deck Card */
+
+    .deck-card {
+      min-height: 430px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.11);
+      border-radius: 28px;
+      background:
+        linear-gradient(to bottom, rgba(255,255,255,.03), rgba(255,255,255,.01)),
+        #07090d;
+      box-shadow: var(--shadow);
+      transform: perspective(900px) rotateY(-5deg);
+      transition: transform .6s ease;
+    }
+
+    .deck-card:hover {
+      transform: perspective(900px) rotateY(0deg) translateY(-5px);
+    }
+
+    .sky {
+      position: absolute;
+      inset: 0 0 34% 0;
+      background:
+        radial-gradient(circle at 72% 28%, rgba(255,255,255,.12), transparent 2px),
+        radial-gradient(circle at 22% 38%, rgba(255,255,255,.10), transparent 2px),
+        radial-gradient(circle at 55% 15%, rgba(255,255,255,.12), transparent 2px),
+        linear-gradient(to bottom, #111722, #090c13);
+    }
+
+    .moon {
+      position: absolute;
+      width: 75px;
+      height: 75px;
+      border-radius: 50%;
+      right: 18%;
+      top: 18%;
+      background: #dce2e8;
+      box-shadow: 0 0 45px rgba(220,226,232,.16);
+    }
+
+    .tacoma-silhouette {
+      position: absolute;
+      bottom: 33%;
+      left: 0;
+      width: 100%;
+      height: 100px;
+      background:
+        linear-gradient(
+          135deg,
+          transparent 0 8%,
+          #06080c 8% 13%,
+          transparent 13% 16%,
+          #06080c 16% 24%,
+          transparent 24% 28%,
+          #06080c 28% 37%,
+          transparent 37% 41%,
+          #06080c 41% 52%,
+          transparent 52% 57%,
+          #06080c 57% 66%,
+          transparent 66% 72%,
+          #06080c 72% 82%,
+          transparent 82% 87%,
+          #06080c 87%
+        );
+      opacity: .95;
+    }
+
+    .deck-floor {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 35%;
+      background:
+        repeating-linear-gradient(
+          0deg,
+          #090b0f 0 18px,
+          #101319 19px 20px
+        );
+      transform: perspective(350px) rotateX(45deg);
+      transform-origin: bottom;
+    }
+
+    .string-lights {
+      position: absolute;
+      left: 7%;
+      right: 7%;
+      top: 7%;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .string-lights i {
+      width: 6px;
+      height: 6px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 15px rgba(255,255,255,.7);
+    }
+
+    .deck-card-content {
+      position: absolute;
+      z-index: 5;
+      inset: auto 28px 28px;
+    }
+
+    .deck-card-content h2 {
+      font-family: "Orbitron", sans-serif;
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+    }
+
+    .deck-card-content p {
+      color: #aeb6c3;
+      font-size: .85rem;
+    }
+
+    /* =========================
+       SECTIONS
+    ========================== */
+
+    section {
+      padding: 105px 5%;
+      position: relative;
+    }
+
+    .section-inner {
+      max-width: 1400px;
+      margin: auto;
+    }
+
+    .section-heading {
+      margin-bottom: 45px;
+    }
+
+    .section-kicker {
+      color: #87909e;
+      text-transform: uppercase;
+      letter-spacing: .22em;
+      font-size: .68rem;
+      margin-bottom: 12px;
+    }
+
+    .section-heading h2 {
+      font-family: "Orbitron", sans-serif;
+      font-size: clamp(2rem, 4vw, 3.7rem);
+      letter-spacing: -.03em;
+    }
+
+    .section-heading p {
+      max-width: 650px;
+      margin-top: 15px;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    /* =========================
+       LIVE PLAYER
+    ========================== */
+
+    .live-section {
+      background: linear-gradient(to bottom, transparent, rgba(255,255,255,.018), transparent);
+    }
+
+    .live-layout {
+      display: grid;
+      grid-template-columns: 1.5fr .5fr;
+      gap: 24px;
+    }
+
+    .player {
+      aspect-ratio: 16 / 9;
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background:
+        radial-gradient(circle at center, rgba(100,110,125,.08), transparent 45%),
+        #030407;
+      display: grid;
+      place-items: center;
+    }
+
+    .player::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px);
+      background-size: 100% 4px;
+      opacity: .35;
+      pointer-events: none;
+    }
+
+    .player-center {
+      position: relative;
+      text-align: center;
+      z-index: 2;
+    }
+
+    .play {
+      width: 78px;
+      height: 78px;
+      margin: auto auto 20px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.06);
+      display: grid;
+      place-items: center;
+      font-size: 1.4rem;
+      cursor: pointer;
+      transition: .25s ease;
+    }
+
+    .play:hover {
+      transform: scale(1.08);
+      background: rgba(255,255,255,.12);
+    }
+
+    .player-center h3 {
+      font-family: "Orbitron", sans-serif;
+      font-size: 1.1rem;
+      letter-spacing: .08em;
+    }
+
+    .player-center p {
+      margin-top: 9px;
+      color: #8f97a5;
+      font-size: .78rem;
+    }
+
+    .player-bar {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      color: #b9c0cb;
+      font-size: .68rem;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+    }
+
+    .status-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 25px;
+      background: var(--panel);
+      backdrop-filter: blur(12px);
+    }
+
+    .status-card h3 {
+      font-family: "Orbitron", sans-serif;
+      font-size: .95rem;
+      margin-bottom: 24px;
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--line);
+      gap: 15px;
+    }
+
+    .status-row:last-child {
+      border-bottom: 0;
+    }
+
+    .status-row span:first-child {
+      color: #858e9c;
+      font-size: .73rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .status-row span:last-child {
+      text-align: right;
+      font-weight: 700;
+      font-size: .75rem;
+    }
+
+    /* =========================
+       FEATURES
+    ========================== */
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 17px;
+    }
+
+    .feature {
+      padding: 27px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,.025);
+      transition: .3s ease;
+    }
+
+    .feature:hover {
+      transform: translateY(-5px);
+      background: rgba(255,255,255,.05);
+    }
+
+    .feature-icon {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+
+    .feature h3 {
+      font-family: "Orbitron", sans-serif;
+      font-size: .95rem;
+      margin-bottom: 10px;
+    }
+
+    .feature p {
+      color: #858e9d;
+      font-size: .8rem;
+      line-height: 1.7;
+    }
+
+    /* =========================
+       SCHEDULE
+    ========================== */
+
+    .schedule {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .schedule-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 25px;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,.025);
+    }
+
+    .schedule-day {
+      font-family: "Orbitron", sans-serif;
+      font-size: .8rem;
+      letter-spacing: .12em;
+    }
+
+    .schedule-title {
+      margin-top: 7px;
+      font-weight: 700;
+    }
+
+    .schedule-sub {
+      color: #858e9d;
+      font-size: .73rem;
+      margin-top: 5px;
+    }
+
+    .schedule-time {
+      white-space: nowrap;
+      font-family: "Orbitron", sans-serif;
+      font-size: .85rem;
+    }
+
+    /* =========================
+       EPISODES
+    ========================== */
+
+    .episodes {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .episode {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      overflow: hidden;
+      background: var(--panel2);
+      transition: .3s ease;
+    }
+
+    .episode:hover {
+      transform: translateY(-5px);
+    }
+
+    .episode-art {
+      aspect-ratio: 16 / 9;
+      position: relative;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 70% 30%, rgba(255,255,255,.12), transparent 3%),
+        linear-gradient(135deg, #11151d, #050609);
+    }
+
+    .episode-art::after {
+      content: "BACK DECK LIVE";
+      font-family: "Orbitron", sans-serif;
+      font-size: .8rem;
+      letter-spacing: .18em;
+      opacity: .65;
+    }
+
+    .episode-body {
+      padding: 22px;
+    }
+
+    .episode-meta {
+      color: #838c99;
+      font-size: .65rem;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      margin-bottom: 10px;
+    }
+
+    .episode h3 {
+      font-size: 1rem;
+      margin-bottom: 9px;
+    }
+
+    .episode p {
+      color: #858e9d;
+      font-size: .77rem;
+      line-height: 1.6;
+    }
+
+    /* =========================
+       ABOUT
+    ========================== */
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: .8fr 1.2fr;
+      gap: 70px;
+      align-items: center;
+    }
+
+    .about-visual {
+      min-height: 390px;
+      border-radius: 25px;
+      border: 1px solid var(--line);
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 70% 25%, rgba(255,255,255,.12), transparent 2%),
+        radial-gradient(circle at 35% 20%, rgba(255,255,255,.08), transparent 1%),
+        linear-gradient(to bottom, #111722, #050609 65%);
+    }
+
+    .about-visual::after {
+      content: "";
+      position: absolute;
+      left: -10%;
+      right: -10%;
+      bottom: -20%;
+      height: 55%;
+      background:
+        repeating-linear-gradient(
+          0deg,
+          #07090d 0 20px,
+          #11141a 21px 23px
+        );
+      transform: perspective(300px) rotateX(45deg);
+    }
+
+    .about-content h2 {
+      font-family: "Orbitron", sans-serif;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      margin-bottom: 22px;
+    }
+
+    .about-content p {
+      color: #9ba4b2;
+      line-height: 1.9;
+      margin-bottom: 16px;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 25px;
+    }
+
+    .pill {
+      padding: 9px 13px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: #adb5c1;
+      font-size: .68rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+    }
+
+    /* =========================
+       CTA
+    ========================== */
+
+    .cta {
+      padding-top: 70px;
+      padding-bottom: 120px;
+    }
+
+    .cta-box {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      padding: 70px 40px;
+      text-align: center;
+      background:
+        radial-gradient(circle at center, rgba(255,255,255,.065), transparent 55%),
+        rgba(255,255,255,.025);
+    }
+
+    .cta-box::before,
+    .cta-box::after {
+      content: "";
+      position: absolute;
+      width: 160px;
+      height: 160px;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 50%;
+    }
+
+    .cta-box::before {
+      left: -80px;
+      top: -80px;
+    }
+
+    .cta-box::after {
+      right: -80px;
+      bottom: -80px;
+    }
+
+    .cta-box h2 {
+      position: relative;
+      z-index: 2;
+      font-family: "Orbitron", sans-serif;
+      font-size: clamp(2rem, 5vw, 4rem);
+      margin-bottom: 15px;
+    }
+
+    .cta-box p {
+      position: relative;
+      z-index: 2;
+      color: #959eac;
+      margin-bottom: 28px;
+    }
+
+    .cta-box .btn {
+      position: relative;
+      z-index: 2;
+    }
+
+    /* =========================
+       FOOTER
+    ========================== */
+
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 45px 5%;
+      background: #030407;
+    }
+
+    .footer-inner {
+      max-width: 1400px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .footer-brand {
+      font-family: "Orbitron", sans-serif;
+      font-weight: 800;
+      letter-spacing: .1em;
+    }
+
+    .footer-brand span {
+      display: block;
+      color: #777f8c;
+      font-family: "Montserrat", sans-serif;
+      font-size: .65rem;
+      letter-spacing: .12em;
+      margin-top: 5px;
+    }
+
+    .copyright {
+      color: #666e7b;
+      font-size: .68rem;
+      text-align: right;
+      line-height: 1.7;
+    }
+
+    /* =========================
+       REVEAL
+    ========================== */
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: .8s cubic-bezier(.2,.8,.2,1);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================== */
+
+    @media (max-width: 1050px) {
+      .hero-inner {
+        grid-template-columns: 1fr;
+      }
+
+      .deck-card {
+        max-width: 700px;
+      }
+
+      .live-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .feature-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .about-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .about-visual {
+        min-height: 300px;
+      }
+    }
+
+    @media (max-width: 760px) {
+      nav {
+        display: none;
+        position: absolute;
+        top: 75px;
+        left: 5%;
+        right: 5%;
+        padding: 20px;
+        flex-direction: column;
+        align-items: stretch;
+        background: rgba(5,6,9,.96);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+      }
+
+      nav.open {
+        display: flex;
+      }
+
+      nav a {
+        padding: 12px;
+      }
+
+      .mobile-toggle {
+        display: block;
+      }
+
+      .hero {
+        padding-top: 125px;
+      }
+
+      section {
+        padding: 75px 5%;
+      }
+
+      .feature-grid,
+      .schedule,
+      .episodes {
+        grid-template-columns: 1fr;
+      }
+
+      .deck-card {
+        min-height: 360px;
+      }
+
+      .footer-inner {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .copyright {
+        text-align: left;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .brand-text {
+        display: none;
+      }
+
+      h1 {
+        font-size: 3.2rem;
+      }
+
+      .hero-copy {
+        font-size: .9rem;
+      }
+
+      .hero-buttons {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn {
+        justify-content: center;
+      }
+
+      .schedule-item {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .schedule-time {
+        align-self: flex-start;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =========================
+       CINEMATIC INTRO
+  ========================== -->
+
+  <div id="intro">
+    <div class="intro-stars"></div>
+    <div class="intro-noise"></div>
+
+    <div class="deck-lights">
+      <i class="deck-light"></i>
+      <i class="deck-light"></i>
+      <i class="deck-light"></i>
+      <i class="deck-light"></i>
+      <i class="deck-light"></i>
+      <i class="deck-light"></i>
+      <i class="deck-light"></i>
+      <i class="deck-light"></i>
+      <i class="deck-light"></i>
+      <i class="deck-light"></i>
+      <i class="deck-light"></i>
+    </div>
+
+    <div class="deck-scene"></div>
+
+    <div class="intro-content">
+      <div class="intro-overline">CROWRULES ENTERTAINMENT PRESENTS</div>
+
+      <div class="intro-title">
+        <span>BACK DECK</span>
+        <span class="red">LIVE</span>
+      </div>
+
+      <div class="intro-tagline">
+        Live from the Back Deck. Straight from Tacoma.
+      </div>
+
+      <div class="intro-status">
+        <span class="live-dot"></span>
+        Weekly Live Broadcast
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================
+       HEADER
+  ========================== -->
+
+  <header id="header">
+    <div class="nav">
+
+      <a href="#home" class="brand">
+        <div class="brand-mark">CR</div>
+        <div class="brand-text">
+          BACK DECK LIVE
+          <small>CROWRULES ENTERTAINMENT</small>
+        </div>
+      </a>
+
+      <nav id="nav">
+        <a href="#home">Home</a>
+        <a href="#live">Live</a>
+        <a href="#schedule">Schedule</a>
+        <a href="#episodes">Episodes</a>
+        <a href="#about">About</a>
+        <a href="#live" class="nav-live">
+          <span class="live-dot"></span>
+          Live
+        </a>
+      </nav>
+
+      <button class="mobile-toggle" id="mobileToggle" aria-label="Open navigation">
+        ☰
+      </button>
+
+    </div>
+  </header>
+
+  <main>
+
+    <!-- =========================
+         HERO
+    ========================== -->
+
+    <section class="hero" id="home">
+
+      <div class="hero-grid"></div>
+      <div class="hero-glow"></div>
+
+      <div class="hero-inner">
+
+        <div class="hero-content reveal">
+
+          <div class="eyebrow">
+            <span class="live-dot"></span>
+            Saturday Live Broadcast
+          </div>
+
+          <h1>
+            BACK DECK
+            <span class="live-word">LIVE</span>
+          </h1>
+
+          <p class="hero-copy">
+            A weekly live conversation from Tacoma covering local stories,
+            Pacific Northwest life, sports, entertainment, gaming, CrowRules
+            projects, and whatever happens when the cameras go live.
+          </p>
+
+          <div class="hero-buttons">
+            <a href="#live" class="btn btn-primary">
+              ▶ Watch Live
+            </a>
+
+            <a href="#schedule" class="btn btn-dark">
+              View Schedule
+            </a>
+          </div>
+
+        </div>
+
+        <div class="deck-card reveal">
+
+          <div class="sky"></div>
+          <div class="moon"></div>
+
+          <div class="string-lights">
+            <i></i><i></i><i></i><i></i><i></i>
+            <i></i><i></i><i></i><i></i><i></i>
+            <i></i><i></i>
+          </div>
+
+          <div class="tacoma-silhouette"></div>
+          <div class="deck-floor"></div>
+
+          <div class="deck-card-content">
+            <h2>LIVE FROM TACOMA</h2>
+            <p>Saturday • 3:00 PM Pacific</p>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =========================
+         LIVE
+    ========================== -->
+
+    <section class="live-section" id="live">
+
+      <div class="section-inner">
+
+        <div class="section-heading reveal">
+          <div class="section-kicker">Broadcast Center</div>
+          <h2>We're On The Deck.</h2>
+          <p>
+            When Back Deck Live is broadcasting, this becomes the home base
+            for the show.
+          </p>
+        </div>
+
+        <div class="live-layout">
+
+          <div class="player reveal">
+
+            <div class="player-center">
+
+              <button class="play" id="playButton" aria-label="Start player">
+                ▶
+              </button>
+
+              <h3>BACK DECK LIVE</h3>
+
+              <p id="playerMessage">
+                Live video player placeholder
+              </p>
+
+            </div>
+
+            <div class="player-bar">
+              <span>
+                <span class="live-dot"></span>
+                Broadcast
+              </span>
+
+              <span id="clock">00:00:00</span>
+            </div>
+
+          </div>
+
+          <aside class="status-card reveal">
+
+            <h3>Broadcast Status</h3>
+
+            <div class="status-row">
+              <span>Status</span>
+              <span id="statusText">OFF AIR</span>
+            </div>
+
+            <div class="status-row">
+              <span>Next Show</span>
+              <span>Saturday</span>
+            </div>
+
+            <div class="status-row">
+              <span>Time</span>
+              <span>3:00 PM PT</span>
+            </div>
+
+            <div class="status-row">
+              <span>Location</span>
+              <span>Tacoma, WA</span>
+            </div>
+
+            <div class="status-row">
+              <span>Network</span>
+              <span>CrowRules TV</span>
+            </div>
+
+          </aside>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- =========================
+         WHAT'S ON
+    ========================== -->
+
+    <section>
+
+      <div class="section-inner">
+
+        <div class="section-heading reveal">
+          <div class="section-kicker">The Format</div>
+          <h2>What's On The Deck?</h2>
+          <p>
+            Back Deck Live is intentionally flexible. Every broadcast can
+            evolve around what's happening in Tacoma, the Pacific Northwest,
+            and the CrowRules universe.
+          </p>
+        </div>
+
+        <div class="feature-grid">
+
+          <article class="feature reveal">
+            <div class="feature-icon">🎙️</div>
+            <h3>Live Conversation</h3>
+            <p>
+              Unfiltered discussion, stories, opinions, observations and
+              spontaneous moments.
+            </p>
+          </article>
+
+          <article class="feature reveal">
+            <div class="feature-icon">🌲</div>
+            <h3>Tacoma & PNW</h3>
+            <p>
+              Local stories, neighborhood conversations, regional culture
+              and life around the Pacific Northwest.
+            </p>
+          </article>
+
+          <article class="feature reveal">
+            <div class="feature-icon">🏈</div>
+            <h3>Sports</h3>
+            <p>
+              PNW sports discussion, reactions, predictions and whatever
+              deserves attention that week.
+            </p>
+          </article>
+
+          <article class="feature reveal">
+            <div class="feature-icon">🎮</div>
+            <h3>Gaming Nights</h3>
+            <p>
+              Gaming sessions, community challenges and special CrowRules
+              gaming broadcasts.
+            </p>
+          </article>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- =========================
+         SCHEDULE
+    ========================== -->
+
+    <section id="schedule">
+
+      <div class="section-inner">
+
+        <div class="section-heading reveal">
+          <div class="section-kicker">Weekly Programming</div>
+          <h2>The Deck Schedule.</h2>
+          <p>
+            The regular Back Deck Live schedule can be expanded with special
+            broadcasts and pop-up events.
+          </p>
+        </div>
+
+        <div class="schedule">
+
+          <article class="schedule-item reveal">
+            <div>
+              <div class="schedule-day">SATURDAY</div>
+              <div class="schedule-title">Back Deck Live</div>
+              <div class="schedule-sub">Weekly flagship live broadcast</div>
+            </div>
+            <div class="schedule-time">3:00 PM PT</div>
+          </article>
+
+          <article class="schedule-item reveal">
+            <div>
+              <div class="schedule-day">SPECIAL</div>
+              <div class="schedule-title">Back Deck Pop-Up</div>
+              <div class="schedule-sub">Special live broadcasts</div>
+            </div>
+            <div class="schedule-time">TBA</div>
+          </article>
+
+          <article class="schedule-item reveal">
+            <div>
+              <div class="schedule-day">FRIDAY</div>
+              <div class="schedule-title">Tacoma Nights</div>
+              <div class="schedule-sub">Companion CrowRules program</div>
+            </div>
+            <div class="schedule-time">10:00 PM PT</div>
+          </article>
+
+          <article class="schedule-item reveal">
+            <div>
+              <div class="schedule-day">ONGOING</div>
+              <div class="schedule-title">CrowRules TV</div>
+              <div class="schedule-sub">Network programming</div>
+            </div>
+            <div class="schedule-time">24/7</div>
+          </article>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- =========================
+         EPISODES
+    ========================== -->
+
+    <section id="episodes">
+
+      <div class="section-inner">
+
+        <div class="section-heading reveal">
+          <div class="section-kicker">The Archive</div>
+          <h2>From The Deck.</h2>
+          <p>
+            Previous broadcasts, conversations, highlights and special
+            episodes will live here.
+          </p>
+        </div>
+
+        <div class="episodes">
+
+          <article class="episode reveal">
+            <div class="episode-art"></div>
+            <div class="episode-body">
+              <div class="episode-meta">Episode 001 • Pilot</div>
+              <h3>Welcome To The Back Deck</h3>
+              <p>
+                Introducing Back Deck Live and the idea behind CrowRules'
+                newest live conversation format.
+              </p>
+            </div>
+          </article>
+
+          <article class="episode reveal">
+            <div class="episode-art"></div>
+            <div class="episode-body">
+              <div class="episode-meta">Episode 002 • Tacoma</div>
+              <h3>What's Happening Around Tacoma?</h3>
+              <p>
+                A casual look at Tacoma, local life, stories and the things
+                worth talking about this week.
+              </p>
+            </div>
+          </article>
+
+          <article class="episode reveal">
+            <div class="episode-art"></div>
+            <div class="episode-body">
+              <div class="episode-meta">Special • CrowRules</div>
+              <h3>Building The Entertainment Universe</h3>
+              <p>
+                A behind-the-scenes conversation about building CrowRules
+                Entertainment and CrowRules TV.
+              </p>
+            </div>
+          </article>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- =========================
+         ABOUT
+    ========================== -->
+
+    <section id="about">
+
+      <div class="section-inner">
+
+        <div class="about-grid">
+
+          <div class="about-visual reveal"></div>
+
+          <div class="about-content reveal">
+
+            <div class="section-kicker">About The Show</div>
+
+            <h2>Not A Studio.<br>The Back Deck.</h2>
+
+            <p>
+              Back Deck Live is designed to feel different from a traditional
+              studio production. It's conversational, relaxed and connected
+              to the real world around Tacoma.
+            </p>
+
+            <p>
+              The show gives CrowRules Entertainment a dedicated live format
+              where viewers can participate, ask questions, react to topics,
+              watch gaming sessions and hang out for a while.
+            </p>
+
+            <p>
+              It also serves as a natural live companion to
+              <strong>Tacoma Nights</strong>.
+            </p>
+
+            <div class="pill-row">
+              <span class="pill">Tacoma</span>
+              <span class="pill">PNW</span>
+              <span class="pill">Live</span>
+              <span class="pill">Gaming</span>
+              <span class="pill">Entertainment</span>
+              <span class="pill">Community</span>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- =========================
+         CTA
+    ========================== -->
+
+    <section class="cta">
+
+      <div class="section-inner">
+
+        <div class="cta-box reveal">
+
+          <h2>Pull Up A Chair.</h2>
+
+          <p>
+            Saturday afternoons. Tacoma. One deck. One conversation.
+          </p>
+
+          <a href="#live" class="btn btn-primary">
+            ▶ Enter The Live Room
+          </a>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- =========================
+       FOOTER
+  ========================== -->
+
+  <footer>
+
+    <div class="footer-inner">
+
+      <div class="footer-brand">
+        BACK DECK LIVE
+        <span>Live from the Back Deck. Straight from Tacoma.</span>
+      </div>
+
+      <div class="copyright">
+        © <span id="year"></span> CrowRules Entertainment<br>
+        Back Deck Live v1.0
+      </div>
+
+    </div>
+
+  </footer>
+
+  <script>
+    /* =========================
+       INTRO
+    ========================== */
+
+    const intro = document.getElementById("intro");
+
+    window.addEventListener("load", () => {
+      setTimeout(() => {
+        intro.classList.add("hide");
+      }, 3500);
+    });
+
+    /* =========================
+       HEADER
+    ========================== */
+
+    const header = document.getElementById("header");
+
+    window.addEventListener("scroll", () => {
+      header.classList.toggle("scrolled", window.scrollY > 30);
+    });
+
+    /* =========================
+       MOBILE NAV
+    ========================== */
+
+    const mobileToggle = document.getElementById("mobileToggle");
+    const nav = document.getElementById("nav");
+
+    mobileToggle.addEventListener("click", () => {
+      nav.classList.toggle("open");
+    });
+
+    nav.querySelectorAll("a").forEach(link => {
+      link.addEventListener("click", () => {
+        nav.classList.remove("open");
+      });
+    });
+
+    /* =========================
+       REVEAL ANIMATIONS
+    ========================== */
+
+    const revealItems = document.querySelectorAll(".reveal");
+
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: 0.12
+      }
+    );
+
+    revealItems.forEach(item => observer.observe(item));
+
+    /* =========================
+       PLAYER DEMO
+    ========================== */
+
+    const playButton = document.getElementById("playButton");
+    const playerMessage = document.getElementById("playerMessage");
+    const statusText = document.getElementById("statusText");
+
+    let demoPlaying = false;
+
+    playButton.addEventListener("click", () => {
+
+      demoPlaying = !demoPlaying;
+
+      if (demoPlaying) {
+        playButton.textContent = "❚❚";
+        playerMessage.textContent = "Live player ready — connect your stream here.";
+        statusText.textContent = "READY";
+      } else {
+        playButton.textContent = "▶";
+        playerMessage.textContent = "Live video player placeholder";
+        statusText.textContent = "OFF AIR";
+      }
+
+    });
+
+    /* =========================
+       CLOCK
+    ========================== */
+
+    function updateClock() {
+
+      const now = new Date();
+
+      const hours = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+      const seconds = String(now.getSeconds()).padStart(2, "0");
+
+      document.getElementById("clock").textContent =
+        `${hours}:${minutes}:${seconds}`;
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    /* =========================
+       YEAR
+    ========================== */
+
+    document.getElementById("year").textContent =
+      new Date().getFullYear();
+
+    /* =========================
+       SMOOTH BUTTON FEEDBACK
+    ========================== */
+
+    document.querySelectorAll(".btn").forEach(button => {
+
+      button.addEventListener("click", () => {
+        button.style.transform = "scale(.97)";
+
+        setTimeout(() => {
+          button.style.transform = "";
+        }, 120);
+      });
+
+    });
+
+  </script>
+
+</body>
+</html>
