@@ -1,1664 +1,1721 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#050609" />
-  <meta name="description" content="Back Deck Live — Live from the Back Deck. Straight from Tacoma." />
-  <title>Back Deck Live v1.0 | CrowRules Entertainment</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet">
-
-  <style>
-    :root {
-      --bg: #050609;
-      --bg2: #090b10;
-      --panel: rgba(15, 18, 25, .78);
-      --panel2: rgba(10, 12, 17, .92);
-      --text: #f5f7fb;
-      --muted: #9da5b5;
-      --line: rgba(255,255,255,.10);
-      --accent: #d9e1ec;
-      --live: #ff3150;
-      --shadow: 0 25px 80px rgba(0,0,0,.55);
-      --radius: 22px;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      min-height: 100vh;
-      background:
-        radial-gradient(circle at 50% 0%, rgba(85,100,130,.14), transparent 35%),
-        radial-gradient(circle at 20% 30%, rgba(255,255,255,.035), transparent 28%),
-        var(--bg);
-      color: var(--text);
-      font-family: "Montserrat", sans-serif;
-      overflow-x: hidden;
-    }
-
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    button {
-      font: inherit;
-    }
-
-    /* =========================
-       INTRO
-    ========================== */
-
-    #intro {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      display: grid;
-      place-items: center;
-      overflow: hidden;
-      background: #020306;
-      transition:
-        opacity 1s ease,
-        visibility 1s ease;
-    }
-
-    #intro.hide {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-    }
-
-    .intro-noise {
-      position: absolute;
-      inset: 0;
-      opacity: .12;
-      background-image:
-        repeating-linear-gradient(
-          0deg,
-          transparent 0,
-          transparent 2px,
-          rgba(255,255,255,.05) 3px
-        );
-      animation: scan 4s linear infinite;
-    }
-
-    @keyframes scan {
-      from { transform: translateY(-20px); }
-      to { transform: translateY(20px); }
-    }
-
-    .intro-stars {
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(circle at 12% 22%, white 0 1px, transparent 2px),
-        radial-gradient(circle at 74% 18%, white 0 1px, transparent 2px),
-        radial-gradient(circle at 88% 47%, white 0 1px, transparent 2px),
-        radial-gradient(circle at 42% 32%, white 0 1px, transparent 2px),
-        radial-gradient(circle at 58% 75%, white 0 1px, transparent 2px),
-        radial-gradient(circle at 24% 68%, white 0 1px, transparent 2px);
-      opacity: .3;
-    }
-
-    .deck-scene {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      height: 31%;
-      background:
-        linear-gradient(to top, #020306 0%, rgba(3,5,8,.9) 65%, transparent 100%);
-      clip-path: polygon(
-        0 48%,
-        8% 43%,
-        16% 47%,
-        25% 40%,
-        34% 45%,
-        43% 36%,
-        52% 44%,
-        61% 39%,
-        70% 45%,
-        79% 37%,
-        88% 43%,
-        100% 38%,
-        100% 100%,
-        0 100%
-      );
-    }
-
-    .deck-lights {
-      position: absolute;
-      bottom: 24%;
-      width: 100%;
-      display: flex;
-      justify-content: space-evenly;
-      opacity: 0;
-      animation: lightsIn 1.2s ease forwards 1s;
-    }
-
-    .deck-light {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #fff;
-      box-shadow:
-        0 0 8px rgba(255,255,255,.8),
-        0 0 28px rgba(255,255,255,.4);
-      animation: bulb 1.8s ease-in-out infinite alternate;
-    }
-
-    @keyframes lightsIn {
-      to { opacity: .9; }
-    }
-
-    @keyframes bulb {
-      from { opacity: .35; transform: scale(.85); }
-      to { opacity: 1; transform: scale(1.15); }
-    }
-
-    .intro-content {
-      position: relative;
-      z-index: 5;
-      width: min(900px, 92%);
-      text-align: center;
-      transform: translateY(25px);
-      opacity: 0;
-      animation: introRise 1.2s cubic-bezier(.2,.8,.2,1) forwards .45s;
-    }
-
-    @keyframes introRise {
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
-
-    .intro-overline {
-      font-family: "Orbitron", sans-serif;
-      font-size: .75rem;
-      letter-spacing: .42em;
-      color: var(--muted);
-      margin-bottom: 22px;
-    }
-
-    .intro-title {
-      font-family: "Orbitron", sans-serif;
-      font-size: clamp(2.8rem, 9vw, 7rem);
-      font-weight: 900;
-      line-height: .95;
-      letter-spacing: .03em;
-      text-shadow:
-        0 0 20px rgba(255,255,255,.14),
-        0 0 70px rgba(255,255,255,.08);
-    }
-
-    .intro-title span {
-      display: block;
-    }
-
-    .intro-title .red {
-      color: var(--live);
-      text-shadow: 0 0 30px rgba(255,49,80,.35);
-    }
-
-    .intro-tagline {
-      margin-top: 28px;
-      color: #c4cad5;
-      font-size: clamp(.85rem, 2vw, 1.1rem);
-      letter-spacing: .16em;
-      text-transform: uppercase;
-    }
-
-    .intro-status {
-      margin-top: 34px;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 17px;
-      border: 1px solid rgba(255,255,255,.12);
-      border-radius: 999px;
-      background: rgba(255,255,255,.035);
-      font-size: .72rem;
-      letter-spacing: .15em;
-      text-transform: uppercase;
-    }
-
-    .live-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--live);
-      box-shadow: 0 0 12px var(--live);
-      animation: livePulse 1.2s infinite;
-    }
-
-    @keyframes livePulse {
-      50% {
-        opacity: .35;
-        transform: scale(.7);
-      }
-    }
-
-    /* =========================
-       HEADER
-    ========================== */
-
-    header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      padding: 18px 5%;
-      border-bottom: 1px solid transparent;
-      transition: .3s ease;
-    }
-
-    header.scrolled {
-      background: rgba(4,5,8,.82);
-      backdrop-filter: blur(18px);
-      border-color: var(--line);
-    }
-
-    .nav {
-      max-width: 1400px;
-      margin: auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 30px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-family: "Orbitron", sans-serif;
-      font-weight: 800;
-      letter-spacing: .08em;
-    }
-
-    .brand-mark {
-      width: 38px;
-      height: 38px;
-      display: grid;
-      place-items: center;
-      border: 1px solid rgba(255,255,255,.25);
-      border-radius: 12px;
-      font-size: 1.1rem;
-      background: rgba(255,255,255,.04);
-    }
-
-    .brand small {
-      display: block;
-      color: var(--muted);
-      font-family: "Montserrat", sans-serif;
-      font-size: .52rem;
-      letter-spacing: .2em;
-      margin-top: 2px;
-    }
-
-    nav {
-      display: flex;
-      gap: 25px;
-      align-items: center;
-    }
-
-    nav a {
-      font-size: .78rem;
-      color: #b9c0cc;
-      text-transform: uppercase;
-      letter-spacing: .12em;
-      transition: .25s ease;
-    }
-
-    nav a:hover {
-      color: #fff;
-    }
-
-    .nav-live {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      color: #fff;
-    }
-
-    .mobile-toggle {
-      display: none;
-      border: 1px solid var(--line);
-      background: transparent;
-      color: #fff;
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      cursor: pointer;
-    }
-
-    /* =========================
-       HERO
-    ========================== */
-
-    .hero {
-      min-height: 100vh;
-      position: relative;
-      display: flex;
-      align-items: center;
-      padding: 150px 5% 100px;
-      overflow: hidden;
-    }
-
-    .hero-grid {
-      position: absolute;
-      inset: 0;
-      background:
-        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
-      background-size: 70px 70px;
-      mask-image: linear-gradient(to bottom, black, transparent 80%);
-      transform: perspective(600px) rotateX(60deg) scale(1.7) translateY(20%);
-      transform-origin: center bottom;
-      opacity: .35;
-    }
-
-    .hero-glow {
-      position: absolute;
-      width: 650px;
-      height: 650px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(110,125,150,.11), transparent 65%);
-      right: -150px;
-      top: 15%;
-      animation: drift 10s ease-in-out infinite alternate;
-    }
-
-    @keyframes drift {
-      to {
-        transform: translate(-100px, 50px) scale(1.15);
-      }
-    }
-
-    .hero-inner {
-      position: relative;
-      z-index: 3;
-      width: min(1400px, 100%);
-      margin: auto;
-      display: grid;
-      grid-template-columns: 1.1fr .9fr;
-      align-items: center;
-      gap: 70px;
-    }
-
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 9px;
-      color: #b5bdc9;
-      font-size: .72rem;
-      text-transform: uppercase;
-      letter-spacing: .24em;
-      margin-bottom: 20px;
-    }
-
-    h1 {
-      font-family: "Orbitron", sans-serif;
-      font-size: clamp(3rem, 7vw, 6.8rem);
-      line-height: .94;
-      letter-spacing: -.04em;
-      margin-bottom: 28px;
-    }
-
-    h1 .live-word {
-      color: var(--live);
-      text-shadow: 0 0 35px rgba(255,49,80,.22);
-    }
-
-    .hero-copy {
-      max-width: 680px;
-      color: #adb5c2;
-      font-size: 1.05rem;
-      line-height: 1.85;
-    }
-
-    .hero-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 13px;
-      margin-top: 32px;
-    }
-
-    .btn {
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 14px 20px;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      transition: .25s ease;
-      font-weight: 700;
-      font-size: .8rem;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-    }
-
-    .btn-primary {
-      background: #f1f4f8;
-      color: #080a0e;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 35px rgba(255,255,255,.12);
-    }
-
-    .btn-dark {
-      background: rgba(255,255,255,.035);
-      color: #fff;
-    }
-
-    .btn-dark:hover {
-      background: rgba(255,255,255,.08);
-    }
-
-    /* Deck Card */
-
-    .deck-card {
-      min-height: 430px;
-      position: relative;
-      overflow: hidden;
-      border: 1px solid rgba(255,255,255,.11);
-      border-radius: 28px;
-      background:
-        linear-gradient(to bottom, rgba(255,255,255,.03), rgba(255,255,255,.01)),
-        #07090d;
-      box-shadow: var(--shadow);
-      transform: perspective(900px) rotateY(-5deg);
-      transition: transform .6s ease;
-    }
-
-    .deck-card:hover {
-      transform: perspective(900px) rotateY(0deg) translateY(-5px);
-    }
-
-    .sky {
-      position: absolute;
-      inset: 0 0 34% 0;
-      background:
-        radial-gradient(circle at 72% 28%, rgba(255,255,255,.12), transparent 2px),
-        radial-gradient(circle at 22% 38%, rgba(255,255,255,.10), transparent 2px),
-        radial-gradient(circle at 55% 15%, rgba(255,255,255,.12), transparent 2px),
-        linear-gradient(to bottom, #111722, #090c13);
-    }
-
-    .moon {
-      position: absolute;
-      width: 75px;
-      height: 75px;
-      border-radius: 50%;
-      right: 18%;
-      top: 18%;
-      background: #dce2e8;
-      box-shadow: 0 0 45px rgba(220,226,232,.16);
-    }
-
-    .tacoma-silhouette {
-      position: absolute;
-      bottom: 33%;
-      left: 0;
-      width: 100%;
-      height: 100px;
-      background:
-        linear-gradient(
-          135deg,
-          transparent 0 8%,
-          #06080c 8% 13%,
-          transparent 13% 16%,
-          #06080c 16% 24%,
-          transparent 24% 28%,
-          #06080c 28% 37%,
-          transparent 37% 41%,
-          #06080c 41% 52%,
-          transparent 52% 57%,
-          #06080c 57% 66%,
-          transparent 66% 72%,
-          #06080c 72% 82%,
-          transparent 82% 87%,
-          #06080c 87%
-        );
-      opacity: .95;
-    }
-
-    .deck-floor {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      height: 35%;
-      background:
-        repeating-linear-gradient(
-          0deg,
-          #090b0f 0 18px,
-          #101319 19px 20px
-        );
-      transform: perspective(350px) rotateX(45deg);
-      transform-origin: bottom;
-    }
-
-    .string-lights {
-      position: absolute;
-      left: 7%;
-      right: 7%;
-      top: 7%;
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .string-lights i {
-      width: 6px;
-      height: 6px;
-      background: #fff;
-      border-radius: 50%;
-      box-shadow: 0 0 15px rgba(255,255,255,.7);
-    }
-
-    .deck-card-content {
-      position: absolute;
-      z-index: 5;
-      inset: auto 28px 28px;
-    }
-
-    .deck-card-content h2 {
-      font-family: "Orbitron", sans-serif;
-      font-size: 1.8rem;
-      margin-bottom: 8px;
-    }
-
-    .deck-card-content p {
-      color: #aeb6c3;
-      font-size: .85rem;
-    }
-
-    /* =========================
-       SECTIONS
-    ========================== */
-
-    section {
-      padding: 105px 5%;
-      position: relative;
-    }
-
-    .section-inner {
-      max-width: 1400px;
-      margin: auto;
-    }
-
-    .section-heading {
-      margin-bottom: 45px;
-    }
-
-    .section-kicker {
-      color: #87909e;
-      text-transform: uppercase;
-      letter-spacing: .22em;
-      font-size: .68rem;
-      margin-bottom: 12px;
-    }
-
-    .section-heading h2 {
-      font-family: "Orbitron", sans-serif;
-      font-size: clamp(2rem, 4vw, 3.7rem);
-      letter-spacing: -.03em;
-    }
-
-    .section-heading p {
-      max-width: 650px;
-      margin-top: 15px;
-      color: var(--muted);
-      line-height: 1.75;
-    }
-
-    /* =========================
-       LIVE PLAYER
-    ========================== */
-
-    .live-section {
-      background: linear-gradient(to bottom, transparent, rgba(255,255,255,.018), transparent);
-    }
-
-    .live-layout {
-      display: grid;
-      grid-template-columns: 1.5fr .5fr;
-      gap: 24px;
-    }
-
-    .player {
-      aspect-ratio: 16 / 9;
-      position: relative;
-      overflow: hidden;
-      border-radius: var(--radius);
-      border: 1px solid var(--line);
-      background:
-        radial-gradient(circle at center, rgba(100,110,125,.08), transparent 45%),
-        #030407;
-      display: grid;
-      place-items: center;
-    }
-
-    .player::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px);
-      background-size: 100% 4px;
-      opacity: .35;
-      pointer-events: none;
-    }
-
-    .player-center {
-      position: relative;
-      text-align: center;
-      z-index: 2;
-    }
-
-    .play {
-      width: 78px;
-      height: 78px;
-      margin: auto auto 20px;
-      border-radius: 50%;
-      border: 1px solid rgba(255,255,255,.25);
-      background: rgba(255,255,255,.06);
-      display: grid;
-      place-items: center;
-      font-size: 1.4rem;
-      cursor: pointer;
-      transition: .25s ease;
-    }
-
-    .play:hover {
-      transform: scale(1.08);
-      background: rgba(255,255,255,.12);
-    }
-
-    .player-center h3 {
-      font-family: "Orbitron", sans-serif;
-      font-size: 1.1rem;
-      letter-spacing: .08em;
-    }
-
-    .player-center p {
-      margin-top: 9px;
-      color: #8f97a5;
-      font-size: .78rem;
-    }
-
-    .player-bar {
-      position: absolute;
-      left: 18px;
-      right: 18px;
-      bottom: 15px;
-      display: flex;
-      justify-content: space-between;
-      color: #b9c0cb;
-      font-size: .68rem;
-      text-transform: uppercase;
-      letter-spacing: .12em;
-    }
-
-    .status-card {
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 25px;
-      background: var(--panel);
-      backdrop-filter: blur(12px);
-    }
-
-    .status-card h3 {
-      font-family: "Orbitron", sans-serif;
-      font-size: .95rem;
-      margin-bottom: 24px;
-    }
-
-    .status-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 14px 0;
-      border-bottom: 1px solid var(--line);
-      gap: 15px;
-    }
-
-    .status-row:last-child {
-      border-bottom: 0;
-    }
-
-    .status-row span:first-child {
-      color: #858e9c;
-      font-size: .73rem;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-    }
-
-    .status-row span:last-child {
-      text-align: right;
-      font-weight: 700;
-      font-size: .75rem;
-    }
-
-    /* =========================
-       FEATURES
-    ========================== */
-
-    .feature-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 17px;
-    }
-
-    .feature {
-      padding: 27px;
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      background: rgba(255,255,255,.025);
-      transition: .3s ease;
-    }
-
-    .feature:hover {
-      transform: translateY(-5px);
-      background: rgba(255,255,255,.05);
-    }
-
-    .feature-icon {
-      font-size: 1.5rem;
-      margin-bottom: 20px;
-    }
-
-    .feature h3 {
-      font-family: "Orbitron", sans-serif;
-      font-size: .95rem;
-      margin-bottom: 10px;
-    }
-
-    .feature p {
-      color: #858e9d;
-      font-size: .8rem;
-      line-height: 1.7;
-    }
-
-    /* =========================
-       SCHEDULE
-    ========================== */
-
-    .schedule {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-    }
-
-    .schedule-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 25px;
-      padding: 24px;
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      background: rgba(255,255,255,.025);
-    }
-
-    .schedule-day {
-      font-family: "Orbitron", sans-serif;
-      font-size: .8rem;
-      letter-spacing: .12em;
-    }
-
-    .schedule-title {
-      margin-top: 7px;
-      font-weight: 700;
-    }
-
-    .schedule-sub {
-      color: #858e9d;
-      font-size: .73rem;
-      margin-top: 5px;
-    }
-
-    .schedule-time {
-      white-space: nowrap;
-      font-family: "Orbitron", sans-serif;
-      font-size: .85rem;
-    }
-
-    /* =========================
-       EPISODES
-    ========================== */
-
-    .episodes {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 18px;
-    }
-
-    .episode {
-      border: 1px solid var(--line);
-      border-radius: 20px;
-      overflow: hidden;
-      background: var(--panel2);
-      transition: .3s ease;
-    }
-
-    .episode:hover {
-      transform: translateY(-5px);
-    }
-
-    .episode-art {
-      aspect-ratio: 16 / 9;
-      position: relative;
-      display: grid;
-      place-items: center;
-      background:
-        radial-gradient(circle at 70% 30%, rgba(255,255,255,.12), transparent 3%),
-        linear-gradient(135deg, #11151d, #050609);
-    }
-
-    .episode-art::after {
-      content: "BACK DECK LIVE";
-      font-family: "Orbitron", sans-serif;
-      font-size: .8rem;
-      letter-spacing: .18em;
-      opacity: .65;
-    }
-
-    .episode-body {
-      padding: 22px;
-    }
-
-    .episode-meta {
-      color: #838c99;
-      font-size: .65rem;
-      text-transform: uppercase;
-      letter-spacing: .14em;
-      margin-bottom: 10px;
-    }
-
-    .episode h3 {
-      font-size: 1rem;
-      margin-bottom: 9px;
-    }
-
-    .episode p {
-      color: #858e9d;
-      font-size: .77rem;
-      line-height: 1.6;
-    }
-
-    /* =========================
-       ABOUT
-    ========================== */
-
-    .about-grid {
-      display: grid;
-      grid-template-columns: .8fr 1.2fr;
-      gap: 70px;
-      align-items: center;
-    }
-
-    .about-visual {
-      min-height: 390px;
-      border-radius: 25px;
-      border: 1px solid var(--line);
-      position: relative;
-      overflow: hidden;
-      background:
-        radial-gradient(circle at 70% 25%, rgba(255,255,255,.12), transparent 2%),
-        radial-gradient(circle at 35% 20%, rgba(255,255,255,.08), transparent 1%),
-        linear-gradient(to bottom, #111722, #050609 65%);
-    }
-
-    .about-visual::after {
-      content: "";
-      position: absolute;
-      left: -10%;
-      right: -10%;
-      bottom: -20%;
-      height: 55%;
-      background:
-        repeating-linear-gradient(
-          0deg,
-          #07090d 0 20px,
-          #11141a 21px 23px
-        );
-      transform: perspective(300px) rotateX(45deg);
-    }
-
-    .about-content h2 {
-      font-family: "Orbitron", sans-serif;
-      font-size: clamp(2rem, 4vw, 3.5rem);
-      margin-bottom: 22px;
-    }
-
-    .about-content p {
-      color: #9ba4b2;
-      line-height: 1.9;
-      margin-bottom: 16px;
-    }
-
-    .pill-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 9px;
-      margin-top: 25px;
-    }
-
-    .pill {
-      padding: 9px 13px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      color: #adb5c1;
-      font-size: .68rem;
-      text-transform: uppercase;
-      letter-spacing: .1em;
-    }
-
-    /* =========================
-       CTA
-    ========================== */
-
-    .cta {
-      padding-top: 70px;
-      padding-bottom: 120px;
-    }
-
-    .cta-box {
-      position: relative;
-      overflow: hidden;
-      border: 1px solid var(--line);
-      border-radius: 28px;
-      padding: 70px 40px;
-      text-align: center;
-      background:
-        radial-gradient(circle at center, rgba(255,255,255,.065), transparent 55%),
-        rgba(255,255,255,.025);
-    }
-
-    .cta-box::before,
-    .cta-box::after {
-      content: "";
-      position: absolute;
-      width: 160px;
-      height: 160px;
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 50%;
-    }
-
-    .cta-box::before {
-      left: -80px;
-      top: -80px;
-    }
-
-    .cta-box::after {
-      right: -80px;
-      bottom: -80px;
-    }
-
-    .cta-box h2 {
-      position: relative;
-      z-index: 2;
-      font-family: "Orbitron", sans-serif;
-      font-size: clamp(2rem, 5vw, 4rem);
-      margin-bottom: 15px;
-    }
-
-    .cta-box p {
-      position: relative;
-      z-index: 2;
-      color: #959eac;
-      margin-bottom: 28px;
-    }
-
-    .cta-box .btn {
-      position: relative;
-      z-index: 2;
-    }
-
-    /* =========================
-       FOOTER
-    ========================== */
-
-    footer {
-      border-top: 1px solid var(--line);
-      padding: 45px 5%;
-      background: #030407;
-    }
-
-    .footer-inner {
-      max-width: 1400px;
-      margin: auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 30px;
-    }
-
-    .footer-brand {
-      font-family: "Orbitron", sans-serif;
-      font-weight: 800;
-      letter-spacing: .1em;
-    }
-
-    .footer-brand span {
-      display: block;
-      color: #777f8c;
-      font-family: "Montserrat", sans-serif;
-      font-size: .65rem;
-      letter-spacing: .12em;
-      margin-top: 5px;
-    }
-
-    .copyright {
-      color: #666e7b;
-      font-size: .68rem;
-      text-align: right;
-      line-height: 1.7;
-    }
-
-    /* =========================
-       REVEAL
-    ========================== */
-
-    .reveal {
-      opacity: 0;
-      transform: translateY(30px);
-      transition: .8s cubic-bezier(.2,.8,.2,1);
-    }
-
-    .reveal.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* =========================
-       RESPONSIVE
-    ========================== */
-
-    @media (max-width: 1050px) {
-      .hero-inner {
-        grid-template-columns: 1fr;
-      }
-
-      .deck-card {
-        max-width: 700px;
-      }
-
-      .live-layout {
-        grid-template-columns: 1fr;
-      }
-
-      .feature-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .about-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .about-visual {
-        min-height: 300px;
-      }
-    }
-
-    @media (max-width: 760px) {
-      nav {
-        display: none;
-        position: absolute;
-        top: 75px;
-        left: 5%;
-        right: 5%;
-        padding: 20px;
-        flex-direction: column;
-        align-items: stretch;
-        background: rgba(5,6,9,.96);
-        border: 1px solid var(--line);
-        border-radius: 18px;
-      }
-
-      nav.open {
-        display: flex;
-      }
-
-      nav a {
-        padding: 12px;
-      }
-
-      .mobile-toggle {
-        display: block;
-      }
-
-      .hero {
-        padding-top: 125px;
-      }
-
-      section {
-        padding: 75px 5%;
-      }
-
-      .feature-grid,
-      .schedule,
-      .episodes {
-        grid-template-columns: 1fr;
-      }
-
-      .deck-card {
-        min-height: 360px;
-      }
-
-      .footer-inner {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .copyright {
-        text-align: left;
-      }
-    }
-
-    @media (max-width: 500px) {
-      .brand-text {
-        display: none;
-      }
-
-      h1 {
-        font-size: 3.2rem;
-      }
-
-      .hero-copy {
-        font-size: .9rem;
-      }
-
-      .hero-buttons {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .btn {
-        justify-content: center;
-      }
-
-      .schedule-item {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-
-      .schedule-time {
-        align-self: flex-start;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Back Deck Live | CrowRules Entertainment</title>
+
+<meta
+  name="description"
+  content="Back Deck Live — Live from the Back Deck. Straight from Tacoma."
+>
+
+<meta name="theme-color" content="#050609">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link
+  href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@400;500;600;700;800;900&display=swap"
+  rel="stylesheet"
+>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+/* =========================================================
+   ROOT
+========================================================= */
+
+:root{
+  --bg:#050609;
+  --bg2:#080a0f;
+  --panel:#0c0f15;
+  --panel2:#10141c;
+  --line:rgba(255,255,255,.09);
+  --line2:rgba(255,255,255,.15);
+  --text:#f5f7fa;
+  --muted:#929aa8;
+  --dim:#69717f;
+  --accent:#ff1744;
+  --accent2:#ff5575;
+  --green:#39e58c;
+  --yellow:#ffc857;
+  --blue:#56a8ff;
+  --shadow:0 20px 70px rgba(0,0,0,.45);
+  --radius:22px;
+  --max:1240px;
+}
+
+/* =========================================================
+   RESET
+========================================================= */
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+html{
+  scroll-behavior:smooth;
+  background:var(--bg);
+}
+
+body{
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 15% 10%,rgba(255,23,68,.08),transparent 30%),
+    radial-gradient(circle at 85% 25%,rgba(86,168,255,.06),transparent 28%),
+    linear-gradient(180deg,#050609 0%,#07090d 45%,#050609 100%);
+  color:var(--text);
+  font-family:"Montserrat",sans-serif;
+  line-height:1.6;
+  overflow-x:hidden;
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:9998;
+  opacity:.025;
+  background-image:
+    linear-gradient(rgba(255,255,255,.4) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.4) 1px,transparent 1px);
+  background-size:4px 4px;
+}
+
+a{
+  color:inherit;
+  text-decoration:none;
+}
+
+button,
+input{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+#loadingScreen{
+  position:fixed;
+  inset:0;
+  z-index:10000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#030406;
+  transition:opacity .7s ease,visibility .7s ease;
+}
+
+#loadingScreen.hide{
+  opacity:0;
+  visibility:hidden;
+}
+
+.loader{
+  width:90px;
+  height:90px;
+  position:relative;
+}
+
+.loader::before,
+.loader::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+  border:2px solid transparent;
+}
+
+.loader::before{
+  border-top-color:var(--accent);
+  border-right-color:var(--accent);
+  animation:spin 1s linear infinite;
+}
+
+.loader::after{
+  inset:10px;
+  border-bottom-color:#fff;
+  animation:spinReverse 1.5s linear infinite;
+}
+
+.loaderText{
+  position:absolute;
+  top:calc(50% + 65px);
+  left:50%;
+  transform:translateX(-50%);
+  white-space:nowrap;
+  font-family:"Orbitron",sans-serif;
+  font-size:.65rem;
+  letter-spacing:.3em;
+  color:var(--muted);
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg);}
+}
+
+@keyframes spinReverse{
+  to{transform:rotate(-360deg);}
+}
+
+/* =========================================================
+   CINEMATIC INTRO
+========================================================= */
+
+#intro{
+  position:fixed;
+  inset:0;
+  z-index:9997;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(circle at center,rgba(255,23,68,.12),transparent 35%),
+    #030406;
+  transition:opacity .8s ease,visibility .8s ease;
+}
+
+#intro.hide{
+  opacity:0;
+  visibility:hidden;
+}
+
+.introInner{
+  text-align:center;
+  animation:introRise 1.3s ease forwards;
+}
+
+.introEyebrow{
+  color:var(--accent);
+  font-family:"Orbitron",sans-serif;
+  font-size:.7rem;
+  font-weight:700;
+  letter-spacing:.4em;
+  margin-bottom:18px;
+}
+
+.introTitle{
+  font-family:"Orbitron",sans-serif;
+  font-size:clamp(2.5rem,8vw,7rem);
+  line-height:.9;
+  font-weight:900;
+  letter-spacing:.04em;
+  text-shadow:
+    0 0 20px rgba(255,23,68,.35),
+    0 0 70px rgba(255,23,68,.15);
+}
+
+.introTitle span{
+  color:var(--accent);
+}
+
+.introSub{
+  margin-top:25px;
+  color:var(--muted);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  font-size:.75rem;
+}
+
+@keyframes introRise{
+  from{
+    opacity:0;
+    transform:translateY(30px) scale(.97);
+  }
+  to{
+    opacity:1;
+    transform:none;
+  }
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+header{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:900;
+  height:76px;
+  border-bottom:1px solid var(--line);
+  background:rgba(5,6,9,.82);
+  backdrop-filter:blur(18px);
+}
+
+.nav{
+  width:min(var(--max),calc(100% - 36px));
+  height:100%;
+  margin:auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.logo{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.logoMark{
+  width:38px;
+  height:38px;
+  border:1px solid var(--accent);
+  display:grid;
+  place-items:center;
+  color:var(--accent);
+  font-family:"Orbitron",sans-serif;
+  font-weight:900;
+  transform:rotate(45deg);
+}
+
+.logoMark span{
+  transform:rotate(-45deg);
+}
+
+.logoText{
+  font-family:"Orbitron",sans-serif;
+  font-weight:800;
+  letter-spacing:.08em;
+  font-size:.85rem;
+}
+
+.logoText small{
+  display:block;
+  font-family:"Montserrat",sans-serif;
+  font-size:.52rem;
+  color:var(--muted);
+  letter-spacing:.18em;
+  margin-top:2px;
+}
+
+.navLinks{
+  display:flex;
+  align-items:center;
+  gap:28px;
+}
+
+.navLinks a{
+  font-size:.72rem;
+  font-weight:700;
+  color:var(--muted);
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  transition:.25s;
+}
+
+.navLinks a:hover{
+  color:#fff;
+}
+
+.navLive{
+  display:flex!important;
+  align-items:center;
+  gap:8px;
+}
+
+.liveDot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 15px var(--accent);
+  animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+  50%{
+    opacity:.35;
+    transform:scale(.75);
+  }
+}
+
+.menuBtn{
+  display:none;
+  border:1px solid var(--line2);
+  background:transparent;
+  color:#fff;
+  width:42px;
+  height:42px;
+  border-radius:10px;
+}
+
+/* =========================================================
+   GLOBAL
+========================================================= */
+
+main{
+  position:relative;
+  z-index:2;
+}
+
+.container{
+  width:min(var(--max),calc(100% - 36px));
+  margin:auto;
+}
+
+section{
+  padding:110px 0;
+}
+
+.sectionHead{
+  margin-bottom:38px;
+}
+
+.kicker{
+  color:var(--accent);
+  font-family:"Orbitron",sans-serif;
+  font-size:.65rem;
+  font-weight:800;
+  letter-spacing:.25em;
+  text-transform:uppercase;
+  margin-bottom:12px;
+}
+
+.sectionTitle{
+  font-family:"Orbitron",sans-serif;
+  font-size:clamp(1.8rem,4vw,3rem);
+  line-height:1.1;
+  letter-spacing:.02em;
+}
+
+.sectionText{
+  max-width:720px;
+  color:var(--muted);
+  margin-top:15px;
+}
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.hero{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  padding-top:120px;
+  position:relative;
+  overflow:hidden;
+}
+
+.hero::before{
+  content:"";
+  position:absolute;
+  width:650px;
+  height:650px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(255,23,68,.16),transparent 67%);
+  right:-200px;
+  top:10%;
+  pointer-events:none;
+}
+
+.heroGrid{
+  display:grid;
+  grid-template-columns:1.15fr .85fr;
+  gap:70px;
+  align-items:center;
+}
+
+.heroEyebrow{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:var(--accent);
+  font-family:"Orbitron",sans-serif;
+  font-size:.68rem;
+  font-weight:800;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  margin-bottom:22px;
+}
+
+.heroEyebrow::before{
+  content:"";
+  width:32px;
+  height:1px;
+  background:var(--accent);
+}
+
+.hero h1{
+  font-family:"Orbitron",sans-serif;
+  font-size:clamp(3rem,7vw,6.5rem);
+  line-height:.91;
+  letter-spacing:-.02em;
+}
+
+.hero h1 span{
+  color:var(--accent);
+  display:block;
+}
+
+.heroLead{
+  margin-top:28px;
+  color:#b1b7c2;
+  max-width:680px;
+  font-size:1.02rem;
+}
+
+.heroActions{
+  margin-top:34px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:13px;
+}
+
+.btn{
+  min-height:48px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  padding:0 20px;
+  border-radius:10px;
+  border:1px solid var(--line2);
+  background:#11151c;
+  color:#fff;
+  font-size:.72rem;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  transition:.25s;
+}
+
+.btn:hover{
+  transform:translateY(-2px);
+  border-color:rgba(255,255,255,.3);
+}
+
+.btnPrimary{
+  background:var(--accent);
+  border-color:var(--accent);
+  box-shadow:0 12px 35px rgba(255,23,68,.18);
+}
+
+.btnPrimary:hover{
+  background:#ff2d55;
+}
+
+.btnGhost{
+  background:transparent;
+}
+
+/* =========================================================
+   DECK VISUAL
+========================================================= */
+
+.deckVisual{
+  min-height:470px;
+  border:1px solid var(--line);
+  border-radius:30px;
+  position:relative;
+  overflow:hidden;
+  background:
+    linear-gradient(145deg,rgba(255,23,68,.1),transparent 40%),
+    linear-gradient(180deg,#11151b,#07090c);
+  box-shadow:var(--shadow);
+}
+
+.deckVisual::before{
+  content:"";
+  position:absolute;
+  inset:20px;
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:20px;
+}
+
+.deckGlow{
+  position:absolute;
+  width:250px;
+  height:250px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(255,23,68,.25),transparent 70%);
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+}
+
+.deckContent{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:30px;
+}
+
+.deckSignal{
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+  padding:7px 12px;
+  border:1px solid rgba(255,23,68,.35);
+  border-radius:999px;
+  color:#ff7d94;
+  background:rgba(255,23,68,.07);
+  font-family:"Orbitron",sans-serif;
+  font-size:.55rem;
+  letter-spacing:.15em;
+  margin-bottom:25px;
+}
+
+.deckContent h2{
+  font-family:"Orbitron",sans-serif;
+  font-size:clamp(2rem,5vw,4rem);
+  line-height:1;
+}
+
+.deckContent p{
+  margin-top:20px;
+  color:var(--muted);
+  font-size:.78rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
+.deckLines{
+  position:absolute;
+  bottom:28px;
+  left:28px;
+  right:28px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+}
+
+.deckLines span{
+  height:2px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  opacity:.45;
+}
+
+/* =========================================================
+   BROADCAST
+========================================================= */
+
+.broadcastSection{
+  padding-top:80px;
+}
+
+.broadcastGrid{
+  display:grid;
+  grid-template-columns:1.5fr .5fr;
+  gap:20px;
+}
+
+.broadcastMain,
+.broadcastSide{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:linear-gradient(145deg,#0d1118,#090b10);
+  box-shadow:var(--shadow);
+}
+
+.broadcastMain{
+  overflow:hidden;
+}
+
+.broadcastHeader{
+  padding:25px 28px;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+}
+
+.broadcastHeader h3{
+  font-family:"Orbitron",sans-serif;
+  font-size:1rem;
+}
+
+.statusBadge{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:7px 11px;
+  border-radius:999px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--line);
+  font-family:"Orbitron",sans-serif;
+  font-size:.55rem;
+  font-weight:800;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+
+.statusBadge.live{
+  color:#ff607d;
+  border-color:rgba(255,23,68,.3);
+}
+
+.statusBadge.upcoming{
+  color:var(--yellow);
+  border-color:rgba(255,200,87,.25);
+}
+
+.statusBadge.archive{
+  color:var(--blue);
+  border-color:rgba(86,168,255,.25);
+}
+
+.statusBadge.off{
+  color:var(--muted);
+}
+
+.videoWrap{
+  width:100%;
+  aspect-ratio:16/9;
+  background:#020305;
+  position:relative;
+}
+
+.videoWrap iframe{
+  width:100%;
+  height:100%;
+  border:0;
+  display:block;
+}
+
+.videoPlaceholder{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:30px;
+  background:
+    radial-gradient(circle at center,rgba(255,23,68,.09),transparent 45%),
+    #030406;
+}
+
+.videoPlaceholder.hidden{
+  display:none;
+}
+
+.placeholderInner{
+  max-width:520px;
+}
+
+.placeholderIcon{
+  width:65px;
+  height:65px;
+  margin:0 auto 20px;
+  border:1px solid var(--line2);
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  color:var(--accent);
+  font-size:1.3rem;
+}
+
+.placeholderInner h4{
+  font-family:"Orbitron",sans-serif;
+  font-size:1rem;
+}
+
+.placeholderInner p{
+  color:var(--muted);
+  margin-top:10px;
+  font-size:.82rem;
+}
+
+.broadcastInfo{
+  padding:25px 28px;
+}
+
+.broadcastTitle{
+  font-family:"Orbitron",sans-serif;
+  font-size:1.15rem;
+}
+
+.broadcastDescription{
+  color:var(--muted);
+  margin-top:8px;
+  font-size:.85rem;
+}
+
+.broadcastMeta{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  margin-top:25px;
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+}
+
+.metaItem{
+  padding:17px 15px;
+  border-right:1px solid var(--line);
+}
+
+.metaItem:last-child{
+  border-right:0;
+}
+
+.metaLabel{
+  color:var(--dim);
+  font-size:.58rem;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  font-weight:800;
+}
+
+.metaValue{
+  margin-top:5px;
+  font-size:.76rem;
+  font-weight:700;
+}
+
+/* =========================================================
+   SIDE
+========================================================= */
+
+.broadcastSide{
+  padding:25px;
+}
+
+.sideTitle{
+  font-family:"Orbitron",sans-serif;
+  font-size:.85rem;
+  margin-bottom:20px;
+}
+
+.infoList{
+  display:grid;
+  gap:1px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  overflow:hidden;
+}
+
+.infoRow{
+  padding:17px;
+  background:rgba(255,255,255,.015);
+  border-bottom:1px solid var(--line);
+}
+
+.infoRow:last-child{
+  border-bottom:0;
+}
+
+.infoRow small{
+  display:block;
+  color:var(--dim);
+  font-size:.55rem;
+  font-weight:800;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
+.infoRow strong{
+  display:block;
+  margin-top:4px;
+  font-size:.75rem;
+}
+
+/* =========================================================
+   CHAT
+========================================================= */
+
+.chatSection{
+  padding-top:30px;
+}
+
+.chatPanel{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  overflow:hidden;
+  background:#080a0e;
+}
+
+.chatHeader{
+  padding:20px 25px;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.chatHeader h3{
+  font-family:"Orbitron",sans-serif;
+  font-size:.85rem;
+}
+
+.chatHeader span{
+  color:var(--muted);
+  font-size:.65rem;
+}
+
+.chatFrame{
+  min-height:500px;
+  background:#030406;
+}
+
+.chatFrame iframe{
+  width:100%;
+  height:500px;
+  border:0;
+  display:block;
+}
+
+.chatDisabled{
+  min-height:300px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:30px;
+  color:var(--muted);
+}
+
+/* =========================================================
+   FORMAT
+========================================================= */
+
+.formatGrid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:15px;
+}
+
+.formatCard{
+  min-height:190px;
+  padding:25px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:linear-gradient(145deg,#0d1117,#090b0f);
+  transition:.3s;
+}
+
+.formatCard:hover{
+  transform:translateY(-5px);
+  border-color:var(--line2);
+}
+
+.formatNumber{
+  color:var(--accent);
+  font-family:"Orbitron",sans-serif;
+  font-size:.6rem;
+  font-weight:800;
+}
+
+.formatCard h3{
+  margin-top:25px;
+  font-family:"Orbitron",sans-serif;
+  font-size:.9rem;
+}
+
+.formatCard p{
+  color:var(--muted);
+  font-size:.72rem;
+  margin-top:10px;
+}
+
+/* =========================================================
+   SCHEDULE
+========================================================= */
+
+.scheduleGrid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+}
+
+.scheduleCard{
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:22px;
+  background:#0b0e13;
+}
+
+.scheduleDay{
+  color:var(--accent);
+  font-family:"Orbitron",sans-serif;
+  font-size:.6rem;
+  font-weight:800;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
+.scheduleCard h3{
+  margin-top:13px;
+  font-family:"Orbitron",sans-serif;
+  font-size:.85rem;
+}
+
+.scheduleTime{
+  margin-top:7px;
+  color:var(--muted);
+  font-size:.7rem;
+}
+
+.scheduleStatus{
+  margin-top:18px;
+  color:var(--dim);
+  font-size:.6rem;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+}
+
+/* =========================================================
+   ARCHIVE
+========================================================= */
+
+.archiveToolbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  margin-bottom:25px;
+}
+
+.searchBox{
+  width:min(420px,100%);
+  position:relative;
+}
+
+.searchBox input{
+  width:100%;
+  height:46px;
+  border-radius:10px;
+  border:1px solid var(--line2);
+  outline:none;
+  background:#0c0f14;
+  color:#fff;
+  padding:0 15px;
+}
+
+.searchBox input:focus{
+  border-color:rgba(255,23,68,.5);
+}
+
+.archiveCount{
+  color:var(--muted);
+  font-size:.7rem;
+}
+
+.archiveGrid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+}
+
+.episodeCard{
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:#0b0e13;
+  transition:.3s;
+}
+
+.episodeCard:hover{
+  transform:translateY(-5px);
+  border-color:var(--line2);
+}
+
+.episodeThumb{
+  aspect-ratio:16/9;
+  background:#030406;
+  position:relative;
+  overflow:hidden;
+}
+
+.episodeThumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  transition:.4s;
+}
+
+.episodeCard:hover .episodeThumb img{
+  transform:scale(1.04);
+}
+
+.episodeOverlay{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.18);
+}
+
+.playButton{
+  width:54px;
+  height:54px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:rgba(255,23,68,.92);
+  color:#fff;
+  box-shadow:0 10px 30px rgba(0,0,0,.35);
+}
+
+.episodeBody{
+  padding:20px;
+}
+
+.episodeTag{
+  color:var(--accent);
+  font-family:"Orbitron",sans-serif;
+  font-size:.55rem;
+  font-weight:800;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+}
+
+.episodeBody h3{
+  margin-top:8px;
+  font-family:"Orbitron",sans-serif;
+  font-size:.9rem;
+  line-height:1.3;
+}
+
+.episodeDescription{
+  margin-top:9px;
+  color:var(--muted);
+  font-size:.7rem;
+  display:-webkit-box;
+  -webkit-line-clamp:3;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
+.episodeFooter{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-top:18px;
+}
+
+.episodeDate{
+  color:var(--dim);
+  font-size:.58rem;
+}
+
+.watchBtn{
+  border:1px solid var(--line2);
+  border-radius:8px;
+  background:transparent;
+  color:#fff;
+  padding:8px 11px;
+  font-size:.57rem;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+
+.watchBtn:hover{
+  background:rgba(255,255,255,.06);
+}
+
+.archiveState{
+  grid-column:1/-1;
+  padding:50px;
+  border:1px dashed var(--line2);
+  border-radius:18px;
+  text-align:center;
+  color:var(--muted);
+}
+
+.archiveState strong{
+  display:block;
+  color:#fff;
+  font-family:"Orbitron",sans-serif;
+  margin-bottom:8px;
+}
+
+/* =========================================================
+   ABOUT
+========================================================= */
+
+.aboutGrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:25px;
+}
+
+.aboutCard{
+  padding:35px;
+  border:1px solid var(--line);
+  border-radius:22px;
+  background:linear-gradient(145deg,#0d1117,#090b0f);
+}
+
+.aboutCard h3{
+  font-family:"Orbitron",sans-serif;
+  font-size:1rem;
+  margin-bottom:14px;
+}
+
+.aboutCard p{
+  color:var(--muted);
+  font-size:.82rem;
+}
+
+.aboutQuote{
+  margin-top:22px;
+  padding:18px;
+  border-left:2px solid var(--accent);
+  color:#d6dae0;
+  font-size:.82rem;
+  background:rgba(255,23,68,.035);
+}
+
+/* =========================================================
+   CTA
+========================================================= */
+
+.cta{
+  padding:70px 0 120px;
+}
+
+.ctaCard{
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(255,23,68,.22);
+  border-radius:28px;
+  padding:60px;
+  background:
+    radial-gradient(circle at 80% 50%,rgba(255,23,68,.13),transparent 35%),
+    linear-gradient(145deg,#10131a,#090b0f);
+}
+
+.ctaCard h2{
+  font-family:"Orbitron",sans-serif;
+  font-size:clamp(1.8rem,4vw,3.5rem);
+  line-height:1;
+}
+
+.ctaCard p{
+  color:var(--muted);
+  max-width:650px;
+  margin-top:15px;
+}
+
+.ctaActions{
+  margin-top:25px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+footer{
+  border-top:1px solid var(--line);
+  padding:35px 0;
+}
+
+.footerInner{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+}
+
+.footerBrand{
+  font-family:"Orbitron",sans-serif;
+  font-size:.7rem;
+  font-weight:800;
+}
+
+.footerBrand span{
+  color:var(--accent);
+}
+
+.footerCopy{
+  color:var(--dim);
+  font-size:.6rem;
+  text-align:right;
+}
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+#toastContainer{
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  z-index:10001;
+  display:grid;
+  gap:10px;
+}
+
+.toast{
+  min-width:270px;
+  max-width:400px;
+  padding:15px 17px;
+  border-radius:12px;
+  border:1px solid var(--line2);
+  background:#11151b;
+  box-shadow:var(--shadow);
+  font-size:.7rem;
+  animation:toastIn .3s ease;
+}
+
+.toast.success{
+  border-color:rgba(57,229,140,.3);
+}
+
+.toast.error{
+  border-color:rgba(255,23,68,.35);
+}
+
+@keyframes toastIn{
+  from{
+    opacity:0;
+    transform:translateY(10px);
+  }
+}
+
+/* =========================================================
+   REVEAL
+========================================================= */
+
+.reveal{
+  opacity:0;
+  transform:translateY(25px);
+  transition:opacity .7s ease,transform .7s ease;
+}
+
+.reveal.visible{
+  opacity:1;
+  transform:none;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:1050px){
+
+  .heroGrid{
+    grid-template-columns:1fr;
+  }
+
+  .deckVisual{
+    min-height:350px;
+  }
+
+  .broadcastGrid{
+    grid-template-columns:1fr;
+  }
+
+  .formatGrid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .scheduleGrid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .archiveGrid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media(max-width:760px){
+
+  header{
+    height:68px;
+  }
+
+  .navLinks{
+    position:absolute;
+    top:68px;
+    left:18px;
+    right:18px;
+    display:none;
+    flex-direction:column;
+    align-items:stretch;
+    gap:0;
+    padding:8px;
+    border:1px solid var(--line);
+    border-radius:15px;
+    background:#090c11;
+    box-shadow:var(--shadow);
+  }
+
+  .navLinks.open{
+    display:flex;
+  }
+
+  .navLinks a{
+    padding:14px;
+    border-bottom:1px solid var(--line);
+  }
+
+  .navLinks a:last-child{
+    border-bottom:0;
+  }
+
+  .menuBtn{
+    display:block;
+  }
+
+  .hero{
+    padding-top:110px;
+  }
+
+  section{
+    padding:80px 0;
+  }
+
+  .broadcastMeta{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .metaItem:nth-child(2){
+    border-right:0;
+  }
+
+  .metaItem:nth-child(-n+2){
+    border-bottom:1px solid var(--line);
+  }
+
+  .archiveToolbar{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .archiveGrid{
+    grid-template-columns:1fr;
+  }
+
+  .aboutGrid{
+    grid-template-columns:1fr;
+  }
+
+  .ctaCard{
+    padding:35px 25px;
+  }
+
+  .footerInner{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .footerCopy{
+    text-align:left;
+  }
+}
+
+@media(max-width:500px){
+
+  .container,
+  .nav{
+    width:min(100% - 24px,var(--max));
+  }
+
+  .hero h1{
+    font-size:3rem;
+  }
+
+  .formatGrid,
+  .scheduleGrid{
+    grid-template-columns:1fr;
+  }
+
+  .broadcastHeader{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .deckVisual{
+    min-height:300px;
+  }
+
+  .deckLines{
+    display:none;
+  }
+}
+</style>
 </head>
 
 <body>
 
-  <!-- =========================
-       CINEMATIC INTRO
-  ========================== -->
+<!-- =======================================================
+     LOADING
+======================================================= -->
 
-  <div id="intro">
-    <div class="intro-stars"></div>
-    <div class="intro-noise"></div>
+<div id="loadingScreen">
+  <div class="loader"></div>
+  <div class="loaderText">CONNECTING TO CROWRULES</div>
+</div>
 
-    <div class="deck-lights">
-      <i class="deck-light"></i>
-      <i class="deck-light"></i>
-      <i class="deck-light"></i>
-      <i class="deck-light"></i>
-      <i class="deck-light"></i>
-      <i class="deck-light"></i>
-      <i class="deck-light"></i>
-      <i class="deck-light"></i>
-      <i class="deck-light"></i>
-      <i class="deck-light"></i>
-      <i class="deck-light"></i>
+<!-- =======================================================
+     INTRO
+======================================================= -->
+
+<div id="intro">
+  <div class="introInner">
+    <div class="introEyebrow">CrowRules Entertainment Presents</div>
+    <div class="introTitle">
+      BACK <span>DECK</span><br>
+      LIVE
     </div>
-
-    <div class="deck-scene"></div>
-
-    <div class="intro-content">
-      <div class="intro-overline">CROWRULES ENTERTAINMENT PRESENTS</div>
-
-      <div class="intro-title">
-        <span>BACK DECK</span>
-        <span class="red">LIVE</span>
-      </div>
-
-      <div class="intro-tagline">
-        Live from the Back Deck. Straight from Tacoma.
-      </div>
-
-      <div class="intro-status">
-        <span class="live-dot"></span>
-        Weekly Live Broadcast
-      </div>
-    </div>
+    <div class="introSub">Live From Tacoma</div>
   </div>
+</div>
 
-  <!-- =========================
-       HEADER
-  ========================== -->
+<!-- =======================================================
+     HEADER
+======================================================= -->
 
-  <header id="header">
-    <div class="nav">
+<header>
+  <nav class="nav">
 
-      <a href="#home" class="brand">
-        <div class="brand-mark">CR</div>
-        <div class="brand-text">
-          BACK DECK LIVE
-          <small>CROWRULES ENTERTAINMENT</small>
-        </div>
+    <a href="#" class="logo">
+      <div class="logoMark">
+        <span>CR</span>
+      </div>
+
+      <div class="logoText">
+        BACK DECK LIVE
+        <small>CROWRULES ENTERTAINMENT</small>
+      </div>
+    </a>
+
+    <div class="navLinks" id="navLinks">
+      <a href="#broadcast" class="navLive">
+        <span class="liveDot"></span>
+        Broadcast
       </a>
 
-      <nav id="nav">
-        <a href="#home">Home</a>
-        <a href="#live">Live</a>
-        <a href="#schedule">Schedule</a>
-        <a href="#episodes">Episodes</a>
-        <a href="#about">About</a>
-        <a href="#live" class="nav-live">
-          <span class="live-dot"></span>
-          Live
+      <a href="#format">Format</a>
+      <a href="#schedule">Schedule</a>
+      <a href="#archive">Episodes</a>
+      <a href="#about">About</a>
+    </div>
+
+    <button
+      class="menuBtn"
+      id="menuBtn"
+      aria-label="Open navigation"
+      type="button"
+    >
+      ☰
+    </button>
+
+  </nav>
+</header>
+
+<!-- =======================================================
+     MAIN
+======================================================= -->
+
+<main>
+
+<!-- =======================================================
+     HERO
+======================================================= -->
+
+<section class="hero">
+  <div class="container heroGrid">
+
+    <div class="reveal">
+
+      <div class="heroEyebrow">
+        Saturday Live Broadcast
+      </div>
+
+      <h1>
+        BACK DECK
+        <span>LIVE</span>
+      </h1>
+
+      <p class="heroLead">
+        A weekly live conversation from Tacoma covering local stories,
+        Pacific Northwest life, sports, entertainment, gaming,
+        CrowRules projects, and whatever happens when the cameras go live.
+      </p>
+
+      <div class="heroActions">
+        <a href="#broadcast" class="btn btnPrimary">
+          ▶ Watch Broadcast
         </a>
-      </nav>
 
-      <button class="mobile-toggle" id="mobileToggle" aria-label="Open navigation">
-        ☰
-      </button>
+        <a href="#archive" class="btn btnGhost">
+          Browse Archive
+        </a>
+      </div>
 
     </div>
-  </header>
 
-  <main>
+    <div class="deckVisual reveal">
 
-    <!-- =========================
-         HERO
-    ========================== -->
+      <div class="deckGlow"></div>
 
-    <section class="hero" id="home">
+      <div class="deckContent">
 
-      <div class="hero-grid"></div>
-      <div class="hero-glow"></div>
-
-      <div class="hero-inner">
-
-        <div class="hero-content reveal">
-
-          <div class="eyebrow">
-            <span class="live-dot"></span>
-            Saturday Live Broadcast
-          </div>
-
-          <h1>
-            BACK DECK
-            <span class="live-word">LIVE</span>
-          </h1>
-
-          <p class="hero-copy">
-            A weekly live conversation from Tacoma covering local stories,
-            Pacific Northwest life, sports, entertainment, gaming, CrowRules
-            projects, and whatever happens when the cameras go live.
-          </p>
-
-          <div class="hero-buttons">
-            <a href="#live" class="btn btn-primary">
-              ▶ Watch Live
-            </a>
-
-            <a href="#schedule" class="btn btn-dark">
-              View Schedule
-            </a>
-          </div>
-
+        <div class="deckSignal">
+          <span class="liveDot"></span>
+          LIVE FROM TACOMA
         </div>
 
-        <div class="deck-card reveal">
+        <h2>
+          SATURDAY<br>
+          <span style="color:var(--accent)">3 PM</span>
+        </h2>
 
-          <div class="sky"></div>
-          <div class="moon"></div>
-
-          <div class="string-lights">
-            <i></i><i></i><i></i><i></i><i></i>
-            <i></i><i></i><i></i><i></i><i></i>
-            <i></i><i></i>
-          </div>
-
-          <div class="tacoma-silhouette"></div>
-          <div class="deck-floor"></div>
-
-          <div class="deck-card-content">
-            <h2>LIVE FROM TACOMA</h2>
-            <p>Saturday • 3:00 PM Pacific</p>
-          </div>
-
-        </div>
+        <p>
+          Pacific Time • CrowRules Entertainment
+        </p>
 
       </div>
-    </section>
 
-    <!-- =========================
-         LIVE
-    ========================== -->
+      <div class="deckLines">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
 
-    <section class="live-section" id="live">
+    </div>
 
-      <div class="section-inner">
+  </div>
+</section>
 
-        <div class="section-heading reveal">
-          <div class="section-kicker">Broadcast Center</div>
-          <h2>We're On The Deck.</h2>
-          <p>
-            When Back Deck Live is broadcasting, this becomes the home base
-            for the show.
-          </p>
+<!-- =======================================================
+     BROADCAST
+======================================================= -->
+
+<section id="broadcast" class="broadcastSection">
+  <div class="container">
+
+    <div class="sectionHead reveal">
+      <div class="kicker">Broadcast Center</div>
+
+      <h2 class="sectionTitle">
+        The Next Broadcast
+      </h2>
+
+      <p class="sectionText" id="broadcastIntro">
+        Loading the next Back Deck Live broadcast from Supabase...
+      </p>
+    </div>
+
+    <div class="broadcastGrid">
+
+      <div class="broadcastMain reveal">
+
+        <div class="broadcastHeader">
+
+          <h3 id="broadcastHeaderTitle">
+            Back Deck Live
+          </h3>
+
+          <div
+            id="broadcastStatus"
+            class="statusBadge upcoming"
+          >
+            <span class="liveDot"></span>
+            Checking Status
+          </div>
+
         </div>
 
-        <div class="live-layout">
+        <div class="videoWrap">
 
-          <div class="player reveal">
+          <iframe
+            id="youtubePlayer"
+            title="Back Deck Live YouTube Player"
+            allow="autoplay; encrypted-media; picture-in-picture; web-share"
+            allowfullscreen
+            referrerpolicy="strict-origin-when-cross-origin"
+            hidden
+          ></iframe>
 
-            <div class="player-center">
+          <div
+            class="videoPlaceholder"
+            id="videoPlaceholder"
+          >
+            <div class="placeholderInner">
 
-              <button class="play" id="playButton" aria-label="Start player">
+              <div class="placeholderIcon">
                 ▶
-              </button>
+              </div>
 
-              <h3>BACK DECK LIVE</h3>
+              <h4 id="placeholderTitle">
+                Back Deck Live
+              </h4>
 
-              <p id="playerMessage">
-                Live video player placeholder
+              <p id="placeholderText">
+                The broadcast player will appear here when a video
+                is available.
               </p>
 
             </div>
-
-            <div class="player-bar">
-              <span>
-                <span class="live-dot"></span>
-                Broadcast
-              </span>
-
-              <span id="clock">00:00:00</span>
-            </div>
-
           </div>
 
-          <aside class="status-card reveal">
-
-            <h3>Broadcast Status</h3>
-
-            <div class="status-row">
-              <span>Status</span>
-              <span id="statusText">OFF AIR</span>
-            </div>
-
-            <div class="status-row">
-              <span>Next Show</span>
-              <span>Saturday</span>
-            </div>
-
-            <div class="status-row">
-              <span>Time</span>
-              <span>3:00 PM PT</span>
-            </div>
-
-            <div class="status-row">
-              <span>Location</span>
-              <span>Tacoma, WA</span>
-            </div>
-
-            <div class="status-row">
-              <span>Network</span>
-              <span>CrowRules TV</span>
-            </div>
-
-          </aside>
-
         </div>
 
-      </div>
+        <div class="broadcastInfo">
 
-    </section>
+          <div
+            class="broadcastTitle"
+            id="broadcastTitle"
+          >
+            Loading broadcast...
+          </div>
 
-    <!-- =========================
-         WHAT'S ON
-    ========================== -->
+          <div
+            class="broadcastDescription"
+            id="broadcastDescription"
+          >
+            Loading broadcast information from Supabase.
+          </div>
 
-    <section>
+          <div class="broadcastMeta">
 
-      <div class="section-inner">
-
-        <div class="section-heading reveal">
-          <div class="section-kicker">The Format</div>
-          <h2>What's On The Deck?</h2>
-          <p>
-            Back Deck Live is intentionally flexible. Every broadcast can
-            evolve around what's happening in Tacoma, the Pacific Northwest,
-            and the CrowRules universe.
-          </p>
-        </div>
-
-        <div class="feature-grid">
-
-          <article class="feature reveal">
-            <div class="feature-icon">🎙️</div>
-            <h3>Live Conversation</h3>
-            <p>
-              Unfiltered discussion, stories, opinions, observations and
-              spontaneous moments.
-            </p>
-          </article>
-
-          <article class="feature reveal">
-            <div class="feature-icon">🌲</div>
-            <h3>Tacoma & PNW</h3>
-            <p>
-              Local stories, neighborhood conversations, regional culture
-              and life around the Pacific Northwest.
-            </p>
-          </article>
-
-          <article class="feature reveal">
-            <div class="feature-icon">🏈</div>
-            <h3>Sports</h3>
-            <p>
-              PNW sports discussion, reactions, predictions and whatever
-              deserves attention that week.
-            </p>
-          </article>
-
-          <article class="feature reveal">
-            <div class="feature-icon">🎮</div>
-            <h3>Gaming Nights</h3>
-            <p>
-              Gaming sessions, community challenges and special CrowRules
-              gaming broadcasts.
-            </p>
-          </article>
-
-        </div>
-
-      </div>
-
-    </section>
-
-    <!-- =========================
-         SCHEDULE
-    ========================== -->
-
-    <section id="schedule">
-
-      <div class="section-inner">
-
-        <div class="section-heading reveal">
-          <div class="section-kicker">Weekly Programming</div>
-          <h2>The Deck Schedule.</h2>
-          <p>
-            The regular Back Deck Live schedule can be expanded with special
-            broadcasts and pop-up events.
-          </p>
-        </div>
-
-        <div class="schedule">
-
-          <article class="schedule-item reveal">
-            <div>
-              <div class="schedule-day">SATURDAY</div>
-              <div class="schedule-title">Back Deck Live</div>
-              <div class="schedule-sub">Weekly flagship live broadcast</div>
+            <div class="metaItem">
+              <div class="metaLabel">Broadcast</div>
+              <div class="metaValue" id="metaBroadcast">
+                Back Deck Live
+              </div>
             </div>
-            <div class="schedule-time">3:00 PM PT</div>
-          </article>
 
-          <article class="schedule-item reveal">
-            <div>
-              <div class="schedule-day">SPECIAL</div>
-              <div class="schedule-title">Back Deck Pop-Up</div>
-              <div class="schedule-sub">Special live broadcasts</div>
+            <div class="metaItem">
+              <div class="metaLabel">Date</div>
+              <div class="metaValue" id="metaDate">
+                —
+              </div>
             </div>
-            <div class="schedule-time">TBA</div>
-          </article>
 
-          <article class="schedule-item reveal">
-            <div>
-              <div class="schedule-day">FRIDAY</div>
-              <div class="schedule-title">Tacoma Nights</div>
-              <div class="schedule-sub">Companion CrowRules program</div>
+            <div class="metaItem">
+              <div class="metaLabel">Time</div>
+              <div class="metaValue" id="metaTime">
+                3:00 PM PT
+              </div>
             </div>
-            <div class="schedule-time">10:00 PM PT</div>
-          </article>
 
-          <article class="schedule-item reveal">
-            <div>
-              <div class="schedule-day">ONGOING</div>
-              <div class="schedule-title">CrowRules TV</div>
-              <div class="schedule-sub">Network programming</div>
-            </div>
-            <div class="schedule-time">24/7</div>
-          </article>
-
-        </div>
-
-      </div>
-
-    </section>
-
-    <!-- =========================
-         EPISODES
-    ========================== -->
-
-    <section id="episodes">
-
-      <div class="section-inner">
-
-        <div class="section-heading reveal">
-          <div class="section-kicker">The Archive</div>
-          <h2>From The Deck.</h2>
-          <p>
-            Previous broadcasts, conversations, highlights and special
-            episodes will live here.
-          </p>
-        </div>
-
-        <div class="episodes">
-
-          <article class="episode reveal">
-            <div class="episode-art"></div>
-            <div class="episode-body">
-              <div class="episode-meta">Episode 001 • Pilot</div>
-              <h3>Welcome To The Back Deck</h3>
-              <p>
-                Introducing Back Deck Live and the idea behind CrowRules'
-                newest live conversation format.
-              </p>
-            </div>
-          </article>
-
-          <article class="episode reveal">
-            <div class="episode-art"></div>
-            <div class="episode-body">
-              <div class="episode-meta">Episode 002 • Tacoma</div>
-              <h3>What's Happening Around Tacoma?</h3>
-              <p>
-                A casual look at Tacoma, local life, stories and the things
-                worth talking about this week.
-              </p>
-            </div>
-          </article>
-
-          <article class="episode reveal">
-            <div class="episode-art"></div>
-            <div class="episode-body">
-              <div class="episode-meta">Special • CrowRules</div>
-              <h3>Building The Entertainment Universe</h3>
-              <p>
-                A behind-the-scenes conversation about building CrowRules
-                Entertainment and CrowRules TV.
-              </p>
-            </div>
-          </article>
-
-        </div>
-
-      </div>
-
-    </section>
-
-    <!-- =========================
-         ABOUT
-    ========================== -->
-
-    <section id="about">
-
-      <div class="section-inner">
-
-        <div class="about-grid">
-
-          <div class="about-visual reveal"></div>
-
-          <div class="about-content reveal">
-
-            <div class="section-kicker">About The Show</div>
-
-            <h2>Not A Studio.<br>The Back Deck.</h2>
-
-            <p>
-              Back Deck Live is designed to feel different from a traditional
-              studio production. It's conversational, relaxed and connected
-              to the real world around Tacoma.
-            </p>
-
-            <p>
-              The show gives CrowRules Entertainment a dedicated live format
-              where viewers can participate, ask questions, react to topics,
-              watch gaming sessions and hang out for a while.
-            </p>
-
-            <p>
-              It also serves as a natural live companion to
-              <strong>Tacoma Nights</strong>.
-            </p>
-
-            <div class="pill-row">
-              <span class="pill">Tacoma</span>
-              <span class="pill">PNW</span>
-              <span class="pill">Live</span>
-              <span class="pill">Gaming</span>
-              <span class="pill">Entertainment</span>
-              <span class="pill">Community</span>
+            <div class="metaItem">
+              <div class="metaLabel">Location</div>
+              <div class="metaValue">
+                Tacoma, WA
+              </div>
             </div>
 
           </div>
@@ -1667,189 +1724,2080 @@
 
       </div>
 
-    </section>
+      <aside class="broadcastSide reveal">
 
-    <!-- =========================
-         CTA
-    ========================== -->
+        <div class="sideTitle">
+          BROADCAST STATUS
+        </div>
 
-    <section class="cta">
+        <div class="infoList">
 
-      <div class="section-inner">
+          <div class="infoRow">
+            <small>Status</small>
+            <strong id="sideStatus">
+              Checking...
+            </strong>
+          </div>
 
-        <div class="cta-box reveal">
+          <div class="infoRow">
+            <small>Next Show</small>
+            <strong id="sideNextShow">
+              Back Deck Live
+            </strong>
+          </div>
 
-          <h2>Pull Up A Chair.</h2>
+          <div class="infoRow">
+            <small>Time</small>
+            <strong id="sideTime">
+              Saturday • 3:00 PM PT
+            </strong>
+          </div>
 
-          <p>
-            Saturday afternoons. Tacoma. One deck. One conversation.
-          </p>
+          <div class="infoRow">
+            <small>Network</small>
+            <strong>
+              CrowRules TV
+            </strong>
+          </div>
 
-          <a href="#live" class="btn btn-primary">
-            ▶ Enter The Live Room
-          </a>
+          <div class="infoRow">
+            <small>Database</small>
+            <strong id="databaseStatus">
+              CONNECTING
+            </strong>
+          </div>
 
         </div>
 
+      </aside>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- =======================================================
+     LIVE CHAT
+======================================================= -->
+
+<section class="chatSection">
+  <div class="container">
+
+    <div class="chatPanel reveal">
+
+      <div class="chatHeader">
+        <h3>LIVE CHAT</h3>
+        <span id="chatStatus">
+          Waiting for broadcast
+        </span>
       </div>
 
-    </section>
+      <div class="chatFrame" id="chatFrame">
 
-  </main>
+        <div class="chatDisabled" id="chatDisabled">
+          Live chat becomes available when a compatible
+          YouTube broadcast is loaded.
+        </div>
 
-  <!-- =========================
-       FOOTER
-  ========================== -->
+        <iframe
+          id="youtubeChat"
+          title="Back Deck Live YouTube Live Chat"
+          hidden
+          allow="autoplay"
+        ></iframe>
 
-  <footer>
-
-    <div class="footer-inner">
-
-      <div class="footer-brand">
-        BACK DECK LIVE
-        <span>Live from the Back Deck. Straight from Tacoma.</span>
-      </div>
-
-      <div class="copyright">
-        © <span id="year"></span> CrowRules Entertainment<br>
-        Back Deck Live v1.0
       </div>
 
     </div>
 
-  </footer>
+  </div>
+</section>
 
-  <script>
-    /* =========================
-       INTRO
-    ========================== */
+<!-- =======================================================
+     FORMAT
+======================================================= -->
 
-    const intro = document.getElementById("intro");
+<section id="format">
+  <div class="container">
 
-    window.addEventListener("load", () => {
-      setTimeout(() => {
-        intro.classList.add("hide");
-      }, 3500);
+    <div class="sectionHead reveal">
+
+      <div class="kicker">
+        The Format
+      </div>
+
+      <h2 class="sectionTitle">
+        No Script. No Filter.
+      </h2>
+
+      <p class="sectionText">
+        Back Deck Live is designed to feel like a conversation
+        rather than a traditional television program.
+      </p>
+
+    </div>
+
+    <div class="formatGrid">
+
+      <article class="formatCard reveal">
+        <div class="formatNumber">01</div>
+        <h3>LIVE CONVERSATION</h3>
+        <p>
+          Real conversations, reactions, stories and spontaneous
+          moments from the Back Deck.
+        </p>
+      </article>
+
+      <article class="formatCard reveal">
+        <div class="formatNumber">02</div>
+        <h3>TACOMA & PNW</h3>
+        <p>
+          Local stories, Tacoma life and the people,
+          places and ideas shaping the Pacific Northwest.
+        </p>
+      </article>
+
+      <article class="formatCard reveal">
+        <div class="formatNumber">03</div>
+        <h3>SPORTS</h3>
+        <p>
+          Pacific Northwest sports, fan reactions,
+          big games and whatever is worth talking about.
+        </p>
+      </article>
+
+      <article class="formatCard reveal">
+        <div class="formatNumber">04</div>
+        <h3>GAMING NIGHTS</h3>
+        <p>
+          Games, challenges, community interaction and
+          the occasional unpredictable night.
+        </p>
+      </article>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- =======================================================
+     SCHEDULE
+======================================================= -->
+
+<section id="schedule">
+  <div class="container">
+
+    <div class="sectionHead reveal">
+
+      <div class="kicker">
+        CrowRules Programming
+      </div>
+
+      <h2 class="sectionTitle">
+        The Schedule
+      </h2>
+
+      <p class="sectionText">
+        Back Deck Live anchors the weekend programming schedule
+        alongside Tacoma Nights and CrowRules TV.
+      </p>
+
+    </div>
+
+    <div class="scheduleGrid">
+
+      <article class="scheduleCard reveal">
+        <div class="scheduleDay">
+          Saturday
+        </div>
+
+        <h3>
+          Back Deck Live
+        </h3>
+
+        <div class="scheduleTime">
+          3:00 PM Pacific
+        </div>
+
+        <div class="scheduleStatus">
+          Weekly Live Broadcast
+        </div>
+      </article>
+
+      <article class="scheduleCard reveal">
+        <div class="scheduleDay">
+          Special
+        </div>
+
+        <h3>
+          Back Deck Pop-Up
+        </h3>
+
+        <div class="scheduleTime">
+          TBA
+        </div>
+
+        <div class="scheduleStatus">
+          Occasional Broadcast
+        </div>
+      </article>
+
+      <article class="scheduleCard reveal">
+        <div class="scheduleDay">
+          Friday
+        </div>
+
+        <h3>
+          Tacoma Nights
+        </h3>
+
+        <div class="scheduleTime">
+          10:00 PM Pacific
+        </div>
+
+        <div class="scheduleStatus">
+          Weekly Premiere
+        </div>
+      </article>
+
+      <article class="scheduleCard reveal">
+        <div class="scheduleDay">
+          Ongoing
+        </div>
+
+        <h3>
+          CrowRules TV
+        </h3>
+
+        <div class="scheduleTime">
+          24 / 7
+        </div>
+
+        <div class="scheduleStatus">
+          Streaming Network
+        </div>
+      </article>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- =======================================================
+     EPISODE ARCHIVE
+======================================================= -->
+
+<section id="archive">
+  <div class="container">
+
+    <div class="sectionHead reveal">
+
+      <div class="kicker">
+        On Demand
+      </div>
+
+      <h2 class="sectionTitle">
+        Back Deck Live Archive
+      </h2>
+
+      <p class="sectionText">
+        Published Back Deck Live episodes are loaded directly
+        from CrowRules Entertainment Supabase.
+      </p>
+
+    </div>
+
+    <div class="archiveToolbar reveal">
+
+      <div class="searchBox">
+        <input
+          type="search"
+          id="episodeSearch"
+          placeholder="Search Back Deck Live episodes..."
+          autocomplete="off"
+        >
+      </div>
+
+      <div
+        class="archiveCount"
+        id="archiveCount"
+      >
+        Loading episodes...
+      </div>
+
+    </div>
+
+    <div
+      class="archiveGrid"
+      id="archiveGrid"
+    >
+
+      <div class="archiveState">
+        <strong>LOADING ARCHIVE</strong>
+        Connecting to Supabase...
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- =======================================================
+     ABOUT
+======================================================= -->
+
+<section id="about">
+  <div class="container">
+
+    <div class="sectionHead reveal">
+
+      <div class="kicker">
+        About The Show
+      </div>
+
+      <h2 class="sectionTitle">
+        Live From The Back Deck
+      </h2>
+
+    </div>
+
+    <div class="aboutGrid">
+
+      <article class="aboutCard reveal">
+
+        <h3>
+          WHAT IS BACK DECK LIVE?
+        </h3>
+
+        <p>
+          Back Deck Live is the weekly live companion to
+          Tacoma Nights — a relaxed, conversational broadcast
+          built around Tacoma, the Pacific Northwest and the
+          world of CrowRules Entertainment.
+        </p>
+
+        <div class="aboutQuote">
+          Sometimes there's a plan. Sometimes there's a story.
+          Sometimes you just hit Go Live and see what happens.
+        </div>
+
+      </article>
+
+      <article class="aboutCard reveal">
+
+        <h3>
+          WHY THE BACK DECK?
+        </h3>
+
+        <p>
+          The Back Deck is intentionally different from a
+          traditional studio. It is informal, personal and
+          connected to everyday life.
+        </p>
+
+        <p style="margin-top:15px;">
+          That makes it the perfect place for conversations
+          that don't need a television studio to happen.
+        </p>
+
+      </article>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- =======================================================
+     CTA
+======================================================= -->
+
+<section class="cta">
+  <div class="container">
+
+    <div class="ctaCard reveal">
+
+      <div class="kicker">
+        CrowRules Entertainment
+      </div>
+
+      <h2>
+        PULL UP A CHAIR.
+      </h2>
+
+      <p>
+        Watch the next broadcast, explore the archive and
+        become part of the Back Deck Live community.
+      </p>
+
+      <div class="ctaActions">
+
+        <a
+          href="#broadcast"
+          class="btn btnPrimary"
+        >
+          Watch Broadcast
+        </a>
+
+        <a
+          href="#archive"
+          class="btn btnGhost"
+        >
+          Browse Episodes
+        </a>
+
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+</main>
+
+<!-- =======================================================
+     FOOTER
+======================================================= -->
+
+<footer>
+  <div class="container footerInner">
+
+    <div class="footerBrand">
+      BACK DECK <span>LIVE</span>
+    </div>
+
+    <div class="footerCopy">
+      Back Deck Live v3.0 • Supabase Connected •
+      CrowRules Entertainment
+    </div>
+
+  </div>
+</footer>
+
+<div id="toastContainer"></div>
+
+<script>
+/* =========================================================
+   CONFIG
+========================================================= */
+
+const CONFIG = {
+
+  SUPABASE_URL:
+    "https://zauxdqyssratvzmomozf.supabase.co",
+
+  SUPABASE_KEY:
+    "sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9",
+
+  EPISODES_TABLE:
+    "cr_episodes",
+
+  SCHEDULE_TABLE:
+    "cr_schedule",
+
+  BACK_DECK_PRODUCTION_ID:
+    "7b45f7a9-8dc0-40df-93c3-a81101b494b3",
+
+  SHOW_NAME:
+    "Back Deck Live",
+
+  DEFAULT_VIDEO_URL:
+    "",
+
+  DEFAULT_TIME:
+    "Saturday • 3:00 PM PT"
+
+};
+
+/* =========================================================
+   SUPABASE
+========================================================= */
+
+let sb = null;
+
+try{
+
+  sb = window.supabase.createClient(
+    CONFIG.SUPABASE_URL,
+    CONFIG.SUPABASE_KEY
+  );
+
+}catch(error){
+
+  console.error("Supabase initialization failed:",error);
+
+}
+
+/* =========================================================
+   STATE
+========================================================= */
+
+const state = {
+
+  episodes: [],
+
+  filteredEpisodes: [],
+
+  schedule: null,
+
+  selectedVideoId: null,
+
+  initialized: false
+
+};
+
+/* =========================================================
+   DOM
+========================================================= */
+
+const $ = id =>
+  document.getElementById(id);
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+function toast(message,type="success"){
+
+  const container = $("toastContainer");
+
+  const el = document.createElement("div");
+
+  el.className = `toast ${type}`;
+
+  el.textContent = message;
+
+  container.appendChild(el);
+
+  setTimeout(()=>{
+    el.remove();
+  },4200);
+}
+
+/* =========================================================
+   SAFE TEXT
+========================================================= */
+
+function safe(value,fallback=""){
+
+  if(
+    value === null ||
+    value === undefined
+  ){
+    return fallback;
+  }
+
+  return String(value);
+}
+
+/* =========================================================
+   YOUTUBE ID
+========================================================= */
+
+function getYouTubeId(value){
+
+  if(!value){
+    return null;
+  }
+
+  const raw = String(value).trim();
+
+  if(
+    /^[A-Za-z0-9_-]{11}$/.test(raw)
+  ){
+    return raw;
+  }
+
+  try{
+
+    const url = new URL(raw);
+
+    const host =
+      url.hostname.toLowerCase();
+
+    if(
+      host.includes("youtube.com") ||
+      host.includes("youtube-nocookie.com")
+    ){
+
+      const queryId =
+        url.searchParams.get("v");
+
+      if(queryId){
+        return queryId;
+      }
+
+      const parts =
+        url.pathname.split("/").filter(Boolean);
+
+      const index =
+        parts.findIndex(part =>
+          ["embed","shorts","live"].includes(part)
+        );
+
+      if(
+        index !== -1 &&
+        parts[index + 1]
+      ){
+        return parts[index + 1];
+      }
+
+    }
+
+    if(
+      host === "youtu.be" ||
+      host.endsWith(".youtu.be")
+    ){
+
+      return url.pathname
+        .split("/")
+        .filter(Boolean)[0] || null;
+
+    }
+
+  }catch(error){
+
+    /* Not a valid URL. */
+
+  }
+
+  const match =
+    raw.match(
+      /(?:v=|youtu\.be\/|embed\/|shorts\/|live\/)([A-Za-z0-9_-]{11})/
+    );
+
+  return match ? match[1] : null;
+}
+
+/* =========================================================
+   YOUTUBE URL
+========================================================= */
+
+function buildYouTubeEmbedUrl(id){
+
+  if(!id){
+    return "";
+  }
+
+  const params =
+    new URLSearchParams({
+
+      autoplay:"1",
+
+      rel:"0",
+
+      modestbranding:"1",
+
+      playsinline:"1",
+
+      enablejsapi:"1"
+
     });
 
-    /* =========================
-       HEADER
-    ========================== */
+  /*
+    Error 153 protection:
+    YouTube expects a valid HTTP(S) origin/referrer.
+  */
 
-    const header = document.getElementById("header");
+  if(
+    location.protocol === "http:" ||
+    location.protocol === "https:"
+  ){
 
-    window.addEventListener("scroll", () => {
-      header.classList.toggle("scrolled", window.scrollY > 30);
-    });
+    params.set(
+      "origin",
+      location.origin
+    );
 
-    /* =========================
-       MOBILE NAV
-    ========================== */
+  }
 
-    const mobileToggle = document.getElementById("mobileToggle");
-    const nav = document.getElementById("nav");
+  return(
+    "https://www.youtube.com/embed/" +
+    encodeURIComponent(id) +
+    "?" +
+    params.toString()
+  );
+}
 
-    mobileToggle.addEventListener("click", () => {
-      nav.classList.toggle("open");
-    });
+/* =========================================================
+   YOUTUBE THUMBNAIL
+========================================================= */
 
-    nav.querySelectorAll("a").forEach(link => {
-      link.addEventListener("click", () => {
-        nav.classList.remove("open");
-      });
-    });
+function youtubeThumbnail(id){
 
-    /* =========================
-       REVEAL ANIMATIONS
-    ========================== */
+  if(!id){
+    return "";
+  }
 
-    const revealItems = document.querySelectorAll(".reveal");
+  return(
+    "https://img.youtube.com/vi/" +
+    encodeURIComponent(id) +
+    "/maxresdefault.jpg"
+  );
+}
 
-    const observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("visible");
-            observer.unobserve(entry.target);
-          }
-        });
-      },
+/* =========================================================
+   FORMAT DATE
+========================================================= */
+
+function formatDate(value){
+
+  if(!value){
+    return "Date TBA";
+  }
+
+  const date =
+    new Date(value + "T00:00:00");
+
+  if(Number.isNaN(date.getTime())){
+    return safe(value,"Date TBA");
+  }
+
+  return new Intl.DateTimeFormat(
+    "en-US",
+    {
+      month:"short",
+      day:"numeric",
+      year:"numeric"
+    }
+  ).format(date);
+}
+
+/* =========================================================
+   FORMAT SCHEDULE DATE
+========================================================= */
+
+function formatScheduleDate(value){
+
+  if(!value){
+    return "TBA";
+  }
+
+  const date =
+    new Date(value);
+
+  if(Number.isNaN(date.getTime())){
+    return "TBA";
+  }
+
+  return new Intl.DateTimeFormat(
+    "en-US",
+    {
+      weekday:"long",
+      month:"long",
+      day:"numeric",
+      year:"numeric",
+      timeZone:"America/Los_Angeles"
+    }
+  ).format(date);
+}
+
+/* =========================================================
+   FORMAT SCHEDULE TIME
+========================================================= */
+
+function formatScheduleTime(value){
+
+  if(!value){
+    return CONFIG.DEFAULT_TIME;
+  }
+
+  const date =
+    new Date(value);
+
+  if(Number.isNaN(date.getTime())){
+    return CONFIG.DEFAULT_TIME;
+  }
+
+  return (
+    new Intl.DateTimeFormat(
+      "en-US",
       {
-        threshold: 0.12
+        hour:"numeric",
+        minute:"2-digit",
+        timeZone:"America/Los_Angeles"
+      }
+    ).format(date) + " PT"
+  );
+}
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+function getScheduleStatus(row){
+
+  if(!row){
+    return "upcoming";
+  }
+
+  if(row.is_live === true){
+    return "live";
+  }
+
+  const start =
+    row.start_at
+      ? new Date(row.start_at)
+      : null;
+
+  const end =
+    row.end_at
+      ? new Date(row.end_at)
+      : null;
+
+  const now =
+    new Date();
+
+  if(
+    start &&
+    !Number.isNaN(start.getTime())
+  ){
+
+    if(
+      start <= now &&
+      (!end || now <= end)
+    ){
+      return "live";
+    }
+
+    if(start > now){
+      return "upcoming";
+    }
+
+  }
+
+  return "archive";
+}
+
+/* =========================================================
+   STATUS LABEL
+========================================================= */
+
+function statusLabel(status){
+
+  switch(status){
+
+    case "live":
+      return "LIVE NOW";
+
+    case "upcoming":
+      return "UPCOMING";
+
+    case "archive":
+      return "ARCHIVE";
+
+    default:
+      return "OFF AIR";
+
+  }
+}
+
+/* =========================================================
+   NORMALIZE EPISODE
+========================================================= */
+
+function normalizeEpisode(row){
+
+  const metadata =
+    row.metadata &&
+    typeof row.metadata === "object"
+      ? row.metadata
+      : {};
+
+  return {
+
+    ...row,
+
+    title:
+      safe(
+        row.title,
+        "Back Deck Live Episode"
+      ),
+
+    description:
+      safe(
+        row.description,
+        "Back Deck Live"
+      ),
+
+    episodeNumber:
+      Number(
+        row.episode_number || 0
+      ),
+
+    seasonNumber:
+      Number(
+        row.season_number || 1
+      ),
+
+    videoUrl:
+      row.video_url ||
+      metadata.video_url ||
+      metadata.youtube_url ||
+      "",
+
+    thumbnailUrl:
+      row.thumbnail_url ||
+      metadata.thumbnail_url ||
+      "",
+
+    releaseDate:
+      row.release_date ||
+      "",
+
+    published:
+      row.is_published === true ||
+      row.status === "published"
+
+  };
+
+}
+
+/* =========================================================
+   EPISODE FILTER
+========================================================= */
+
+function isBackDeckEpisode(row){
+
+  if(!row){
+    return false;
+  }
+
+  if(
+    row.production_id &&
+    String(row.production_id) ===
+    CONFIG.BACK_DECK_PRODUCTION_ID
+  ){
+    return true;
+  }
+
+  const fields = [
+
+    row.show,
+    row.show_name,
+    row.series,
+    row.program,
+    row.production_name,
+    row.title
+
+  ]
+  .filter(Boolean)
+  .join(" ")
+  .toLowerCase();
+
+  return fields.includes(
+    "back deck live"
+  );
+}
+
+/* =========================================================
+   LOAD EPISODES
+========================================================= */
+
+async function loadEpisodes(){
+
+  if(!sb){
+    throw new Error(
+      "Supabase client is unavailable."
+    );
+  }
+
+  /*
+    IMPORTANT:
+    We intentionally use select("*")
+    instead of hard-coding a column list.
+
+    This avoids schema-cache failures when
+    Supabase columns change.
+  */
+
+  const {data,error} =
+    await sb
+      .from(CONFIG.EPISODES_TABLE)
+      .select("*");
+
+  if(error){
+    throw error;
+  }
+
+  const rows =
+    Array.isArray(data)
+      ? data
+      : [];
+
+  const filtered =
+    rows
+      .filter(isBackDeckEpisode)
+      .filter(row => {
+
+        if(
+          row.is_published === false
+        ){
+          return false;
+        }
+
+        if(
+          row.status &&
+          ["draft","planned","building","scheduled"]
+            .includes(
+              String(row.status).toLowerCase()
+            ) &&
+          row.is_published !== true
+        ){
+          return false;
+        }
+
+        return true;
+      })
+      .map(normalizeEpisode)
+      .sort((a,b)=>{
+
+        if(
+          b.episodeNumber !==
+          a.episodeNumber
+        ){
+
+          return(
+            b.episodeNumber -
+            a.episodeNumber
+          );
+
+        }
+
+        return(
+          String(
+            b.releaseDate || ""
+          ).localeCompare(
+            String(
+              a.releaseDate || ""
+            )
+          )
+        );
+
+      });
+
+  state.episodes =
+    filtered;
+
+  state.filteredEpisodes =
+    [...filtered];
+
+  renderEpisodes();
+
+}
+
+/* =========================================================
+   RENDER EPISODES
+========================================================= */
+
+function renderEpisodes(){
+
+  const grid =
+    $("archiveGrid");
+
+  const count =
+    $("archiveCount");
+
+  if(!grid){
+    return;
+  }
+
+  count.textContent =
+    `${state.filteredEpisodes.length} episode${
+      state.filteredEpisodes.length === 1
+        ? ""
+        : "s"
+    }`;
+
+  if(!state.filteredEpisodes.length){
+
+    grid.innerHTML = `
+      <div class="archiveState">
+        <strong>NO EPISODES FOUND</strong>
+        Try another search or check back after
+        the next Back Deck Live broadcast.
+      </div>
+    `;
+
+    return;
+  }
+
+  grid.innerHTML =
+    state.filteredEpisodes
+      .map(episodeCard)
+      .join("");
+
+}
+
+/* =========================================================
+   EPISODE CARD
+========================================================= */
+
+function episodeCard(ep){
+
+  const id =
+    getYouTubeId(ep.videoUrl);
+
+  const thumbnail =
+    ep.thumbnailUrl ||
+    youtubeThumbnail(id);
+
+  const episodeLabel =
+    ep.episodeNumber
+      ? `Episode ${String(ep.episodeNumber).padStart(3,"0")}`
+      : "Back Deck Live";
+
+  const date =
+    formatDate(ep.releaseDate);
+
+  return `
+    <article class="episodeCard reveal visible">
+
+      <div class="episodeThumb">
+
+        ${
+          thumbnail
+            ? `
+              <img
+                src="${escapeAttribute(thumbnail)}"
+                alt="${escapeAttribute(ep.title)}"
+                loading="lazy"
+                onerror="this.style.display='none'"
+              >
+            `
+            : ""
+        }
+
+        <div class="episodeOverlay">
+
+          <button
+            type="button"
+            class="playButton"
+            aria-label="Play ${escapeAttribute(ep.title)}"
+            data-play-episode="${escapeAttribute(ep.id || ep.videoUrl || ep.title)}"
+          >
+            ▶
+          </button>
+
+        </div>
+
+      </div>
+
+      <div class="episodeBody">
+
+        <div class="episodeTag">
+          ${escapeHtml(episodeLabel)}
+        </div>
+
+        <h3>
+          ${escapeHtml(ep.title)}
+        </h3>
+
+        <div class="episodeDescription">
+          ${escapeHtml(ep.description)}
+        </div>
+
+        <div class="episodeFooter">
+
+          <div class="episodeDate">
+            ${escapeHtml(date)}
+          </div>
+
+          ${
+            ep.videoUrl
+              ? `
+                <button
+                  type="button"
+                  class="watchBtn"
+                  data-play-episode="${escapeAttribute(ep.id || ep.videoUrl || ep.title)}"
+                >
+                  Watch
+                </button>
+              `
+              : `
+                <span class="episodeDate">
+                  Video TBA
+                </span>
+              `
+          }
+
+        </div>
+
+      </div>
+
+    </article>
+  `;
+}
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHtml(value){
+
+  return safe(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+/* =========================================================
+   ESCAPE ATTRIBUTE
+========================================================= */
+
+function escapeAttribute(value){
+
+  return escapeHtml(value);
+}
+
+/* =========================================================
+   FIND EPISODE
+========================================================= */
+
+function findEpisode(identifier){
+
+  return state.episodes.find(ep =>
+    String(ep.id) ===
+    String(identifier)
+  ) || state.episodes.find(ep =>
+    ep.videoUrl === identifier
+  ) || state.episodes.find(ep =>
+    ep.title === identifier
+  );
+
+}
+
+/* =========================================================
+   PLAY EPISODE
+========================================================= */
+
+function playEpisode(identifier){
+
+  const episode =
+    findEpisode(identifier);
+
+  if(!episode){
+    toast(
+      "Episode could not be found.",
+      "error"
+    );
+    return;
+  }
+
+  const videoId =
+    getYouTubeId(
+      episode.videoUrl
+    );
+
+  if(!videoId){
+
+    toast(
+      "This episode does not have a valid YouTube video URL.",
+      "error"
+    );
+
+    return;
+  }
+
+  loadVideo(
+    videoId,
+    episode.title,
+    episode.description,
+    "archive"
+  );
+
+  document
+    .getElementById("broadcast")
+    .scrollIntoView({
+      behavior:"smooth",
+      block:"start"
+    });
+
+}
+
+/* =========================================================
+   LOAD VIDEO
+========================================================= */
+
+function loadVideo(
+  videoId,
+  title,
+  description,
+  mode="archive"
+){
+
+  const iframe =
+    $("youtubePlayer");
+
+  const placeholder =
+    $("videoPlaceholder");
+
+  if(
+    location.protocol !== "http:" &&
+    location.protocol !== "https:"
+  ){
+
+    iframe.hidden = true;
+
+    placeholder.classList.remove(
+      "hidden"
+    );
+
+    $("placeholderTitle")
+      .textContent =
+      "HOST THE PAGE FIRST";
+
+    $("placeholderText")
+      .textContent =
+      "YouTube embeds require the page to be served over HTTP or HTTPS. Opening this HTML file directly with file:// can cause YouTube Error 153.";
+
+    return;
+
+  }
+
+  const url =
+    buildYouTubeEmbedUrl(
+      videoId
+    );
+
+  iframe.src = url;
+
+  iframe.hidden = false;
+
+  placeholder.classList.add(
+    "hidden"
+  );
+
+  state.selectedVideoId =
+    videoId;
+
+  $("broadcastTitle")
+    .textContent =
+    title ||
+    CONFIG.SHOW_NAME;
+
+  $("broadcastDescription")
+    .textContent =
+    description ||
+    "Back Deck Live";
+
+  updateStatus(mode);
+
+  setupChat(videoId);
+
+}
+
+/* =========================================================
+   UPDATE STATUS
+========================================================= */
+
+function updateStatus(mode){
+
+  const badge =
+    $("broadcastStatus");
+
+  badge.className =
+    `statusBadge ${mode}`;
+
+  badge.innerHTML =
+    `<span class="liveDot"></span> ${statusLabel(mode)}`;
+
+  $("sideStatus")
+    .textContent =
+    statusLabel(mode);
+
+}
+
+/* =========================================================
+   SETUP CHAT
+========================================================= */
+
+function setupChat(videoId){
+
+  const frame =
+    $("youtubeChat");
+
+  const disabled =
+    $("chatDisabled");
+
+  if(
+    !videoId ||
+    (
+      location.hostname === "localhost" ||
+      location.hostname === "127.0.0.1"
+    )
+  ){
+
+    frame.hidden = true;
+
+    disabled.style.display =
+      "flex";
+
+    $("chatStatus")
+      .textContent =
+      "Chat unavailable on this host";
+
+    return;
+  }
+
+  const domain =
+    location.hostname;
+
+  frame.src =
+    "https://www.youtube.com/live_chat?v=" +
+    encodeURIComponent(videoId) +
+    "&embed_domain=" +
+    encodeURIComponent(domain);
+
+  frame.hidden = false;
+
+  disabled.style.display =
+    "none";
+
+  $("chatStatus")
+    .textContent =
+    "YouTube Live Chat";
+}
+
+/* =========================================================
+   LOAD SCHEDULE
+========================================================= */
+
+async function loadSchedule(){
+
+  if(!sb){
+    throw new Error(
+      "Supabase client is unavailable."
+    );
+  }
+
+  const {data,error} =
+    await sb
+      .from(CONFIG.SCHEDULE_TABLE)
+      .select("*")
+      .eq(
+        "production_id",
+        CONFIG.BACK_DECK_PRODUCTION_ID
+      )
+      .eq(
+        "is_published",
+        true
+      );
+
+  if(error){
+    throw error;
+  }
+
+  const rows =
+    Array.isArray(data)
+      ? data
+      : [];
+
+  const now =
+    Date.now();
+
+  const future =
+    rows
+      .filter(row => {
+
+        if(
+          !row.start_at
+        ){
+          return false;
+        }
+
+        return(
+          new Date(
+            row.start_at
+          ).getTime() >= now
+        );
+
+      })
+      .sort((a,b)=>
+        new Date(a.start_at) -
+        new Date(b.start_at)
+      );
+
+  let selected =
+    future[0] || null;
+
+  /*
+    If there is currently-live programming,
+    prioritize it.
+  */
+
+  const live =
+    rows.find(row =>
+      getScheduleStatus(row) === "live"
+    );
+
+  if(live){
+    selected = live;
+  }
+
+  state.schedule =
+    selected;
+
+  renderSchedule(
+    selected
+  );
+
+}
+
+/* =========================================================
+   RENDER SCHEDULE
+========================================================= */
+
+function renderSchedule(row){
+
+  if(!row){
+
+    $("broadcastIntro")
+      .textContent =
+      "The next Back Deck Live broadcast will be announced soon.";
+
+    $("broadcastTitle")
+      .textContent =
+      "Back Deck Live";
+
+    $("broadcastDescription")
+      .textContent =
+      "Saturday live broadcasts from Tacoma.";
+
+    $("metaDate")
+      .textContent =
+      "TBA";
+
+    $("metaTime")
+      .textContent =
+      "Saturday • 3:00 PM PT";
+
+    $("sideStatus")
+      .textContent =
+      "UPCOMING";
+
+    $("databaseStatus")
+      .textContent =
+      "CONNECTED";
+
+    return;
+  }
+
+  const status =
+    getScheduleStatus(row);
+
+  const title =
+    row.title ||
+    CONFIG.SHOW_NAME;
+
+  const description =
+    row.description ||
+    "Back Deck Live from Tacoma.";
+
+  const videoUrl =
+    row.stream_url ||
+    "";
+
+  const videoId =
+    getYouTubeId(videoUrl);
+
+  $("broadcastHeaderTitle")
+    .textContent =
+    title;
+
+  $("broadcastIntro")
+    .textContent =
+    status === "live"
+      ? "Back Deck Live is currently broadcasting."
+      : "The next Back Deck Live broadcast is scheduled below.";
+
+  $("broadcastTitle")
+    .textContent =
+    title;
+
+  $("broadcastDescription")
+    .textContent =
+    description;
+
+  $("metaDate")
+    .textContent =
+    formatScheduleDate(
+      row.start_at
+    );
+
+  $("metaTime")
+    .textContent =
+    formatScheduleTime(
+      row.start_at
+    );
+
+  $("sideNextShow")
+    .textContent =
+    title;
+
+  $("sideTime")
+    .textContent =
+    formatScheduleTime(
+      row.start_at
+    );
+
+  $("databaseStatus")
+    .textContent =
+    "CONNECTED";
+
+  updateStatus(status);
+
+  if(videoId){
+
+    loadVideo(
+      videoId,
+      title,
+      description,
+      status
+    );
+
+  }else{
+
+    $("youtubePlayer")
+      .hidden = true;
+
+    $("videoPlaceholder")
+      .classList.remove(
+        "hidden"
+      );
+
+    $("placeholderTitle")
+      .textContent =
+      status === "live"
+        ? "LIVE BROADCAST"
+        : "NEXT BROADCAST";
+
+    $("placeholderText")
+      .textContent =
+      "The broadcast is scheduled in Supabase. The YouTube stream will appear here when a compatible video URL is available.";
+
+  }
+
+}
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+function setupSearch(){
+
+  const input =
+    $("episodeSearch");
+
+  input.addEventListener(
+    "input",
+    () => {
+
+      const query =
+        input.value
+          .trim()
+          .toLowerCase();
+
+      if(!query){
+
+        state.filteredEpisodes =
+          [...state.episodes];
+
+      }else{
+
+        state.filteredEpisodes =
+          state.episodes.filter(
+            episode => {
+
+              const haystack =
+                [
+                  episode.title,
+                  episode.description,
+                  episode.episodeNumber,
+                  episode.seasonNumber
+                ]
+                .filter(Boolean)
+                .join(" ")
+                .toLowerCase();
+
+              return haystack.includes(
+                query
+              );
+
+            }
+          );
+
+      }
+
+      renderEpisodes();
+
+    }
+  );
+
+}
+
+/* =========================================================
+   ARCHIVE CLICK HANDLER
+========================================================= */
+
+function setupArchiveEvents(){
+
+  $("archiveGrid")
+    .addEventListener(
+      "click",
+      event => {
+
+        const button =
+          event.target.closest(
+            "[data-play-episode]"
+          );
+
+        if(!button){
+          return;
+        }
+
+        playEpisode(
+          button.dataset.playEpisode
+        );
+
       }
     );
 
-    revealItems.forEach(item => observer.observe(item));
+}
 
-    /* =========================
-       PLAYER DEMO
-    ========================== */
+/* =========================================================
+   NAV
+========================================================= */
 
-    const playButton = document.getElementById("playButton");
-    const playerMessage = document.getElementById("playerMessage");
-    const statusText = document.getElementById("statusText");
+function setupNavigation(){
 
-    let demoPlaying = false;
+  $("menuBtn")
+    .addEventListener(
+      "click",
+      () => {
 
-    playButton.addEventListener("click", () => {
+        $("navLinks")
+          .classList.toggle(
+            "open"
+          );
 
-      demoPlaying = !demoPlaying;
-
-      if (demoPlaying) {
-        playButton.textContent = "❚❚";
-        playerMessage.textContent = "Live player ready — connect your stream here.";
-        statusText.textContent = "READY";
-      } else {
-        playButton.textContent = "▶";
-        playerMessage.textContent = "Live video player placeholder";
-        statusText.textContent = "OFF AIR";
       }
+    );
+
+  document
+    .querySelectorAll(
+      ".navLinks a"
+    )
+    .forEach(link => {
+
+      link.addEventListener(
+        "click",
+        () => {
+
+          $("navLinks")
+            .classList.remove(
+              "open"
+            );
+
+        }
+      );
 
     });
 
-    /* =========================
-       CLOCK
-    ========================== */
+}
 
-    function updateClock() {
+/* =========================================================
+   REVEAL
+========================================================= */
 
-      const now = new Date();
+function setupReveal(){
 
-      const hours = String(now.getHours()).padStart(2, "0");
-      const minutes = String(now.getMinutes()).padStart(2, "0");
-      const seconds = String(now.getSeconds()).padStart(2, "0");
+  const observer =
+    new IntersectionObserver(
+      entries => {
 
-      document.getElementById("clock").textContent =
-        `${hours}:${minutes}:${seconds}`;
+        entries.forEach(entry => {
+
+          if(entry.isIntersecting){
+
+            entry.target
+              .classList
+              .add("visible");
+
+            observer.unobserve(
+              entry.target
+            );
+
+          }
+
+        });
+
+      },
+      {
+        threshold:.08
+      }
+    );
+
+  document
+    .querySelectorAll(".reveal")
+    .forEach(el =>
+      observer.observe(el)
+    );
+
+}
+
+/* =========================================================
+   ANALYTICS
+========================================================= */
+
+async function trackEvent(
+  eventName,
+  elementId=null,
+  metadata={}
+){
+
+  try{
+
+    if(!sb){
+      return;
     }
 
-    updateClock();
-    setInterval(updateClock, 1000);
+    await sb
+      .from("cr_analytics_events")
+      .insert({
 
-    /* =========================
-       YEAR
-    ========================== */
+        event_name:
+          eventName,
 
-    document.getElementById("year").textContent =
-      new Date().getFullYear();
+        page_path:
+          location.pathname,
 
-    /* =========================
-       SMOOTH BUTTON FEEDBACK
-    ========================== */
+        element_id:
+          elementId,
 
-    document.querySelectorAll(".btn").forEach(button => {
+        session_id:
+          getSessionId(),
 
-      button.addEventListener("click", () => {
-        button.style.transform = "scale(.97)";
+        referrer:
+          document.referrer ||
+          null,
 
-        setTimeout(() => {
-          button.style.transform = "";
-        }, 120);
+        metadata:
+          metadata
+
       });
+
+  }catch(error){
+
+    console.debug(
+      "Analytics event skipped:",
+      error
+    );
+
+  }
+
+}
+
+/* =========================================================
+   SESSION ID
+========================================================= */
+
+function getSessionId(){
+
+  const key =
+    "cr_backdeck_session";
+
+  let id =
+    localStorage.getItem(
+      key
+    );
+
+  if(!id){
+
+    id =
+      crypto.randomUUID();
+
+    localStorage.setItem(
+      key,
+      id
+    );
+
+  }
+
+  return id;
+}
+
+/* =========================================================
+   GLOBAL CLICKS
+========================================================= */
+
+function setupAnalytics(){
+
+  document
+    .querySelectorAll(
+      ".btn"
+    )
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          trackEvent(
+            "back_deck_cta_click",
+            button.textContent
+              .trim()
+              .toLowerCase()
+          );
+
+        }
+      );
 
     });
 
-  </script>
+}
+
+/* =========================================================
+   INITIALIZE
+========================================================= */
+
+async function initialize(){
+
+  setupSearch();
+
+  setupArchiveEvents();
+
+  setupNavigation();
+
+  setupReveal();
+
+  setupAnalytics();
+
+  await new Promise(
+    resolve =>
+      setTimeout(
+        resolve,
+        700
+      )
+  );
+
+  $("loadingScreen")
+    .classList
+    .add("hide");
+
+  setTimeout(
+    () => {
+
+      $("intro")
+        .classList
+        .add("hide");
+
+    },
+    1200
+  );
+
+  if(!sb){
+
+    $("databaseStatus")
+      .textContent =
+      "ERROR";
+
+    toast(
+      "Supabase could not be initialized.",
+      "error"
+    );
+
+    return;
+  }
+
+  try{
+
+    await Promise.all([
+      loadEpisodes(),
+      loadSchedule()
+    ]);
+
+    state.initialized =
+      true;
+
+    $("databaseStatus")
+      .textContent =
+      "CONNECTED";
+
+    trackEvent(
+      "back_deck_page_view"
+    );
+
+  }catch(error){
+
+    console.error(
+      "Back Deck Live initialization error:",
+      error
+    );
+
+    $("databaseStatus")
+      .textContent =
+      "ERROR";
+
+    toast(
+      "Some Supabase content could not be loaded.",
+      "error"
+    );
+
+    if(
+      state.episodes.length === 0
+    ){
+
+      $("archiveGrid")
+        .innerHTML = `
+          <div class="archiveState">
+            <strong>ARCHIVE TEMPORARILY UNAVAILABLE</strong>
+            The Back Deck Live archive could not be
+            loaded from Supabase.
+          </div>
+        `;
+
+    }
+
+  }
+
+}
+
+/* =========================================================
+   START
+========================================================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  initialize
+);
+
+/* =========================================================
+   REFRESH SCHEDULE
+========================================================= */
+
+setInterval(
+  async () => {
+
+    try{
+
+      await loadSchedule();
+
+    }catch(error){
+
+      console.debug(
+        "Schedule refresh failed:",
+        error
+      );
+
+    }
+
+  },
+  60000
+);
+
+</script>
 
 </body>
 </html>
