@@ -18,1152 +18,1414 @@
   content="Back Deck Live — Live from the Back Deck. Straight from Tacoma."
 >
 
-<title>Back Deck Live | CrowRules Entertainment</title>
+<title>Back Deck Live — CrowRules Entertainment</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link
+  href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@400;500;600;700;800;900&display=swap"
+  rel="stylesheet"
+>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+/* =========================================================
+   BACK DECK LIVE
+   SINGLE-FILE HTML / CSS / JS
+   ========================================================= */
 
-:root{
-  --bg:#050609;
-  --bg2:#0a0b10;
-  --panel:#0d0f15;
-  --panel2:#11141b;
-  --panel3:#171a22;
-  --border:#242936;
-  --border2:#303644;
+:root {
+  --bg: #050609;
+  --bg-2: #080a10;
+  --panel: #0c0f16;
+  --panel-2: #10141d;
+  --panel-3: #151a24;
 
-  --text:#f5f7fb;
-  --muted:#969daa;
-  --muted2:#707681;
+  --text: #f5f7fb;
+  --muted: #8992a3;
+  --muted-2: #626b7c;
 
-  --accent:#ff1744;
-  --accent2:#ff3158;
+  --accent: #00e5ff;
+  --accent-2: #8b5cf6;
+  --green: #20e39a;
+  --yellow: #ffd166;
+  --red: #ff4d6d;
 
-  --green:#22c55e;
-  --yellow:#f59e0b;
-  --blue:#38bdf8;
+  --border: rgba(255,255,255,.09);
+  --border-accent: rgba(0,229,255,.32);
 
   --shadow:
-    0 20px 70px rgba(0,0,0,.45);
+    0 25px 70px rgba(0,0,0,.42);
 
-  --radius:18px;
+  --radius: 22px;
+  --radius-sm: 14px;
+
+  --max-width: 1450px;
 }
 
-*{
-  box-sizing:border-box;
+* {
+  box-sizing: border-box;
 }
 
-html{
-  scroll-behavior:smooth;
+html {
+  scroll-behavior: smooth;
 }
 
-body{
-  margin:0;
-  min-height:100vh;
+body {
+  margin: 0;
+  min-height: 100vh;
+
+  color: var(--text);
+
+  font-family:
+    "Montserrat",
+    Arial,
+    sans-serif;
 
   background:
     radial-gradient(
-      circle at 20% 0%,
-      rgba(255,23,68,.08),
+      circle at 15% 5%,
+      rgba(0,229,255,.08),
       transparent 30%
     ),
     radial-gradient(
-      circle at 90% 10%,
-      rgba(56,189,248,.05),
-      transparent 28%
+      circle at 85% 15%,
+      rgba(139,92,246,.09),
+      transparent 30%
     ),
-    var(--bg);
+    linear-gradient(
+      180deg,
+      #040509 0%,
+      #070910 45%,
+      #040509 100%
+    );
 
-  color:var(--text);
+  overflow-x: hidden;
+}
 
-  font-family:
-    Inter,
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+
+  pointer-events: none;
+
+  opacity: .035;
+
+  background-image:
+    linear-gradient(
+      rgba(255,255,255,.8) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255,255,255,.8) 1px,
+      transparent 1px
+    );
+
+  background-size: 50px 50px;
+
+  mask-image:
+    linear-gradient(
+      to bottom,
+      black,
+      transparent 80%
+    );
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
 button,
-input{
-  font:inherit;
+input {
+  font: inherit;
 }
 
-button{
-  cursor:pointer;
-}
-
-a{
-  color:inherit;
-  text-decoration:none;
+button {
+  cursor: pointer;
 }
 
 /* =========================================================
    HEADER
-========================================================= */
+   ========================================================= */
 
-.site-header{
-  position:sticky;
-  top:0;
-  z-index:100;
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
+  border-bottom: 1px solid var(--border);
 
   background:
-    rgba(5,6,9,.88);
+    rgba(5,6,9,.86);
 
   backdrop-filter:
     blur(18px);
 
-  border-bottom:
-    1px solid rgba(255,255,255,.07);
+  -webkit-backdrop-filter:
+    blur(18px);
 }
 
-.header-inner{
-  width:min(1400px, calc(100% - 32px));
-  margin:auto;
+.header-inner {
+  width: min(
+    calc(100% - 32px),
+    var(--max-width)
+  );
 
-  min-height:72px;
+  min-height: 72px;
 
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
+  margin: 0 auto;
 
-  gap:24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
 }
 
-.brand{
-  display:flex;
-  align-items:center;
-  gap:12px;
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 
-  min-width:0;
+  min-width: 0;
 }
 
-.brand-mark{
-  width:42px;
-  height:42px;
+.brand-mark {
+  width: 42px;
+  height: 42px;
 
-  display:grid;
-  place-items:center;
+  display: grid;
+  place-items: center;
 
-  border-radius:12px;
+  border-radius: 12px;
+
+  color: #020408;
+
+  font-family: "Orbitron", sans-serif;
+  font-weight: 900;
 
   background:
     linear-gradient(
       135deg,
       var(--accent),
-      #7f102b
+      var(--accent-2)
     );
 
   box-shadow:
-    0 0 25px rgba(255,23,68,.22);
-
-  font-weight:900;
-  font-size:18px;
+    0 0 24px rgba(0,229,255,.18);
 }
 
-.brand-copy{
-  min-width:0;
+.brand-copy {
+  min-width: 0;
 }
 
-.brand-title{
-  font-size:16px;
-  font-weight:900;
-  letter-spacing:.04em;
-  text-transform:uppercase;
+.brand-name {
+  font-family: "Orbitron", sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: .12em;
 }
 
-.brand-subtitle{
-  color:var(--muted);
-  font-size:11px;
-  margin-top:2px;
+.brand-sub {
+  margin-top: 3px;
+
+  color: var(--muted);
+
+  font-size: 10px;
+  font-weight: 700;
+
+  letter-spacing: .14em;
+  text-transform: uppercase;
 }
 
-.back-link{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 
-  padding:10px 14px;
+  padding: 10px 14px;
 
   border:
-    1px solid var(--border);
+    1px solid
+    var(--border);
 
-  border-radius:10px;
+  border-radius: 999px;
 
-  background:
-    rgba(255,255,255,.03);
+  color: #cbd2df;
 
-  color:var(--muted);
+  font-size: 12px;
+  font-weight: 700;
 
-  font-size:13px;
-  font-weight:700;
-
-  transition:.2s ease;
+  transition:
+    .2s ease;
 }
 
-.back-link:hover{
-  color:var(--text);
-  border-color:var(--border2);
-  background:rgba(255,255,255,.06);
+.back-link:hover {
+  color: var(--accent);
+
+  border-color:
+    var(--border-accent);
+
+  background:
+    rgba(0,229,255,.05);
+
+  transform:
+    translateY(-1px);
 }
 
 /* =========================================================
    HERO
-========================================================= */
+   ========================================================= */
 
-.hero{
-  width:min(1400px, calc(100% - 32px));
-  margin:0 auto;
+.hero {
+  position: relative;
 
-  padding:62px 0 36px;
+  width: min(
+    calc(100% - 32px),
+    var(--max-width)
+  );
+
+  margin: 0 auto;
+
+  padding:
+    70px
+    0
+    42px;
 }
 
-.hero-kicker{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
+.hero-grid {
+  display: grid;
 
-  padding:7px 11px;
+  grid-template-columns:
+    minmax(0, 1.45fr)
+    minmax(330px, .55fr);
 
-  border:
-    1px solid rgba(255,23,68,.3);
+  gap: 34px;
 
-  border-radius:999px;
-
-  background:
-    rgba(255,23,68,.08);
-
-  color:#ff6b87;
-
-  font-size:11px;
-  font-weight:900;
-  letter-spacing:.12em;
-  text-transform:uppercase;
+  align-items: end;
 }
 
-.live-dot{
-  width:7px;
-  height:7px;
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
 
-  border-radius:50%;
+  color: var(--accent);
 
-  background:var(--accent);
+  font-family: "Orbitron", sans-serif;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+
+  border-radius: 50%;
+
+  background: var(--green);
 
   box-shadow:
-    0 0 12px var(--accent);
+    0 0 0 5px rgba(32,227,154,.09),
+    0 0 18px rgba(32,227,154,.7);
 
-  animation:pulse 1.5s infinite;
+  animation:
+    pulse 1.7s infinite;
 }
 
-@keyframes pulse{
-  0%,100%{
-    opacity:1;
-    transform:scale(1);
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
   }
 
-  50%{
-    opacity:.45;
-    transform:scale(.72);
+  50% {
+    opacity: .45;
+    transform: scale(.72);
   }
 }
 
-.hero h1{
-  margin:18px 0 10px;
+.hero h1 {
+  margin:
+    18px
+    0
+    14px;
+
+  font-family: "Orbitron", sans-serif;
 
   font-size:
-    clamp(42px, 7vw, 86px);
+    clamp(40px, 7vw, 86px);
 
-  line-height:.95;
+  line-height: .98;
 
-  letter-spacing:-.055em;
+  letter-spacing:
+    -.055em;
 
-  font-weight:950;
+  text-transform: uppercase;
+
+  text-shadow:
+    0 0 30px rgba(0,229,255,.08);
 }
 
-.hero h1 span{
-  color:var(--accent);
+.hero h1 span {
+  color: var(--accent);
 }
 
-.hero p{
-  max-width:720px;
+.hero-description {
+  max-width: 780px;
 
-  margin:0;
-
-  color:var(--muted);
+  color: #aeb6c5;
 
   font-size:
-    clamp(15px, 2vw, 19px);
+    clamp(15px, 2vw, 18px);
 
-  line-height:1.7;
+  line-height: 1.7;
 }
 
 /* =========================================================
-   STATUS BAR
-========================================================= */
+   COUNTDOWN
+   ========================================================= */
 
-.status-row{
-  width:min(1400px, calc(100% - 32px));
-  margin:0 auto 24px;
-
-  display:flex;
-  flex-wrap:wrap;
-  align-items:center;
-  gap:10px;
-}
-
-.status-pill{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-
-  padding:8px 11px;
+.countdown-card {
+  padding: 22px;
 
   border:
-    1px solid var(--border);
+    1px solid
+    var(--border);
 
-  border-radius:999px;
+  border-radius:
+    var(--radius);
 
   background:
-    rgba(255,255,255,.025);
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.045),
+      rgba(255,255,255,.015)
+    );
 
-  color:var(--muted);
-
-  font-size:11px;
-  font-weight:800;
-  text-transform:uppercase;
-  letter-spacing:.07em;
+  box-shadow:
+    var(--shadow);
 }
 
-.status-pill.connected{
-  color:#86efac;
-  border-color:rgba(34,197,94,.25);
+.countdown-label {
+  color: var(--muted);
+
+  font-size: 10px;
+  font-weight: 800;
+
+  letter-spacing: .16em;
+  text-transform: uppercase;
 }
 
-.status-pill.error{
-  color:#ff8ba1;
-  border-color:rgba(255,23,68,.3);
+.countdown-title {
+  margin-top: 8px;
+
+  font-family: "Orbitron", sans-serif;
+
+  font-size: 17px;
+  font-weight: 800;
 }
 
-.status-dot{
-  width:7px;
-  height:7px;
-  border-radius:50%;
+.countdown-date {
+  margin-top: 7px;
 
-  background:var(--muted2);
+  color: var(--accent);
+
+  font-size: 13px;
+  font-weight: 700;
 }
 
-.connected .status-dot{
-  background:var(--green);
-  box-shadow:0 0 10px rgba(34,197,94,.55);
+.countdown-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, 1fr);
+
+  gap: 8px;
+
+  margin-top: 18px;
 }
 
-.error .status-dot{
-  background:var(--accent);
+.count-box {
+  padding: 12px 7px;
+
+  text-align: center;
+
+  border:
+    1px solid
+    rgba(255,255,255,.07);
+
+  border-radius:
+    12px;
+
+  background:
+    rgba(0,0,0,.22);
+}
+
+.count-number {
+  font-family: "Orbitron", sans-serif;
+
+  font-size: 22px;
+  font-weight: 800;
+
+  line-height: 1;
+}
+
+.count-label {
+  margin-top: 6px;
+
+  color: var(--muted-2);
+
+  font-size: 8px;
+  font-weight: 800;
+
+  letter-spacing: .1em;
+  text-transform: uppercase;
 }
 
 /* =========================================================
    MAIN
-========================================================= */
+   ========================================================= */
 
-main{
-  width:min(1400px, calc(100% - 32px));
-  margin:0 auto 80px;
+.main {
+  width: min(
+    calc(100% - 32px),
+    var(--max-width)
+  );
+
+  margin: 0 auto;
+
+  padding-bottom: 80px;
 }
 
 /* =========================================================
-   PLAYER AREA
-========================================================= */
+   PLAYER + CHAT
+   ========================================================= */
 
-.player-grid{
-  display:grid;
+.watch-layout {
+  display: grid;
 
   grid-template-columns:
-    minmax(0, 1.7fr)
-    minmax(300px, .75fr);
+    minmax(0, 1.65fr)
+    minmax(320px, .55fr);
 
-  gap:18px;
-
-  align-items:stretch;
+  gap: 18px;
 }
 
 .player-card,
-.chat-card{
-  overflow:hidden;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,.025),
-      rgba(255,255,255,.01)
-    ),
-    var(--panel);
-
+.chat-card {
   border:
-    1px solid var(--border);
+    1px solid
+    var(--border);
 
-  border-radius:var(--radius);
-
-  box-shadow:var(--shadow);
-}
-
-.player-card{
-  min-width:0;
-}
-
-.player-wrap{
-  position:relative;
-
-  aspect-ratio:16 / 9;
-
-  width:100%;
-
-  background:#000;
-
-  overflow:hidden;
-}
-
-.player-placeholder{
-  position:absolute;
-  inset:0;
-
-  display:grid;
-  place-items:center;
-
-  padding:30px;
-
-  text-align:center;
+  border-radius:
+    var(--radius);
 
   background:
-    radial-gradient(
-      circle at center,
-      rgba(255,23,68,.08),
-      transparent 45%
-    ),
-    #020204;
-}
-
-.placeholder-inner{
-  max-width:430px;
-}
-
-.placeholder-icon{
-  width:64px;
-  height:64px;
-
-  display:grid;
-  place-items:center;
-
-  margin:0 auto 18px;
-
-  border-radius:50%;
-
-  background:
-    rgba(255,23,68,.12);
-
-  border:
-    1px solid rgba(255,23,68,.25);
-
-  font-size:24px;
-}
-
-.placeholder-title{
-  font-size:18px;
-  font-weight:900;
-}
-
-.placeholder-text{
-  margin-top:8px;
-
-  color:var(--muted);
-
-  font-size:13px;
-  line-height:1.6;
-}
-
-.player-frame{
-  position:absolute;
-  inset:0;
-
-  width:100%;
-  height:100%;
-
-  border:0;
-
-  display:block;
-
-  background:#000;
-}
-
-.player-meta{
-  padding:18px 20px 20px;
-}
-
-.player-meta-top{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-
-  gap:15px;
-}
-
-.player-label{
-  color:var(--muted2);
-
-  font-size:10px;
-  font-weight:900;
-
-  letter-spacing:.12em;
-
-  text-transform:uppercase;
-}
-
-.player-status{
-  display:inline-flex;
-  align-items:center;
-  gap:7px;
-
-  color:#86efac;
-
-  font-size:10px;
-  font-weight:900;
-
-  letter-spacing:.08em;
-  text-transform:uppercase;
-}
-
-.player-status-dot{
-  width:7px;
-  height:7px;
-
-  border-radius:50%;
-
-  background:var(--green);
+    rgba(9,12,18,.92);
 
   box-shadow:
-    0 0 10px rgba(34,197,94,.6);
+    var(--shadow);
+
+  overflow: hidden;
 }
 
-.player-title{
-  margin:8px 0 0;
+.player-wrap {
+  position: relative;
 
-  font-size:
-    clamp(20px, 3vw, 28px);
+  width: 100%;
 
-  line-height:1.15;
-
-  font-weight:900;
-
-  letter-spacing:-.02em;
-}
-
-.player-description{
-  margin-top:8px;
-
-  color:var(--muted);
-
-  font-size:13px;
-  line-height:1.6;
-}
-
-/* =========================================================
-   CHAT
-========================================================= */
-
-.chat-card{
-  min-height:100%;
-  display:flex;
-  flex-direction:column;
-}
-
-.chat-header{
-  min-height:70px;
-
-  padding:16px 18px;
-
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-
-  gap:12px;
-
-  border-bottom:
-    1px solid var(--border);
+  aspect-ratio:
+    16 / 9;
 
   background:
-    rgba(0,0,0,.2);
+    #000;
 }
 
-.chat-title{
-  font-weight:900;
-  font-size:15px;
+.player-wrap iframe {
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  border: 0;
 }
 
-.chat-subtitle{
-  margin-top:3px;
+.player-overlay {
+  position: absolute;
 
-  color:var(--muted2);
+  top: 14px;
+  left: 14px;
 
-  font-size:10px;
+  z-index: 2;
 
-  text-transform:uppercase;
-  letter-spacing:.08em;
-}
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
 
-.chat-status{
-  padding:6px 8px;
-
-  border-radius:7px;
-
-  background:
-    rgba(255,255,255,.04);
-
-  color:var(--muted);
-
-  font-size:9px;
-
-  font-weight:900;
-
-  letter-spacing:.08em;
-
-  text-transform:uppercase;
-}
-
-.chat-frame{
-  position:relative;
-
-  flex:1;
-
-  min-height:500px;
-
-  background:#000;
-}
-
-.chat-frame iframe{
-  position:absolute;
-  inset:0;
-
-  width:100%;
-  height:100%;
-
-  border:0;
-
-  background:#000;
-}
-
-.chat-placeholder{
-  min-height:500px;
-
-  display:grid;
-  place-items:center;
-
-  padding:30px;
-
-  text-align:center;
-
-  color:var(--muted);
-
-  background:
-    radial-gradient(
-      circle at center,
-      rgba(255,255,255,.025),
-      transparent 50%
-    ),
-    #08090d;
-}
-
-.chat-placeholder strong{
-  color:var(--text);
-}
-
-/* =========================================================
-   ARCHIVE
-========================================================= */
-
-.archive-section{
-  margin-top:44px;
-}
-
-.section-heading{
-  display:flex;
-  align-items:end;
-  justify-content:space-between;
-
-  gap:20px;
-
-  margin-bottom:18px;
-}
-
-.section-kicker{
-  color:var(--accent);
-
-  font-size:10px;
-  font-weight:950;
-
-  letter-spacing:.13em;
-
-  text-transform:uppercase;
-}
-
-.section-title{
-  margin-top:5px;
-
-  font-size:30px;
-
-  font-weight:950;
-
-  letter-spacing:-.03em;
-}
-
-.section-description{
-  margin-top:5px;
-
-  color:var(--muted);
-
-  font-size:13px;
-}
-
-.archive-tools{
-  display:flex;
-  align-items:center;
-  gap:8px;
-
-  flex-wrap:wrap;
-}
-
-.search-box{
-  width:240px;
-  max-width:100%;
-
-  padding:10px 12px;
+  padding:
+    8px
+    11px;
 
   border:
-    1px solid var(--border);
+    1px solid
+    rgba(255,255,255,.1);
 
-  border-radius:10px;
-
-  background:
-    rgba(255,255,255,.03);
-
-  color:var(--text);
-
-  outline:none;
-}
-
-.search-box::placeholder{
-  color:var(--muted2);
-}
-
-.search-box:focus{
-  border-color:
-    rgba(255,23,68,.5);
-
-  box-shadow:
-    0 0 0 3px rgba(255,23,68,.08);
-}
-
-.refresh-button{
-  padding:10px 13px;
-
-  border:
-    1px solid var(--border);
-
-  border-radius:10px;
-
-  background:
-    rgba(255,255,255,.04);
-
-  color:var(--text);
-
-  font-weight:800;
-
-  transition:.2s ease;
-}
-
-.refresh-button:hover{
-  border-color:var(--border2);
-  background:rgba(255,255,255,.07);
-}
-
-.archive-grid{
-  display:grid;
-
-  grid-template-columns:
-    repeat(3, minmax(0, 1fr));
-
-  gap:16px;
-}
-
-.episode-card{
-  position:relative;
-
-  overflow:hidden;
-
-  border:
-    1px solid var(--border);
-
-  border-radius:16px;
-
-  background:var(--panel);
-
-  transition:
-    transform .22s ease,
-    border-color .22s ease,
-    box-shadow .22s ease;
-}
-
-.episode-card:hover{
-  transform:translateY(-4px);
-
-  border-color:
-    var(--border2);
-
-  box-shadow:
-    0 18px 45px rgba(0,0,0,.35);
-}
-
-.episode-card.selected{
-  border-color:
-    rgba(255,23,68,.5);
-
-  box-shadow:
-    0 0 0 1px rgba(255,23,68,.08),
-    0 18px 45px rgba(0,0,0,.35);
-}
-
-.episode-thumb{
-  position:relative;
-
-  aspect-ratio:16 / 9;
-
-  overflow:hidden;
-
-  background:#050507;
-}
-
-.episode-thumb img{
-  width:100%;
-  height:100%;
-
-  object-fit:cover;
-
-  display:block;
-
-  transition:transform .35s ease;
-}
-
-.episode-card:hover .episode-thumb img{
-  transform:scale(1.035);
-}
-
-.thumb-overlay{
-  position:absolute;
-  inset:0;
-
-  display:flex;
-  align-items:flex-end;
-  justify-content:space-between;
-
-  padding:12px;
-
-  background:
-    linear-gradient(
-      to top,
-      rgba(0,0,0,.8),
-      transparent 55%
-    );
-}
-
-.episode-number{
-  padding:6px 8px;
-
-  border-radius:7px;
+  border-radius:
+    999px;
 
   background:
     rgba(0,0,0,.72);
 
-  backdrop-filter:blur(8px);
+  backdrop-filter:
+    blur(8px);
 
-  font-size:10px;
-  font-weight:950;
+  font-size: 10px;
+  font-weight: 800;
 
-  letter-spacing:.08em;
+  letter-spacing: .08em;
+  text-transform: uppercase;
 }
 
-.episode-badge{
-  padding:6px 8px;
+.player-overlay.live {
+  color: var(--green);
+}
 
-  border-radius:7px;
+.player-overlay.scheduled {
+  color: var(--yellow);
+}
+
+.player-overlay.ended {
+  color: var(--muted);
+}
+
+.player-overlay-dot {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: currentColor;
+}
+
+.player-info {
+  padding: 22px 24px 25px;
+}
+
+.player-kicker {
+  color: var(--accent);
+
+  font-family: "Orbitron", sans-serif;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.player-title {
+  margin: 8px 0 10px;
+
+  font-family: "Orbitron", sans-serif;
+
+  font-size:
+    clamp(21px, 3vw, 31px);
+
+  line-height: 1.2;
+}
+
+.player-description {
+  color: var(--muted);
+
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.meta-row {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 8px;
+
+  margin-top: 16px;
+}
+
+.meta-pill {
+  display: inline-flex;
+  align-items: center;
+
+  padding:
+    7px
+    10px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    999px;
+
+  color: #bfc6d3;
 
   background:
-    rgba(255,23,68,.9);
+    rgba(255,255,255,.025);
 
-  color:#fff;
-
-  font-size:9px;
-  font-weight:950;
-
-  text-transform:uppercase;
+  font-size: 10px;
+  font-weight: 700;
 }
 
-.episode-body{
-  padding:15px;
-}
+.youtube-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 
-.episode-title{
-  min-height:42px;
+  margin-top: 18px;
 
-  font-size:16px;
-  font-weight:900;
+  padding:
+    11px
+    15px;
 
-  line-height:1.3;
-}
+  border-radius:
+    999px;
 
-.episode-info{
-  display:flex;
-  flex-wrap:wrap;
-
-  gap:8px;
-
-  margin-top:9px;
-
-  color:var(--muted2);
-
-  font-size:11px;
-}
-
-.episode-info span{
-  display:inline-flex;
-  align-items:center;
-  gap:4px;
-}
-
-.play-button{
-  width:100%;
-
-  margin-top:14px;
-
-  padding:11px 12px;
-
-  border:0;
-
-  border-radius:9px;
+  color: #050609;
 
   background:
     var(--accent);
 
-  color:white;
+  font-size: 11px;
+  font-weight: 900;
 
-  font-size:12px;
-  font-weight:950;
-
-  letter-spacing:.03em;
-
-  transition:.2s ease;
+  transition:
+    .2s ease;
 }
 
-.play-button:hover{
-  background:var(--accent2);
+.youtube-button:hover {
+  transform:
+    translateY(-1px);
 
   box-shadow:
-    0 7px 22px rgba(255,23,68,.22);
+    0 8px 30px
+    rgba(0,229,255,.18);
 }
 
-.empty-state{
-  grid-column:1/-1;
+/* =========================================================
+   CHAT
+   ========================================================= */
 
-  padding:55px 25px;
+.chat-header {
+  padding:
+    17px
+    18px;
 
-  text-align:center;
+  border-bottom:
+    1px solid
+    var(--border);
 
-  border:
-    1px dashed var(--border2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
-  border-radius:16px;
-
-  color:var(--muted);
+  gap: 10px;
 }
 
-.loading-card{
-  padding:30px;
+.chat-heading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  font-family: "Orbitron", sans-serif;
+
+  font-size: 13px;
+  font-weight: 800;
+
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.chat-status {
+  padding:
+    6px
+    9px;
+
+  border-radius:
+    999px;
+
+  color: var(--muted);
+
+  background:
+    rgba(255,255,255,.05);
+
+  font-size: 9px;
+  font-weight: 800;
+
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.chat-status.live {
+  color: var(--green);
+  background:
+    rgba(32,227,154,.08);
+}
+
+.chat-status.scheduled {
+  color: var(--yellow);
+  background:
+    rgba(255,209,102,.08);
+}
+
+.chat-frame {
+  position: relative;
+
+  min-height: 520px;
+
+  background:
+    #080a0f;
+}
+
+.chat-frame iframe {
+  width: 100%;
+  height: 100%;
+
+  min-height: 520px;
+
+  display: block;
+
+  border: 0;
+}
+
+.chat-placeholder {
+  min-height: 520px;
+
+  padding:
+    35px
+    24px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(0,229,255,.05),
+      transparent 58%
+    );
+}
+
+.chat-icon {
+  width: 58px;
+  height: 58px;
+
+  display: grid;
+  place-items: center;
+
+  margin-bottom: 17px;
 
   border:
-    1px solid var(--border);
+    1px solid
+    var(--border-accent);
 
-  border-radius:16px;
+  border-radius:
+    18px;
 
-  color:var(--muted);
+  color: var(--accent);
 
-  text-align:center;
+  background:
+    rgba(0,229,255,.06);
+
+  font-size: 24px;
+}
+
+.chat-placeholder h3 {
+  margin:
+    0
+    0
+    9px;
+
+  font-family: "Orbitron", sans-serif;
+
+  font-size: 15px;
+}
+
+.chat-placeholder p {
+  max-width: 300px;
+
+  margin: 0;
+
+  color: var(--muted);
+
+  font-size: 12px;
+
+  line-height: 1.7;
+}
+
+.chat-action {
+  margin-top: 18px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  padding:
+    10px
+    14px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    999px;
+
+  color: #cbd2df;
+
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.chat-action:hover {
+  color: var(--accent);
+
+  border-color:
+    var(--border-accent);
+}
+
+/* =========================================================
+   SECTION
+   ========================================================= */
+
+.section {
+  margin-top: 48px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  margin-bottom: 18px;
+}
+
+.section-title {
+  margin: 0;
+
+  font-family: "Orbitron", sans-serif;
+
+  font-size:
+    clamp(20px, 3vw, 28px);
+
+  text-transform: uppercase;
+}
+
+.section-subtitle {
+  margin: 6px 0 0;
+
+  color: var(--muted);
+
+  font-size: 12px;
+}
+
+/* =========================================================
+   EPISODES
+   ========================================================= */
+
+.episode-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 16px;
+}
+
+.episode-card {
+  position: relative;
+
+  padding: 0;
+
+  text-align: left;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    18px;
+
+  background:
+    var(--panel);
+
+  color: var(--text);
+
+  overflow: hidden;
+
+  transition:
+    transform .2s ease,
+    border-color .2s ease,
+    box-shadow .2s ease;
+}
+
+.episode-card:hover {
+  transform:
+    translateY(-3px);
+
+  border-color:
+    rgba(0,229,255,.22);
+
+  box-shadow:
+    0 15px 40px
+    rgba(0,0,0,.25);
+}
+
+.episode-card.active {
+  border-color:
+    var(--border-accent);
+
+  box-shadow:
+    0 0 0 1px
+    rgba(0,229,255,.08),
+    0 15px 40px
+    rgba(0,229,255,.05);
+}
+
+.episode-thumb {
+  position: relative;
+
+  aspect-ratio:
+    16 / 9;
+
+  background:
+    #030406;
+
+  overflow: hidden;
+}
+
+.episode-thumb img {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+
+  transition:
+    transform .3s ease;
+}
+
+.episode-card:hover .episode-thumb img {
+  transform:
+    scale(1.035);
+}
+
+.episode-play {
+  position: absolute;
+
+  inset: 0;
+
+  display: grid;
+  place-items: center;
+
+  pointer-events: none;
+}
+
+.play-circle {
+  width: 50px;
+  height: 50px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 50%;
+
+  color: #030406;
+
+  background:
+    rgba(0,229,255,.94);
+
+  box-shadow:
+    0 0 35px
+    rgba(0,229,255,.22);
+
+  font-size: 18px;
+
+  transform:
+    scale(.9);
+
+  opacity: .95;
+}
+
+.episode-number {
+  position: absolute;
+
+  left: 10px;
+  top: 10px;
+
+  padding:
+    6px
+    8px;
+
+  border-radius:
+    7px;
+
+  color: #dffaff;
+
+  background:
+    rgba(0,0,0,.72);
+
+  backdrop-filter:
+    blur(8px);
+
+  font-family: "Orbitron", sans-serif;
+
+  font-size: 9px;
+  font-weight: 800;
+
+  letter-spacing: .06em;
+}
+
+.episode-body {
+  padding:
+    16px
+    16px
+    17px;
+}
+
+.episode-title {
+  min-height: 42px;
+
+  margin: 0;
+
+  font-family: "Orbitron", sans-serif;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  line-height: 1.45;
+}
+
+.episode-meta {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 7px;
+
+  margin-top: 11px;
+
+  color: var(--muted);
+
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.episode-status {
+  margin-top: 12px;
+
+  color: var(--accent);
+
+  font-size: 9px;
+  font-weight: 800;
+
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+/* =========================================================
+   EMPTY / ERROR
+   ========================================================= */
+
+.state-card {
+  padding:
+    30px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    var(--radius);
+
+  background:
+    var(--panel);
+
+  color: var(--muted);
+
+  text-align: center;
+}
+
+.state-card strong {
+  display: block;
+
+  margin-bottom: 8px;
+
+  color: var(--text);
+
+  font-family: "Orbitron", sans-serif;
+
+  font-size: 14px;
+}
+
+/* =========================================================
+   SUPABASE STATUS
+   ========================================================= */
+
+.system-bar {
+  margin-top: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  padding:
+    12px
+    15px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    14px;
+
+  background:
+    rgba(255,255,255,.018);
+
+  color: var(--muted);
+
+  font-size: 10px;
+}
+
+.system-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  font-weight: 700;
+}
+
+.system-dot {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background:
+    var(--muted-2);
+}
+
+.system-dot.online {
+  background:
+    var(--green);
+
+  box-shadow:
+    0 0 12px
+    rgba(32,227,154,.55);
+}
+
+.system-dot.error {
+  background:
+    var(--red);
+
+  box-shadow:
+    0 0 12px
+    rgba(255,77,109,.45);
 }
 
 /* =========================================================
    FOOTER
-========================================================= */
+   ========================================================= */
 
-.site-footer{
-  width:min(1400px, calc(100% - 32px));
-  margin:0 auto;
-
-  padding:25px 0 45px;
+.footer {
+  padding:
+    35px
+    16px
+    50px;
 
   border-top:
-    1px solid var(--border);
+    1px solid
+    var(--border);
 
-  color:var(--muted2);
+  color: var(--muted);
 
-  font-size:11px;
+  text-align: center;
+
+  font-size: 10px;
+  line-height: 1.7;
 }
 
-.footer-inner{
-  display:flex;
-
-  justify-content:space-between;
-
-  gap:20px;
-
-  flex-wrap:wrap;
-}
-
-.footer-brand{
-  color:var(--muted);
-
-  font-weight:800;
-}
-
-/* =========================================================
-   TOAST
-========================================================= */
-
-.toast{
-  position:fixed;
-
-  right:20px;
-  bottom:20px;
-
-  z-index:500;
-
-  max-width:360px;
-
-  padding:13px 15px;
-
-  border:
-    1px solid var(--border2);
-
-  border-radius:11px;
-
-  background:
-    rgba(13,15,21,.96);
-
-  backdrop-filter:blur(14px);
-
-  box-shadow:
-    0 20px 50px rgba(0,0,0,.45);
-
-  color:var(--text);
-
-  font-size:12px;
-  font-weight:700;
-
-  transform:
-    translateY(20px);
-
-  opacity:0;
-
-  pointer-events:none;
-
-  transition:.25s ease;
-}
-
-.toast.show{
-  transform:translateY(0);
-  opacity:1;
+.footer strong {
+  color: #d8deea;
 }
 
 /* =========================================================
    RESPONSIVE
-========================================================= */
+   ========================================================= */
 
-@media(max-width:1050px){
+@media (max-width: 1100px) {
 
-  .player-grid{
-    grid-template-columns:1fr;
+  .hero-grid {
+    grid-template-columns:
+      1fr;
   }
 
-  .chat-card{
-    min-height:560px;
+  .watch-layout {
+    grid-template-columns:
+      1fr;
   }
 
-  .archive-grid{
+  .chat-frame,
+  .chat-placeholder,
+  .chat-frame iframe {
+    min-height: 460px;
+  }
+
+  .episode-grid {
     grid-template-columns:
       repeat(2, minmax(0, 1fr));
   }
-
 }
 
-@media(max-width:700px){
+@media (max-width: 700px) {
 
-  .header-inner,
-  .hero,
-  .status-row,
-  main,
-  .site-footer{
-    width:min(
-      100% - 20px,
-      1400px
-    );
+  .header-inner {
+    min-height: 64px;
   }
 
-  .header-inner{
-    min-height:62px;
+  .brand-sub {
+    display: none;
   }
 
-  .brand-subtitle{
-    display:none;
+  .back-link {
+    padding:
+      9px
+      11px;
+
+    font-size: 10px;
   }
 
-  .hero{
-    padding-top:40px;
+  .hero {
+    padding:
+      50px
+      0
+      30px;
   }
 
-  .hero h1{
-    font-size:48px;
+  .hero h1 {
+    font-size:
+      clamp(38px, 14vw, 62px);
   }
 
-  .section-heading{
-    align-items:flex-start;
-    flex-direction:column;
+  .countdown-grid {
+    gap: 5px;
   }
 
-  .archive-tools{
-    width:100%;
+  .count-number {
+    font-size: 18px;
   }
 
-  .search-box{
-    width:100%;
-    flex:1;
+  .main {
+    width:
+      min(
+        calc(100% - 22px),
+        var(--max-width)
+      );
   }
 
-  .archive-grid{
-    grid-template-columns:1fr;
+  .hero {
+    width:
+      min(
+        calc(100% - 22px),
+        var(--max-width)
+      );
   }
 
-  .chat-card{
-    min-height:500px;
+  .player-info {
+    padding:
+      18px;
   }
 
-  .chat-frame{
-    min-height:460px;
+  .chat-frame,
+  .chat-placeholder,
+  .chat-frame iframe {
+    min-height: 430px;
   }
 
+  .episode-grid {
+    grid-template-columns:
+      1fr;
+  }
+
+  .section-heading {
+    display: block;
+  }
+
+  .system-bar {
+    align-items:
+      flex-start;
+
+    flex-direction:
+      column;
+  }
 }
 
+@media (max-width: 430px) {
+
+  .brand-name {
+    font-size: 11px;
+  }
+
+  .brand-mark {
+    width: 36px;
+    height: 36px;
+
+    border-radius: 10px;
+  }
+
+  .hero-description {
+    font-size: 14px;
+  }
+
+  .countdown-card {
+    padding: 17px;
+  }
+
+  .count-number {
+    font-size: 16px;
+  }
+
+  .count-label {
+    font-size: 7px;
+  }
+}
 </style>
 </head>
 
 <body>
+
+<!-- =========================================================
+     HEADER
+     ========================================================= -->
 
 <header class="site-header">
 
@@ -1172,7 +1434,7 @@ main{
     <a
       class="brand"
       href="index.html"
-      aria-label="CrowRules Entertainment home"
+      aria-label="Back to CrowRules Entertainment"
     >
 
       <div class="brand-mark">
@@ -1181,12 +1443,12 @@ main{
 
       <div class="brand-copy">
 
-        <div class="brand-title">
-          Back Deck Live
+        <div class="brand-name">
+          CROW RULES
         </div>
 
-        <div class="brand-subtitle">
-          CrowRules Entertainment
+        <div class="brand-sub">
+          Entertainment
         </div>
 
       </div>
@@ -1197,7 +1459,7 @@ main{
       class="back-link"
       href="index.html"
     >
-      ← Back to CrowRules
+      ← Back to index.html
     </a>
 
   </div>
@@ -1205,191 +1467,264 @@ main{
 </header>
 
 
+<!-- =========================================================
+     HERO
+     ========================================================= -->
+
 <section class="hero">
 
-  <div class="hero-kicker">
+  <div class="hero-grid">
 
-    <span class="live-dot"></span>
+    <div>
 
-    Live From The Back Deck
+      <div class="eyebrow">
 
-  </div>
+        <span class="live-dot"></span>
 
-  <h1>
-    Back Deck <span>Live.</span>
-  </h1>
+        Back Deck Live
 
-  <p>
-    A weekly live companion to CrowRules Entertainment —
-    straight from Tacoma. Watch the latest episode,
-    browse the archive, and join the conversation.
-  </p>
+      </div>
 
-</section>
+      <h1>
+        Live from the<br>
+        <span>Back Deck.</span>
+      </h1>
 
+      <p class="hero-description">
+        Straight from Tacoma. Back Deck Live is the live companion
+        to Tacoma Nights — conversations, updates, stories, and
+        whatever happens when the cameras go on.
+      </p>
 
-<div class="status-row">
-
-  <div
-    id="databaseStatus"
-    class="status-pill"
-  >
-    <span class="status-dot"></span>
-    <span id="databaseStatusText">
-      Connecting
-    </span>
-  </div>
-
-  <div class="status-pill">
-
-    <span>
-      Supabase Archive
-    </span>
-
-  </div>
-
-  <div class="status-pill">
-
-    <span id="episodeCount">
-      0 Episodes
-    </span>
-
-  </div>
-
-</div>
+    </div>
 
 
-<main>
+    <div class="countdown-card">
 
-  <!-- ======================================================
-       PLAYER
-  ======================================================= -->
-
-  <section class="player-grid">
-
-    <article class="player-card">
+      <div class="countdown-label">
+        Next Back Deck Live
+      </div>
 
       <div
-        id="playerWrap"
-        class="player-wrap"
+        class="countdown-title"
+        id="countdownTitle"
       >
+        Saturday Live
+      </div>
 
-        <div
-          id="playerPlaceholder"
-          class="player-placeholder"
-        >
+      <div
+        class="countdown-date"
+        id="countdownDate"
+      >
+        September 5, 2026 • 3:00 PM Pacific
+      </div>
 
-          <div class="placeholder-inner">
+      <div class="countdown-grid">
 
-            <div class="placeholder-icon">
-              ▶
-            </div>
-
-            <div class="placeholder-title">
-              Loading Back Deck Live
-            </div>
-
-            <div class="placeholder-text">
-              Connecting to the latest episode
-              from the Supabase archive.
-            </div>
-
+        <div class="count-box">
+          <div
+            class="count-number"
+            id="days"
+          >
+            00
           </div>
 
+          <div class="count-label">
+            Days
+          </div>
+        </div>
+
+        <div class="count-box">
+          <div
+            class="count-number"
+            id="hours"
+          >
+            00
+          </div>
+
+          <div class="count-label">
+            Hours
+          </div>
+        </div>
+
+        <div class="count-box">
+          <div
+            class="count-number"
+            id="minutes"
+          >
+            00
+          </div>
+
+          <div class="count-label">
+            Minutes
+          </div>
+        </div>
+
+        <div class="count-box">
+          <div
+            class="count-number"
+            id="seconds"
+          >
+            00
+          </div>
+
+          <div class="count-label">
+            Seconds
+          </div>
         </div>
 
       </div>
 
+    </div>
 
-      <div class="player-meta">
+  </div>
 
-        <div class="player-meta-top">
+</section>
 
-          <div class="player-label">
-            Now Playing
-          </div>
 
-          <div
-            id="playerStatus"
-            class="player-status"
-          >
+<!-- =========================================================
+     MAIN
+     ========================================================= -->
 
-            <span class="player-status-dot"></span>
+<main class="main">
 
-            Back Deck Live
+  <!-- =======================================================
+       PLAYER / CHAT
+       ======================================================= -->
 
-          </div>
+  <section class="watch-layout">
 
-        </div>
+    <article class="player-card">
+
+      <div class="player-wrap">
 
         <div
-          id="playerTitle"
+          class="player-overlay scheduled"
+          id="playerStatus"
+        >
+          <span class="player-overlay-dot"></span>
+          <span id="playerStatusText">
+            Latest Episode
+          </span>
+        </div>
+
+        <iframe
+          id="youtubePlayer"
+          title="Back Deck Live video player"
+          allow="
+            accelerometer;
+            autoplay;
+            clipboard-write;
+            encrypted-media;
+            gyroscope;
+            picture-in-picture;
+            web-share
+          "
+          allowfullscreen
+          referrerpolicy="strict-origin-when-cross-origin"
+        ></iframe>
+
+      </div>
+
+      <div class="player-info">
+
+        <div
+          class="player-kicker"
+          id="playerKicker"
+        >
+          Back Deck Live
+        </div>
+
+        <h2
           class="player-title"
+          id="playerTitle"
         >
           Loading latest episode…
+        </h2>
+
+        <div
+          class="player-description"
+          id="playerDescription"
+        >
+          Loading episode information from Supabase…
         </div>
 
         <div
-          id="playerDescription"
-          class="player-description"
+          class="meta-row"
+          id="playerMeta"
+        ></div>
+
+        <a
+          class="youtube-button"
+          id="youtubeButton"
+          href="#"
+          target="_blank"
+          rel="noopener noreferrer"
+          style="display:none;"
         >
-          The latest published Back Deck Live episode
-          will automatically load here.
-        </div>
+          ▶ Watch on YouTube
+        </a>
 
       </div>
 
     </article>
 
 
-    <!-- ====================================================
+    <!-- =====================================================
          CHAT
-    ===================================================== -->
+         ===================================================== -->
 
     <aside class="chat-card">
 
       <div class="chat-header">
 
-        <div>
-
-          <div class="chat-title">
-            Live Chat
-          </div>
-
-          <div class="chat-subtitle">
-            YouTube Conversation
-          </div>
-
+        <div class="chat-heading">
+          <span>💬</span>
+          Live Chat
         </div>
 
         <div
+          class="chat-status scheduled"
           id="chatStatus"
-          class="chat-status"
         >
-          Waiting
+          Scheduled
         </div>
 
       </div>
 
       <div
-        id="chatFrame"
         class="chat-frame"
+        id="chatFrame"
       >
 
-        <div class="chat-placeholder">
+        <div
+          class="chat-placeholder"
+          id="chatPlaceholder"
+        >
 
-          <div>
-
-            <strong>
-              Live Chat
-            </strong>
-
-            <br><br>
-
-            Chat will appear here when the selected
-            YouTube broadcast has an active live chat.
-
+          <div class="chat-icon">
+            💬
           </div>
+
+          <h3 id="chatPlaceholderTitle">
+            Chat Is Ready
+          </h3>
+
+          <p id="chatPlaceholderText">
+            Live chat will activate when the September 5 broadcast
+            begins. Keep this page open and join the conversation
+            when Back Deck Live goes live.
+          </p>
+
+          <a
+            class="chat-action"
+            id="chatYoutubeButton"
+            href="https://www.youtube.com/@CrowRules_TV"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Open CrowRules TV →
+          </a>
 
         </div>
 
@@ -1400,499 +1735,462 @@ main{
   </section>
 
 
-  <!-- ======================================================
-       ARCHIVE
-  ======================================================= -->
+  <!-- =======================================================
+       EPISODES
+       ======================================================= -->
 
-  <section
-    id="archive"
-    class="archive-section"
-  >
+  <section class="section">
 
     <div class="section-heading">
 
       <div>
 
-        <div class="section-kicker">
-          Back Deck Live Archive
-        </div>
+        <h2 class="section-title">
+          Back Deck Live Episodes
+        </h2>
 
-        <div class="section-title">
-          Episodes
-        </div>
-
-        <div class="section-description">
-          Select any episode to play it above.
-        </div>
-
-      </div>
-
-
-      <div class="archive-tools">
-
-        <input
-          id="searchInput"
-          class="search-box"
-          type="search"
-          placeholder="Search episodes..."
-          autocomplete="off"
-        >
-
-        <button
-          id="refreshButton"
-          class="refresh-button"
-          type="button"
-        >
-          ↻ Refresh
-        </button>
+        <p class="section-subtitle">
+          The latest episode loads automatically. Select another
+          episode to play it in the main player.
+        </p>
 
       </div>
 
     </div>
 
-
     <div
-      id="archiveGrid"
-      class="archive-grid"
+      class="episode-grid"
+      id="episodeGrid"
     >
 
-      <div class="loading-card">
-        Loading episodes…
+      <div class="state-card">
+
+        <strong>
+          Loading Back Deck Live…
+        </strong>
+
+        Connecting to the episode archive.
+
       </div>
 
     </div>
 
   </section>
 
-</main>
 
+  <!-- =======================================================
+       SYSTEM STATUS
+       ======================================================= -->
 
-<footer class="site-footer">
+  <div class="system-bar">
 
-  <div class="footer-inner">
+    <div class="system-status">
 
-    <div class="footer-brand">
-      © 2026 CrowRules Entertainment
+      <span
+        class="system-dot"
+        id="systemDot"
+      ></span>
+
+      <span id="systemStatus">
+        Connecting to Supabase…
+      </span>
+
     </div>
 
-    <div>
-      Back Deck Live · Tacoma, Washington
+    <div id="episodeCount">
+      Episodes: —
     </div>
 
   </div>
 
+</main>
+
+
+<!-- =========================================================
+     FOOTER
+     ========================================================= -->
+
+<footer class="footer">
+
+  <strong>
+    Back Deck Live
+  </strong>
+
+  —
+  Live from the Back Deck. Straight from Tacoma.
+
+  <br>
+
+  ©
+  <span id="year"></span>
+  CrowRules Entertainment.
+  All rights reserved.
+
 </footer>
 
 
-<div
-  id="toast"
-  class="toast"
-  role="status"
-  aria-live="polite"
-></div>
-
-
 <script>
-
 /* =========================================================
-   CONFIGURATION
-========================================================= */
+   BACK DECK LIVE
+   APPLICATION
+   ========================================================= */
 
-const CONFIG = {
-
-  SUPABASE_URL:
-    "https://zauxdqyssratvzmomozf.supabase.co",
-
-  /*
-    Publishable browser key.
-
-    NEVER replace this with a service_role key.
-  */
-
-  SUPABASE_KEY:
-    "sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9",
-
-  EPISODES_TABLE:
-    "cr_episodes",
-
-  /*
-    Back Deck Live production UUID verified in Supabase.
-  */
-
-  BACK_DECK_PRODUCTION_ID:
-    "7b45f7a9-8dc0-40df-93c3-a81101b494b3"
-
-};
+"use strict";
 
 
 /* =========================================================
-   SUPABASE CLIENT
-========================================================= */
+   SUPABASE CONFIG
+   ========================================================= */
 
-let sb = null;
+const SUPABASE_URL =
+  "https://zauxdqyssratvzmomozf.supabase.co";
 
-try{
+const SUPABASE_KEY =
+  "sb_publishable_-Z6wecSOxwOk6IBUt2zLnw_8DfRxnE9";
 
-  if(
-    window.supabase &&
-    typeof window.supabase.createClient === "function"
-  ){
+const EPISODE_TABLE =
+  "cr_episodes";
 
-    sb =
+let supabaseClient = null;
+
+
+/* =========================================================
+   GLOBAL STATE
+   ========================================================= */
+
+let episodes = [];
+
+let currentEpisode = null;
+
+let youtubePlayer = null;
+
+let chatLoaded = false;
+
+
+/* =========================================================
+   DOM
+   ========================================================= */
+
+const $ = (selector) =>
+  document.querySelector(selector);
+
+const episodeGrid =
+  $("#episodeGrid");
+
+const player =
+  $("#youtubePlayer");
+
+const playerTitle =
+  $("#playerTitle");
+
+const playerDescription =
+  $("#playerDescription");
+
+const playerMeta =
+  $("#playerMeta");
+
+const playerKicker =
+  $("#playerKicker");
+
+const playerStatus =
+  $("#playerStatus");
+
+const playerStatusText =
+  $("#playerStatusText");
+
+const youtubeButton =
+  $("#youtubeButton");
+
+const chatFrame =
+  $("#chatFrame");
+
+const chatPlaceholder =
+  $("#chatPlaceholder");
+
+const chatStatus =
+  $("#chatStatus");
+
+const chatPlaceholderTitle =
+  $("#chatPlaceholderTitle");
+
+const chatPlaceholderText =
+  $("#chatPlaceholderText");
+
+const systemDot =
+  $("#systemDot");
+
+const systemStatus =
+  $("#systemStatus");
+
+const episodeCount =
+  $("#episodeCount");
+
+
+$("#year").textContent =
+  new Date().getFullYear();
+
+
+/* =========================================================
+   INITIALIZE SUPABASE
+   ========================================================= */
+
+function initializeSupabase() {
+
+  try {
+
+    if (
+      !window.supabase ||
+      typeof window.supabase.createClient !== "function"
+    ) {
+
+      throw new Error(
+        "Supabase JavaScript library did not load."
+      );
+
+    }
+
+    supabaseClient =
       window.supabase.createClient(
-        CONFIG.SUPABASE_URL,
-        CONFIG.SUPABASE_KEY,
+        SUPABASE_URL,
+        SUPABASE_KEY,
         {
-          auth:{
-            persistSession:false,
-            autoRefreshToken:false,
-            detectSessionInUrl:false
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
           }
         }
       );
 
+    return true;
+
+  } catch (error) {
+
+    console.error(
+      "Supabase initialization error:",
+      error
+    );
+
+    setSystemStatus(
+      false,
+      "Supabase initialization failed."
+    );
+
+    return false;
   }
-
-}catch(error){
-
-  console.error(
-    "Supabase initialization error:",
-    error
-  );
-
 }
 
 
 /* =========================================================
-   APPLICATION STATE
-========================================================= */
+   ERROR FORMATTER
+   ========================================================= */
 
-let allEpisodes = [];
+function formatSupabaseError(error) {
 
-let selectedEpisode = null;
-
-let selectedVideoId = "";
-
-let searchTerm = "";
-
-
-/* =========================================================
-   DOM HELPERS
-========================================================= */
-
-const $ = id =>
-  document.getElementById(id);
-
-
-/* =========================================================
-   STATUS
-========================================================= */
-
-function setDatabaseStatus(
-  state,
-  text
-){
-
-  const element =
-    $("databaseStatus");
-
-  const label =
-    $("databaseStatusText");
-
-  if(!element || !label){
-    return;
+  if (!error) {
+    return "Unknown Supabase error.";
   }
 
-  element.classList.remove(
-    "connected",
+  const parts = [];
+
+  if (error.message) {
+    parts.push(error.message);
+  }
+
+  if (error.code) {
+    parts.push(`Code: ${error.code}`);
+  }
+
+  if (error.details) {
+    parts.push(`Details: ${error.details}`);
+  }
+
+  if (error.hint) {
+    parts.push(`Hint: ${error.hint}`);
+  }
+
+  return parts.join(" | ");
+}
+
+
+/* =========================================================
+   SYSTEM STATUS
+   ========================================================= */
+
+function setSystemStatus(
+  online,
+  message
+) {
+
+  systemDot.classList.remove(
+    "online",
     "error"
   );
 
-  if(state === "connected"){
+  if (online === true) {
 
-    element.classList.add(
-      "connected"
+    systemDot.classList.add(
+      "online"
     );
 
-  }
+  } else if (online === false) {
 
-  if(state === "error"){
-
-    element.classList.add(
+    systemDot.classList.add(
       "error"
     );
-
   }
 
-  label.textContent =
-    text;
-
-}
-
-
-/* =========================================================
-   TOAST
-========================================================= */
-
-let toastTimer = null;
-
-function toast(message){
-
-  const element =
-    $("toast");
-
-  if(!element){
-    return;
-  }
-
-  element.textContent =
+  systemStatus.textContent =
     message;
-
-  element.classList.add(
-    "show"
-  );
-
-  clearTimeout(
-    toastTimer
-  );
-
-  toastTimer =
-    setTimeout(
-      () => {
-
-        element.classList.remove(
-          "show"
-        );
-
-      },
-      3200
-    );
-
 }
 
 
 /* =========================================================
-   DATE HELPERS
-========================================================= */
+   YOUTUBE ID PARSER
+   ========================================================= */
 
-function parseDate(value){
+function getYouTubeId(value) {
 
-  if(!value){
-    return null;
-  }
-
-  const date =
-    new Date(value);
-
-  return Number.isNaN(
-    date.getTime()
-  )
-    ? null
-    : date;
-
-}
-
-
-function formatDate(value){
-
-  const date =
-    parseDate(value);
-
-  if(!date){
-    return "Date not set";
-  }
-
-  return new Intl.DateTimeFormat(
-    "en-US",
-    {
-      month:"short",
-      day:"numeric",
-      year:"numeric"
-    }
-  ).format(date);
-
-}
-
-
-function formatRuntime(minutes){
-
-  const numeric =
-    Number(minutes);
-
-  if(
-    !Number.isFinite(numeric) ||
-    numeric <= 0
-  ){
-
-    return "";
-
-  }
-
-  const total =
-    Math.round(numeric);
-
-  const hours =
-    Math.floor(total / 60);
-
-  const mins =
-    total % 60;
-
-  if(hours > 0){
-
-    return (
-      hours +
-      "h " +
-      mins +
-      "m"
-    );
-
-  }
-
-  return mins + "m";
-
-}
-
-
-/* =========================================================
-   YOUTUBE HELPERS
-========================================================= */
-
-function getYouTubeId(value){
-
-  if(!value){
+  if (!value) {
     return "";
   }
 
   const raw =
     String(value).trim();
 
-  /*
-    Already looks like a YouTube ID.
-  */
-
-  if(
-    /^[a-zA-Z0-9_-]{11}$/.test(raw)
-  ){
-
-    return raw;
-
+  if (!raw) {
+    return "";
   }
 
-  try{
+  /*
+   * Already a YouTube ID.
+   */
+  if (
+    /^[a-zA-Z0-9_-]{11}$/.test(raw)
+  ) {
 
-    const url =
+    return raw;
+  }
+
+  try {
+
+    let url =
       new URL(raw);
 
+    const hostname =
+      url.hostname
+        .toLowerCase()
+        .replace(/^www\./, "");
+
     /*
-      youtube.com/watch?v=...
-    */
+     * youtube.com/watch?v=...
+     */
 
-    if(
-      url.hostname.includes(
-        "youtube.com"
-      )
-    ){
+    if (
+      hostname === "youtube.com" ||
+      hostname === "m.youtube.com"
+    ) {
 
-      const watchId =
+      const v =
         url.searchParams.get("v");
 
-      if(watchId){
+      if (
+        v &&
+        /^[a-zA-Z0-9_-]{11}$/.test(v)
+      ) {
 
-        return watchId;
-
+        return v;
       }
 
       /*
-        youtube.com/embed/VIDEO
-      */
+       * /shorts/VIDEO_ID
+       */
 
-      const parts =
-        url.pathname
-          .split("/")
-          .filter(Boolean);
+      const shorts =
+        url.pathname.match(
+          /\/shorts\/([a-zA-Z0-9_-]{11})/
+        );
 
-      const embedIndex =
-        parts.indexOf("embed");
-
-      if(
-        embedIndex >= 0 &&
-        parts[embedIndex + 1]
-      ){
-
-        return parts[
-          embedIndex + 1
-        ];
-
+      if (shorts) {
+        return shorts[1];
       }
 
       /*
-        youtube.com/live/VIDEO
-      */
+       * /embed/VIDEO_ID
+       */
 
-      const liveIndex =
-        parts.indexOf("live");
+      const embed =
+        url.pathname.match(
+          /\/embed\/([a-zA-Z0-9_-]{11})/
+        );
 
-      if(
-        liveIndex >= 0 &&
-        parts[liveIndex + 1]
-      ){
-
-        return parts[
-          liveIndex + 1
-        ];
-
+      if (embed) {
+        return embed[1];
       }
 
+      /*
+       * /live/VIDEO_ID
+       */
+
+      const live =
+        url.pathname.match(
+          /\/live\/([a-zA-Z0-9_-]{11})/
+        );
+
+      if (live) {
+        return live[1];
+      }
     }
 
     /*
-      youtu.be/VIDEO
-    */
+     * youtu.be/VIDEO_ID
+     */
 
-    if(
-      url.hostname === "youtu.be"
-    ){
+    if (
+      hostname === "youtu.be"
+    ) {
 
       const id =
         url.pathname
-          .split("/")
-          .filter(Boolean)[0];
+          .replace(/^\/+/, "")
+          .split("/")[0];
 
-      if(id){
+      if (
+        /^[a-zA-Z0-9_-]{11}$/.test(id)
+      ) {
 
         return id;
-
       }
-
     }
 
-  }catch(error){
+  } catch (_) {
 
     /*
-      Fall through to regex.
-    */
+     * Not a URL.
+     * Try to locate an ID inside the string.
+     */
 
+    const match =
+      raw.match(
+        /(?:v=|youtu\.be\/|embed\/|shorts\/|live\/)([a-zA-Z0-9_-]{11})/
+      );
+
+    if (match) {
+      return match[1];
+    }
   }
 
-  /*
-    Last-resort extraction.
-  */
-
-  const match =
-    raw.match(
-      /(?:v=|youtu\.be\/|embed\/|live\/)([a-zA-Z0-9_-]{11})/
-    );
-
-  return match
-    ? match[1]
-    : "";
-
+  return "";
 }
 
 
-function youtubeWatchUrl(id){
+/* =========================================================
+   YOUTUBE URLS
+   ========================================================= */
 
-  if(!id){
+function getYouTubeWatchUrl(id) {
+
+  if (!id) {
     return "#";
   }
 
@@ -1900,1240 +2198,640 @@ function youtubeWatchUrl(id){
     "https://www.youtube.com/watch?v=" +
     encodeURIComponent(id)
   );
-
 }
 
 
-function youtubeThumbnail(
-  id,
-  fallback = ""
-){
+function getYouTubeThumbnail(id) {
 
-  if(!id){
-
-    return (
-      fallback ||
-      ""
-    );
-
+  if (!id) {
+    return "";
   }
 
   return (
-    "https://img.youtube.com/vi/" +
+    "https://i.ytimg.com/vi/" +
     encodeURIComponent(id) +
-    "/maxresdefault.jpg"
+    "/hqdefault.jpg"
   );
-
 }
 
 
 /* =========================================================
-   EPISODE NORMALIZATION
-========================================================= */
+   YOUTUBE EMBED URL
+   ========================================================= */
 
-function normalizeEpisode(row){
+function getYouTubeEmbedUrl(id) {
 
-  const source =
-    row || {};
-
-  const videoSource =
-    source.video_url ||
-    source.youtube_url ||
-    source.youtube ||
-    source.video ||
-    "";
-
-  const youtubeId =
-    getYouTubeId(
-      videoSource
-    );
-
-  const thumbnail =
-    source.thumbnail_url ||
-    source.thumbnail ||
-    youtubeThumbnail(
-      youtubeId
-    );
-
-  return {
-
-    raw:source,
-
-    id:
-      source.id ||
-      "",
-
-    productionId:
-      source.production_id ||
-      "",
-
-    episodeNumber:
-      Number(
-        source.episode_number
-      ) || 0,
-
-    title:
-      source.title ||
-      "Untitled Episode",
-
-    description:
-      source.description ||
-      source.summary ||
-      "",
-
-    status:
-      source.status ||
-      "",
-
-    releaseDate:
-      source.release_date ||
-      source.published_at ||
-      source.air_date ||
-      null,
-
-    runtimeMinutes:
-      source.runtime_minutes ||
-      source.duration_minutes ||
-      source.duration ||
-      null,
-
-    videoUrl:
-      videoSource,
-
-    youtubeId,
-
-    thumbnailUrl:
-      thumbnail,
-
-    isPublished:
-      source.is_published !== false
-
-  };
-
-}
-
-
-/* =========================================================
-   BACK DECK FILTER
-========================================================= */
-
-function isBackDeckEpisode(
-  episode
-){
-
-  if(!episode){
-    return false;
-  }
-
-  /*
-    Primary identification:
-    production UUID.
-  */
-
-  if(
-    episode.productionId ===
-    CONFIG.BACK_DECK_PRODUCTION_ID
-  ){
-
-    return true;
-
-  }
-
-  /*
-    Fallback for older records.
-  */
-
-  const title =
-    String(
-      episode.raw?.production ||
-      episode.raw?.show ||
-      episode.raw?.series ||
-      ""
-    )
-    .toLowerCase();
-
-  if(
-    title.includes(
-      "back deck live"
-    )
-  ){
-
-    return true;
-
-  }
-
-  return false;
-
-}
-
-
-/* =========================================================
-   SORT
-========================================================= */
-
-function sortEpisodes(
-  episodes
-){
-
-  return [
-    ...episodes
-  ].sort(
-    (a,b) => {
-
-      const aDate =
-        parseDate(
-          a.releaseDate
-        );
-
-      const bDate =
-        parseDate(
-          b.releaseDate
-        );
-
-      /*
-        Episodes with dates first,
-        newest date first.
-      */
-
-      if(aDate && bDate){
-
-        const difference =
-          bDate.getTime() -
-          aDate.getTime();
-
-        if(difference !== 0){
-
-          return difference;
-
-        }
-
-      }
-
-      if(aDate && !bDate){
-        return -1;
-      }
-
-      if(!aDate && bDate){
-        return 1;
-      }
-
-      /*
-        Then highest episode number.
-      */
-
-      if(
-        a.episodeNumber !==
-        b.episodeNumber
-      ){
-
-        return (
-          b.episodeNumber -
-          a.episodeNumber
-        );
-
-      }
-
-      /*
-        Finally ID for deterministic ordering.
-      */
-
-      return String(
-        b.id
-      ).localeCompare(
-        String(a.id)
-      );
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   FUTURE / LIVE LOGIC
-========================================================= */
-
-function isFutureEpisode(
-  episode
-){
-
-  const date =
-    parseDate(
-      episode?.releaseDate
-    );
-
-  if(!date){
-    return false;
-  }
-
-  return (
-    date.getTime() >
-    Date.now()
-  );
-
-}
-
-
-function episodeLabel(
-  episode
-){
-
-  if(
-    episode?.status ===
-    "live"
-  ){
-
-    return "LIVE NOW";
-
-  }
-
-  if(
-    isFutureEpisode(
-      episode
-    )
-  ){
-
-    return "SCHEDULED";
-
-  }
-
-  return "AVAILABLE";
-
-}
-
-
-/* =========================================================
-   YOUTUBE PLAYER URL
-========================================================= */
-
-function buildPlayerUrl(
-  videoId
-){
-
-  if(!videoId){
+  if (!id) {
     return "";
   }
 
   const params =
-    new URLSearchParams();
+    new URLSearchParams({
+      rel: "0",
+      modestbranding: "1",
+      playsinline: "1",
+      enablejsapi: "1"
+    });
 
   /*
-    Do NOT force autoplay.
+   * origin is useful when hosted on a real website.
+   *
+   * Do not send file:// as an origin.
+   */
 
-    This avoids browser autoplay restrictions.
-  */
-
-  params.set(
-    "autoplay",
-    "0"
-  );
-
-  params.set(
-    "playsinline",
-    "1"
-  );
-
-  params.set(
-    "rel",
-    "0"
-  );
-
-  params.set(
-    "modestbranding",
-    "1"
-  );
-
-  params.set(
-    "enablejsapi",
-    "1"
-  );
-
-  /*
-    Only add origin when the page is
-    running from a normal HTTP(S) host.
-  */
-
-  if(
-    location.protocol ===
-      "http:" ||
-    location.protocol ===
-      "https:"
-  ){
+  if (
+    location.protocol === "http:" ||
+    location.protocol === "https:"
+  ) {
 
     params.set(
       "origin",
       location.origin
     );
-
   }
 
   return (
     "https://www.youtube.com/embed/" +
-    encodeURIComponent(
-      videoId
-    ) +
+    encodeURIComponent(id) +
     "?" +
     params.toString()
   );
-
 }
 
 
 /* =========================================================
-   YOUTUBE CHAT
-========================================================= */
+   CHAT EMBED URL
+   ========================================================= */
 
-function buildChatUrl(
-  videoId
-){
+function getYouTubeChatUrl() {
 
-  if(!videoId){
+  /*
+   * YouTube's embedded live chat requires
+   * the site's hostname as embed_domain.
+   *
+   * It cannot work correctly from file://.
+   */
+
+  if (
+    location.protocol !== "http:" &&
+    location.protocol !== "https:"
+  ) {
+
     return "";
   }
 
   const domain =
-    location.hostname ||
-    "localhost";
+    location.hostname;
 
-  const params =
-    new URLSearchParams();
-
-  params.set(
-    "v",
-    videoId
-  );
-
-  params.set(
-    "embed_domain",
-    domain
-  );
-
-  params.set(
-    "dark_theme",
-    "1"
-  );
-
-  params.set(
-    "hl",
-    "en"
-  );
+  if (!domain) {
+    return "";
+  }
 
   return (
-    "https://www.youtube.com/live_chat?" +
-    params.toString()
+    "https://www.youtube.com/live_chat" +
+    "?embed_domain=" +
+    encodeURIComponent(domain)
   );
-
 }
 
 
 /* =========================================================
-   CLEAR PLAYER
-========================================================= */
+   FIELD HELPERS
+   ========================================================= */
 
-function clearPlayer(){
+function firstValue(
+  row,
+  fields,
+  fallback = ""
+) {
 
-  const wrap =
-    $("playerWrap");
+  for (const field of fields) {
 
-  if(!wrap){
-    return;
+    if (
+      Object.prototype.hasOwnProperty.call(
+        row,
+        field
+      ) &&
+      row[field] !== null &&
+      row[field] !== undefined &&
+      String(row[field]).trim() !== ""
+    ) {
+
+      return row[field];
+    }
   }
 
-  const iframe =
-    wrap.querySelector(
-      ".player-frame"
-    );
-
-  if(iframe){
-
-    iframe.remove();
-
-  }
-
-  const placeholder =
-    $("playerPlaceholder");
-
-  if(placeholder){
-
-    placeholder.style.display =
-      "grid";
-
-  }
-
+  return fallback;
 }
 
 
-/* =========================================================
-   LOAD PLAYER
-========================================================= */
+function booleanValue(
+  row,
+  fields
+) {
 
-function loadPlayer(
-  videoId,
-  episode
-){
+  for (const field of fields) {
 
-  if(!videoId){
-
-    toast(
-      "This episode does not have a valid YouTube video."
-    );
-
-    return;
-
-  }
-
-  selectedVideoId =
-    videoId;
-
-  selectedEpisode =
-    episode;
-
-  const wrap =
-    $("playerWrap");
-
-  if(!wrap){
-    return;
-  }
-
-  /*
-    Remove existing iframe.
-  */
-
-  const oldFrame =
-    wrap.querySelector(
-      ".player-frame"
-    );
-
-  if(oldFrame){
-
-    oldFrame.remove();
-
-  }
-
-  const iframe =
-    document.createElement(
-      "iframe"
-    );
-
-  iframe.className =
-    "player-frame";
-
-  iframe.src =
-    buildPlayerUrl(
-      videoId
-    );
-
-  iframe.title =
-    episode?.title ||
-    "Back Deck Live";
-
-  iframe.allow =
-    [
-      "autoplay",
-      "encrypted-media",
-      "picture-in-picture",
-      "web-share"
-    ].join("; ");
-
-  iframe.allowFullscreen =
-    true;
-
-  iframe.referrerPolicy =
-    "strict-origin-when-cross-origin";
-
-  iframe.loading =
-    "eager";
-
-  wrap.insertBefore(
-    iframe,
-    wrap.firstChild
-  );
-
-  const placeholder =
-    $("playerPlaceholder");
-
-  if(placeholder){
-
-    placeholder.style.display =
-      "none";
-
-  }
-
-  /*
-    Update metadata.
-  */
-
-  $("playerTitle").textContent =
-    episode.title;
-
-  const details = [];
-
-  if(
-    episode.releaseDate
-  ){
-
-    details.push(
-      formatDate(
-        episode.releaseDate
+    if (
+      Object.prototype.hasOwnProperty.call(
+        row,
+        field
       )
-    );
+    ) {
 
-  }
+      const value =
+        row[field];
 
-  if(
-    formatRuntime(
-      episode.runtimeMinutes
-    )
-  ){
+      if (
+        typeof value === "boolean"
+      ) {
 
-    details.push(
-      formatRuntime(
-        episode.runtimeMinutes
-      )
-    );
+        return value;
+      }
 
-  }
+      if (
+        typeof value === "string"
+      ) {
 
-  $("playerDescription").textContent =
-    details.length
-      ? details.join(" · ")
-      : "Back Deck Live";
+        if (
+          value.toLowerCase() === "true"
+        ) {
+          return true;
+        }
 
-  const status =
-    episodeLabel(
-      episode
-    );
+        if (
+          value.toLowerCase() === "false"
+        ) {
+          return false;
+        }
+      }
 
-  const statusElement =
-    $("playerStatus");
+      if (
+        typeof value === "number"
+      ) {
 
-  if(statusElement){
-
-    statusElement.innerHTML =
-      `
-        <span class="player-status-dot"></span>
-        ${escapeHtml(status)}
-      `;
-
-    if(status === "LIVE NOW"){
-
-      statusElement.style.color =
-        "#86efac";
-
-    }else if(status === "SCHEDULED"){
-
-      statusElement.style.color =
-        "#fbbf24";
-
-    }else{
-
-      statusElement.style.color =
-        "#969daa";
-
+        return value === 1;
+      }
     }
-
   }
 
-  /*
-    Chat behavior.
-
-    Future/scheduled episodes cannot be assumed
-    to have an active YouTube live chat yet.
-  */
-
-  loadChat(
-    videoId,
-    episode
-  );
-
-  /*
-    Highlight selected archive card.
-  */
-
-  renderArchive(
-    getFilteredEpisodes()
-  );
-
+  return null;
 }
 
 
 /* =========================================================
-   LOAD CHAT
-========================================================= */
+   EPISODE NORMALIZATION
+   ========================================================= */
 
-function loadChat(
-  videoId,
-  episode
-){
+function normalizeEpisode(row) {
 
-  const container =
-    $("chatFrame");
-
-  const status =
-    $("chatStatus");
-
-  if(!container){
-    return;
-  }
-
-  container.innerHTML =
-    "";
-
-  /*
-    Scheduled/future episode.
-  */
-
-  if(
-    isFutureEpisode(
-      episode
-    )
-  ){
-
-    container.innerHTML =
-      `
-        <div class="chat-placeholder">
-          <div>
-            <strong>
-              Chat isn't live yet
-            </strong>
-
-            <br><br>
-
-            This episode is scheduled for
-            ${escapeHtml(
-              formatDate(
-                episode.releaseDate
-              )
-            )}.
-
-            <br><br>
-
-            YouTube Live Chat will become available
-            when the broadcast is actually live.
-          </div>
-        </div>
-      `;
-
-    if(status){
-
-      status.textContent =
-        "Scheduled";
-
-    }
-
-    return;
-
-  }
-
-  /*
-    Local file / file:// environment.
-  */
-
-  if(
-    location.protocol !==
-      "http:" &&
-    location.protocol !==
-      "https:"
-  ){
-
-    container.innerHTML =
-      `
-        <div class="chat-placeholder">
-          <div>
-            <strong>
-              Web Hosting Required
-            </strong>
-
-            <br><br>
-
-            YouTube embedded Live Chat requires
-            this page to be served through HTTP or HTTPS.
-
-            <br><br>
-
-            The video player itself can still be tested.
-          </div>
-        </div>
-      `;
-
-    if(status){
-
-      status.textContent =
-        "Hosting Required";
-
-    }
-
-    return;
-
-  }
-
-  /*
-    For an already-ended archived video,
-    YouTube may not expose live chat.
-  */
-
-  const iframe =
-    document.createElement(
-      "iframe"
+  const videoValue =
+    firstValue(
+      row,
+      [
+        "youtube_url",
+        "youtube",
+        "video_url",
+        "video",
+        "url",
+        "youtube_video",
+        "youtube_link",
+        "embed_url"
+      ]
     );
 
-  iframe.src =
-    buildChatUrl(
-      videoId
+  const id =
+    getYouTubeId(
+      videoValue
     );
 
-  iframe.title =
-    "Back Deck Live YouTube Live Chat";
+  /*
+   * Some schemas may use youtube_id
+   * directly.
+   */
 
-  iframe.allow =
-    "autoplay";
-
-  iframe.referrerPolicy =
-    "strict-origin-when-cross-origin";
-
-  iframe.loading =
-    "lazy";
-
-  iframe.setAttribute(
-    "frameborder",
-    "0"
-  );
-
-  container.appendChild(
-    iframe
-  );
-
-  if(status){
-
-    status.textContent =
-      "YouTube Chat";
-
-  }
-
-}
-
-
-/* =========================================================
-   ESCAPE HTML
-========================================================= */
-
-function escapeHtml(
-  value
-){
-
-  return String(
-    value ?? ""
-  )
-  .replace(
-    /&/g,
-    "&amp;"
-  )
-  .replace(
-    /</g,
-    "&lt;"
-  )
-  .replace(
-    />/g,
-    "&gt;"
-  )
-  .replace(
-    /"/g,
-    "&quot;"
-  )
-  .replace(
-    /'/g,
-    "&#039;"
-  );
-
-}
-
-
-/* =========================================================
-   FILTERED EPISODES
-========================================================= */
-
-function getFilteredEpisodes(){
-
-  const query =
-    searchTerm
-      .trim()
-      .toLowerCase();
-
-  if(!query){
-
-    return [
-      ...allEpisodes
-    ];
-
-  }
-
-  return allEpisodes.filter(
-    episode => {
-
-      const haystack =
+  const finalId =
+    id ||
+    getYouTubeId(
+      firstValue(
+        row,
         [
-          episode.title,
-          episode.description,
-          episode.status,
-          String(
-            episode.episodeNumber
-          )
+          "youtube_id",
+          "video_id"
         ]
-        .join(" ")
-        .toLowerCase();
+      )
+    );
 
-      return haystack.includes(
-        query
+  const title =
+    firstValue(
+      row,
+      [
+        "title",
+        "episode_title",
+        "name",
+        "episode_name"
+      ],
+      "Back Deck Live"
+    );
+
+  const description =
+    firstValue(
+      row,
+      [
+        "description",
+        "summary",
+        "excerpt",
+        "synopsis",
+        "body"
+      ],
+      ""
+    );
+
+  const episodeNumberRaw =
+    firstValue(
+      row,
+      [
+        "episode_number",
+        "episode_no",
+        "episode",
+        "number"
+      ],
+      ""
+    );
+
+  const parsedEpisodeNumber =
+    parseEpisodeNumber(
+      episodeNumberRaw,
+      title
+    );
+
+  const dateValue =
+    firstValue(
+      row,
+      [
+        "published_at",
+        "release_at",
+        "scheduled_at",
+        "scheduled_start",
+        "air_date",
+        "premiere_at",
+        "publish_date",
+        "date",
+        "created_at"
+      ],
+      ""
+    );
+
+  const duration =
+    firstValue(
+      row,
+      [
+        "duration",
+        "duration_minutes",
+        "runtime",
+        "length"
+      ],
+      ""
+    );
+
+  const published =
+    booleanValue(
+      row,
+      [
+        "is_published",
+        "published",
+        "active",
+        "enabled"
+      ]
+    );
+
+  return {
+    raw: row,
+
+    id: finalId,
+
+    title,
+
+    description,
+
+    episodeNumber:
+      parsedEpisodeNumber,
+
+    dateValue,
+
+    date:
+      parseDate(dateValue),
+
+    duration:
+      formatDuration(duration),
+
+    published
+  };
+}
+
+
+/* =========================================================
+   EPISODE NUMBER
+   ========================================================= */
+
+function parseEpisodeNumber(
+  explicit,
+  title
+) {
+
+  if (
+    explicit !== null &&
+    explicit !== undefined &&
+    String(explicit).trim() !== ""
+  ) {
+
+    const numeric =
+      Number(
+        String(explicit)
+          .replace(/[^\d.-]/g, "")
       );
 
-    }
-  );
+    if (
+      Number.isFinite(numeric)
+    ) {
 
+      return numeric;
+    }
+  }
+
+  const match =
+    String(title || "")
+      .match(
+        /(?:#|episode\s*)(\d+)/i
+      );
+
+  if (match) {
+    return Number(match[1]);
+  }
+
+  return null;
 }
 
 
 /* =========================================================
-   RENDER ARCHIVE
-========================================================= */
+   DATE PARSER
+   ========================================================= */
 
-function renderArchive(
-  episodes
-){
+function parseDate(value) {
 
-  const grid =
-    $("archiveGrid");
-
-  if(!grid){
-    return;
+  if (!value) {
+    return null;
   }
 
-  if(!episodes.length){
+  const date =
+    new Date(value);
 
-    grid.innerHTML =
-      `
-        <div class="empty-state">
-          <strong>
-            No Back Deck Live episodes found.
-          </strong>
+  if (
+    Number.isNaN(date.getTime())
+  ) {
 
-          <br><br>
-
-          Try another search or refresh the archive.
-        </div>
-      `;
-
-    return;
-
+    return null;
   }
 
-  grid.innerHTML =
-    episodes
-      .map(
-        episode =>
-          renderEpisodeCard(
-            episode
-          )
-      )
-      .join("");
+  return date;
+}
+
+
+/* =========================================================
+   DURATION
+   ========================================================= */
+
+function formatDuration(value) {
+
+  if (
+    value === null ||
+    value === undefined ||
+    String(value).trim() === ""
+  ) {
+
+    return "";
+  }
+
+  const raw =
+    String(value).trim();
 
   /*
-    Attach events after rendering.
-  */
+   * Already MM:SS or HH:MM:SS.
+   */
 
-  grid
-    .querySelectorAll(
-      "[data-play-id]"
-    )
-    .forEach(
-      button => {
+  if (
+    /^\d{1,3}:\d{1,2}(?::\d{1,2})?$/
+      .test(raw)
+  ) {
 
-        button.addEventListener(
-          "click",
-          () => {
+    const parts =
+      raw.split(":")
+        .map(Number);
 
-            const id =
-              button.dataset.playId;
+    if (
+      parts.length === 2
+    ) {
 
-            const episode =
-              allEpisodes.find(
-                item =>
-                  item.id === id
-              );
+      return (
+        String(parts[0]).padStart(2, "0") +
+        ":" +
+        String(parts[1]).padStart(2, "0")
+      );
+    }
 
-            if(
-              episode &&
-              episode.youtubeId
-            ){
+    return parts
+      .map(
+        value =>
+          String(value).padStart(2, "0")
+      )
+      .join(":");
+  }
 
-              loadPlayer(
-                episode.youtubeId,
-                episode
-              );
+  /*
+   * User has used values such as:
+   *
+   * 33.08 = 33:08
+   * 27.25 = 27:25
+   */
 
-              /*
-                Bring player into view.
-              */
-
-              document
-                .querySelector(
-                  ".player-card"
-                )
-                ?.scrollIntoView({
-                  behavior:"smooth",
-                  block:"start"
-                });
-
-            }
-
-          }
-        );
-
-      }
+  const mmss =
+    raw.match(
+      /^(\d{1,3})[.:](\d{1,2})$/
     );
 
+  if (mmss) {
+
+    const minutes =
+      Number(mmss[1]);
+
+    const seconds =
+      Number(mmss[2]);
+
+    if (
+      seconds >= 0 &&
+      seconds <= 59
+    ) {
+
+      return (
+        String(minutes).padStart(2, "0") +
+        ":" +
+        String(seconds).padStart(2, "0")
+      );
+    }
+  }
+
+  /*
+   * Numeric duration assumed to be minutes.
+   */
+
+  const numeric =
+    Number(raw);
+
+  if (
+    Number.isFinite(numeric)
+  ) {
+
+    const totalSeconds =
+      Math.round(
+        numeric * 60
+      );
+
+    const minutes =
+      Math.floor(
+        totalSeconds / 60
+      );
+
+    const seconds =
+      totalSeconds % 60;
+
+    return (
+      String(minutes).padStart(2, "0") +
+      ":" +
+      String(seconds).padStart(2, "0")
+    );
+  }
+
+  return raw;
 }
 
 
 /* =========================================================
-   EPISODE CARD
-========================================================= */
+   SHOW MATCHING
+   ========================================================= */
 
-function renderEpisodeCard(
-  episode
-){
+function looksLikeBackDeckLive(row) {
 
-  const selected =
-    selectedEpisode &&
-    selectedEpisode.id ===
-      episode.id;
+  const possibleFields = [
+    "show_name",
+    "show",
+    "series",
+    "production",
+    "program",
+    "category",
+    "brand",
+    "channel",
+    "show_title"
+  ];
 
-  const selectedClass =
-    selected
-      ? " selected"
-      : "";
+  /*
+   * If one of these fields explicitly says
+   * Back Deck Live, accept it.
+   */
 
-  const number =
-    episode.episodeNumber > 0
-      ? "#" +
-        String(
-          episode.episodeNumber
-        ).padStart(
-          3,
-          "0"
+  for (
+    const field of possibleFields
+  ) {
+
+    if (
+      row[field] !== null &&
+      row[field] !== undefined
+    ) {
+
+      const value =
+        String(row[field])
+          .toLowerCase();
+
+      if (
+        value.includes(
+          "back deck live"
         )
-      : "EPISODE";
+      ) {
 
-  const badge =
-    episodeLabel(
-      episode
-    );
-
-  const runtime =
-    formatRuntime(
-      episode.runtimeMinutes
-    );
-
-  const info = [];
-
-  if(
-    episode.releaseDate
-  ){
-
-    info.push(
-      `
-        <span>
-          ${escapeHtml(
-            formatDate(
-              episode.releaseDate
-            )
-          )}
-        </span>
-      `
-    );
-
+        return true;
+      }
+    }
   }
 
-  if(runtime){
+  /*
+   * If there is no show identifier,
+   * use title matching.
+   */
 
-    info.push(
-      `
-        <span>
-          ${escapeHtml(
-            runtime
-          )}
-        </span>
-      `
-    );
+  const title =
+    String(
+      firstValue(
+        row,
+        [
+          "title",
+          "episode_title",
+          "name",
+          "episode_name"
+        ],
+        ""
+      )
+    ).toLowerCase();
 
-  }
-
-  const image =
-    episode.thumbnailUrl ||
-    youtubeThumbnail(
-      episode.youtubeId
-    );
-
-  return `
-    <article
-      class="episode-card${selectedClass}"
-    >
-
-      <div class="episode-thumb">
-
-        ${
-          image
-            ? `
-              <img
-                src="${escapeHtml(image)}"
-                alt="${escapeHtml(
-                  episode.title
-                )}"
-                loading="lazy"
-                onerror="
-                  this.style.display='none';
-                "
-              >
-            `
-            : ""
-        }
-
-        <div class="thumb-overlay">
-
-          <div class="episode-number">
-            ${escapeHtml(number)}
-          </div>
-
-          <div class="episode-badge">
-            ${escapeHtml(badge)}
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <div class="episode-body">
-
-        <div class="episode-title">
-          ${escapeHtml(
-            episode.title
-          )}
-        </div>
-
-        <div class="episode-info">
-          ${info.join("")}
-        </div>
-
-        ${
-          episode.youtubeId
-            ? `
-              <button
-                class="play-button"
-                type="button"
-                data-play-id="${escapeHtml(
-                  episode.id
-                )}"
-              >
-                ▶ Play Episode
-              </button>
-            `
-            : `
-              <button
-                class="play-button"
-                type="button"
-                disabled
-                style="
-                  opacity:.45;
-                  cursor:not-allowed;
-                "
-              >
-                Video Unavailable
-              </button>
-            `
-        }
-
-      </div>
-
-    </article>
-  `;
-
+  return title.includes(
+    "back deck live"
+  );
 }
 
 
 /* =========================================================
    LOAD EPISODES
-========================================================= */
+   ========================================================= */
 
-async function loadEpisodes(){
+async function loadEpisodes() {
 
-  if(!sb){
+  if (!supabaseClient) {
 
-    setDatabaseStatus(
-      "error",
-      "Supabase unavailable"
+    renderFallback(
+      "Supabase is not available."
     );
 
-    $("archiveGrid").innerHTML =
-      `
-        <div class="empty-state">
-          Supabase could not be initialized.
-        </div>
-      `;
-
     return;
-
   }
 
-  setDatabaseStatus(
-    "connecting",
-    "Loading archive"
+  setSystemStatus(
+    null,
+    "Loading Back Deck Live episodes…"
   );
 
-  try{
+  try {
 
     /*
-      IMPORTANT:
-
-      We intentionally use select("*").
-
-      This avoids hard-coding optional columns that
-      may not exist in the current cr_episodes schema.
-
-      Supabase officially supports select() for fetching
-      table rows. 
-    */
+     * IMPORTANT:
+     *
+     * select("*") intentionally avoids assumptions
+     * about columns that may not exist.
+     */
 
     const {
       data,
       error
     } =
-      await sb
-        .from(
-          CONFIG.EPISODES_TABLE
-        )
-        .select("*")
-        .eq(
-          "production_id",
-          CONFIG.BACK_DECK_PRODUCTION_ID
-        )
-        .eq(
-          "is_published",
-          true
-        );
+      await supabaseClient
+        .from(EPISODE_TABLE)
+        .select("*");
 
-    if(error){
-
-      /*
-        Log the complete Supabase error object.
-      */
+    if (error) {
 
       console.error(
-        "Supabase episode query failed:",
+        "Supabase episode error:",
         error
       );
 
       throw error;
-
     }
 
     const rows =
@@ -3141,222 +2839,1529 @@ async function loadEpisodes(){
         ? data
         : [];
 
-    allEpisodes =
-      sortEpisodes(
-        rows
-          .map(
-            normalizeEpisode
-          )
-          .filter(
-            episode =>
-              Boolean(
-                episode.id
-              )
-          )
-          .filter(
-            episode =>
-              Boolean(
-                episode.isPublished
-              )
-          )
-          .filter(
-            isBackDeckEpisode
-          )
-      );
+    /*
+     * Filter Back Deck Live client-side.
+     */
 
-    setDatabaseStatus(
-      "connected",
-      "Connected"
-    );
-
-    $("episodeCount").textContent =
-      allEpisodes.length +
-      (
-        allEpisodes.length === 1
-          ? " Episode"
-          : " Episodes"
+    const filtered =
+      rows.filter(
+        row =>
+          looksLikeBackDeckLive(row)
       );
 
     /*
-      Render archive.
-    */
+     * If the table contains Back Deck Live
+     * records, use those.
+     *
+     * Otherwise, try rows that contain a
+     * YouTube video and title.
+     */
 
-    renderArchive(
-      getFilteredEpisodes()
-    );
+    const sourceRows =
+      filtered.length
+        ? filtered
+        : rows.filter(
+            row => {
+
+              const title =
+                String(
+                  firstValue(
+                    row,
+                    [
+                      "title",
+                      "episode_title",
+                      "name"
+                    ],
+                    ""
+                  )
+                ).toLowerCase();
+
+              const video =
+                firstValue(
+                  row,
+                  [
+                    "youtube_url",
+                    "youtube",
+                    "video_url",
+                    "video",
+                    "url",
+                    "youtube_id",
+                    "video_id"
+                  ],
+                  ""
+                );
+
+              return (
+                title.includes(
+                  "back deck"
+                ) &&
+                Boolean(
+                  getYouTubeId(video)
+                )
+              );
+            }
+          );
+
+    episodes =
+      sourceRows
+        .map(
+          normalizeEpisode
+        )
+        .filter(
+          episode =>
+            Boolean(episode.id)
+        )
+        .filter(
+          episode =>
+            episode.published !== false
+        );
 
     /*
-      ======================================================
-      AUTOMATIC DEFAULT PLAYER
-      ======================================================
+     * Remove duplicate video IDs.
+     */
 
-      Because the array is sorted newest-first,
-      index 0 is the latest episode.
+    const seen =
+      new Set();
 
-      We prefer a playable episode.
-    */
+    episodes =
+      episodes.filter(
+        episode => {
 
-    const newest =
-      allEpisodes.find(
-        episode =>
-          Boolean(
-            episode.youtubeId
-          )
+          if (
+            seen.has(
+              episode.id
+            )
+          ) {
+
+            return false;
+          }
+
+          seen.add(
+            episode.id
+          );
+
+          return true;
+        }
       );
 
-    if(newest){
+    /*
+     * Sort newest/latest first.
+     */
 
-      loadPlayer(
-        newest.youtubeId,
-        newest
+    episodes.sort(
+      sortEpisodes
+    );
+
+    episodeCount.textContent =
+      `Episodes: ${episodes.length}`;
+
+    setSystemStatus(
+      true,
+      "Supabase connected • Episode archive loaded"
+    );
+
+    if (!episodes.length) {
+
+      renderFallback(
+        "No Back Deck Live episodes were found in cr_episodes."
       );
 
-    }else{
-
-      clearPlayer();
-
-      $("playerTitle").textContent =
-        "No playable episode found";
-
-      $("playerDescription").textContent =
-        "Add a YouTube video URL to a published Back Deck Live episode.";
-
-      $("chatStatus").textContent =
-        "Waiting";
-
+      return;
     }
 
-  }catch(error){
+    renderEpisodes();
+
+    /*
+     * Latest episode is automatically selected.
+     */
+
+    selectEpisode(
+      episodes[0],
+      false
+    );
+
+  } catch (error) {
+
+    const message =
+      formatSupabaseError(
+        error
+      );
 
     console.error(
-      "Back Deck Live archive error:",
+      "Back Deck Live archive failed:",
       error
     );
 
-    setDatabaseStatus(
-      "error",
-      "Connection error"
+    setSystemStatus(
+      false,
+      "Supabase error — " + message
     );
 
-    $("episodeCount").textContent =
-      "Archive Error";
-
-    $("archiveGrid").innerHTML =
-      `
-        <div class="empty-state">
-
-          <strong>
-            Unable to load the Back Deck Live archive.
-          </strong>
-
-          <br><br>
-
-          ${escapeHtml(
-            error?.message ||
-            "Unknown Supabase error."
-          )}
-
-          <br><br>
-
-          <button
-            id="retryInline"
-            class="refresh-button"
-            type="button"
-          >
-            ↻ Try Again
-          </button>
-
-        </div>
-      `;
-
-    $("retryInline")
-      ?.addEventListener(
-        "click",
-        loadEpisodes
-      );
-
+    renderFallback(
+      message
+    );
   }
-
 }
 
 
 /* =========================================================
-   SEARCH
-========================================================= */
+   SORT EPISODES
+   ========================================================= */
 
-$("searchInput")
-  ?.addEventListener(
-    "input",
-    event => {
+function sortEpisodes(a, b) {
 
-      searchTerm =
-        event.target.value ||
-        "";
+  /*
+   * Highest episode number first.
+   */
 
-      renderArchive(
-        getFilteredEpisodes()
+  if (
+    a.episodeNumber !== null &&
+    b.episodeNumber !== null
+  ) {
+
+    if (
+      a.episodeNumber !==
+      b.episodeNumber
+    ) {
+
+      return (
+        b.episodeNumber -
+        a.episodeNumber
+      );
+    }
+  }
+
+  /*
+   * Newest date next.
+   */
+
+  if (
+    a.date &&
+    b.date
+  ) {
+
+    return (
+      b.date.getTime() -
+      a.date.getTime()
+    );
+  }
+
+  /*
+   * Episodes with numbers before
+   * episodes without numbers.
+   */
+
+  if (
+    a.episodeNumber !== null
+  ) {
+
+    return -1;
+  }
+
+  if (
+    b.episodeNumber !== null
+  ) {
+
+    return 1;
+  }
+
+  return 0;
+}
+
+
+/* =========================================================
+   RENDER EPISODES
+   ========================================================= */
+
+function renderEpisodes() {
+
+  episodeGrid.replaceChildren();
+
+  for (
+    const episode of episodes
+  ) {
+
+    const button =
+      document.createElement(
+        "button"
       );
 
+    button.type =
+      "button";
+
+    button.className =
+      "episode-card";
+
+    button.dataset.id =
+      episode.id;
+
+    /*
+     * Thumbnail.
+     */
+
+    const thumb =
+      document.createElement(
+        "div"
+      );
+
+    thumb.className =
+      "episode-thumb";
+
+    const image =
+      document.createElement(
+        "img"
+      );
+
+    image.src =
+      getYouTubeThumbnail(
+        episode.id
+      );
+
+    image.alt =
+      episode.title;
+
+    image.loading =
+      "lazy";
+
+    image.addEventListener(
+      "error",
+      () => {
+
+        image.src =
+          `https://i.ytimg.com/vi/${encodeURIComponent(
+            episode.id
+          )}/0.jpg`;
+      },
+      {
+        once: true
+      }
+    );
+
+    thumb.appendChild(
+      image
+    );
+
+
+    /*
+     * Episode number.
+     */
+
+    if (
+      episode.episodeNumber !== null
+    ) {
+
+      const number =
+        document.createElement(
+          "div"
+        );
+
+      number.className =
+        "episode-number";
+
+      number.textContent =
+        `#${episode.episodeNumber}`;
+
+      thumb.appendChild(
+        number
+      );
     }
-  );
+
+
+    /*
+     * Play button.
+     */
+
+    const play =
+      document.createElement(
+        "div"
+      );
+
+    play.className =
+      "episode-play";
+
+    const playCircle =
+      document.createElement(
+        "div"
+      );
+
+    playCircle.className =
+      "play-circle";
+
+    playCircle.textContent =
+      "▶";
+
+    play.appendChild(
+      playCircle
+    );
+
+    thumb.appendChild(
+      play
+    );
+
+
+    /*
+     * Body.
+     */
+
+    const body =
+      document.createElement(
+        "div"
+      );
+
+    body.className =
+      "episode-body";
+
+
+    const title =
+      document.createElement(
+        "h3"
+      );
+
+    title.className =
+      "episode-title";
+
+    title.textContent =
+      episode.title;
+
+    body.appendChild(
+      title
+    );
+
+
+    const meta =
+      document.createElement(
+        "div"
+      );
+
+    meta.className =
+      "episode-meta";
+
+
+    if (
+      episode.date
+    ) {
+
+      const date =
+        document.createElement(
+          "span"
+        );
+
+      date.textContent =
+        formatDate(
+          episode.date
+        );
+
+      meta.appendChild(
+        date
+      );
+    }
+
+
+    if (
+      episode.duration
+    ) {
+
+      const duration =
+        document.createElement(
+          "span"
+        );
+
+      duration.textContent =
+        `• ${episode.duration}`;
+
+      meta.appendChild(
+        duration
+      );
+    }
+
+
+    body.appendChild(
+      meta
+    );
+
+
+    const status =
+      document.createElement(
+        "div"
+      );
+
+    status.className =
+      "episode-status";
+
+    status.textContent =
+      "▶ Select Episode";
+
+    body.appendChild(
+      status
+    );
+
+
+    button.appendChild(
+      thumb
+    );
+
+    button.appendChild(
+      body
+    );
+
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        selectEpisode(
+          episode,
+          true
+        );
+      }
+    );
+
+
+    episodeGrid.appendChild(
+      button
+    );
+  }
+}
 
 
 /* =========================================================
-   REFRESH
-========================================================= */
+   SELECT EPISODE
+   ========================================================= */
 
-$("refreshButton")
-  ?.addEventListener(
-    "click",
-    async () => {
+function selectEpisode(
+  episode,
+  scrollToPlayer
+) {
 
-      const button =
-        $("refreshButton");
+  if (!episode || !episode.id) {
+    return;
+  }
 
-      if(button){
+  currentEpisode =
+    episode;
 
-        button.disabled =
-          true;
 
-        button.textContent =
-          "↻ Loading…";
+  /*
+   * Mark active card.
+   */
 
+  document
+    .querySelectorAll(
+      ".episode-card"
+    )
+    .forEach(
+      card => {
+
+        card.classList.toggle(
+          "active",
+          card.dataset.id ===
+            episode.id
+        );
       }
+    );
 
-      try{
 
-        await loadEpisodes();
+  /*
+   * Update player information.
+   */
 
-      }finally{
+  playerTitle.textContent =
+    episode.title;
 
-        if(button){
+  playerDescription.textContent =
+    episode.description ||
+    "Back Deck Live from CrowRules Entertainment.";
 
-          button.disabled =
-            false;
 
-          button.textContent =
-            "↻ Refresh";
+  playerKicker.textContent =
+    episode.episodeNumber !== null
+      ? `Back Deck Live • Episode ${episode.episodeNumber}`
+      : "Back Deck Live";
 
-        }
 
-      }
+  playerMeta.replaceChildren();
 
-    }
+
+  if (
+    episode.date
+  ) {
+
+    addMetaPill(
+      formatDate(
+        episode.date
+      )
+    );
+  }
+
+
+  if (
+    episode.duration
+  ) {
+
+    addMetaPill(
+      episode.duration
+    );
+  }
+
+
+  addMetaPill(
+    "YouTube"
   );
 
 
+  youtubeButton.href =
+    getYouTubeWatchUrl(
+      episode.id
+    );
+
+  youtubeButton.style.display =
+    "inline-flex";
+
+
+  /*
+   * Change iframe only when the video
+   * actually changes.
+   */
+
+  const nextSrc =
+    getYouTubeEmbedUrl(
+      episode.id
+    );
+
+  if (
+    player.src !== nextSrc
+  ) {
+
+    player.src =
+      nextSrc;
+  }
+
+
+  /*
+   * Episode status.
+   */
+
+  const status =
+    getEpisodeStatus(
+      episode
+    );
+
+  updatePlayerStatus(
+    status
+  );
+
+
+  /*
+   * Keep chat visible.
+   *
+   * Important:
+   * For prerecorded episodes, chat isn't falsely
+   * represented as active.
+   */
+
+  updateChatForEpisode(
+    episode
+  );
+
+
+  if (
+    scrollToPlayer
+  ) {
+
+    document
+      .querySelector(
+        ".watch-layout"
+      )
+      .scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+  }
+}
+
+
 /* =========================================================
-   INITIALIZE
-========================================================= */
+   META PILL
+   ========================================================= */
+
+function addMetaPill(
+  text
+) {
+
+  const pill =
+    document.createElement(
+      "span"
+    );
+
+  pill.className =
+    "meta-pill";
+
+  pill.textContent =
+    text;
+
+  playerMeta.appendChild(
+    pill
+  );
+}
+
+
+/* =========================================================
+   DATE FORMAT
+   ========================================================= */
+
+function formatDate(
+  date
+) {
+
+  if (!date) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat(
+    "en-US",
+    {
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    }
+  ).format(date);
+}
+
+
+/* =========================================================
+   EPISODE STATUS
+   ========================================================= */
+
+function getEpisodeStatus(
+  episode
+) {
+
+  if (
+    !episode.date
+  ) {
+
+    return "latest";
+  }
+
+  const now =
+    Date.now();
+
+  const time =
+    episode.date.getTime();
+
+  /*
+   * A future date means scheduled.
+   */
+
+  if (
+    time > now
+  ) {
+
+    return "scheduled";
+  }
+
+  return "published";
+}
+
+
+/* =========================================================
+   PLAYER STATUS
+   ========================================================= */
+
+function updatePlayerStatus(
+  status
+) {
+
+  playerStatus.classList.remove(
+    "live",
+    "scheduled",
+    "ended"
+  );
+
+  if (
+    status === "scheduled"
+  ) {
+
+    playerStatus.classList.add(
+      "scheduled"
+    );
+
+    playerStatusText.textContent =
+      "Scheduled";
+
+    return;
+  }
+
+  if (
+    status === "published"
+  ) {
+
+    playerStatus.classList.add(
+      "scheduled"
+    );
+
+    playerStatusText.textContent =
+      "Latest Episode";
+
+    return;
+  }
+
+  playerStatus.classList.add(
+    "scheduled"
+  );
+
+  playerStatusText.textContent =
+    "Back Deck Live";
+}
+
+
+/* =========================================================
+   CHAT STATE
+   ========================================================= */
+
+function updateChatForEpisode(
+  episode
+) {
+
+  /*
+   * IMPORTANT:
+   *
+   * We intentionally keep the chat panel visible.
+   *
+   * We do not pretend that an archived episode has
+   * active chat.
+   *
+   * Future/scheduled broadcasts get a persistent
+   * "Chat is ready" panel.
+   */
+
+
+  const status =
+    getEpisodeStatus(
+      episode
+    );
+
+
+  chatStatus.classList.remove(
+    "live",
+    "scheduled"
+  );
+
+
+  if (
+    status === "scheduled"
+  ) {
+
+    chatStatus.classList.add(
+      "scheduled"
+    );
+
+    chatStatus.textContent =
+      "Scheduled";
+
+    showScheduledChat();
+
+    return;
+  }
+
+
+  /*
+   * For an already-published episode, keep the
+   * chat area visible but explain that chat is
+   * available during the live broadcast.
+   */
+
+  chatStatus.classList.add(
+    "scheduled"
+  );
+
+  chatStatus.textContent =
+    "Live Broadcast Chat";
+
+  showArchivedChat();
+}
+
+
+/* =========================================================
+   SCHEDULED CHAT
+   ========================================================= */
+
+function showScheduledChat() {
+
+  /*
+   * Do NOT inject a YouTube chat iframe here.
+   *
+   * A future scheduled event may not have an
+   * active chat session yet.
+   *
+   * Keeping the container visible gives the user
+   * a stable chat panel before the event starts.
+   */
+
+  removeChatIframe();
+
+  chatPlaceholder.style.display =
+    "flex";
+
+  chatPlaceholderTitle.textContent =
+    "Chat Is Ready";
+
+  chatPlaceholderText.textContent =
+    "Live chat will activate when the September 5 Back Deck Live broadcast begins. Keep this page open and join the conversation when the show goes live.";
+
+  const button =
+    $("#chatYoutubeButton");
+
+  button.href =
+    "https://www.youtube.com/@CrowRules_TV";
+
+  button.textContent =
+    "Open CrowRules TV →";
+}
+
+
+/* =========================================================
+   ARCHIVED CHAT
+   ========================================================= */
+
+function showArchivedChat() {
+
+  removeChatIframe();
+
+  chatPlaceholder.style.display =
+    "flex";
+
+  chatPlaceholderTitle.textContent =
+    "Chat Is Available Live";
+
+  chatPlaceholderText.textContent =
+    "This episode has already aired. YouTube live chat is tied to the live broadcast rather than the archived video. Join us during the next Back Deck Live.";
+
+  const button =
+    $("#chatYoutubeButton");
+
+  button.href =
+    "https://www.youtube.com/@CrowRules_TV";
+
+  button.textContent =
+    "Visit CrowRules TV →";
+}
+
+
+/* =========================================================
+   REMOVE CHAT IFRAME
+   ========================================================= */
+
+function removeChatIframe() {
+
+  const existing =
+    chatFrame.querySelector(
+      "iframe"
+    );
+
+  if (existing) {
+
+    existing.remove();
+  }
+
+  chatLoaded =
+    false;
+}
+
+
+/* =========================================================
+   ACTIVATE LIVE CHAT
+   ========================================================= */
+
+function activateLiveChat() {
+
+  const chatUrl =
+    getYouTubeChatUrl();
+
+  if (!chatUrl) {
+
+    showChatHostingWarning();
+
+    return;
+  }
+
+  removeChatIframe();
+
+  chatPlaceholder.style.display =
+    "none";
+
+  chatStatus.classList.remove(
+    "scheduled"
+  );
+
+  chatStatus.classList.add(
+    "live"
+  );
+
+  chatStatus.textContent =
+    "LIVE";
+
+
+  const iframe =
+    document.createElement(
+      "iframe"
+    );
+
+  iframe.title =
+    "Back Deck Live YouTube Live Chat";
+
+  iframe.src =
+    chatUrl;
+
+  iframe.loading =
+    "eager";
+
+  iframe.referrerPolicy =
+    "strict-origin-when-cross-origin";
+
+  iframe.allow =
+    "clipboard-write";
+
+  chatFrame.appendChild(
+    iframe
+  );
+
+  chatLoaded =
+    true;
+}
+
+
+/* =========================================================
+   CHAT HOSTING WARNING
+   ========================================================= */
+
+function showChatHostingWarning() {
+
+  removeChatIframe();
+
+  chatPlaceholder.style.display =
+    "flex";
+
+  chatPlaceholderTitle.textContent =
+    "Chat Needs a Web Address";
+
+  chatPlaceholderText.textContent =
+    "YouTube live chat cannot be embedded when this HTML file is opened directly with file://. Upload this page to your website or run it through localhost.";
+
+  const button =
+    $("#chatYoutubeButton");
+
+  button.href =
+    "https://www.youtube.com/@CrowRules_TV";
+
+  button.textContent =
+    "Open CrowRules TV →";
+}
+
+
+/* =========================================================
+   FALLBACK
+   ========================================================= */
+
+function renderFallback(
+  message
+) {
+
+  episodeGrid.replaceChildren();
+
+  const state =
+    document.createElement(
+      "div"
+    );
+
+  state.className =
+    "state-card";
+
+  const title =
+    document.createElement(
+      "strong"
+    );
+
+  title.textContent =
+    "Back Deck Live Archive";
+
+  const text =
+    document.createElement(
+      "span"
+    );
+
+  text.textContent =
+    message;
+
+  state.appendChild(
+    title
+  );
+
+  state.appendChild(
+    text
+  );
+
+  episodeGrid.appendChild(
+    state
+  );
+
+  /*
+   * Do not fabricate database episodes.
+   */
+
+  playerTitle.textContent =
+    "Back Deck Live";
+
+  playerDescription.textContent =
+    "The Back Deck Live archive could not be loaded. Check the Supabase status message below.";
+
+  player.src =
+    "";
+
+  youtubeButton.style.display =
+    "none";
+
+  episodeCount.textContent =
+    "Episodes: —";
+}
+
+
+/* =========================================================
+   TIMEZONE HELPERS
+   ========================================================= */
+
+function getTimeZoneOffsetMinutes(
+  date,
+  timeZone
+) {
+
+  const parts =
+    new Intl.DateTimeFormat(
+      "en-US",
+      {
+        timeZone,
+        timeZoneName: "shortOffset"
+      }
+    ).formatToParts(date);
+
+  const zone =
+    parts.find(
+      part =>
+        part.type ===
+        "timeZoneName"
+    )?.value || "GMT";
+
+  const match =
+    zone.match(
+      /GMT([+-])(\d{1,2})(?::(\d{2}))?/
+    );
+
+  if (!match) {
+    return 0;
+  }
+
+  const sign =
+    match[1] === "+"
+      ? 1
+      : -1;
+
+  const hours =
+    Number(match[2]);
+
+  const minutes =
+    Number(match[3] || 0);
+
+  return (
+    sign *
+    (
+      hours * 60 +
+      minutes
+    )
+  );
+}
+
+
+function zonedDateToUtc(
+  year,
+  month,
+  day,
+  hour,
+  minute,
+  timeZone
+) {
+
+  const guess =
+    new Date(
+      Date.UTC(
+        year,
+        month - 1,
+        day,
+        hour,
+        minute,
+        0
+      )
+    );
+
+  const offset =
+    getTimeZoneOffsetMinutes(
+      guess,
+      timeZone
+    );
+
+  return new Date(
+    guess.getTime() -
+    offset * 60000
+  );
+}
+
+
+/* =========================================================
+   PACIFIC DATE PARTS
+   ========================================================= */
+
+function getPacificParts() {
+
+  const parts =
+    new Intl.DateTimeFormat(
+      "en-US",
+      {
+        timeZone:
+          "America/Los_Angeles",
+
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+
+        weekday: "short"
+      }
+    ).formatToParts(
+      new Date()
+    );
+
+  const output = {};
+
+  for (
+    const part of parts
+  ) {
+
+    output[
+      part.type
+    ] =
+      part.value;
+  }
+
+  return output;
+}
+
+
+/* =========================================================
+   NEXT SATURDAY 3 PM PACIFIC
+   ========================================================= */
+
+function getNextBackDeckLiveDate() {
+
+  const now =
+    new Date();
+
+  const pacific =
+    new Intl.DateTimeFormat(
+      "en-US",
+      {
+        timeZone:
+          "America/Los_Angeles",
+
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+        weekday: "short"
+      }
+    ).formatToParts(
+      now
+    );
+
+  const parts = {};
+
+  pacific.forEach(
+    part => {
+      parts[part.type] =
+        part.value;
+    }
+  );
+
+  const year =
+    Number(parts.year);
+
+  const month =
+    Number(parts.month);
+
+  const day =
+    Number(parts.day);
+
+  /*
+   * Build a UTC date representing the Pacific
+   * calendar date only.
+   */
+
+  const base =
+    new Date(
+      Date.UTC(
+        year,
+        month - 1,
+        day
+      )
+    );
+
+  /*
+   * JS:
+   *
+   * Sunday = 0
+   * Monday = 1
+   * ...
+   * Saturday = 6
+   */
+
+  const dayOfWeek =
+    base.getUTCDay();
+
+  let daysUntilSaturday =
+    (6 - dayOfWeek + 7) % 7;
+
+  /*
+   * If it is already Saturday at or after 3 PM
+   * Pacific, target next Saturday.
+   */
+
+  const todayTarget =
+    zonedDateToUtc(
+      year,
+      month,
+      day,
+      15,
+      0,
+      "America/Los_Angeles"
+    );
+
+  if (
+    daysUntilSaturday === 0 &&
+    now.getTime() >=
+      todayTarget.getTime()
+  ) {
+
+    daysUntilSaturday =
+      7;
+  }
+
+  const targetCalendar =
+    new Date(
+      Date.UTC(
+        year,
+        month - 1,
+        day
+      )
+    );
+
+  targetCalendar.setUTCDate(
+    targetCalendar.getUTCDate() +
+    daysUntilSaturday
+  );
+
+  return zonedDateToUtc(
+    targetCalendar.getUTCFullYear(),
+    targetCalendar.getUTCMonth() + 1,
+    targetCalendar.getUTCDate(),
+    15,
+    0,
+    "America/Los_Angeles"
+  );
+}
+
+
+/* =========================================================
+   COUNTDOWN
+   ========================================================= */
+
+let nextLiveTarget =
+  getNextBackDeckLiveDate();
+
+
+function updateCountdown() {
+
+  const now =
+    new Date();
+
+  let difference =
+    nextLiveTarget.getTime() -
+    now.getTime();
+
+
+  /*
+   * If countdown reaches zero, immediately
+   * calculate the next Saturday.
+   */
+
+  if (
+    difference <= 0
+  ) {
+
+    nextLiveTarget =
+      getNextBackDeckLiveDate();
+
+    difference =
+      nextLiveTarget.getTime() -
+      now.getTime();
+  }
+
+
+  const totalSeconds =
+    Math.floor(
+      difference / 1000
+    );
+
+  const days =
+    Math.floor(
+      totalSeconds / 86400
+    );
+
+  const hours =
+    Math.floor(
+      (totalSeconds % 86400) /
+      3600
+    );
+
+  const minutes =
+    Math.floor(
+      (totalSeconds % 3600) /
+      60
+    );
+
+  const seconds =
+    totalSeconds % 60;
+
+
+  $("#days").textContent =
+    String(days).padStart(2, "0");
+
+  $("#hours").textContent =
+    String(hours).padStart(2, "0");
+
+  $("#minutes").textContent =
+    String(minutes).padStart(2, "0");
+
+  $("#seconds").textContent =
+    String(seconds).padStart(2, "0");
+
+
+  $("#countdownDate").textContent =
+    new Intl.DateTimeFormat(
+      "en-US",
+      {
+        timeZone:
+          "America/Los_Angeles",
+
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+
+        hour: "numeric",
+        minute: "2-digit",
+
+        timeZoneName:
+          "short"
+      }
+    ).format(
+      nextLiveTarget
+    );
+}
+
+
+/* =========================================================
+   INITIAL PAGE LOAD
+   ========================================================= */
+
+async function initializePage() {
+
+  /*
+   * Initial countdown.
+   *
+   * This is specifically Saturday,
+   * September 5, 2026 at 3 PM Pacific
+   * when this page is first used.
+   */
+
+  nextLiveTarget =
+    getNextBackDeckLiveDate();
+
+  updateCountdown();
+
+  setInterval(
+    updateCountdown,
+    1000
+  );
+
+
+  /*
+   * Supabase.
+   */
+
+  if (
+    initializeSupabase()
+  ) {
+
+    await loadEpisodes();
+  }
+
+
+  /*
+   * If this page is opened directly as a local file,
+   * warn about YouTube embedding.
+   */
+
+  if (
+    location.protocol === "file:"
+  ) {
+
+    console.warn(
+      "Back Deck Live is running from file://. YouTube embeds and live chat may require a web server."
+    );
+  }
+}
+
+
+/* =========================================================
+   START
+   ========================================================= */
 
 document.addEventListener(
   "DOMContentLoaded",
-  () => {
-
-    loadEpisodes();
-
-  }
+  initializePage
 );
+
+
+/* =========================================================
+   OPTIONAL LIVE CHAT ACTIVATION
+   =========================================================
+   
+   When the September 5 broadcast actually starts,
+   call:
+
+       activateLiveChat();
+
+   This can later be connected to a YouTube live status
+   signal or an admin-controlled Supabase status field.
+
+   The function intentionally does not run automatically
+   for future broadcasts because YouTube only exposes an
+   active live-chat session when the broadcast is actually
+   live and chat is available.
+   ========================================================= */
+
+window.BackDeckLive = {
+  activateLiveChat,
+  reloadEpisodes: loadEpisodes,
+  selectEpisode,
+  getYouTubeId
+};
 
 </script>
 
