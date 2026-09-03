@@ -13,19 +13,23 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap"
-      rel="stylesheet">
+<link
+  href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap"
+  rel="stylesheet">
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Pinned Supabase JS version -->
+<script
+  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0">
+</script>
 
 <style>
 :root{
   --bg:#05070b;
   --bg2:#090d14;
-  --panel:rgba(12,17,26,.88);
-  --panel2:rgba(16,22,33,.95);
+  --panel:rgba(12,17,26,.9);
+  --panel2:rgba(16,22,33,.96);
   --line:rgba(255,255,255,.09);
-  --line2:rgba(124,247,255,.22);
+  --line2:rgba(124,247,255,.25);
   --text:#f4f7fb;
   --muted:#8d99aa;
   --accent:#7cf7ff;
@@ -88,6 +92,11 @@ button{
   cursor:pointer;
 }
 
+button:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
 .container{
   width:min(var(--max),calc(100% - 32px));
   margin:auto;
@@ -103,24 +112,15 @@ button{
   z-index:99999;
   display:grid;
   place-items:center;
-  opacity:1;
-  visibility:visible;
-  pointer-events:auto;
   background:
     radial-gradient(circle at center,rgba(124,247,255,.08),transparent 30%),
     #030407;
-  transition:
-    opacity .7s ease,
-    visibility .7s ease;
+  transition:opacity .7s ease,visibility .7s ease;
 }
 
-#crIntro.cr-intro-done{
+#crIntro.done{
   opacity:0;
   visibility:hidden;
-  pointer-events:none;
-}
-
-#crIntro[aria-hidden="true"]{
   pointer-events:none;
 }
 
@@ -200,7 +200,7 @@ button{
 }
 
 #crIntroProgress{
-  width:0%;
+  width:0;
   height:100%;
   background:linear-gradient(90deg,var(--accent),var(--accent2));
   box-shadow:0 0 18px rgba(124,247,255,.7);
@@ -219,9 +219,52 @@ button{
   letter-spacing:.08em;
 }
 
-.cr-intro-skip:hover{
-  color:var(--text);
-  border-color:var(--line2);
+/* =========================================================
+   CONNECTION STATUS
+========================================================= */
+
+.connection-status{
+  position:fixed;
+  right:18px;
+  top:88px;
+  z-index:1500;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:rgba(5,7,11,.85);
+  backdrop-filter:blur(15px);
+  color:var(--muted);
+  font-size:.58rem;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.connection-dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--warn);
+  box-shadow:0 0 10px currentColor;
+}
+
+.connection-status.connected{
+  color:var(--good);
+}
+
+.connection-status.connected .connection-dot{
+  background:var(--good);
+}
+
+.connection-status.error{
+  color:var(--danger);
+}
+
+.connection-status.error .connection-dot{
+  background:var(--danger);
 }
 
 /* =========================================================
@@ -263,7 +306,6 @@ button{
   border-radius:10px;
   color:var(--accent);
   font-size:.75rem;
-  box-shadow:0 0 20px rgba(124,247,255,.15);
 }
 
 .brand small{
@@ -288,7 +330,6 @@ button{
   color:var(--muted);
   font-size:.68rem;
   font-weight:800;
-  letter-spacing:.02em;
 }
 
 .nav-links a:hover{
@@ -531,7 +572,6 @@ section{
   color:var(--accent);
   font-size:.58rem;
   font-weight:800;
-  letter-spacing:.05em;
   text-transform:uppercase;
 }
 
@@ -566,7 +606,6 @@ section{
 .directory-card:hover{
   transform:translateY(-3px);
   border-color:var(--line2);
-  background:rgba(124,247,255,.035);
 }
 
 .directory-number{
@@ -603,7 +642,7 @@ section{
 
 .list-item{
   display:grid;
-  grid-template-columns:120px 1fr auto;
+  grid-template-columns:150px 1fr auto;
   align-items:center;
   gap:20px;
   padding:17px 20px;
@@ -931,14 +970,6 @@ section{
   margin-top:8px;
 }
 
-.priority-urgent{
-  color:var(--danger);
-}
-
-.priority-high{
-  color:var(--warn);
-}
-
 .empty,
 .loading{
   padding:25px;
@@ -1118,6 +1149,10 @@ footer{
     width:calc(100% - 22px);
   }
 
+  .connection-status{
+    display:none;
+  }
+
   .hero{
     padding:80px 0 60px;
   }
@@ -1186,10 +1221,6 @@ footer{
     animation-iteration-count:1 !important;
     transition-duration:.01ms !important;
   }
-
-  #crIntro{
-    transition:none;
-  }
 }
 </style>
 </head>
@@ -1235,6 +1266,23 @@ footer{
     type="button">
     SKIP INTRO
   </button>
+
+</div>
+
+<!-- =========================================================
+     CONNECTION STATUS
+========================================================= -->
+
+<div
+  id="connectionStatus"
+  class="connection-status"
+  title="Supabase connection status">
+
+  <span class="connection-dot"></span>
+
+  <span id="connectionText">
+    CONNECTING
+  </span>
 
 </div>
 
@@ -1353,22 +1401,22 @@ footer{
 
       <div class="stat">
         <div id="statDivisions" class="stat-number">—</div>
-        <div class="stat-label">Divisions</div>
+        <div class="stat-label">Published Divisions</div>
       </div>
 
       <div class="stat">
         <div id="statProjects" class="stat-number">—</div>
-        <div class="stat-label">Projects</div>
+        <div class="stat-label">Published Projects</div>
       </div>
 
       <div class="stat">
         <div id="statShows" class="stat-number">—</div>
-        <div class="stat-label">Shows</div>
+        <div class="stat-label">Original Shows</div>
       </div>
 
       <div class="stat">
         <div id="statUpdates" class="stat-number">—</div>
-        <div class="stat-label">Updates</div>
+        <div class="stat-label">Published Updates</div>
       </div>
 
     </div>
@@ -1378,7 +1426,7 @@ footer{
 </section>
 
 <!-- =========================================================
-     SITE DIRECTORY
+     DIRECTORY
 ========================================================= -->
 
 <section id="directory">
@@ -1388,7 +1436,6 @@ footer{
     <div class="section-heading">
 
       <div>
-
         <div class="section-kicker">
           01 / NAVIGATION
         </div>
@@ -1396,7 +1443,6 @@ footer{
         <h2 class="section-title">
           CrowRules Directory
         </h2>
-
       </div>
 
       <div class="section-description">
@@ -1409,147 +1455,66 @@ footer{
     <div class="directory-grid">
 
       <a class="directory-card" href="divisions.html">
-
         <div class="directory-number">01</div>
-
         <h3>DIVISIONS</h3>
-
-        <p>
-          Explore the CrowRules Entertainment divisions.
-        </p>
-
-        <span class="btn">
-          OPEN DIVISIONS
-        </span>
-
+        <p>Explore the CrowRules Entertainment divisions.</p>
+        <span class="btn">OPEN DIVISIONS</span>
       </a>
 
       <a class="directory-card" href="projects.html">
-
         <div class="directory-number">02</div>
-
         <h3>PROJECTS</h3>
-
-        <p>
-          Explore current and future projects.
-        </p>
-
-        <span class="btn">
-          OPEN PROJECTS
-        </span>
-
+        <p>Explore current and future projects.</p>
+        <span class="btn">OPEN PROJECTS</span>
       </a>
 
       <a class="directory-card" href="news.html">
-
         <div class="directory-number">03</div>
-
         <h3>NEWS</h3>
-
-        <p>
-          Read the latest CrowRules news.
-        </p>
-
-        <span class="btn">
-          OPEN NEWS
-        </span>
-
+        <p>Read the latest CrowRules news.</p>
+        <span class="btn">OPEN NEWS</span>
       </a>
 
       <a class="directory-card" href="updates.html">
-
         <div class="directory-number">04</div>
-
         <h3>UPDATES</h3>
-
-        <p>
-          Follow development updates.
-        </p>
-
-        <span class="btn">
-          OPEN UPDATES
-        </span>
-
+        <p>Follow development updates.</p>
+        <span class="btn">OPEN UPDATES</span>
       </a>
 
       <a class="directory-card" href="roadmap.html">
-
         <div class="directory-number">05</div>
-
         <h3>ROADMAP</h3>
-
-        <p>
-          See where CrowRules is heading.
-        </p>
-
-        <span class="btn">
-          OPEN ROADMAP
-        </span>
-
+        <p>See where CrowRules is heading.</p>
+        <span class="btn">OPEN ROADMAP</span>
       </a>
 
       <a class="directory-card" href="partners.html">
-
         <div class="directory-number">06</div>
-
         <h3>PARTNERS</h3>
-
-        <p>
-          Explore partnership opportunities.
-        </p>
-
-        <span class="btn">
-          OPEN PARTNERS
-        </span>
-
+        <p>Explore partnership opportunities.</p>
+        <span class="btn">OPEN PARTNERS</span>
       </a>
 
       <a class="directory-card" href="support.html">
-
         <div class="directory-number">07</div>
-
         <h3>SUPPORT</h3>
-
-        <p>
-          Support CrowRules Entertainment.
-        </p>
-
-        <span class="btn">
-          OPEN SUPPORT
-        </span>
-
+        <p>Support CrowRules Entertainment.</p>
+        <span class="btn">OPEN SUPPORT</span>
       </a>
 
       <a class="directory-card" href="tacomanights.html">
-
         <div class="directory-number">08</div>
-
         <h3>TACOMA NIGHTS</h3>
-
-        <p>
-          Enter the Tacoma Nights show page.
-        </p>
-
-        <span class="btn">
-          WATCH TACOMA NIGHTS
-        </span>
-
+        <p>Enter the Tacoma Nights show page.</p>
+        <span class="btn">WATCH TACOMA NIGHTS</span>
       </a>
 
       <a class="directory-card" href="backdeck.html">
-
         <div class="directory-number">09</div>
-
         <h3>BACK DECK LIVE</h3>
-
-        <p>
-          Enter the Back Deck Live page.
-        </p>
-
-        <span class="btn">
-          OPEN BACK DECK
-        </span>
-
+        <p>Enter the Back Deck Live page.</p>
+        <span class="btn">OPEN BACK DECK</span>
       </a>
 
       <a
@@ -1559,16 +1524,9 @@ footer{
         rel="noopener noreferrer">
 
         <div class="directory-number">10</div>
-
         <h3>NEWSLETTER</h3>
-
-        <p>
-          Read CrowRules posts and newsletter updates on Kit.
-        </p>
-
-        <span class="btn">
-          OPEN KIT
-        </span>
+        <p>Read CrowRules posts and newsletter updates on Kit.</p>
+        <span class="btn">OPEN KIT</span>
 
       </a>
 
@@ -1600,17 +1558,13 @@ footer{
     </div>
 
     <div id="divisionsGrid" class="grid">
-      <div class="loading">Loading divisions...</div>
+      <div class="loading">Loading divisions from Supabase...</div>
     </div>
 
     <div class="card-actions">
-
-      <a
-        class="btn btn-primary"
-        href="divisions.html">
+      <a class="btn btn-primary" href="divisions.html">
         VIEW ALL DIVISIONS
       </a>
-
     </div>
 
   </div>
@@ -1639,17 +1593,13 @@ footer{
     </div>
 
     <div id="projectsGrid" class="grid">
-      <div class="loading">Loading projects...</div>
+      <div class="loading">Loading projects from Supabase...</div>
     </div>
 
     <div class="card-actions">
-
-      <a
-        class="btn btn-primary"
-        href="projects.html">
+      <a class="btn btn-primary" href="projects.html">
         VIEW ALL PROJECTS
       </a>
-
     </div>
 
   </div>
@@ -1678,20 +1628,16 @@ footer{
     </div>
 
     <div id="showsGrid" class="grid">
-      <div class="loading">Loading shows...</div>
+      <div class="loading">Loading original productions...</div>
     </div>
 
     <div class="card-actions">
 
-      <a
-        class="btn btn-primary"
-        href="tacomanights.html">
+      <a class="btn btn-primary" href="tacomanights.html">
         TACOMA NIGHTS
       </a>
 
-      <a
-        class="btn"
-        href="backdeck.html">
+      <a class="btn" href="backdeck.html">
         BACK DECK LIVE
       </a>
 
@@ -1714,6 +1660,10 @@ footer{
       <div>
         <div class="section-kicker">05 / PROGRAMMING</div>
         <h2 class="section-title">Schedule</h2>
+      </div>
+
+      <div class="section-description">
+        Current programming loaded directly from the CrowRules database.
       </div>
 
     </div>
@@ -1753,9 +1703,7 @@ footer{
 
     <div class="card-actions">
 
-      <a
-        class="btn btn-primary"
-        href="roadmap.html">
+      <a class="btn btn-primary" href="roadmap.html">
         VIEW FULL ROADMAP
       </a>
 
@@ -1788,9 +1736,7 @@ footer{
 
     <div class="card-actions">
 
-      <a
-        class="btn btn-primary"
-        href="news.html">
+      <a class="btn btn-primary" href="news.html">
         VIEW ALL NEWS
       </a>
 
@@ -1823,9 +1769,7 @@ footer{
 
     <div class="card-actions">
 
-      <a
-        class="btn btn-primary"
-        href="updates.html">
+      <a class="btn btn-primary" href="updates.html">
         VIEW ALL UPDATES
       </a>
 
@@ -1859,20 +1803,16 @@ footer{
           </h2>
 
           <p class="newsletter-copy">
-            Get updates about CrowRules Entertainment, Tacoma Nights,
-            Back Deck Live, original productions, announcements,
-            projects, and what we're building next.
+            Join the CrowRules Entertainment mailing list for updates,
+            announcements, productions, programming, and future projects.
           </p>
 
           <form
-            id="kitNewsletterForm"
-            class="kit-form"
-            action="https://crowrules-entertainment.kit.com/profile/posts"
-            method="get"
-            target="_blank">
+            id="newsletterForm"
+            class="kit-form">
 
             <input
-              id="kitEmail"
+              id="newsletterEmail"
               name="email"
               type="email"
               autocomplete="email"
@@ -1889,8 +1829,9 @@ footer{
           </form>
 
           <div class="kit-note">
-            Newsletter publishing and subscriber management are handled
-            through Kit.
+            Your subscription is recorded in the CrowRules Supabase
+            database. The official Kit publication remains available
+            for reading and newsletter publishing.
           </div>
 
         </div>
@@ -2008,59 +1949,52 @@ footer{
         <div class="form-grid">
 
           <div class="field">
-            <label for="organization_name">
-              Organization
-            </label>
-
+            <label for="organization_name">Organization</label>
             <input
               id="organization_name"
               name="organization_name"
+              maxlength="200"
               required>
           </div>
 
           <div class="field">
-            <label for="contact_name">
-              Contact Name
-            </label>
-
+            <label for="contact_name">Contact Name</label>
             <input
               id="contact_name"
               name="contact_name"
+              maxlength="150"
               required>
           </div>
 
           <div class="field">
-            <label for="email">
-              Email
-            </label>
-
+            <label for="partnership_email">Email</label>
             <input
-              id="email"
+              id="partnership_email"
               name="email"
               type="email"
+              maxlength="320"
               required>
           </div>
 
           <div class="field">
-            <label for="phone">
-              Phone
-            </label>
-
+            <label for="phone">Phone</label>
             <input
               id="phone"
-              name="phone">
+              name="phone"
+              maxlength="50">
           </div>
 
           <div class="field">
-            <label for="partnership_type">
-              Partnership Type
-            </label>
+            <label for="partnership_type">Partnership Type</label>
+
+            <!-- IMPORTANT:
+                 Values match the existing Supabase RLS policy. -->
 
             <select
               id="partnership_type"
               name="partnership_type">
 
-              <option value="business partnership">
+              <option value="partnership">
                 Business Partnership
               </option>
 
@@ -2081,12 +2015,11 @@ footer{
               </option>
 
             </select>
+
           </div>
 
           <div class="field">
-            <label for="budget_range">
-              Budget Range
-            </label>
+            <label for="budget_range">Budget Range</label>
 
             <select
               id="budget_range"
@@ -2100,24 +2033,21 @@ footer{
               <option value="discuss">Let's Discuss</option>
 
             </select>
+
           </div>
 
           <div class="field">
-            <label for="website_url">
-              Website
-            </label>
-
+            <label for="website_url">Website</label>
             <input
               id="website_url"
               name="website_url"
               type="url"
+              maxlength="500"
               placeholder="https://">
           </div>
 
           <div class="field">
-            <label for="preferred_contact">
-              Preferred Contact
-            </label>
+            <label for="preferred_contact">Preferred Contact</label>
 
             <select
               id="preferred_contact"
@@ -2128,9 +2058,11 @@ footer{
               <option value="either">Either</option>
 
             </select>
+
           </div>
 
           <div class="field full">
+
             <label for="project_interest">
               Project Interest
             </label>
@@ -2139,55 +2071,21 @@ footer{
               id="project_interest"
               name="project_interest">
 
-              <option value="Tacoma Nights">
-                Tacoma Nights
-              </option>
-
-              <option value="Back Deck Live">
-                Back Deck Live
-              </option>
-
-              <option value="CrowRules TV">
-                CrowRules TV
-              </option>
-
-              <option value="CrowRules Sports">
-                CrowRules Sports
-              </option>
-
-              <option value="CrowRules Podcasting">
-                CrowRules Podcasting
-              </option>
-
-              <option value="CrowSpace">
-                CrowSpace
-              </option>
-
-              <option value="CrowRules Yearbooks">
-                CrowRules Yearbooks
-              </option>
-
-              <option value="Spectrum Awards">
-                Spectrum Awards
-              </option>
-
-              <option value="CrowRules Records">
-                CrowRules Records
-              </option>
-
-              <option value="CrowRules Studios">
-                CrowRules Studios
-              </option>
-
-              <option value="Multiple Projects">
-                Multiple Projects
-              </option>
-
-              <option value="Other">
-                Other
-              </option>
+              <option value="Tacoma Nights">Tacoma Nights</option>
+              <option value="Back Deck Live">Back Deck Live</option>
+              <option value="CrowRules TV">CrowRules TV</option>
+              <option value="CrowRules Sports">CrowRules Sports</option>
+              <option value="CrowRules Podcasting">CrowRules Podcasting</option>
+              <option value="CrowSpace">CrowSpace</option>
+              <option value="CrowRules Yearbooks">CrowRules Yearbooks</option>
+              <option value="Spectrum Awards">Spectrum Awards</option>
+              <option value="CrowRules Records">CrowRules Records</option>
+              <option value="CrowRules Studios">CrowRules Studios</option>
+              <option value="Multiple Projects">Multiple Projects</option>
+              <option value="Other">Other</option>
 
             </select>
+
           </div>
 
           <div class="field full">
@@ -2199,6 +2097,7 @@ footer{
             <textarea
               id="message"
               name="message"
+              maxlength="5000"
               required
               placeholder="Tell us about your partnership idea..."></textarea>
 
@@ -2299,7 +2198,6 @@ footer{
           <iframe
             src="https://www.paypal.com/giving/campaigns?campaign_id=9NLV7DEE95E8A"
             title="PayPal donate campaign card"
-            frameborder="0"
             width="382"
             height="550"
             scrolling="no"
@@ -2331,6 +2229,10 @@ footer{
         <h2 class="section-title">
           Admin Control
         </h2>
+      </div>
+
+      <div class="section-description">
+        Secure Supabase Auth administration for partnership inquiries.
       </div>
 
     </div>
@@ -2395,7 +2297,11 @@ footer{
           placeholder="Search inquiries...">
 
         <select id="adminStatusFilter">
-          <option value="">All Statuses</option>
+
+          <option value="">
+            All Statuses
+          </option>
+
           <option value="new">New</option>
           <option value="reviewing">Reviewing</option>
           <option value="contacted">Contacted</option>
@@ -2404,14 +2310,21 @@ footer{
           <option value="won">Won</option>
           <option value="declined">Declined</option>
           <option value="closed">Closed</option>
+          <option value="spam">Spam</option>
+
         </select>
 
         <select id="adminPriorityFilter">
-          <option value="">All Priorities</option>
+
+          <option value="">
+            All Priorities
+          </option>
+
           <option value="urgent">Urgent</option>
           <option value="high">High</option>
           <option value="normal">Normal</option>
           <option value="low">Low</option>
+
         </select>
 
         <button
@@ -2530,9 +2443,11 @@ footer{
         </div>
 
         <div class="field">
+
           <label>Status</label>
 
           <select id="editStatus">
+
             <option value="new">New</option>
             <option value="reviewing">Reviewing</option>
             <option value="contacted">Contacted</option>
@@ -2541,23 +2456,29 @@ footer{
             <option value="won">Won</option>
             <option value="declined">Declined</option>
             <option value="closed">Closed</option>
+            <option value="spam">Spam</option>
+
           </select>
 
         </div>
 
         <div class="field">
+
           <label>Priority</label>
 
           <select id="editPriority">
+
             <option value="urgent">Urgent</option>
             <option value="high">High</option>
             <option value="normal">Normal</option>
             <option value="low">Low</option>
+
           </select>
 
         </div>
 
         <div class="field full">
+
           <label>Message</label>
 
           <textarea
@@ -2567,6 +2488,7 @@ footer{
         </div>
 
         <div class="field full">
+
           <label>Admin Notes</label>
 
           <textarea
@@ -2619,42 +2541,15 @@ footer{
       <div class="footer-links">
 
         <a href="index.html">Home</a>
-
-        <a href="divisions.html">
-          Divisions
-        </a>
-
-        <a href="projects.html">
-          Projects
-        </a>
-
-        <a href="news.html">
-          News
-        </a>
-
-        <a href="updates.html">
-          Updates
-        </a>
-
-        <a href="roadmap.html">
-          Roadmap
-        </a>
-
-        <a href="partners.html">
-          Partners
-        </a>
-
-        <a href="support.html">
-          Support
-        </a>
-
-        <a href="tacomanights.html">
-          Tacoma Nights
-        </a>
-
-        <a href="backdeck.html">
-          Back Deck Live
-        </a>
+        <a href="divisions.html">Divisions</a>
+        <a href="projects.html">Projects</a>
+        <a href="news.html">News</a>
+        <a href="updates.html">Updates</a>
+        <a href="roadmap.html">Roadmap</a>
+        <a href="partners.html">Partners</a>
+        <a href="support.html">Support</a>
+        <a href="tacomanights.html">Tacoma Nights</a>
+        <a href="backdeck.html">Back Deck Live</a>
 
         <a
           href="https://crowrules-entertainment.kit.com/profile/posts"
@@ -2681,7 +2576,8 @@ footer{
 
 <script>
 /* =========================================================
-   CONFIG
+   CROWRULES BUSINESS HUB
+   SUPABASE-CONNECTED EDITION
 ========================================================= */
 
 const SUPABASE_URL =
@@ -2690,11 +2586,18 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
   'sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9';
 
+const KIT_POSTS_URL =
+  'https://crowrules-entertainment.kit.com/profile/posts';
+
 const PAYPAL_URL =
   'https://www.paypal.com/donate/?hosted_button_id=9NLV7DEE95E8A';
 
-const KIT_POSTS_URL =
-  'https://crowrules-entertainment.kit.com/profile/posts';
+let sb = null;
+let currentUser = null;
+let currentAdmin = false;
+let activeInquiry = null;
+let realtimeChannel = null;
+let allInquiries = [];
 
 
 /* =========================================================
@@ -2704,14 +2607,12 @@ const KIT_POSTS_URL =
 const $ = (
   selector,
   root = document
-) =>
-  root.querySelector(selector);
+) => root.querySelector(selector);
 
 const $$ = (
   selector,
   root = document
-) =>
-  [...root.querySelectorAll(selector)];
+) => [...root.querySelectorAll(selector)];
 
 
 function escapeHTML(value){
@@ -2760,6 +2661,37 @@ function safeURL(value){
 }
 
 
+function formatDate(value){
+
+  if(!value){
+    return '';
+  }
+
+  const date =
+    new Date(value);
+
+  if(
+    Number.isNaN(
+      date.getTime()
+    )
+  ){
+
+    return String(value);
+
+  }
+
+  return new Intl.DateTimeFormat(
+    'en-US',
+    {
+      month:'short',
+      day:'numeric',
+      year:'numeric'
+    }
+  ).format(date);
+
+}
+
+
 function toast(message){
 
   const element =
@@ -2781,7 +2713,11 @@ function toast(message){
   toast.timer =
     setTimeout(
       () => {
-        element.classList.remove('show');
+
+        element.classList.remove(
+          'show'
+        );
+
       },
       3500
     );
@@ -2790,7 +2726,58 @@ function toast(message){
 
 
 /* =========================================================
-   FOOTER YEAR
+   CONNECTION STATUS
+========================================================= */
+
+function setConnectionStatus(
+  state,
+  text
+){
+
+  const element =
+    $('#connectionStatus');
+
+  const label =
+    $('#connectionText');
+
+  if(!element){
+    return;
+  }
+
+  element.classList.remove(
+    'connected',
+    'error'
+  );
+
+  if(state === 'connected'){
+
+    element.classList.add(
+      'connected'
+    );
+
+  }
+
+  if(state === 'error'){
+
+    element.classList.add(
+      'error'
+    );
+
+  }
+
+  if(label){
+
+    label.textContent =
+      text ||
+      state.toUpperCase();
+
+  }
+
+}
+
+
+/* =========================================================
+   FOOTER
 ========================================================= */
 
 $('#footerYear').textContent =
@@ -2867,21 +2854,20 @@ const introSkip =
 const INTRO_DURATION =
   4200;
 
-const FADE_DURATION =
-  700;
+let introFinished =
+  false;
 
-let introFrame = 0;
-let introTimer = null;
-let introFinished = false;
+let introFrame =
+  0;
 
 
 const introMessages = [
 
   [0,'INITIALIZING CROW RULES...'],
-  [900,'LOADING ENTERTAINMENT UNIVERSE...'],
-  [1800,'CONNECTING BUSINESS HUB...'],
-  [2700,'LOADING PROJECTS + PROGRAMMING...'],
-  [3500,'FINALIZING SYSTEM...']
+  [900,'CONNECTING SUPABASE...'],
+  [1800,'LOADING ENTERTAINMENT UNIVERSE...'],
+  [2700,'LOADING BUSINESS DATA...'],
+  [3500,'FINALIZING BUSINESS HUB...']
 
 ];
 
@@ -2901,7 +2887,10 @@ function updateIntroStatus(
     if(
       elapsed >= item[0]
     ){
-      message = item[1];
+
+      message =
+        item[1];
+
     }
 
   }
@@ -2922,14 +2911,11 @@ function finishIntro(){
     return;
   }
 
-  introFinished = true;
+  introFinished =
+    true;
 
   cancelAnimationFrame(
     introFrame
-  );
-
-  clearTimeout(
-    introTimer
   );
 
   if(introProgress){
@@ -2946,11 +2932,11 @@ function finishIntro(){
 
   }
 
-  intro.classList.add(
-    'cr-intro-done'
+  intro?.classList.add(
+    'done'
   );
 
-  intro.setAttribute(
+  intro?.setAttribute(
     'aria-hidden',
     'true'
   );
@@ -2958,11 +2944,15 @@ function finishIntro(){
   setTimeout(
     () => {
 
-      intro.style.display =
-        'none';
+      if(intro){
+
+        intro.style.display =
+          'none';
+
+      }
 
     },
-    FADE_DURATION + 50
+    750
   );
 
 }
@@ -2980,20 +2970,6 @@ function runIntro(){
       '(prefers-reduced-motion: reduce)'
     ).matches
   ){
-
-    if(introProgress){
-
-      introProgress.style.width =
-        '100%';
-
-    }
-
-    if(introStatus){
-
-      introStatus.textContent =
-        'SYSTEM READY';
-
-    }
 
     setTimeout(
       finishIntro,
@@ -3019,7 +2995,7 @@ function runIntro(){
     const percent =
       Math.min(
         100,
-        (elapsed / INTRO_DURATION) * 100
+        elapsed / INTRO_DURATION * 100
       );
 
     if(introProgress){
@@ -3056,12 +3032,6 @@ function runIntro(){
       tick
     );
 
-  introTimer =
-    setTimeout(
-      finishIntro,
-      INTRO_DURATION + 1000
-    );
-
 }
 
 
@@ -3091,16 +3061,8 @@ runIntro();
 
 
 /* =========================================================
-   SUPABASE
+   SUPABASE INITIALIZATION
 ========================================================= */
-
-let sb = null;
-let currentUser = null;
-let currentAdmin = false;
-let activeInquiry = null;
-let realtimeChannel = null;
-let allInquiries = [];
-
 
 function initSupabase(){
 
@@ -3109,6 +3071,11 @@ function initSupabase(){
     typeof window.supabase.createClient !==
       'function'
   ){
+
+    setConnectionStatus(
+      'error',
+      'SUPABASE LIBRARY ERROR'
+    );
 
     toast(
       'Supabase library failed to load.'
@@ -3129,18 +3096,32 @@ function initSupabase(){
             persistSession:true,
             autoRefreshToken:true,
             detectSessionInUrl:true
+          },
+          realtime:{
+            params:{
+              eventsPerSecond:10
+            }
           }
         }
       );
+
+    setConnectionStatus(
+      'connected',
+      'SUPABASE READY'
+    );
 
     return true;
 
   }catch(error){
 
-    console.error(error);
+    console.error(
+      'Supabase initialization:',
+      error
+    );
 
-    toast(
-      'Supabase initialization failed.'
+    setConnectionStatus(
+      'error',
+      'SUPABASE ERROR'
     );
 
     return false;
@@ -3151,17 +3132,23 @@ function initSupabase(){
 
 
 /* =========================================================
-   TABLE LOADER
+   GENERIC FETCH
 ========================================================= */
 
-async function fetchTable(
+async function fetchRows({
   table,
   select = '*',
-  options = {}
-){
+  filters = [],
+  order = null,
+  limit = null
+}){
 
   if(!sb){
-    return [];
+
+    throw new Error(
+      'Supabase is not initialized.'
+    );
+
   }
 
   let query =
@@ -3169,34 +3156,43 @@ async function fetchTable(
       .from(table)
       .select(select);
 
-  if(options.published){
+  for(
+    const filter
+    of filters
+  ){
 
-    query =
-      query.eq(
-        'is_published',
-        true
-      );
+    if(
+      filter.type === 'eq'
+    ){
+
+      query =
+        query.eq(
+          filter.column,
+          filter.value
+        );
+
+    }
 
   }
 
-  if(options.order){
+  if(order){
 
     query =
       query.order(
-        options.order.column,
+        order.column,
         {
           ascending:
-            options.order.ascending !== false
+            order.ascending !== false
         }
       );
 
   }
 
-  if(options.limit){
+  if(limit){
 
     query =
       query.limit(
-        options.limit
+        limit
       );
 
   }
@@ -3209,12 +3205,12 @@ async function fetchTable(
 
   if(error){
 
-    console.warn(
-      `Supabase ${table}:`,
-      error.message
+    console.error(
+      `${table}:`,
+      error
     );
 
-    return [];
+    throw error;
 
   }
 
@@ -3256,7 +3252,9 @@ function renderDivisions(
         <article class="card">
 
           <h3>
-            ${escapeHTML(row.name)}
+            ${escapeHTML(
+              row.name
+            )}
           </h3>
 
           <p>
@@ -3274,6 +3272,18 @@ function renderDivisions(
                   <span class="tag">
                     ${escapeHTML(
                       row.short_code
+                    )}
+                  </span>
+                `
+                : ''
+            }
+
+            ${
+              row.status
+                ? `
+                  <span class="tag">
+                    ${escapeHTML(
+                      row.status
                     )}
                   </span>
                 `
@@ -3336,7 +3346,7 @@ function projectRoute(
 
   return (
     safeURL(pageUrl) ||
-    '#'
+    ''
   );
 
 }
@@ -3370,7 +3380,6 @@ function renderProjects(
 
         const name =
           row.name ||
-          row.title ||
           'Untitled Project';
 
         const route =
@@ -3390,7 +3399,6 @@ function renderProjects(
             <p>
               ${escapeHTML(
                 row.description ||
-                row.short_description ||
                 'CrowRules Entertainment project.'
               )}
             </p>
@@ -3409,16 +3417,28 @@ function renderProjects(
                   : ''
               }
 
+              ${
+                row.target_year
+                  ? `
+                    <span class="tag">
+                      ${escapeHTML(
+                        row.target_year
+                      )}
+                    </span>
+                  `
+                  : ''
+              }
+
             </div>
 
             ${
-              route !== '#'
+              route
                 ? `
                   <div class="card-actions">
 
                     <a
                       class="btn btn-primary"
-                      href="${route}">
+                      href="${escapeHTML(route)}">
                       EXPLORE
                     </a>
 
@@ -3455,7 +3475,7 @@ function renderShows(
 
     target.innerHTML = `
       <div class="empty">
-        No published shows are currently available.
+        No published original productions are currently available.
       </div>
     `;
 
@@ -3471,7 +3491,6 @@ function renderShows(
 
           <h3>
             ${escapeHTML(
-              row.name ||
               row.title ||
               'Untitled Show'
             )}
@@ -3480,7 +3499,6 @@ function renderShows(
           <p>
             ${escapeHTML(
               row.description ||
-              row.short_description ||
               'Original CrowRules programming.'
             )}
           </p>
@@ -3499,6 +3517,28 @@ function renderShows(
                 : ''
             }
 
+            ${
+              row.schedule_text
+                ? `
+                  <span class="tag">
+                    ${escapeHTML(
+                      row.schedule_text
+                    )}
+                  </span>
+                `
+                : ''
+            }
+
+            ${
+              row.is_live
+                ? `
+                  <span class="tag">
+                    LIVE
+                  </span>
+                `
+                : ''
+            }
+
           </div>
 
         </article>
@@ -3511,6 +3551,8 @@ function renderShows(
 
 /* =========================================================
    SCHEDULE
+   ACTUAL TABLE:
+   cr_schedule.start_at
 ========================================================= */
 
 function renderSchedule(
@@ -3534,49 +3576,77 @@ function renderSchedule(
 
   target.innerHTML =
     rows.map(
-      row => `
+      row => {
 
-        <div class="list-item">
+        const date =
+          row.start_at
+            ? formatDate(
+                row.start_at
+              )
+            : 'Scheduled';
 
-          <div class="list-date">
-            ${escapeHTML(
-              row.date ||
-              row.start_date ||
-              row.air_date ||
-              ''
-            )}
-          </div>
+        return `
 
-          <div>
+          <div class="list-item">
 
-            <div class="list-title">
+            <div class="list-date">
+              ${escapeHTML(date)}
+            </div>
+
+            <div>
+
+              <div class="list-title">
+                ${escapeHTML(
+                  row.title ||
+                  'Programming'
+                )}
+              </div>
+
+              <div class="list-copy">
+
+                ${escapeHTML(
+                  row.description ||
+                  ''
+                )}
+
+                ${
+                  row.start_at
+                    ? `
+                      · ${escapeHTML(
+                        new Intl.DateTimeFormat(
+                          'en-US',
+                          {
+                            hour:'numeric',
+                            minute:'2-digit'
+                          }
+                        ).format(
+                          new Date(
+                            row.start_at
+                          )
+                        )
+                      )}
+                    `
+                    : ''
+                }
+
+              </div>
+
+            </div>
+
+            <div class="status">
               ${escapeHTML(
-                row.title ||
-                row.name ||
-                'Programming'
+                row.is_live
+                  ? 'LIVE'
+                  : row.status ||
+                    'Scheduled'
               )}
             </div>
 
-            <div class="list-copy">
-              ${escapeHTML(
-                row.description ||
-                row.show_name ||
-                ''
-              )}
-            </div>
-
           </div>
 
-          <div class="status">
-            ${escapeHTML(
-              row.status ||
-              'Scheduled'
-            )}
-          </div>
+        `;
 
-        </div>
-
-      `
+      }
     ).join('');
 
 }
@@ -3614,7 +3684,6 @@ function renderRoadmap(
           <div class="list-date">
             ${escapeHTML(
               row.year ||
-              row.target_year ||
               ''
             )}
           </div>
@@ -3624,7 +3693,6 @@ function renderRoadmap(
             <div class="list-title">
               ${escapeHTML(
                 row.title ||
-                row.name ||
                 'Roadmap Item'
               )}
             </div>
@@ -3641,7 +3709,7 @@ function renderRoadmap(
           <div class="status">
             ${escapeHTML(
               row.status ||
-              'Planned'
+              'planned'
             )}
           </div>
 
@@ -3655,6 +3723,8 @@ function renderRoadmap(
 
 /* =========================================================
    NEWS
+   ACTUAL PUBLICATION LOGIC:
+   status = published
 ========================================================= */
 
 function renderNews(
@@ -3668,7 +3738,7 @@ function renderNews(
 
     target.innerHTML = `
       <div class="empty">
-        No news stories are currently available.
+        No published news stories are currently available.
       </div>
     `;
 
@@ -3682,9 +3752,7 @@ function renderNews(
 
         const url =
           safeURL(
-            row.url ||
-            row.article_url ||
-            row.link
+            row.source_url
           );
 
         return `
@@ -3694,7 +3762,6 @@ function renderNews(
             <h3>
               ${escapeHTML(
                 row.title ||
-                row.name ||
                 'News'
               )}
             </h3>
@@ -3702,11 +3769,39 @@ function renderNews(
             <p>
               ${escapeHTML(
                 row.excerpt ||
-                row.description ||
-                row.summary ||
                 ''
               )}
             </p>
+
+            <div class="card-meta">
+
+              ${
+                row.category
+                  ? `
+                    <span class="tag">
+                      ${escapeHTML(
+                        row.category
+                      )}
+                    </span>
+                  `
+                  : ''
+              }
+
+              ${
+                row.published_at
+                  ? `
+                    <span class="tag">
+                      ${escapeHTML(
+                        formatDate(
+                          row.published_at
+                        )
+                      )}
+                    </span>
+                  `
+                  : ''
+              }
+
+            </div>
 
             ${
               url
@@ -3715,7 +3810,7 @@ function renderNews(
 
                     <a
                       class="btn"
-                      href="${url}"
+                      href="${escapeHTML(url)}"
                       target="_blank"
                       rel="noopener noreferrer">
                       READ
@@ -3738,6 +3833,8 @@ function renderNews(
 
 /* =========================================================
    UPDATES
+   ACTUAL PUBLICATION LOGIC:
+   published = true
 ========================================================= */
 
 function renderUpdates(
@@ -3754,7 +3851,7 @@ function renderUpdates(
 
     target.innerHTML = `
       <div class="empty">
-        No development updates are currently available.
+        No published development updates are currently available.
       </div>
     `;
 
@@ -3771,7 +3868,6 @@ function renderUpdates(
           <h3>
             ${escapeHTML(
               row.title ||
-              row.name ||
               'Update'
             )}
           </h3>
@@ -3779,11 +3875,75 @@ function renderUpdates(
           <p>
             ${escapeHTML(
               row.description ||
-              row.content ||
-              row.summary ||
               ''
             )}
           </p>
+
+          <div class="card-meta">
+
+            ${
+              row.update_type
+                ? `
+                  <span class="tag">
+                    ${escapeHTML(
+                      row.update_type
+                    )}
+                  </span>
+                `
+                : ''
+            }
+
+            ${
+              row.project
+                ? `
+                  <span class="tag">
+                    ${escapeHTML(
+                      row.project
+                    )}
+                  </span>
+                `
+                : ''
+            }
+
+            ${
+              row.published_at
+                ? `
+                  <span class="tag">
+                    ${escapeHTML(
+                      formatDate(
+                        row.published_at
+                      )
+                    )}
+                  </span>
+                `
+                : ''
+            }
+
+          </div>
+
+          ${
+            safeURL(
+              row.link_url
+            )
+              ? `
+                <div class="card-actions">
+
+                  <a
+                    class="btn"
+                    href="${escapeHTML(
+                      safeURL(
+                        row.link_url
+                      )
+                    )}"
+                    target="_blank"
+                    rel="noopener noreferrer">
+                    VIEW
+                  </a>
+
+                </div>
+              `
+              : ''
+          }
 
         </article>
 
@@ -3795,6 +3955,8 @@ function renderUpdates(
 
 /* =========================================================
    ANNOUNCEMENTS
+   ACTUAL PUBLICATION LOGIC:
+   active + starts_at + expires_at
 ========================================================= */
 
 function renderAnnouncements(
@@ -3824,9 +3986,9 @@ function renderAnnouncements(
 
           <div class="list-date">
             ${escapeHTML(
-              row.date ||
-              row.created_at ||
-              ''
+              formatDate(
+                row.created_at
+              )
             )}
           </div>
 
@@ -3835,7 +3997,6 @@ function renderAnnouncements(
             <div class="list-title">
               ${escapeHTML(
                 row.title ||
-                row.name ||
                 'Announcement'
               )}
             </div>
@@ -3843,8 +4004,6 @@ function renderAnnouncements(
             <div class="list-copy">
               ${escapeHTML(
                 row.message ||
-                row.description ||
-                row.content ||
                 ''
               )}
             </div>
@@ -3852,7 +4011,10 @@ function renderAnnouncements(
           </div>
 
           <div class="status">
-            ANNOUNCEMENT
+            ${escapeHTML(
+              row.severity ||
+              'info'
+            )}
           </div>
 
         </div>
@@ -3864,7 +4026,7 @@ function renderAnnouncements(
 
 
 /* =========================================================
-   LOAD PUBLIC DATA
+   PUBLIC DATA
 ========================================================= */
 
 async function loadPublicData(){
@@ -3873,138 +4035,441 @@ async function loadPublicData(){
     return;
   }
 
+  const jobs = {
+
+    divisions:
+      fetchRows({
+        table:'cr_divisions',
+        select:'id,name,slug,short_code,description,status,target_year,sort_order,icon,website_url,is_published',
+        filters:[
+          {
+            type:'eq',
+            column:'is_published',
+            value:true
+          }
+        ],
+        order:{
+          column:'sort_order',
+          ascending:true
+        }
+      }),
+
+    projects:
+      fetchRows({
+        table:'cr_projects',
+        select:'*',
+        filters:[
+          {
+            type:'eq',
+            column:'is_published',
+            value:true
+          }
+        ],
+        order:{
+          column:'sort_order',
+          ascending:true
+        }
+      }),
+
+    shows:
+      fetchRows({
+        table:'cr_original_productions',
+        select:'*',
+        filters:[
+          {
+            type:'eq',
+            column:'is_published',
+            value:true
+          }
+        ],
+        order:{
+          column:'sort_order',
+          ascending:true
+        }
+      }),
+
+    schedule:
+      fetchRows({
+        table:'cr_schedule',
+        select:'*',
+        filters:[
+          {
+            type:'eq',
+            column:'is_published',
+            value:true
+          }
+        ],
+        order:{
+          column:'start_at',
+          ascending:true
+        }
+      }),
+
+    roadmap:
+      fetchRows({
+        table:'cr_roadmap',
+        select:'*',
+        filters:[
+          {
+            type:'eq',
+            column:'is_published',
+            value:true
+          }
+        ],
+        order:{
+          column:'sort_order',
+          ascending:true
+        }
+      }),
+
+    news:
+      fetchRows({
+        table:'cr_news',
+        select:'*',
+        filters:[
+          {
+            type:'eq',
+            column:'status',
+            value:'published'
+          }
+        ],
+        order:{
+          column:'created_at',
+          ascending:false
+        },
+        limit:6
+      }),
+
+    updates:
+      fetchRows({
+        table:'cr_updates',
+        select:'*',
+        filters:[
+          {
+            type:'eq',
+            column:'published',
+            value:true
+          }
+        ],
+        order:{
+          column:'published_at',
+          ascending:false
+        },
+        limit:6
+      }),
+
+    announcements:
+      fetchRows({
+        table:'cr_announcements',
+        select:'*',
+        filters:[],
+        order:{
+          column:'created_at',
+          ascending:false
+        },
+        limit:10
+      })
+
+  };
+
+
+  const entries =
+    Object.entries(
+      jobs
+    );
+
+
   const results =
-    await Promise.allSettled([
-
-      fetchTable(
-        'cr_divisions',
-        'id,name,slug,short_code,description,status,target_year,sort_order,icon,website_url,is_published',
-        {
-          published:true,
-          order:{
-            column:'sort_order',
-            ascending:true
-          }
-        }
-      ),
-
-      fetchTable(
-        'cr_projects',
-        '*',
-        {
-          published:true,
-          order:{
-            column:'sort_order',
-            ascending:true
-          }
-        }
-      ),
-
-      fetchTable(
-        'cr_original_productions',
-        '*',
-        {
-          published:true,
-          order:{
-            column:'sort_order',
-            ascending:true
-          }
-        }
-      ),
-
-      fetchTable(
-        'cr_schedule',
-        '*',
-        {
-          published:true,
-          order:{
-            column:'sort_order',
-            ascending:true
-          }
-        }
-      ),
-
-      fetchTable(
-        'cr_roadmap',
-        '*',
-        {
-          published:true,
-          order:{
-            column:'sort_order',
-            ascending:true
-          }
-        }
-      ),
-
-      fetchTable(
-        'cr_news',
-        '*',
-        {
-          published:true,
-          order:{
-            column:'created_at',
-            ascending:false
-          }
-        }
-      ),
-
-      fetchTable(
-        'cr_updates',
-        '*',
-        {
-          published:true,
-          order:{
-            column:'created_at',
-            ascending:false
-          }
-        }
-      ),
-
-      fetchTable(
-        'cr_announcements',
-        '*',
-        {
-          published:true,
-          order:{
-            column:'created_at',
-            ascending:false
-          }
-        }
+    await Promise.allSettled(
+      entries.map(
+        ([,promise]) =>
+          promise
       )
+    );
 
-    ]);
 
-  const value =
-    index =>
-      results[index]?.status ===
-      'fulfilled'
-        ? results[index].value
-        : [];
+  const data = {};
 
-  renderDivisions(value(0));
-  renderProjects(value(1));
-  renderShows(value(2));
-  renderSchedule(value(3));
-  renderRoadmap(value(4));
-  renderNews(value(5));
-  renderUpdates(value(6));
-  renderAnnouncements(value(7));
+  entries.forEach(
+    ([key],index) => {
+
+      const result =
+        results[index];
+
+      data[key] =
+        result.status ===
+        'fulfilled'
+          ? result.value
+          : [];
+
+    }
+  );
+
+
+  renderDivisions(
+    data.divisions
+  );
+
+  renderProjects(
+    data.projects
+  );
+
+  renderShows(
+    data.shows
+  );
+
+  renderSchedule(
+    data.schedule
+  );
+
+  renderRoadmap(
+    data.roadmap
+  );
+
+  renderNews(
+    data.news
+  );
+
+  renderUpdates(
+    data.updates
+  );
+
+
+  /*
+   * cr_announcements has no is_published column.
+   * Filter active dates client-side in addition to RLS.
+   */
+
+  const now =
+    Date.now();
+
+  const activeAnnouncements =
+    data.announcements.filter(
+      row => {
+
+        const starts =
+          row.starts_at
+            ? new Date(
+                row.starts_at
+              ).getTime()
+            : 0;
+
+        const expires =
+          row.expires_at
+            ? new Date(
+                row.expires_at
+              ).getTime()
+            : Infinity;
+
+        return (
+          row.active === true &&
+          starts <= now &&
+          expires > now
+        );
+
+      }
+    );
+
+
+  renderAnnouncements(
+    activeAnnouncements
+  );
 
 }
 
 
 /* =========================================================
-   KIT
+   NEWSLETTER
+   NOW CONNECTED TO cr_subscribers
 ========================================================= */
 
-$('#kitNewsletterForm')
+$('#newsletterForm')
   ?.addEventListener(
     'submit',
-    () => {
+    async event => {
 
-      toast(
-        'Opening CrowRules Entertainment on Kit...'
-      );
+      event.preventDefault();
+
+      if(!sb){
+
+        toast(
+          'Database connection is unavailable.'
+        );
+
+        return;
+
+      }
+
+      const form =
+        event.currentTarget;
+
+      const email =
+        String(
+          $('#newsletterEmail').value ||
+          ''
+        )
+          .trim()
+          .toLowerCase();
+
+
+      if(!email){
+
+        toast(
+          'Please enter your email address.'
+        );
+
+        return;
+
+      }
+
+
+      const button =
+        form.querySelector(
+          'button[type="submit"]'
+        );
+
+      const original =
+        button?.textContent;
+
+
+      if(button){
+
+        button.disabled =
+          true;
+
+        button.textContent =
+          'SUBSCRIBING...';
+
+      }
+
+
+      try{
+
+        /*
+         * The existing RLS policy permits public INSERT
+         * into cr_subscribers.
+         *
+         * We use upsert so returning visitors don't create
+         * duplicate email records.
+         */
+
+        const {
+          error
+        } =
+          await sb
+            .from(
+              'cr_subscribers'
+            )
+            .upsert(
+              {
+                email,
+                source:
+                  'business_hub',
+                status:
+                  'subscribed'
+              },
+              {
+                onConflict:
+                  'email',
+                ignoreDuplicates:
+                  false
+              }
+            );
+
+
+        if(error){
+
+          /*
+           * Some existing databases may reject the update
+           * portion of an upsert because public users only
+           * have INSERT permission.
+           *
+           * In that case, try a plain insert and interpret
+           * duplicate-key as an already-subscribed address.
+           */
+
+          if(
+            String(
+              error.message || ''
+            ).toLowerCase()
+              .includes('duplicate')
+          ){
+
+            toast(
+              'That email is already subscribed.'
+            );
+
+            return;
+
+          }
+
+          const fallback =
+            await sb
+              .from(
+                'cr_subscribers'
+              )
+              .insert({
+                email,
+                source:
+                  'business_hub',
+                status:
+                  'subscribed'
+              });
+
+
+          if(
+            fallback.error &&
+            !String(
+              fallback.error.message || ''
+            ).toLowerCase()
+              .includes('duplicate')
+          ){
+
+            throw fallback.error;
+
+          }
+
+        }
+
+
+        form.reset();
+
+        toast(
+          'You are now subscribed to CrowRules updates.'
+        );
+
+
+        /*
+         * Kit remains the official publication.
+         * We don't pretend this static frontend has
+         * Kit's private subscriber API credentials.
+         */
+
+      }catch(error){
+
+        console.error(
+          'Newsletter subscription:',
+          error
+        );
+
+        toast(
+          'Unable to subscribe right now.'
+        );
+
+      }finally{
+
+        if(button){
+
+          button.disabled =
+            false;
+
+          button.textContent =
+            original ||
+            'JOIN NEWSLETTER';
+
+        }
+
+      }
 
     }
   );
@@ -4036,6 +4501,7 @@ $('#partnershipForm')
 
       const fd =
         new FormData(form);
+
 
       const payload = {
 
@@ -4071,7 +4537,7 @@ $('#partnershipForm')
           String(
             fd.get(
               'partnership_type'
-            ) || ''
+            ) || 'partnership'
           ).trim(),
 
         website_url:
@@ -4099,7 +4565,7 @@ $('#partnershipForm')
           String(
             fd.get(
               'preferred_contact'
-            ) || ''
+            ) || 'email'
           ).trim(),
 
         message:
@@ -4112,6 +4578,10 @@ $('#partnershipForm')
         source:
           'business_hub',
 
+        /*
+         * Must remain "new" for the public RLS policy.
+         */
+
         status:
           'new',
 
@@ -4120,26 +4590,74 @@ $('#partnershipForm')
 
       };
 
+
+      if(
+        payload.organization_name.length < 1 ||
+        payload.organization_name.length > 200
+      ){
+
+        toast(
+          'Please enter a valid organization name.'
+        );
+
+        return;
+
+      }
+
+
+      if(
+        payload.contact_name.length < 1 ||
+        payload.contact_name.length > 150
+      ){
+
+        toast(
+          'Please enter a valid contact name.'
+        );
+
+        return;
+
+      }
+
+
+      if(
+        payload.message.length < 1 ||
+        payload.message.length > 5000
+      ){
+
+        toast(
+          'Please enter a partnership message.'
+        );
+
+        return;
+
+      }
+
+
       const button =
         form.querySelector(
           'button[type="submit"]'
         );
 
-      const originalText =
+      const original =
         button?.textContent;
+
 
       if(button){
 
-        button.disabled = true;
+        button.disabled =
+          true;
 
         button.textContent =
           'SENDING...';
 
       }
 
+
       try{
 
-        const { error } =
+        const {
+          error
+        } =
           await sb
             .from(
               'cr_partnership_inquiries'
@@ -4148,9 +4666,13 @@ $('#partnershipForm')
               payload
             );
 
+
         if(error){
+
           throw error;
+
         }
+
 
         form.reset();
 
@@ -4158,11 +4680,16 @@ $('#partnershipForm')
           'Partnership request submitted successfully.'
         );
 
+
       }catch(error){
 
-        console.error(error);
+        console.error(
+          'Partnership submission:',
+          error
+        );
 
         toast(
+          error.message ||
           'Unable to submit partnership request.'
         );
 
@@ -4170,10 +4697,12 @@ $('#partnershipForm')
 
         if(button){
 
-          button.disabled = false;
+          button.disabled =
+            false;
 
           button.textContent =
-            originalText;
+            original ||
+            'SEND PARTNERSHIP REQUEST';
 
         }
 
@@ -4184,7 +4713,9 @@ $('#partnershipForm')
 
 
 /* =========================================================
-   ADMIN
+   ADMIN CHECK
+   IMPORTANT:
+   cr_admins uses user_id, NOT email.
 ========================================================= */
 
 async function checkAdmin(){
@@ -4201,6 +4732,7 @@ async function checkAdmin(){
 
   }
 
+
   try{
 
     const {
@@ -4208,19 +4740,24 @@ async function checkAdmin(){
       error
     } =
       await sb
-        .from('cr_admins')
-        .select('id,email')
+        .from(
+          'cr_admins'
+        )
+        .select(
+          'user_id,display_name'
+        )
         .eq(
-          'email',
-          currentUser.email
+          'user_id',
+          currentUser.id
         )
         .maybeSingle();
 
+
     if(error){
 
-      console.warn(
+      console.error(
         'Admin check:',
-        error.message
+        error
       );
 
       currentAdmin =
@@ -4230,12 +4767,18 @@ async function checkAdmin(){
 
     }
 
+
     currentAdmin =
       !!data;
 
     return currentAdmin;
 
   }catch(error){
+
+    console.error(
+      'Admin check exception:',
+      error
+    );
 
     currentAdmin =
       false;
@@ -4247,6 +4790,10 @@ async function checkAdmin(){
 }
 
 
+/* =========================================================
+   ADMIN UI
+========================================================= */
+
 function updateAdminUI(){
 
   const loginCard =
@@ -4254,6 +4801,7 @@ function updateAdminUI(){
 
   const panel =
     $('#adminPanel');
+
 
   if(currentAdmin){
 
@@ -4299,6 +4847,7 @@ $('#adminLoginForm')
 
       }
 
+
       const email =
         $('#adminEmail')
           .value
@@ -4307,6 +4856,29 @@ $('#adminLoginForm')
       const password =
         $('#adminPassword')
           .value;
+
+
+      const button =
+        event.currentTarget
+          .querySelector(
+            'button[type="submit"]'
+          );
+
+
+      const original =
+        button?.textContent;
+
+
+      if(button){
+
+        button.disabled =
+          true;
+
+        button.textContent =
+          'AUTHENTICATING...';
+
+      }
+
 
       try{
 
@@ -4320,15 +4892,21 @@ $('#adminLoginForm')
               password
             });
 
+
         if(error){
+
           throw error;
+
         }
+
 
         currentUser =
           data.user;
 
+
         const isAdmin =
           await checkAdmin();
+
 
         if(!isAdmin){
 
@@ -4337,15 +4915,19 @@ $('#adminLoginForm')
           currentUser =
             null;
 
+          currentAdmin =
+            false;
+
           updateAdminUI();
 
           toast(
-            'This account does not have admin access.'
+            'Authenticated, but this account is not a CrowRules administrator.'
           );
 
           return;
 
         }
+
 
         updateAdminUI();
 
@@ -4353,18 +4935,36 @@ $('#adminLoginForm')
 
         subscribeRealtime();
 
+
         toast(
           'Admin login successful.'
         );
 
+
       }catch(error){
 
-        console.error(error);
+        console.error(
+          'Admin login:',
+          error
+        );
 
         toast(
           error.message ||
           'Admin login failed.'
         );
+
+      }finally{
+
+        if(button){
+
+          button.disabled =
+            false;
+
+          button.textContent =
+            original ||
+            'ADMIN LOGIN';
+
+        }
 
       }
 
@@ -4381,11 +4981,29 @@ $('#adminLogout')
     'click',
     async () => {
 
+      if(realtimeChannel){
+
+        try{
+
+          await sb
+            ?.removeChannel(
+              realtimeChannel
+            );
+
+        }catch(error){}
+
+        realtimeChannel =
+          null;
+
+      }
+
+
       if(sb){
 
         await sb.auth.signOut();
 
       }
+
 
       currentUser =
         null;
@@ -4393,7 +5011,11 @@ $('#adminLogout')
       currentAdmin =
         false;
 
+      allInquiries =
+        [];
+
       updateAdminUI();
+
 
       toast(
         'You have been logged out.'
@@ -4417,6 +5039,7 @@ async function loadInquiries(){
     return;
 
   }
+
 
   const {
     data,
@@ -4452,9 +5075,13 @@ async function loadInquiries(){
         }
       );
 
+
   if(error){
 
-    console.error(error);
+    console.error(
+      'Load inquiries:',
+      error
+    );
 
     toast(
       'Unable to load partnership inquiries.'
@@ -4464,8 +5091,10 @@ async function loadInquiries(){
 
   }
 
+
   allInquiries =
     data || [];
+
 
   renderInquiries();
 
@@ -4496,6 +5125,7 @@ function renderInquiries(){
       ?.value ||
     '';
 
+
   const filtered =
     allInquiries.filter(
       item => {
@@ -4515,6 +5145,7 @@ function renderInquiries(){
           .join(' ')
           .toLowerCase();
 
+
         if(
           search &&
           !text.includes(search)
@@ -4523,6 +5154,7 @@ function renderInquiries(){
           return false;
 
         }
+
 
         if(
           status &&
@@ -4533,6 +5165,7 @@ function renderInquiries(){
 
         }
 
+
         if(
           priority &&
           item.priority !== priority
@@ -4542,28 +5175,36 @@ function renderInquiries(){
 
         }
 
+
         return true;
 
       }
     );
 
+
   $('#adminTotal').textContent =
     allInquiries.length;
+
 
   $('#adminNew').textContent =
     allInquiries.filter(
       item =>
-        item.status === 'new'
+        item.status ===
+        'new'
     ).length;
+
 
   $('#adminUrgent').textContent =
     allInquiries.filter(
       item =>
-        item.priority === 'urgent'
+        item.priority ===
+        'urgent'
     ).length;
+
 
   const target =
     $('#inquiryList');
+
 
   if(!filtered.length){
 
@@ -4576,6 +5217,7 @@ function renderInquiries(){
     return;
 
   }
+
 
   target.innerHTML =
     filtered.map(
@@ -4593,6 +5235,7 @@ function renderInquiries(){
             </div>
 
             <div class="list-copy">
+
               ${escapeHTML(
                 item.contact_name ||
                 ''
@@ -4615,7 +5258,7 @@ function renderInquiries(){
               <span class="tag">
                 ${escapeHTML(
                   item.partnership_type ||
-                  'Partnership'
+                  'partnership'
                 )}
               </span>
 
@@ -4662,6 +5305,7 @@ function renderInquiries(){
       `
     ).join('');
 
+
   $$('.inquiry-open')
     .forEach(
       button => {
@@ -4678,6 +5322,7 @@ function renderInquiries(){
                     button.dataset.id
                   )
               );
+
 
             if(item){
 
@@ -4697,7 +5342,7 @@ function renderInquiries(){
 
 
 /* =========================================================
-   FILTERS
+   ADMIN FILTERS
 ========================================================= */
 
 $('#adminSearch')
@@ -4706,11 +5351,13 @@ $('#adminSearch')
     renderInquiries
   );
 
+
 $('#adminStatusFilter')
   ?.addEventListener(
     'change',
     renderInquiries
   );
+
 
 $('#adminPriorityFilter')
   ?.addEventListener(
@@ -4718,15 +5365,24 @@ $('#adminPriorityFilter')
     renderInquiries
   );
 
+
 $('#refreshAdmin')
   ?.addEventListener(
     'click',
-    loadInquiries
+    async () => {
+
+      await loadInquiries();
+
+      toast(
+        'Admin inbox refreshed.'
+      );
+
+    }
   );
 
 
 /* =========================================================
-   MODAL
+   INQUIRY MODAL
 ========================================================= */
 
 function openInquiry(
@@ -4735,6 +5391,7 @@ function openInquiry(
 
   activeInquiry =
     item;
+
 
   $('#editInquiryId').value =
     item.id || '';
@@ -4769,12 +5426,15 @@ function openInquiry(
   $('#editAdminNotes').value =
     item.admin_notes || '';
 
+
   const modal =
     $('#inquiryModal');
+
 
   modal.classList.add(
     'active'
   );
+
 
   modal.setAttribute(
     'aria-hidden',
@@ -4789,14 +5449,17 @@ function closeInquiry(){
   const modal =
     $('#inquiryModal');
 
+
   modal.classList.remove(
     'active'
   );
+
 
   modal.setAttribute(
     'aria-hidden',
     'true'
   );
+
 
   activeInquiry =
     null;
@@ -4809,6 +5472,7 @@ $('#modalClose')
     'click',
     closeInquiry
   );
+
 
 $('#modalCancel')
   ?.addEventListener(
@@ -4835,6 +5499,25 @@ $('#inquiryModal')
   );
 
 
+document.addEventListener(
+  'keydown',
+  event => {
+
+    if(
+      event.key === 'Escape' &&
+      $('#inquiryModal')
+        ?.classList
+        .contains('active')
+    ){
+
+      closeInquiry();
+
+    }
+
+  }
+);
+
+
 /* =========================================================
    SAVE INQUIRY
 ========================================================= */
@@ -4845,6 +5528,7 @@ $('#inquiryEditForm')
     async event => {
 
       event.preventDefault();
+
 
       if(
         !sb ||
@@ -4860,53 +5544,111 @@ $('#inquiryEditForm')
 
       }
 
-      const {
-        error
-      } =
-        await sb
-          .from(
-            'cr_partnership_inquiries'
-          )
-          .update({
 
-            status:
-              $('#editStatus')
-                .value,
+      const status =
+        $('#editStatus')
+          .value;
 
-            priority:
-              $('#editPriority')
-                .value,
+      const priority =
+        $('#editPriority')
+          .value;
 
-            admin_notes:
-              $('#editAdminNotes')
-                .value
-                .trim()
+      const adminNotes =
+        $('#editAdminNotes')
+          .value
+          .trim();
 
-          })
-          .eq(
-            'id',
-            activeInquiry.id
+
+      const button =
+        event.currentTarget
+          .querySelector(
+            'button[type="submit"]'
           );
 
-      if(error){
 
-        console.error(error);
+      const original =
+        button?.textContent;
 
-        toast(
-          'Unable to update inquiry.'
-        );
 
-        return;
+      if(button){
+
+        button.disabled =
+          true;
+
+        button.textContent =
+          'SAVING...';
 
       }
 
-      closeInquiry();
 
-      await loadInquiries();
+      try{
 
-      toast(
-        'Inquiry updated successfully.'
-      );
+        const {
+          error
+        } =
+          await sb
+            .from(
+              'cr_partnership_inquiries'
+            )
+            .update({
+
+              status,
+              priority,
+              admin_notes:
+                adminNotes,
+              updated_at:
+                new Date().toISOString()
+
+            })
+            .eq(
+              'id',
+              activeInquiry.id
+            );
+
+
+        if(error){
+
+          throw error;
+
+        }
+
+
+        closeInquiry();
+
+        await loadInquiries();
+
+
+        toast(
+          'Inquiry updated successfully.'
+        );
+
+
+      }catch(error){
+
+        console.error(
+          'Update inquiry:',
+          error
+        );
+
+        toast(
+          error.message ||
+          'Unable to update inquiry.'
+        );
+
+      }finally{
+
+        if(button){
+
+          button.disabled =
+            false;
+
+          button.textContent =
+            original ||
+            'SAVE CHANGES';
+
+        }
+
+      }
 
     }
   );
@@ -4927,6 +5669,7 @@ function subscribeRealtime(){
 
   }
 
+
   if(realtimeChannel){
 
     try{
@@ -4938,6 +5681,12 @@ function subscribeRealtime(){
     }catch(error){}
 
   }
+
+
+  /*
+   * cr_partnership_inquiries has now been added to
+   * supabase_realtime in the database.
+   */
 
   realtimeChannel =
     sb
@@ -4952,13 +5701,31 @@ function subscribeRealtime(){
           table:
             'cr_partnership_inquiries'
         },
-        async () => {
+        async payload => {
+
+          console.log(
+            'Partnership inquiry realtime event:',
+            payload.eventType
+          );
 
           await loadInquiries();
 
+          toast(
+            'Partnership inbox updated.'
+          );
+
         }
       )
-      .subscribe();
+      .subscribe(
+        status => {
+
+          console.log(
+            'Realtime status:',
+            status
+          );
+
+        }
+      );
 
 }
 
@@ -4973,38 +5740,55 @@ async function restoreSession(){
     return;
   }
 
+
   try{
 
     const {
       data
     } =
-      await sb.auth.getSession();
+      await sb.auth
+        .getSession();
+
 
     currentUser =
       data?.session?.user ||
       null;
 
+
     if(!currentUser){
+
+      updateAdminUI();
+
       return;
+
     }
+
 
     const isAdmin =
       await checkAdmin();
+
 
     if(!isAdmin){
 
       currentUser =
         null;
 
+      currentAdmin =
+        false;
+
+      updateAdminUI();
+
       return;
 
     }
+
 
     updateAdminUI();
 
     await loadInquiries();
 
     subscribeRealtime();
+
 
   }catch(error){
 
@@ -5022,26 +5806,49 @@ async function restoreSession(){
    AUTH LISTENER
 ========================================================= */
 
-async function setupAuth(){
+function setupAuth(){
 
   if(!sb){
     return;
   }
 
+
   sb.auth.onAuthStateChange(
     async (
-      _event,
+      event,
       session
     ) => {
+
+      console.log(
+        'Auth event:',
+        event
+      );
+
 
       currentUser =
         session?.user ||
         null;
 
+
       if(!currentUser){
 
         currentAdmin =
           false;
+
+        if(realtimeChannel){
+
+          try{
+
+            sb.removeChannel(
+              realtimeChannel
+            );
+
+          }catch(error){}
+
+          realtimeChannel =
+            null;
+
+        }
 
         updateAdminUI();
 
@@ -5049,10 +5856,18 @@ async function setupAuth(){
 
       }
 
+
+      /*
+       * Avoid trusting client metadata.
+       * Admin status is checked against cr_admins.user_id.
+       */
+
       const isAdmin =
         await checkAdmin();
 
+
       updateAdminUI();
+
 
       if(isAdmin){
 
@@ -5069,29 +5884,121 @@ async function setupAuth(){
 
 
 /* =========================================================
+   OPTIONAL NAVIGATION FROM DATABASE
+========================================================= */
+
+async function loadDatabaseNav(){
+
+  if(!sb){
+    return;
+  }
+
+
+  try{
+
+    const rows =
+      await fetchRows({
+        table:'cr_nav_links',
+        select:'label,href,section,sort_order,is_external,is_published',
+        filters:[
+          {
+            type:'eq',
+            column:'is_published',
+            value:true
+          }
+        ],
+        order:{
+          column:'sort_order',
+          ascending:true
+        }
+      });
+
+
+    /*
+     * We intentionally don't replace the hand-built navigation
+     * automatically. This keeps core links available even if
+     * a database navigation record is accidentally removed.
+     *
+     * The database is available for future dynamic navigation.
+     */
+
+    console.log(
+      'Supabase navigation records:',
+      rows.length
+    );
+
+  }catch(error){
+
+    console.warn(
+      'Database navigation unavailable:',
+      error.message
+    );
+
+  }
+
+}
+
+
+/* =========================================================
    INITIALIZATION
 ========================================================= */
 
 async function init(){
 
+  setConnectionStatus(
+    'connected',
+    'CONNECTING'
+  );
+
+
   const connected =
     initSupabase();
+
 
   if(!connected){
     return;
   }
 
-  await loadPublicData();
 
-  await setupAuth();
+  try{
 
-  await restoreSession();
+    await loadPublicData();
+
+    await loadDatabaseNav();
+
+    setupAuth();
+
+    await restoreSession();
+
+
+    setConnectionStatus(
+      'connected',
+      'SUPABASE ONLINE'
+    );
+
+
+  }catch(error){
+
+    console.error(
+      'Business Hub initialization:',
+      error
+    );
+
+    setConnectionStatus(
+      'error',
+      'DATABASE ERROR'
+    );
+
+    toast(
+      'Some Business Hub data could not be loaded.'
+    );
+
+  }
 
 }
 
 
 init();
-
 </script>
 
 </body>
