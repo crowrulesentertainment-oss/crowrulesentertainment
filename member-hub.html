@@ -1,0 +1,3663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="theme-color" content="#05070c">
+<meta name="description"
+      content="CrowRules Members Hub — Your home for CrowRules Entertainment membership, profiles, watch history, points, rankings and more.">
+
+<title>CrowRules Members Hub</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+/* =========================================================
+   CROWRULES MEMBERS HUB
+   SINGLE-FILE HTML / CSS / JS
+   ========================================================= */
+
+:root{
+    --bg:#05070c;
+    --bg2:#090d16;
+    --panel:#0d121d;
+    --panel2:#111927;
+    --border:rgba(255,255,255,.09);
+    --text:#f5f7fb;
+    --muted:#8e99aa;
+    --accent:#8b5cf6;
+    --accent2:#00e5ff;
+    --success:#20e3a2;
+    --danger:#ff5577;
+    --warning:#ffc857;
+    --shadow:0 20px 60px rgba(0,0,0,.45);
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    min-height:100vh;
+    background:
+        radial-gradient(circle at 10% 10%,rgba(139,92,246,.12),transparent 35%),
+        radial-gradient(circle at 90% 20%,rgba(0,229,255,.08),transparent 30%),
+        linear-gradient(180deg,#04060a,#080b12 50%,#05070c);
+    color:var(--text);
+    font-family:"Montserrat",sans-serif;
+    overflow-x:hidden;
+}
+
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    opacity:.045;
+    background-image:
+        linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px);
+    background-size:50px 50px;
+    mask-image:linear-gradient(to bottom,black,transparent);
+    z-index:-1;
+}
+
+a{
+    color:inherit;
+    text-decoration:none;
+}
+
+button,
+input,
+textarea,
+select{
+    font:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+/* =========================================================
+   INTRO
+   ========================================================= */
+
+.intro{
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#030407;
+    transition:opacity 1s ease,visibility 1s ease;
+}
+
+.intro.hidden{
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+}
+
+.intro-inner{
+    text-align:center;
+    padding:30px;
+}
+
+.intro-crow{
+    font-size:64px;
+    margin-bottom:20px;
+    animation:crowPulse 1.6s infinite alternate;
+}
+
+.intro-title{
+    font-family:"Orbitron",sans-serif;
+    font-size:clamp(32px,7vw,80px);
+    letter-spacing:.12em;
+    text-transform:uppercase;
+}
+
+.intro-title span{
+    color:var(--accent2);
+}
+
+.intro-line{
+    height:2px;
+    width:min(500px,80vw);
+    margin:25px auto;
+    background:linear-gradient(
+        90deg,
+        transparent,
+        var(--accent),
+        var(--accent2),
+        transparent
+    );
+    animation:scan 2s infinite;
+}
+
+.intro-sub{
+    color:var(--muted);
+    letter-spacing:.25em;
+    text-transform:uppercase;
+    font-size:12px;
+}
+
+@keyframes crowPulse{
+    from{transform:scale(.95);opacity:.65}
+    to{transform:scale(1.08);opacity:1}
+}
+
+@keyframes scan{
+    0%{transform:scaleX(.25);opacity:.2}
+    50%{transform:scaleX(1);opacity:1}
+    100%{transform:scaleX(.25);opacity:.2}
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.header{
+    position:sticky;
+    top:0;
+    z-index:100;
+    height:76px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 5vw;
+    background:rgba(4,6,10,.82);
+    backdrop-filter:blur(18px);
+    border-bottom:1px solid var(--border);
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.brand-mark{
+    font-size:28px;
+}
+
+.brand-name{
+    font-family:"Orbitron",sans-serif;
+    font-size:16px;
+    font-weight:800;
+    letter-spacing:.08em;
+}
+
+.brand-name span{
+    color:var(--accent2);
+}
+
+.nav{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.nav a,
+.nav button{
+    border:0;
+    background:transparent;
+    color:var(--muted);
+    padding:10px 13px;
+    border-radius:9px;
+    transition:.2s;
+}
+
+.nav a:hover,
+.nav button:hover{
+    color:#fff;
+    background:rgba(255,255,255,.05);
+}
+
+.nav-login{
+    border:1px solid rgba(0,229,255,.35)!important;
+    color:var(--accent2)!important;
+}
+
+.mobile-menu{
+    display:none;
+}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.hero{
+    position:relative;
+    min-height:460px;
+    display:flex;
+    align-items:center;
+    padding:80px 7vw;
+    overflow:hidden;
+}
+
+.hero::before{
+    content:"";
+    position:absolute;
+    width:650px;
+    height:650px;
+    right:-220px;
+    top:-250px;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(139,92,246,.22),transparent 65%);
+    filter:blur(15px);
+}
+
+.hero::after{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    height:2px;
+    background:linear-gradient(
+        90deg,
+        transparent,
+        var(--accent),
+        var(--accent2),
+        transparent
+    );
+}
+
+.hero-content{
+    position:relative;
+    z-index:2;
+    max-width:850px;
+}
+
+.eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    color:var(--accent2);
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:.25em;
+    text-transform:uppercase;
+    margin-bottom:20px;
+}
+
+.eyebrow::before{
+    content:"";
+    width:24px;
+    height:2px;
+    background:var(--accent2);
+}
+
+.hero h1{
+    font-family:"Orbitron",sans-serif;
+    font-size:clamp(40px,7vw,84px);
+    line-height:1;
+    letter-spacing:-.04em;
+    margin-bottom:25px;
+}
+
+.hero h1 span{
+    color:var(--accent2);
+    text-shadow:0 0 30px rgba(0,229,255,.25);
+}
+
+.hero p{
+    max-width:720px;
+    color:var(--muted);
+    font-size:17px;
+    line-height:1.8;
+}
+
+.hero-actions{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-top:30px;
+}
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.btn{
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.04);
+    color:#fff;
+    padding:12px 18px;
+    border-radius:10px;
+    font-weight:700;
+    transition:.2s;
+}
+
+.btn:hover{
+    transform:translateY(-2px);
+    border-color:rgba(255,255,255,.2);
+}
+
+.btn-primary{
+    border-color:transparent;
+    background:linear-gradient(
+        135deg,
+        var(--accent),
+        #5b8cff
+    );
+    box-shadow:0 10px 30px rgba(139,92,246,.25);
+}
+
+.btn-cyan{
+    border-color:rgba(0,229,255,.35);
+    color:var(--accent2);
+}
+
+.btn-danger{
+    border-color:rgba(255,85,119,.3);
+    color:var(--danger);
+}
+
+/* =========================================================
+   CONTAINER
+   ========================================================= */
+
+.container{
+    width:min(1400px,90%);
+    margin:auto;
+}
+
+.section{
+    padding:75px 0;
+}
+
+.section-heading{
+    margin-bottom:30px;
+}
+
+.section-heading .kicker{
+    color:var(--accent2);
+    text-transform:uppercase;
+    letter-spacing:.2em;
+    font-size:11px;
+    font-weight:800;
+    margin-bottom:10px;
+}
+
+.section-heading h2{
+    font-family:"Orbitron",sans-serif;
+    font-size:clamp(26px,4vw,42px);
+}
+
+.section-heading p{
+    color:var(--muted);
+    margin-top:10px;
+}
+
+/* =========================================================
+   AUTH GATE
+   ========================================================= */
+
+.auth-gate{
+    display:none;
+}
+
+.auth-gate.active{
+    display:block;
+}
+
+.auth-panel{
+    max-width:700px;
+    margin:20px auto;
+    padding:45px;
+    text-align:center;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(139,92,246,.12),
+            rgba(0,229,255,.04)
+        ),
+        var(--panel);
+    border:1px solid var(--border);
+    border-radius:20px;
+    box-shadow:var(--shadow);
+}
+
+.auth-icon{
+    font-size:54px;
+    margin-bottom:18px;
+}
+
+.auth-panel h2{
+    font-family:"Orbitron",sans-serif;
+    margin-bottom:12px;
+}
+
+.auth-panel p{
+    color:var(--muted);
+    line-height:1.7;
+    margin-bottom:25px;
+}
+
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
+
+.dashboard{
+    display:none;
+}
+
+.dashboard.active{
+    display:block;
+}
+
+/* =========================================================
+   STAT CARDS
+   ========================================================= */
+
+.stats-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;
+}
+
+.stat-card{
+    position:relative;
+    overflow:hidden;
+    padding:24px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:16px;
+}
+
+.stat-card::after{
+    content:"";
+    position:absolute;
+    width:100px;
+    height:100px;
+    right:-40px;
+    bottom:-40px;
+    border-radius:50%;
+    background:rgba(139,92,246,.1);
+}
+
+.stat-label{
+    color:var(--muted);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.16em;
+    font-weight:700;
+}
+
+.stat-value{
+    font-family:"Orbitron",sans-serif;
+    font-size:34px;
+    margin-top:10px;
+}
+
+.stat-icon{
+    font-size:20px;
+}
+
+/* =========================================================
+   PROFILE
+   ========================================================= */
+
+.profile-layout{
+    display:grid;
+    grid-template-columns:340px 1fr;
+    gap:20px;
+}
+
+.profile-card,
+.form-card,
+.list-card,
+.history-card,
+.community-card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:18px;
+    box-shadow:0 15px 45px rgba(0,0,0,.2);
+}
+
+.profile-card{
+    padding:30px;
+    text-align:center;
+}
+
+.avatar{
+    width:120px;
+    height:120px;
+    margin:0 auto 20px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    background:
+        linear-gradient(135deg,var(--accent),var(--accent2));
+    color:white;
+    font-family:"Orbitron",sans-serif;
+    font-size:35px;
+    font-weight:800;
+    border:3px solid rgba(255,255,255,.1);
+}
+
+.avatar img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.profile-name{
+    font-family:"Orbitron",sans-serif;
+    font-size:21px;
+}
+
+.profile-username{
+    color:var(--accent2);
+    font-size:13px;
+    margin-top:6px;
+}
+
+.profile-bio{
+    color:var(--muted);
+    line-height:1.7;
+    margin-top:18px;
+    font-size:14px;
+}
+
+.profile-meta{
+    display:grid;
+    gap:10px;
+    margin-top:25px;
+    text-align:left;
+}
+
+.meta-row{
+    display:flex;
+    justify-content:space-between;
+    padding:11px 0;
+    border-bottom:1px solid var(--border);
+    font-size:13px;
+}
+
+.meta-row span:first-child{
+    color:var(--muted);
+}
+
+.meta-row span:last-child{
+    font-weight:700;
+}
+
+/* =========================================================
+   FORMS
+   ========================================================= */
+
+.form-card{
+    padding:30px;
+}
+
+.form-card h3{
+    font-family:"Orbitron",sans-serif;
+    margin-bottom:22px;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+}
+
+.field{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.field.full{
+    grid-column:1/-1;
+}
+
+.field label{
+    color:var(--muted);
+    font-size:12px;
+    font-weight:700;
+}
+
+.field input,
+.field textarea,
+.field select{
+    width:100%;
+    border:1px solid var(--border);
+    background:#080c13;
+    color:#fff;
+    border-radius:10px;
+    padding:13px 14px;
+    outline:none;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus{
+    border-color:rgba(0,229,255,.5);
+    box-shadow:0 0 0 3px rgba(0,229,255,.06);
+}
+
+.field textarea{
+    min-height:120px;
+    resize:vertical;
+}
+
+.form-actions{
+    display:flex;
+    gap:10px;
+    margin-top:20px;
+}
+
+/* =========================================================
+   LIST / HISTORY
+   ========================================================= */
+
+.two-column{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.list-card,
+.history-card,
+.community-card{
+    padding:25px;
+}
+
+.card-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.card-header h3{
+    font-family:"Orbitron",sans-serif;
+    font-size:18px;
+}
+
+.item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    padding:15px 0;
+    border-bottom:1px solid var(--border);
+}
+
+.item:last-child{
+    border-bottom:0;
+}
+
+.item-title{
+    font-weight:700;
+    font-size:14px;
+}
+
+.item-sub{
+    color:var(--muted);
+    font-size:12px;
+    margin-top:5px;
+}
+
+.empty{
+    color:var(--muted);
+    padding:25px 0;
+    text-align:center;
+    font-size:13px;
+}
+
+.item-actions{
+    display:flex;
+    gap:7px;
+}
+
+.icon-btn{
+    border:1px solid var(--border);
+    background:transparent;
+    color:var(--muted);
+    width:34px;
+    height:34px;
+    border-radius:8px;
+}
+
+.icon-btn:hover{
+    color:#fff;
+    border-color:rgba(255,255,255,.25);
+}
+
+/* =========================================================
+   COMMUNITY
+   ========================================================= */
+
+.community-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+}
+
+.community-tile{
+    padding:25px;
+    background:rgba(255,255,255,.025);
+    border:1px solid var(--border);
+    border-radius:14px;
+}
+
+.community-tile .icon{
+    font-size:28px;
+    margin-bottom:15px;
+}
+
+.community-tile h4{
+    font-family:"Orbitron",sans-serif;
+    margin-bottom:8px;
+}
+
+.community-tile p{
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.6;
+}
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+
+.toast-container{
+    position:fixed;
+    right:20px;
+    bottom:20px;
+    z-index:10000;
+    display:grid;
+    gap:10px;
+}
+
+.toast{
+    min-width:280px;
+    max-width:400px;
+    padding:15px 18px;
+    background:#111722;
+    border:1px solid var(--border);
+    border-left:3px solid var(--accent2);
+    border-radius:10px;
+    box-shadow:var(--shadow);
+    animation:toastIn .25s ease;
+}
+
+.toast.error{
+    border-left-color:var(--danger);
+}
+
+.toast.success{
+    border-left-color:var(--success);
+}
+
+@keyframes toastIn{
+    from{
+        opacity:0;
+        transform:translateY(15px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+
+.modal{
+    position:fixed;
+    inset:0;
+    z-index:5000;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:rgba(0,0,0,.75);
+    backdrop-filter:blur(12px);
+}
+
+.modal.active{
+    display:flex;
+}
+
+.modal-card{
+    width:min(470px,100%);
+    background:#0b1019;
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:30px;
+    box-shadow:var(--shadow);
+}
+
+.modal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px;
+}
+
+.modal-header h3{
+    font-family:"Orbitron",sans-serif;
+}
+
+.close-btn{
+    border:0;
+    background:transparent;
+    color:var(--muted);
+    font-size:25px;
+}
+
+.auth-form{
+    display:grid;
+    gap:15px;
+}
+
+.auth-switch{
+    margin-top:18px;
+    text-align:center;
+    color:var(--muted);
+    font-size:13px;
+}
+
+.auth-switch button{
+    border:0;
+    background:none;
+    color:var(--accent2);
+    font-weight:700;
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+footer{
+    padding:50px 0;
+    border-top:1px solid var(--border);
+    margin-top:30px;
+}
+
+.footer-inner{
+    display:flex;
+    justify-content:space-between;
+    gap:20px;
+    flex-wrap:wrap;
+}
+
+.footer-brand{
+    font-family:"Orbitron",sans-serif;
+}
+
+.footer-copy{
+    color:var(--muted);
+    font-size:12px;
+}
+
+/* =========================================================
+   LOADING
+   ========================================================= */
+
+.loading{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:10px;
+    padding:40px;
+    color:var(--muted);
+}
+
+.spinner{
+    width:18px;
+    height:18px;
+    border:2px solid rgba(255,255,255,.15);
+    border-top-color:var(--accent2);
+    border-radius:50%;
+    animation:spin .7s linear infinite;
+}
+
+@keyframes spin{
+    to{transform:rotate(360deg)}
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media(max-width:1000px){
+
+    .stats-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .profile-layout{
+        grid-template-columns:1fr;
+    }
+
+}
+
+@media(max-width:760px){
+
+    .header{
+        padding:0 20px;
+    }
+
+    .nav{
+        display:none;
+    }
+
+    .mobile-menu{
+        display:block;
+        border:1px solid var(--border);
+        background:transparent;
+        color:#fff;
+        padding:8px 11px;
+        border-radius:8px;
+    }
+
+    .hero{
+        padding:70px 25px;
+    }
+
+    .section{
+        padding:55px 0;
+    }
+
+    .stats-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .two-column{
+        grid-template-columns:1fr;
+    }
+
+    .community-grid{
+        grid-template-columns:1fr;
+    }
+
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+
+    .field.full{
+        grid-column:auto;
+    }
+
+}
+
+@media(max-width:500px){
+
+    .stats-grid{
+        grid-template-columns:1fr;
+    }
+
+    .auth-panel{
+        padding:30px 20px;
+    }
+
+    .hero h1{
+        font-size:40px;
+    }
+
+    .hero p{
+        font-size:15px;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- =======================================================
+     CINEMATIC INTRO
+     ======================================================= -->
+
+<div class="intro" id="intro">
+
+    <div class="intro-inner">
+
+        <div class="intro-crow">🐦‍⬛</div>
+
+        <div class="intro-title">
+            CROW<span>RULES</span>
+        </div>
+
+        <div class="intro-line"></div>
+
+        <div class="intro-sub">
+            Members Hub Initializing
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     HEADER
+     ======================================================= -->
+
+<header class="header">
+
+    <a href="index.html" class="brand">
+
+        <div class="brand-mark">🐦‍⬛</div>
+
+        <div class="brand-name">
+            CROW<span>RULES</span>
+        </div>
+
+    </a>
+
+
+    <nav class="nav">
+
+        <a href="index.html">
+            Entertainment
+        </a>
+
+        <a href="index.html#shows">
+            Shows
+        </a>
+
+        <a href="index.html#projects">
+            Projects
+        </a>
+
+        <a href="#dashboard">
+            Members
+        </a>
+
+        <button
+            id="headerAuthButton"
+            class="nav-login">
+            Sign In
+        </button>
+
+    </nav>
+
+
+    <button
+        class="mobile-menu"
+        id="mobileMenu">
+        ☰
+    </button>
+
+</header>
+
+
+<!-- =======================================================
+     HERO
+     ======================================================= -->
+
+<section class="hero">
+
+    <div class="hero-content">
+
+        <div class="eyebrow">
+            CrowRules Entertainment
+        </div>
+
+        <h1>
+            Welcome to the<br>
+            <span>Members Hub.</span>
+        </h1>
+
+        <p>
+            Your personal home inside the CrowRules universe.
+            Manage your profile, track your viewing activity,
+            build your watch list, collect points and follow
+            your journey across CrowRules Entertainment.
+        </p>
+
+        <div class="hero-actions">
+
+            <button
+                class="btn btn-primary"
+                id="heroAuthButton">
+                Become a Member
+            </button>
+
+            <a
+                class="btn btn-cyan"
+                href="index.html">
+                Explore CrowRules
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =======================================================
+     AUTH GATE
+     ======================================================= -->
+
+<main>
+
+<section
+    class="section auth-gate active"
+    id="authGate">
+
+    <div class="container">
+
+        <div class="auth-panel">
+
+            <div class="auth-icon">
+                👤
+            </div>
+
+            <h2>
+                Your CrowRules Account
+            </h2>
+
+            <p>
+                Sign in to access your personal member dashboard,
+                profile, My List, viewing history, points and
+                member statistics.
+            </p>
+
+            <button
+                class="btn btn-primary"
+                id="gateLoginButton">
+                Sign In / Create Account
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =======================================================
+     DASHBOARD
+     ======================================================= -->
+
+<section
+    class="section dashboard"
+    id="dashboard">
+
+<div class="container">
+
+    <!-- DASHBOARD HEADER -->
+
+    <div class="section-heading">
+
+        <div class="kicker">
+            Member Dashboard
+        </div>
+
+        <h2>
+            Welcome back,
+            <span id="welcomeName">
+                Member
+            </span>
+        </h2>
+
+        <p id="welcomeEmail">
+            Loading account...
+        </p>
+
+    </div>
+
+
+    <!-- ===================================================
+         STATS
+         =================================================== -->
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                ⭐ Points
+            </div>
+
+            <div
+                class="stat-value"
+                id="statPoints">
+                0
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                ⏱ Watch Hours
+            </div>
+
+            <div
+                class="stat-value"
+                id="statHours">
+                0
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                🏆 Rank
+            </div>
+
+            <div
+                class="stat-value"
+                id="statRank">
+                —
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                📺 Saved Items
+            </div>
+
+            <div
+                class="stat-value"
+                id="statSaved">
+                0
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         PROFILE
+         =================================================== -->
+
+    <div
+        class="section"
+        id="profile">
+
+        <div class="section-heading">
+
+            <div class="kicker">
+                Identity
+            </div>
+
+            <h2>
+                Your Profile
+            </h2>
+
+        </div>
+
+
+        <div class="profile-layout">
+
+            <!-- PROFILE CARD -->
+
+            <div class="profile-card">
+
+                <div
+                    class="avatar"
+                    id="avatar">
+                    CR
+                </div>
+
+                <div
+                    class="profile-name"
+                    id="profileName">
+                    CrowRules Member
+                </div>
+
+                <div
+                    class="profile-username"
+                    id="profileUsername">
+                    @member
+                </div>
+
+                <div
+                    class="profile-bio"
+                    id="profileBio">
+                    Welcome to CrowRules.
+                </div>
+
+                <div class="profile-meta">
+
+                    <div class="meta-row">
+
+                        <span>
+                            Favorite Show
+                        </span>
+
+                        <span id="profileFavorite">
+                            —
+                        </span>
+
+                    </div>
+
+                    <div class="meta-row">
+
+                        <span>
+                            Member Since
+                        </span>
+
+                        <span id="profileSince">
+                            —
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- PROFILE FORM -->
+
+            <div class="form-card">
+
+                <h3>
+                    Edit Profile
+                </h3>
+
+                <form id="profileForm">
+
+                    <div class="form-grid">
+
+                        <div class="field">
+
+                            <label>
+                                Display Name
+                            </label>
+
+                            <input
+                                type="text"
+                                id="displayName"
+                                maxlength="80"
+                                placeholder="Your display name">
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>
+                                Username
+                            </label>
+
+                            <input
+                                type="text"
+                                id="username"
+                                maxlength="40"
+                                placeholder="yourusername">
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>
+                                Favorite Show
+                            </label>
+
+                            <input
+                                type="text"
+                                id="favoriteShow"
+                                maxlength="120"
+                                placeholder="Tacoma Nights">
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>
+                                Avatar URL
+                            </label>
+
+                            <input
+                                type="url"
+                                id="avatarUrl"
+                                placeholder="https://...">
+
+                        </div>
+
+
+                        <div class="field full">
+
+                            <label>
+                                Bio
+                            </label>
+
+                            <textarea
+                                id="bio"
+                                maxlength="500"
+                                placeholder="Tell the CrowRules community about yourself..."></textarea>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-actions">
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary">
+                            Save Profile
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn btn-danger"
+                            id="signOutButton">
+                            Sign Out
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         MY LIST + WATCH HISTORY
+         =================================================== -->
+
+    <div
+        class="section"
+        id="activity">
+
+        <div class="section-heading">
+
+            <div class="kicker">
+                Your Activity
+            </div>
+
+            <h2>
+                My CrowRules
+            </h2>
+
+            <p>
+                Save programming and keep track of what you've watched.
+            </p>
+
+        </div>
+
+
+        <div class="two-column">
+
+
+            <!-- MY LIST -->
+
+            <div class="list-card">
+
+                <div class="card-header">
+
+                    <h3>
+                        📌 My List
+                    </h3>
+
+                </div>
+
+
+                <form id="addListForm">
+
+                    <div class="field">
+
+                        <label>
+                            Save a Show or Episode
+                        </label>
+
+                        <input
+                            type="text"
+                            id="listTitle"
+                            required
+                            placeholder="Example: Tacoma Nights">
+
+                    </div>
+
+                    <div
+                        class="form-actions"
+                        style="margin-top:12px">
+
+                        <button
+                            class="btn btn-primary"
+                            type="submit">
+                            + Add to My List
+                        </button>
+
+                    </div>
+
+                </form>
+
+
+                <div id="myList">
+
+                    <div class="loading">
+
+                        <div class="spinner"></div>
+
+                        Loading My List...
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- WATCH HISTORY -->
+
+            <div class="history-card">
+
+                <div class="card-header">
+
+                    <h3>
+                        🕒 Watch History
+                    </h3>
+
+                </div>
+
+
+                <div id="watchHistory">
+
+                    <div class="loading">
+
+                        <div class="spinner"></div>
+
+                        Loading Watch History...
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         MANUAL WATCH LOG
+         =================================================== -->
+
+    <div class="section">
+
+        <div class="form-card">
+
+            <h3>
+                📺 Log Viewing Activity
+            </h3>
+
+            <p
+                style="color:var(--muted);font-size:13px;margin-bottom:20px">
+                This testing tool lets you manually record viewing
+                activity. CrowRules TV can later call the same
+                database table automatically.
+            </p>
+
+
+            <form id="watchForm">
+
+                <div class="form-grid">
+
+                    <div class="field">
+
+                        <label>
+                            Program
+                        </label>
+
+                        <input
+                            type="text"
+                            id="watchTitle"
+                            required
+                            placeholder="Tacoma Nights — Episode 1">
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            Minutes Watched
+                        </label>
+
+                        <input
+                            type="number"
+                            id="watchMinutes"
+                            min="1"
+                            max="10000"
+                            value="30"
+                            required>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-actions">
+
+                    <button
+                        class="btn btn-cyan"
+                        type="submit">
+                        Record Watch Time
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         COMMUNITY
+         =================================================== -->
+
+    <div
+        class="section"
+        id="community">
+
+        <div class="section-heading">
+
+            <div class="kicker">
+                Coming Together
+            </div>
+
+            <h2>
+                CrowRules Community
+            </h2>
+
+            <p>
+                The member network will continue expanding.
+            </p>
+
+        </div>
+
+
+        <div class="community-grid">
+
+            <div class="community-tile">
+
+                <div class="icon">
+                    👥
+                </div>
+
+                <h4>
+                    Members
+                </h4>
+
+                <p>
+                    Connect with other people who are part of
+                    the CrowRules universe.
+                </p>
+
+            </div>
+
+
+            <div class="community-tile">
+
+                <div class="icon">
+                    🏆
+                </div>
+
+                <h4>
+                    Leaderboards
+                </h4>
+
+                <p>
+                    Earn points and climb the CrowRules member
+                    rankings.
+                </p>
+
+            </div>
+
+
+            <div class="community-tile">
+
+                <div class="icon">
+                    🎖️
+                </div>
+
+                <h4>
+                    Achievements
+                </h4>
+
+                <p>
+                    Future badges will recognize participation,
+                    viewing and community activity.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+</section>
+
+</main>
+
+
+<!-- =======================================================
+     FOOTER
+     ======================================================= -->
+
+<footer>
+
+    <div class="container">
+
+        <div class="footer-inner">
+
+            <div class="footer-brand">
+                🐦‍⬛ CROW<span style="color:var(--accent2)">
+                RULES</span>
+            </div>
+
+            <div class="footer-copy">
+                © 2026 CrowRules Entertainment.
+                All Rights Reserved.
+            </div>
+
+        </div>
+
+    </div>
+
+</footer>
+
+
+<!-- =======================================================
+     AUTH MODAL
+     ======================================================= -->
+
+<div
+    class="modal"
+    id="authModal">
+
+    <div class="modal-card">
+
+        <div class="modal-header">
+
+            <h3 id="authTitle">
+                Member Sign In
+            </h3>
+
+            <button
+                class="close-btn"
+                id="closeAuth">
+                ×
+            </button>
+
+        </div>
+
+
+        <form
+            class="auth-form"
+            id="authForm">
+
+            <div
+                class="field"
+                id="displayNameField"
+                style="display:none">
+
+                <label>
+                    Display Name
+                </label>
+
+                <input
+                    type="text"
+                    id="authDisplayName"
+                    placeholder="Your name">
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    id="authEmail"
+                    required
+                    autocomplete="email"
+                    placeholder="you@example.com">
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="authPassword"
+                    required
+                    minlength="6"
+                    autocomplete="current-password"
+                    placeholder="••••••••">
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+                id="authSubmit">
+                Sign In
+            </button>
+
+        </form>
+
+
+        <div class="auth-switch">
+
+            <span id="authSwitchText">
+                Don't have an account?
+            </span>
+
+            <button id="authSwitch">
+                Create Account
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     TOASTS
+     ======================================================= -->
+
+<div
+    class="toast-container"
+    id="toastContainer">
+</div>
+
+
+<script>
+
+/* =========================================================
+   CROWRULES MEMBERS HUB
+   SUPABASE CONFIGURATION
+   ========================================================= */
+
+const SUPABASE_URL =
+    "https://zauxdqyssratvzmomozf.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY =
+    "sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9";
+
+
+const db =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY,
+        {
+            auth:{
+                persistSession:true,
+                autoRefreshToken:true,
+                detectSessionInUrl:true
+            }
+        }
+    );
+
+
+/* =========================================================
+   STATE
+   ========================================================= */
+
+let currentUser = null;
+let currentProfile = null;
+let authMode = "login";
+
+
+/* =========================================================
+   DOM
+   ========================================================= */
+
+const intro =
+    document.getElementById("intro");
+
+const authGate =
+    document.getElementById("authGate");
+
+const dashboard =
+    document.getElementById("dashboard");
+
+const authModal =
+    document.getElementById("authModal");
+
+const authForm =
+    document.getElementById("authForm");
+
+const authTitle =
+    document.getElementById("authTitle");
+
+const authSubmit =
+    document.getElementById("authSubmit");
+
+const authSwitch =
+    document.getElementById("authSwitch");
+
+const authSwitchText =
+    document.getElementById("authSwitchText");
+
+const displayNameField =
+    document.getElementById("displayNameField");
+
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+
+function toast(
+    message,
+    type = "success"
+){
+
+    const container =
+        document.getElementById("toastContainer");
+
+    const item =
+        document.createElement("div");
+
+    item.className =
+        `toast ${type}`;
+
+    item.textContent =
+        message;
+
+    container.appendChild(item);
+
+    setTimeout(
+        () => item.remove(),
+        4500
+    );
+}
+
+
+/* =========================================================
+   INTRO
+   ========================================================= */
+
+window.addEventListener(
+    "load",
+    () => {
+
+        setTimeout(
+            () => {
+                intro.classList.add("hidden");
+            },
+            1300
+        );
+
+    }
+);
+
+
+/* =========================================================
+   AUTH MODAL
+   ========================================================= */
+
+function openAuth(
+    mode = "login"
+){
+
+    authMode = mode;
+
+    updateAuthModal();
+
+    authModal.classList.add("active");
+
+    setTimeout(
+        () => {
+            document
+                .getElementById("authEmail")
+                ?.focus();
+        },
+        100
+    );
+}
+
+
+function closeAuth(){
+
+    authModal.classList.remove("active");
+
+    authForm.reset();
+
+}
+
+
+function updateAuthModal(){
+
+    if(authMode === "signup"){
+
+        authTitle.textContent =
+            "Create Member Account";
+
+        authSubmit.textContent =
+            "Create Account";
+
+        authSwitchText.textContent =
+            "Already a member?";
+
+        authSwitch.textContent =
+            "Sign In";
+
+        displayNameField.style.display =
+            "flex";
+
+    }else{
+
+        authTitle.textContent =
+            "Member Sign In";
+
+        authSubmit.textContent =
+            "Sign In";
+
+        authSwitchText.textContent =
+            "Don't have an account?";
+
+        authSwitch.textContent =
+            "Create Account";
+
+        displayNameField.style.display =
+            "none";
+
+    }
+
+}
+
+
+document
+    .getElementById("closeAuth")
+    .addEventListener(
+        "click",
+        closeAuth
+    );
+
+
+authModal.addEventListener(
+    "click",
+    event => {
+
+        if(event.target === authModal){
+
+            closeAuth();
+
+        }
+
+    }
+);
+
+
+authSwitch.addEventListener(
+    "click",
+    () => {
+
+        authMode =
+            authMode === "login"
+                ? "signup"
+                : "login";
+
+        updateAuthModal();
+
+    }
+);
+
+
+/* =========================================================
+   OPEN AUTH BUTTONS
+   ========================================================= */
+
+[
+    "headerAuthButton",
+    "heroAuthButton",
+    "gateLoginButton"
+].forEach(
+    id => {
+
+        const button =
+            document.getElementById(id);
+
+        if(button){
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    if(currentUser){
+
+                        document
+                            .getElementById("dashboard")
+                            .scrollIntoView({
+                                behavior:"smooth"
+                            });
+
+                    }else{
+
+                        openAuth("login");
+
+                    }
+
+                }
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   AUTH SUBMIT
+   ========================================================= */
+
+authForm.addEventListener(
+    "submit",
+    async event => {
+
+        event.preventDefault();
+
+        const email =
+            document
+                .getElementById("authEmail")
+                .value
+                .trim();
+
+        const password =
+            document
+                .getElementById("authPassword")
+                .value;
+
+        const displayName =
+            document
+                .getElementById("authDisplayName")
+                .value
+                .trim();
+
+
+        authSubmit.disabled =
+            true;
+
+        authSubmit.textContent =
+            authMode === "signup"
+                ? "Creating..."
+                : "Signing In...";
+
+
+        try{
+
+            if(authMode === "signup"){
+
+                const {
+                    data,
+                    error
+                } =
+                    await db.auth.signUp({
+
+                        email,
+                        password,
+
+                        options:{
+                            data:{
+                                display_name:
+                                    displayName || null
+                            }
+                        }
+
+                    });
+
+
+                if(error)
+                    throw error;
+
+
+                if(!data.session){
+
+                    toast(
+                        "Account created. Check your email to confirm your account.",
+                        "success"
+                    );
+
+                    closeAuth();
+
+                }else{
+
+                    toast(
+                        "Welcome to CrowRules!",
+                        "success"
+                    );
+
+                    closeAuth();
+
+                }
+
+            }else{
+
+                const {
+                    data,
+                    error
+                } =
+                    await db.auth.signInWithPassword({
+                        email,
+                        password
+                    });
+
+
+                if(error)
+                    throw error;
+
+
+                currentUser =
+                    data.user;
+
+                toast(
+                    "Welcome back!",
+                    "success"
+                );
+
+                closeAuth();
+
+            }
+
+        }catch(error){
+
+            console.error(error);
+
+            toast(
+                error.message ||
+                "Authentication failed.",
+                "error"
+            );
+
+        }finally{
+
+            authSubmit.disabled =
+                false;
+
+            updateAuthModal();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   AUTH STATE
+   ========================================================= */
+
+db.auth.onAuthStateChange(
+    async (
+        event,
+        session
+    ) => {
+
+        currentUser =
+            session?.user || null;
+
+        if(currentUser){
+
+            await showDashboard();
+
+        }else{
+
+            showLoggedOut();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   INITIAL SESSION
+   ========================================================= */
+
+async function initialize(){
+
+    try{
+
+        const {
+            data,
+            error
+        } =
+            await db.auth.getSession();
+
+        if(error)
+            throw error;
+
+        currentUser =
+            data.session?.user || null;
+
+
+        if(currentUser){
+
+            await showDashboard();
+
+        }else{
+
+            showLoggedOut();
+
+        }
+
+    }catch(error){
+
+        console.error(
+            "Session initialization failed:",
+            error
+        );
+
+        showLoggedOut();
+
+    }
+
+}
+
+initialize();
+
+
+/* =========================================================
+   LOGGED OUT STATE
+   ========================================================= */
+
+function showLoggedOut(){
+
+    authGate.classList.add("active");
+
+    dashboard.classList.remove("active");
+
+    document
+        .getElementById("headerAuthButton")
+        .textContent =
+        "Sign In";
+
+    document
+        .getElementById("heroAuthButton")
+        .textContent =
+        "Become a Member";
+
+}
+
+
+/* =========================================================
+   SHOW DASHBOARD
+   ========================================================= */
+
+async function showDashboard(){
+
+    authGate.classList.remove("active");
+
+    dashboard.classList.add("active");
+
+
+    document
+        .getElementById("headerAuthButton")
+        .textContent =
+        "My Hub";
+
+    document
+        .getElementById("heroAuthButton")
+        .textContent =
+        "Open My Hub";
+
+
+    document
+        .getElementById("welcomeEmail")
+        .textContent =
+        currentUser.email || "";
+
+
+    await ensureProfile();
+
+    await Promise.all([
+        loadProfile(),
+        loadStats(),
+        loadMyList(),
+        loadWatchHistory()
+    ]);
+
+}
+
+
+/* =========================================================
+   ENSURE PROFILE
+   ========================================================= */
+
+async function ensureProfile(){
+
+    if(!currentUser)
+        return;
+
+
+    const {
+        data,
+        error
+    } =
+        await db
+            .from("member_profiles")
+            .select("user_id")
+            .eq(
+                "user_id",
+                currentUser.id
+            )
+            .maybeSingle();
+
+
+    if(error){
+
+        console.error(
+            "Profile lookup:",
+            error
+        );
+
+        return;
+
+    }
+
+
+    if(!data){
+
+        const metadata =
+            currentUser.user_metadata || {};
+
+        const fallbackName =
+            metadata.display_name ||
+            currentUser.email
+                ?.split("@")[0] ||
+            "CrowRules Member";
+
+
+        const {
+            error:insertError
+        } =
+            await db
+                .from("member_profiles")
+                .insert({
+
+                    user_id:
+                        currentUser.id,
+
+                    display_name:
+                        fallbackName
+
+                });
+
+
+        if(insertError){
+
+            console.error(
+                "Profile creation:",
+                insertError
+            );
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   LOAD PROFILE
+   ========================================================= */
+
+async function loadProfile(){
+
+    if(!currentUser)
+        return;
+
+
+    const {
+        data,
+        error
+    } =
+        await db
+            .from("member_profiles")
+            .select("*")
+            .eq(
+                "user_id",
+                currentUser.id
+            )
+            .maybeSingle();
+
+
+    if(error){
+
+        toast(
+            "Could not load your profile.",
+            "error"
+        );
+
+        console.error(error);
+
+        return;
+
+    }
+
+
+    currentProfile =
+        data;
+
+
+    if(!data)
+        return;
+
+
+    const displayName =
+        data.display_name ||
+        "CrowRules Member";
+
+
+    const username =
+        data.username
+            ? "@" + data.username
+            : "@member";
+
+
+    document
+        .getElementById("profileName")
+        .textContent =
+        displayName;
+
+
+    document
+        .getElementById("welcomeName")
+        .textContent =
+        displayName;
+
+
+    document
+        .getElementById("profileUsername")
+        .textContent =
+        username;
+
+
+    document
+        .getElementById("profileBio")
+        .textContent =
+        data.bio ||
+        "Welcome to the CrowRules community.";
+
+
+    document
+        .getElementById("profileFavorite")
+        .textContent =
+        data.favorite_show ||
+        "—";
+
+
+    if(data.created_at){
+
+        document
+            .getElementById("profileSince")
+            .textContent =
+            new Date(
+                data.created_at
+            ).toLocaleDateString();
+
+    }
+
+
+    document
+        .getElementById("displayName")
+        .value =
+        data.display_name || "";
+
+
+    document
+        .getElementById("username")
+        .value =
+        data.username || "";
+
+
+    document
+        .getElementById("favoriteShow")
+        .value =
+        data.favorite_show || "";
+
+
+    document
+        .getElementById("avatarUrl")
+        .value =
+        data.avatar_url || "";
+
+
+    document
+        .getElementById("bio")
+        .value =
+        data.bio || "";
+
+
+    renderAvatar(
+        displayName,
+        data.avatar_url
+    );
+
+}
+
+
+/* =========================================================
+   AVATAR
+   ========================================================= */
+
+function renderAvatar(
+    name,
+    avatarUrl
+){
+
+    const avatar =
+        document.getElementById("avatar");
+
+
+    avatar.replaceChildren();
+
+
+    if(avatarUrl){
+
+        const image =
+            document.createElement("img");
+
+        image.src =
+            avatarUrl;
+
+        image.alt =
+            name;
+
+        image.onerror =
+            () => {
+
+                avatar.replaceChildren();
+
+                avatar.textContent =
+                    getInitials(name);
+
+            };
+
+        avatar.appendChild(
+            image
+        );
+
+    }else{
+
+        avatar.textContent =
+            getInitials(name);
+
+    }
+
+}
+
+
+function getInitials(name){
+
+    return name
+        .trim()
+        .split(/\s+/)
+        .slice(0,2)
+        .map(
+            part =>
+                part
+                    .charAt(0)
+                    .toUpperCase()
+        )
+        .join("") || "CR";
+
+}
+
+
+/* =========================================================
+   SAVE PROFILE
+   ========================================================= */
+
+document
+    .getElementById("profileForm")
+    .addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+            if(!currentUser)
+                return;
+
+
+            const payload = {
+
+                user_id:
+                    currentUser.id,
+
+                display_name:
+                    document
+                        .getElementById("displayName")
+                        .value
+                        .trim() ||
+                    "CrowRules Member",
+
+                username:
+                    document
+                        .getElementById("username")
+                        .value
+                        .trim()
+                        .toLowerCase()
+                        .replace(
+                            /[^a-z0-9_]/g,
+                            ""
+                        ) ||
+                    null,
+
+                favorite_show:
+                    document
+                        .getElementById("favoriteShow")
+                        .value
+                        .trim() ||
+                    null,
+
+                avatar_url:
+                    document
+                        .getElementById("avatarUrl")
+                        .value
+                        .trim() ||
+                    null,
+
+                bio:
+                    document
+                        .getElementById("bio")
+                        .value
+                        .trim() ||
+                    null
+
+            };
+
+
+            const {
+                error
+            } =
+                await db
+                    .from("member_profiles")
+                    .upsert(
+                        payload,
+                        {
+                            onConflict:"user_id"
+                        }
+                    );
+
+
+            if(error){
+
+                console.error(error);
+
+                toast(
+                    error.message ||
+                    "Could not save profile.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            toast(
+                "Profile saved successfully.",
+                "success"
+            );
+
+
+            await loadProfile();
+
+        }
+    );
+
+
+/* =========================================================
+   LOAD STATS
+   ========================================================= */
+
+async function loadStats(){
+
+    if(!currentUser)
+        return;
+
+
+    const {
+        data,
+        error
+    } =
+        await db
+            .from("member_stats")
+            .select(
+                "points,watch_minutes,rank"
+            )
+            .eq(
+                "user_id",
+                currentUser.id
+            )
+            .maybeSingle();
+
+
+    if(error){
+
+        console.error(
+            "Stats:",
+            error
+        );
+
+        return;
+
+    }
+
+
+    if(!data){
+
+        document
+            .getElementById("statPoints")
+            .textContent =
+            "0";
+
+        document
+            .getElementById("statHours")
+            .textContent =
+            "0";
+
+        document
+            .getElementById("statRank")
+            .textContent =
+            "—";
+
+        return;
+
+    }
+
+
+    document
+        .getElementById("statPoints")
+        .textContent =
+        Number(data.points || 0)
+            .toLocaleString();
+
+
+    document
+        .getElementById("statHours")
+        .textContent =
+        formatHours(
+            data.watch_minutes || 0
+        );
+
+
+    document
+        .getElementById("statRank")
+        .textContent =
+        data.rank
+            ? "#" + data.rank
+            : "—";
+
+}
+
+
+/* =========================================================
+   FORMAT HOURS
+   ========================================================= */
+
+function formatHours(minutes){
+
+    const hours =
+        Number(minutes || 0) / 60;
+
+    if(hours < 1){
+
+        return hours
+            .toFixed(1);
+
+    }
+
+    return hours
+        .toFixed(1);
+
+}
+
+
+/* =========================================================
+   LOAD MY LIST
+   ========================================================= */
+
+async function loadMyList(){
+
+    if(!currentUser)
+        return;
+
+
+    const {
+        data,
+        error
+    } =
+        await db
+            .from("member_list")
+            .select("*")
+            .eq(
+                "user_id",
+                currentUser.id
+            )
+            .order(
+                "created_at",
+                {
+                    ascending:false
+                }
+            );
+
+
+    if(error){
+
+        console.error(
+            "My List:",
+            error
+        );
+
+        return;
+
+    }
+
+
+    document
+        .getElementById("statSaved")
+        .textContent =
+        data?.length || 0;
+
+
+    const container =
+        document.getElementById(
+            "myList"
+        );
+
+
+    container.replaceChildren();
+
+
+    if(!data?.length){
+
+        const empty =
+            document.createElement("div");
+
+        empty.className =
+            "empty";
+
+        empty.textContent =
+            "Your My List is empty.";
+
+        container.appendChild(
+            empty
+        );
+
+        return;
+
+    }
+
+
+    data.forEach(
+        item => {
+
+            const row =
+                document.createElement("div");
+
+            row.className =
+                "item";
+
+
+            const info =
+                document.createElement("div");
+
+
+            const title =
+                document.createElement("div");
+
+            title.className =
+                "item-title";
+
+            title.textContent =
+                item.title;
+
+
+            const sub =
+                document.createElement("div");
+
+            sub.className =
+                "item-sub";
+
+            sub.textContent =
+                item.item_type ||
+                "Show";
+
+
+            info.appendChild(title);
+            info.appendChild(sub);
+
+
+            const actions =
+                document.createElement(
+                    "div"
+                );
+
+            actions.className =
+                "item-actions";
+
+
+            if(item.item_url){
+
+                const open =
+                    document.createElement("a");
+
+                open.className =
+                    "icon-btn";
+
+                open.textContent =
+                    "↗";
+
+                open.href =
+                    item.item_url;
+
+                open.target =
+                    "_blank";
+
+                open.rel =
+                    "noopener";
+
+                actions.appendChild(
+                    open
+                );
+
+            }
+
+
+            const remove =
+                document.createElement("button");
+
+            remove.className =
+                "icon-btn";
+
+            remove.textContent =
+                "×";
+
+            remove.title =
+                "Remove from My List";
+
+
+            remove.addEventListener(
+                "click",
+                () =>
+                    removeListItem(
+                        item.id
+                    )
+            );
+
+
+            actions.appendChild(
+                remove
+            );
+
+
+            row.appendChild(info);
+            row.appendChild(actions);
+
+
+            container.appendChild(
+                row
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   ADD TO LIST
+   ========================================================= */
+
+document
+    .getElementById("addListForm")
+    .addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+            if(!currentUser)
+                return;
+
+
+            const title =
+                document
+                    .getElementById("listTitle")
+                    .value
+                    .trim();
+
+
+            if(!title)
+                return;
+
+
+            const {
+                error
+            } =
+                await db
+                    .from("member_list")
+                    .insert({
+
+                        user_id:
+                            currentUser.id,
+
+                        item_type:
+                            "show",
+
+                        title
+
+                    });
+
+
+            if(error){
+
+                toast(
+                    error.message ||
+                    "Could not add item.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            document
+                .getElementById("listTitle")
+                .value =
+                "";
+
+
+            toast(
+                "Added to My List.",
+                "success"
+            );
+
+
+            await loadMyList();
+
+        }
+    );
+
+
+/* =========================================================
+   REMOVE LIST ITEM
+   ========================================================= */
+
+async function removeListItem(
+    id
+){
+
+    if(!currentUser)
+        return;
+
+
+    const {
+        error
+    } =
+        await db
+            .from("member_list")
+            .delete()
+            .eq(
+                "id",
+                id
+            )
+            .eq(
+                "user_id",
+                currentUser.id
+            );
+
+
+    if(error){
+
+        toast(
+            "Could not remove item.",
+            "error"
+        );
+
+        console.error(error);
+
+        return;
+
+    }
+
+
+    toast(
+        "Removed from My List.",
+        "success"
+    );
+
+
+    await loadMyList();
+
+}
+
+
+/* =========================================================
+   WATCH HISTORY
+   ========================================================= */
+
+async function loadWatchHistory(){
+
+    if(!currentUser)
+        return;
+
+
+    const {
+        data,
+        error
+    } =
+        await db
+            .from("member_watch_history")
+            .select("*")
+            .eq(
+                "user_id",
+                currentUser.id
+            )
+            .order(
+                "watched_at",
+                {
+                    ascending:false
+                }
+            )
+            .limit(10);
+
+
+    if(error){
+
+        console.error(
+            "Watch history:",
+            error
+        );
+
+        return;
+
+    }
+
+
+    const container =
+        document.getElementById(
+            "watchHistory"
+        );
+
+
+    container.replaceChildren();
+
+
+    if(!data?.length){
+
+        const empty =
+            document.createElement("div");
+
+        empty.className =
+            "empty";
+
+        empty.textContent =
+            "No viewing history yet.";
+
+        container.appendChild(
+            empty
+        );
+
+        return;
+
+    }
+
+
+    data.forEach(
+        item => {
+
+            const row =
+                document.createElement("div");
+
+            row.className =
+                "item";
+
+
+            const info =
+                document.createElement("div");
+
+
+            const title =
+                document.createElement("div");
+
+            title.className =
+                "item-title";
+
+            title.textContent =
+                item.title;
+
+
+            const sub =
+                document.createElement("div");
+
+            sub.className =
+                "item-sub";
+
+            sub.textContent =
+                `${item.minutes_watched || 0} minutes • ${
+                    formatDate(item.watched_at)
+                }`;
+
+
+            info.appendChild(title);
+            info.appendChild(sub);
+
+
+            row.appendChild(info);
+
+
+            container.appendChild(
+                row
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   RECORD WATCH
+   ========================================================= */
+
+document
+    .getElementById("watchForm")
+    .addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+            if(!currentUser)
+                return;
+
+
+            const title =
+                document
+                    .getElementById("watchTitle")
+                    .value
+                    .trim();
+
+
+            const minutes =
+                Number(
+                    document
+                        .getElementById("watchMinutes")
+                        .value
+                );
+
+
+            if(!title || minutes <= 0){
+
+                toast(
+                    "Enter a valid title and watch time.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            const {
+                error
+            } =
+                await db
+                    .from("member_watch_history")
+                    .insert({
+
+                        user_id:
+                            currentUser.id,
+
+                        title,
+
+                        minutes_watched:
+                            minutes
+
+                    });
+
+
+            if(error){
+
+                console.error(error);
+
+                toast(
+                    error.message ||
+                    "Could not record viewing activity.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            toast(
+                "Viewing activity recorded.",
+                "success"
+            );
+
+
+            document
+                .getElementById("watchTitle")
+                .value =
+                "";
+
+
+            await loadWatchHistory();
+
+            await loadStats();
+
+        }
+    );
+
+
+/* =========================================================
+   DATE
+   ========================================================= */
+
+function formatDate(
+    value
+){
+
+    if(!value)
+        return "Unknown date";
+
+
+    return new Date(
+        value
+    ).toLocaleDateString(
+        undefined,
+        {
+            month:"short",
+            day:"numeric",
+            year:"numeric"
+        }
+    );
+
+}
+
+
+/* =========================================================
+   SIGN OUT
+   ========================================================= */
+
+document
+    .getElementById("signOutButton")
+    .addEventListener(
+        "click",
+        async () => {
+
+            const {
+                error
+            } =
+                await db.auth.signOut();
+
+
+            if(error){
+
+                toast(
+                    error.message ||
+                    "Could not sign out.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            currentUser =
+                null;
+
+            currentProfile =
+                null;
+
+
+            toast(
+                "You have been signed out.",
+                "success"
+            );
+
+
+            window.scrollTo({
+                top:0,
+                behavior:"smooth"
+            });
+
+        }
+    );
+
+
+/* =========================================================
+   MOBILE MENU
+   ========================================================= */
+
+document
+    .getElementById("mobileMenu")
+    .addEventListener(
+        "click",
+        () => {
+
+            const nav =
+                document.querySelector(".nav");
+
+
+            if(
+                nav.style.display ===
+                "flex"
+            ){
+
+                nav.style.display =
+                    "";
+
+            }else{
+
+                nav.style.display =
+                    "flex";
+
+                nav.style.position =
+                    "absolute";
+
+                nav.style.top =
+                    "76px";
+
+                nav.style.left =
+                    "0";
+
+                nav.style.right =
+                    "0";
+
+                nav.style.padding =
+                    "15px";
+
+                nav.style.background =
+                    "#080c13";
+
+                nav.style.flexDirection =
+                    "column";
+
+                nav.style.borderBottom =
+                    "1px solid var(--border)";
+
+            }
+
+        }
+    );
+
+
+/* =========================================================
+   ESCAPE KEY
+   ========================================================= */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if(
+            event.key === "Escape" &&
+            authModal.classList.contains("active")
+        ){
+
+            closeAuth();
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+</html>
