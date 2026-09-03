@@ -4050,6 +4050,2942 @@ footer{
 'use strict';
 
 
+```html
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>CrowRules Entertainment — Business Hub v3.3</title>
+
+<meta
+  name="description"
+  content="CrowRules Entertainment Business Hub — business infrastructure, projects, productions, partnerships, sponsorships, news, support and administration."
+>
+
+<meta name="theme-color" content="#05070b">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link
+  href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap"
+  rel="stylesheet"
+>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --bg:#030509;
+  --bg2:#05070b;
+  --panel:#080c13;
+  --panel2:#0b1019;
+  --panel3:#101722;
+  --line:rgba(255,255,255,.09);
+  --line2:rgba(34,211,238,.25);
+
+  --cyan:#22d3ee;
+  --purple:#8b5cf6;
+  --pink:#ec4899;
+  --green:#22c55e;
+  --yellow:#facc15;
+  --orange:#fb923c;
+  --red:#ef4444;
+
+  --text:#f4f7fb;
+  --muted:#94a3b8;
+  --dim:#64748b;
+
+  --radius:18px;
+  --radius2:12px;
+
+  --shadow:
+    0 20px 60px rgba(0,0,0,.4);
+
+  --glow:
+    0 0 30px rgba(34,211,238,.15);
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at 15% 10%,rgba(34,211,238,.07),transparent 30%),
+    radial-gradient(circle at 85% 15%,rgba(139,92,246,.08),transparent 28%),
+    linear-gradient(180deg,#030509 0%,#05070b 45%,#030509 100%);
+  color:var(--text);
+  font-family:Montserrat,Arial,sans-serif;
+  line-height:1.6;
+  overflow-x:hidden;
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:.025;
+  background-image:
+    linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px);
+  background-size:60px 60px;
+  z-index:-1;
+}
+
+a{
+  color:inherit;
+  text-decoration:none;
+}
+
+button,
+input,
+select,
+textarea{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+img{
+  max-width:100%;
+}
+
+.container{
+  width:min(1180px,calc(100% - 32px));
+  margin:auto;
+}
+
+.hidden{
+  display:none!important;
+}
+
+.muted{
+  color:var(--muted);
+}
+
+.empty,
+.loading{
+  padding:30px;
+  border:1px dashed var(--line);
+  border-radius:var(--radius2);
+  color:var(--muted);
+  text-align:center;
+}
+
+/* =========================================================
+   INTRO
+========================================================= */
+
+.cr-intro{
+  position:fixed;
+  inset:0;
+  z-index:99999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  background:#020307;
+  transition:
+    opacity .8s ease,
+    visibility .8s ease;
+}
+
+.cr-intro::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(rgba(34,211,238,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(34,211,238,.05) 1px,transparent 1px);
+  background-size:50px 50px;
+  transform:perspective(500px) rotateX(60deg) scale(1.8);
+  transform-origin:center bottom;
+  animation:introGrid 8s linear infinite;
+}
+
+.cr-intro::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle,transparent 20%,rgba(0,0,0,.75) 100%),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255,255,255,.02) 0,
+      rgba(255,255,255,.02) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+  pointer-events:none;
+}
+
+.cr-intro-done{
+  opacity:0;
+  visibility:hidden;
+}
+
+.cr-intro-inner{
+  position:relative;
+  z-index:2;
+  width:min(700px,calc(100% - 40px));
+  text-align:center;
+}
+
+.cr-intro-logo{
+  font-family:Orbitron,sans-serif;
+  font-size:clamp(42px,9vw,92px);
+  font-weight:900;
+  letter-spacing:.08em;
+  line-height:1;
+  text-shadow:
+    0 0 15px rgba(34,211,238,.6),
+    0 0 50px rgba(139,92,246,.25);
+  animation:introPulse 2s ease-in-out infinite;
+}
+
+.cr-intro-logo span{
+  color:var(--cyan);
+}
+
+.cr-intro-status{
+  margin-top:25px;
+  font-family:Orbitron,sans-serif;
+  font-size:11px;
+  letter-spacing:.22em;
+  color:var(--cyan);
+}
+
+.cr-intro-progress{
+  height:3px;
+  margin:25px auto 0;
+  width:min(500px,100%);
+  background:rgba(255,255,255,.08);
+  overflow:hidden;
+}
+
+.cr-intro-progress-bar{
+  height:100%;
+  width:0;
+  background:linear-gradient(90deg,var(--cyan),var(--purple),var(--pink));
+  box-shadow:0 0 20px var(--cyan);
+}
+
+.cr-intro-skip{
+  margin-top:30px;
+  padding:9px 15px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:rgba(255,255,255,.03);
+  color:var(--muted);
+  font-family:Orbitron,sans-serif;
+  font-size:9px;
+  letter-spacing:.15em;
+}
+
+@keyframes introGrid{
+  from{transform:perspective(500px) rotateX(60deg) scale(1.8) translateY(0)}
+  to{transform:perspective(500px) rotateX(60deg) scale(1.8) translateY(50px)}
+}
+
+@keyframes introPulse{
+  0%,100%{opacity:.8;transform:scale(1)}
+  50%{opacity:1;transform:scale(1.015)}
+}
+
+/* =========================================================
+   TOPBAR
+========================================================= */
+
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:500;
+  border-bottom:1px solid var(--line);
+  background:rgba(3,5,9,.86);
+  backdrop-filter:blur(18px);
+}
+
+.topbar-inner{
+  min-height:68px;
+  display:flex;
+  align-items:center;
+  gap:20px;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-shrink:0;
+}
+
+.brand-mark{
+  width:38px;
+  height:38px;
+  display:grid;
+  place-items:center;
+  border:1px solid var(--cyan);
+  color:var(--cyan);
+  font-family:Orbitron,sans-serif;
+  font-weight:800;
+  font-size:12px;
+  box-shadow:var(--glow);
+}
+
+.brand-text{
+  font-family:Orbitron,sans-serif;
+  font-weight:800;
+  font-size:13px;
+  letter-spacing:.06em;
+}
+
+.nav-links{
+  margin-left:auto;
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+
+.nav-links a{
+  padding:9px 10px;
+  border-radius:9px;
+  color:var(--muted);
+  font-family:Orbitron,sans-serif;
+  font-size:9px;
+  letter-spacing:.06em;
+  transition:.2s;
+}
+
+.nav-links a:hover{
+  color:var(--cyan);
+  background:rgba(34,211,238,.06);
+}
+
+.mobile-menu{
+  display:none;
+  margin-left:auto;
+  border:1px solid var(--line);
+  background:transparent;
+  color:var(--text);
+  padding:9px 12px;
+  border-radius:9px;
+}
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.hero{
+  min-height:620px;
+  display:flex;
+  align-items:center;
+  position:relative;
+  overflow:hidden;
+}
+
+.hero::before{
+  content:"";
+  position:absolute;
+  width:600px;
+  height:600px;
+  right:-180px;
+  top:-100px;
+  border-radius:50%;
+  background:
+    radial-gradient(circle,rgba(34,211,238,.12),transparent 65%);
+  filter:blur(10px);
+}
+
+.hero::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:1px;
+  background:linear-gradient(
+    90deg,
+    transparent,
+    var(--cyan),
+    var(--purple),
+    transparent
+  );
+  opacity:.5;
+}
+
+.hero-content{
+  position:relative;
+  z-index:2;
+  padding:100px 0;
+}
+
+.eyebrow{
+  color:var(--cyan);
+  font-family:Orbitron,sans-serif;
+  font-size:10px;
+  letter-spacing:.25em;
+  margin-bottom:18px;
+}
+
+.hero h1{
+  margin:0;
+  max-width:850px;
+  font-family:Orbitron,sans-serif;
+  font-size:clamp(42px,8vw,86px);
+  line-height:1.02;
+  letter-spacing:-.04em;
+}
+
+.hero h1 span{
+  color:var(--cyan);
+}
+
+.hero p{
+  max-width:700px;
+  margin:25px 0;
+  color:var(--muted);
+  font-size:16px;
+}
+
+.hero-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+}
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-height:44px;
+  padding:10px 17px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:rgba(255,255,255,.035);
+  color:var(--text);
+  font-family:Orbitron,sans-serif;
+  font-size:10px;
+  letter-spacing:.06em;
+  transition:.2s;
+}
+
+.btn:hover{
+  transform:translateY(-1px);
+  border-color:var(--cyan);
+  color:var(--cyan);
+}
+
+.btn-primary{
+  border-color:var(--cyan);
+  background:rgba(34,211,238,.1);
+  color:var(--cyan);
+  box-shadow:0 0 25px rgba(34,211,238,.08);
+}
+
+.btn-small{
+  min-height:34px;
+  padding:7px 11px;
+  font-size:8px;
+}
+
+.btn-paypal{
+  border-color:#60a5fa;
+  color:#dbeafe;
+  background:rgba(37,99,235,.1);
+}
+
+.btn-paypal:hover{
+  border-color:#93c5fd;
+  color:#fff;
+}
+
+/* =========================================================
+   STATS
+========================================================= */
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  margin-top:-50px;
+  position:relative;
+  z-index:10;
+}
+
+.stat{
+  padding:22px;
+  border:1px solid var(--line);
+  background:rgba(8,12,19,.92);
+  backdrop-filter:blur(12px);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+
+.stat-number{
+  font-family:Orbitron,sans-serif;
+  font-size:30px;
+  color:var(--cyan);
+}
+
+.stat-label{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+}
+
+/* =========================================================
+   SECTIONS
+========================================================= */
+
+section{
+  padding:90px 0;
+  scroll-margin-top:75px;
+}
+
+.section-head{
+  margin-bottom:32px;
+}
+
+.section-kicker{
+  color:var(--cyan);
+  font-family:Orbitron,sans-serif;
+  font-size:9px;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  margin-bottom:8px;
+}
+
+.section-head h2{
+  margin:0;
+  font-family:Orbitron,sans-serif;
+  font-size:clamp(28px,5vw,46px);
+}
+
+.section-head p{
+  color:var(--muted);
+  max-width:700px;
+}
+
+/* =========================================================
+   GRIDS / CARDS
+========================================================= */
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+}
+
+.card{
+  position:relative;
+  padding:22px;
+  border:1px solid var(--line);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.035),
+      rgba(255,255,255,.012)
+    );
+  border-radius:var(--radius);
+  box-shadow:0 12px 35px rgba(0,0,0,.18);
+  overflow:hidden;
+}
+
+.card::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  width:70px;
+  height:1px;
+  background:var(--cyan);
+  box-shadow:0 0 15px var(--cyan);
+}
+
+.card h3{
+  margin:12px 0 9px;
+  font-family:Orbitron,sans-serif;
+  font-size:18px;
+}
+
+.card p{
+  color:var(--muted);
+  font-size:13px;
+}
+
+.project-icon{
+  width:48px;
+  height:48px;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(34,211,238,.35);
+  border-radius:12px;
+  color:var(--cyan);
+  background:rgba(34,211,238,.05);
+  font-family:Orbitron,sans-serif;
+  font-size:10px;
+  font-weight:800;
+}
+
+.project-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+}
+
+.project-description{
+  min-height:64px;
+}
+
+.project-actions{
+  margin-top:18px;
+}
+
+.show-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:15px;
+}
+
+.show-meta span,
+.badge{
+  display:inline-flex;
+  align-items:center;
+  padding:5px 8px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  color:var(--muted);
+  background:rgba(255,255,255,.025);
+  font-family:Orbitron,sans-serif;
+  font-size:8px;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+}
+
+.badge-live{
+  border-color:rgba(34,197,94,.4);
+  color:var(--green);
+  background:rgba(34,197,94,.07);
+}
+
+.badge-development{
+  border-color:rgba(139,92,246,.4);
+  color:#c4b5fd;
+}
+
+.badge-planning{
+  border-color:rgba(250,204,21,.4);
+  color:var(--yellow);
+}
+
+.badge-urgent{
+  border-color:rgba(239,68,68,.5);
+  color:#fca5a5;
+}
+
+.badge-high{
+  border-color:rgba(251,146,60,.5);
+  color:#fdba74;
+}
+
+.show-link,
+.article-link{
+  display:inline-block;
+  margin-top:18px;
+  color:var(--cyan);
+  font-family:Orbitron,sans-serif;
+  font-size:9px;
+  letter-spacing:.08em;
+}
+
+/* =========================================================
+   SCHEDULE
+========================================================= */
+
+.schedule-list{
+  display:grid;
+  gap:10px;
+}
+
+.schedule-item{
+  display:grid;
+  grid-template-columns:180px 1fr auto;
+  align-items:center;
+  gap:20px;
+  padding:18px;
+  border:1px solid var(--line);
+  border-radius:var(--radius2);
+  background:rgba(255,255,255,.02);
+}
+
+.schedule-time{
+  color:var(--cyan);
+  font-family:Orbitron,sans-serif;
+  font-size:10px;
+}
+
+.schedule-title{
+  font-family:Orbitron,sans-serif;
+  font-size:13px;
+}
+
+.schedule-description{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:3px;
+}
+
+/* =========================================================
+   ROADMAP
+========================================================= */
+
+.roadmap-list{
+  display:grid;
+  gap:14px;
+}
+
+.roadmap-item{
+  display:grid;
+  grid-template-columns:120px 1fr;
+  gap:25px;
+  padding:25px;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:rgba(255,255,255,.02);
+}
+
+.roadmap-year{
+  color:var(--cyan);
+  font-family:Orbitron,sans-serif;
+  font-size:25px;
+  font-weight:800;
+}
+
+.roadmap-content h3{
+  margin:0 0 7px;
+  font-family:Orbitron,sans-serif;
+}
+
+.roadmap-content p{
+  margin:0 0 12px;
+  color:var(--muted);
+}
+
+/* =========================================================
+   ARTICLES
+========================================================= */
+
+.article-meta{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  color:var(--dim);
+  font-family:Orbitron,sans-serif;
+  font-size:8px;
+  text-transform:uppercase;
+}
+
+/* =========================================================
+   ANNOUNCEMENTS
+========================================================= */
+
+.announcements{
+  display:grid;
+  gap:10px;
+}
+
+.announcement{
+  padding:18px;
+  border-left:3px solid var(--cyan);
+  border-radius:0 12px 12px 0;
+  background:rgba(34,211,238,.04);
+}
+
+.announcement strong{
+  font-family:Orbitron,sans-serif;
+  font-size:12px;
+}
+
+.announcement p{
+  color:var(--muted);
+  margin:5px 0 0;
+}
+
+/* =========================================================
+   PARTNERSHIP
+========================================================= */
+
+.opportunities{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  margin-bottom:30px;
+}
+
+.opportunity{
+  padding:18px;
+  border:1px solid var(--line);
+  border-radius:var(--radius2);
+  background:rgba(255,255,255,.02);
+}
+
+.opportunity h3{
+  margin:0 0 8px;
+  font-family:Orbitron,sans-serif;
+  font-size:13px;
+}
+
+.opportunity p{
+  margin:0;
+  color:var(--muted);
+  font-size:11px;
+}
+
+.form-shell{
+  padding:28px;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:rgba(8,12,19,.8);
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:15px;
+}
+
+.form-group{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+
+.form-group.full{
+  grid-column:1/-1;
+}
+
+.form-group label{
+  color:var(--muted);
+  font-family:Orbitron,sans-serif;
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea{
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:10px;
+  outline:none;
+  padding:12px 13px;
+  background:#05080d;
+  color:var(--text);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus{
+  border-color:var(--cyan);
+  box-shadow:0 0 0 3px rgba(34,211,238,.06);
+}
+
+.form-group textarea{
+  min-height:150px;
+  resize:vertical;
+}
+
+.form-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:20px;
+}
+
+/* =========================================================
+   SUPPORT
+========================================================= */
+
+.support-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 410px;
+  gap:24px;
+  align-items:start;
+}
+
+.support-copy{
+  padding:30px;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:
+    radial-gradient(
+      circle at 100% 0,
+      rgba(34,211,238,.08),
+      transparent 35%
+    ),
+    rgba(255,255,255,.02);
+}
+
+.support-copy h3{
+  margin:0 0 15px;
+  font-family:Orbitron,sans-serif;
+  font-size:25px;
+}
+
+.support-copy p{
+  color:var(--muted);
+}
+
+.support-points{
+  display:grid;
+  gap:10px;
+  margin:25px 0;
+}
+
+.support-point{
+  padding:13px 15px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.support-point strong{
+  color:var(--text);
+}
+
+.paypal-card{
+  padding:20px;
+  border:1px solid rgba(96,165,250,.25);
+  border-radius:var(--radius);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(37,99,235,.07),
+      rgba(255,255,255,.015)
+    );
+  box-shadow:0 20px 55px rgba(0,0,0,.25);
+}
+
+.paypal-header{
+  margin-bottom:15px;
+}
+
+.paypal-header h3{
+  margin:0;
+  font-family:Orbitron,sans-serif;
+  font-size:17px;
+}
+
+.paypal-header p{
+  color:var(--muted);
+  font-size:11px;
+  margin:5px 0 0;
+}
+
+.paypal-frame-wrap{
+  width:100%;
+  min-height:550px;
+  display:flex;
+  justify-content:center;
+  overflow:hidden;
+  border-radius:12px;
+  background:#fff;
+}
+
+.paypal-frame{
+  display:block;
+  width:382px;
+  height:550px;
+  max-width:100%;
+  border:0;
+}
+
+.paypal-fallback{
+  margin-top:15px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:9px;
+}
+
+/* =========================================================
+   ADMIN
+========================================================= */
+
+.admin-login{
+  max-width:500px;
+  margin:auto;
+}
+
+.admin-panel{
+  padding:25px;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:rgba(255,255,255,.02);
+}
+
+.admin-toolbar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:center;
+  margin-bottom:18px;
+}
+
+.admin-toolbar input,
+.admin-toolbar select{
+  min-height:40px;
+  padding:9px 11px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:#05080d;
+  color:var(--text);
+}
+
+.admin-stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-bottom:20px;
+}
+
+.admin-stat{
+  padding:15px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:rgba(255,255,255,.02);
+}
+
+.admin-stat strong{
+  display:block;
+  color:var(--cyan);
+  font-family:Orbitron,sans-serif;
+  font-size:22px;
+}
+
+.admin-stat span{
+  color:var(--muted);
+  font-size:9px;
+  text-transform:uppercase;
+}
+
+.inquiry-list{
+  display:grid;
+  gap:10px;
+}
+
+.inquiry-card{
+  padding:18px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:rgba(255,255,255,.02);
+  cursor:pointer;
+  transition:.2s;
+}
+
+.inquiry-card:hover{
+  border-color:rgba(34,211,238,.35);
+  transform:translateY(-1px);
+}
+
+.inquiry-header{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.inquiry-name{
+  font-family:Orbitron,sans-serif;
+  font-size:13px;
+}
+
+.inquiry-org{
+  color:var(--muted);
+  font-size:11px;
+}
+
+.inquiry-preview{
+  margin-top:12px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.inquiry-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:12px;
+}
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+.modal{
+  position:fixed;
+  inset:0;
+  z-index:1000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(0,0,0,.78);
+  backdrop-filter:blur(10px);
+}
+
+.modal.open{
+  display:flex;
+}
+
+.modal-dialog{
+  width:min(900px,100%);
+  max-height:90vh;
+  overflow:auto;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:#080c13;
+  box-shadow:0 30px 100px rgba(0,0,0,.65);
+}
+
+.modal-header{
+  position:sticky;
+  top:0;
+  z-index:2;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:18px 22px;
+  border-bottom:1px solid var(--line);
+  background:rgba(8,12,19,.95);
+  backdrop-filter:blur(10px);
+}
+
+.modal-header h3{
+  margin:0;
+  font-family:Orbitron,sans-serif;
+  font-size:15px;
+}
+
+.modal-close{
+  width:34px;
+  height:34px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:transparent;
+  color:var(--text);
+}
+
+.modal-body{
+  padding:22px;
+}
+
+.detail-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  margin-bottom:15px;
+}
+
+.detail{
+  padding:14px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:rgba(255,255,255,.015);
+}
+
+.detail-label{
+  color:var(--dim);
+  font-family:Orbitron,sans-serif;
+  font-size:8px;
+  text-transform:uppercase;
+  margin-bottom:5px;
+}
+
+.detail-value{
+  font-size:12px;
+  overflow-wrap:anywhere;
+}
+
+.message-box{
+  white-space:pre-wrap;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.admin-edit{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:18px;
+}
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+.toast{
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  z-index:5000;
+  width:min(390px,calc(100% - 40px));
+  padding:17px;
+  border:1px solid rgba(34,211,238,.3);
+  border-radius:13px;
+  background:rgba(5,8,13,.96);
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
+  transform:translateY(30px);
+  opacity:0;
+  pointer-events:none;
+  transition:.25s;
+}
+
+.toast.show{
+  transform:translateY(0);
+  opacity:1;
+}
+
+.toast-title{
+  color:var(--cyan);
+  font-family:Orbitron,sans-serif;
+  font-size:10px;
+}
+
+.toast-message{
+  color:var(--muted);
+  font-size:11px;
+  margin-top:4px;
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+footer{
+  padding:50px 0 30px;
+  border-top:1px solid var(--line);
+}
+
+.footer-grid{
+  display:grid;
+  grid-template-columns:2fr 1fr 1fr;
+  gap:30px;
+}
+
+.footer-brand{
+  font-family:Orbitron,sans-serif;
+  font-weight:800;
+}
+
+.footer-copy{
+  max-width:500px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.footer-links{
+  display:grid;
+  gap:8px;
+}
+
+.footer-links a{
+  color:var(--muted);
+  font-size:11px;
+}
+
+.footer-links a:hover{
+  color:var(--cyan);
+}
+
+.footer-bottom{
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  margin-top:40px;
+  padding-top:20px;
+  border-top:1px solid var(--line);
+  color:var(--dim);
+  font-size:10px;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:1000px){
+
+  .nav-links{
+    display:none;
+    position:absolute;
+    top:68px;
+    left:16px;
+    right:16px;
+    padding:10px;
+    flex-direction:column;
+    align-items:stretch;
+    border:1px solid var(--line);
+    border-radius:12px;
+    background:rgba(5,8,13,.97);
+  }
+
+  .nav-links.mobile-open{
+    display:flex;
+  }
+
+  .nav-links a{
+    padding:12px;
+  }
+
+  .mobile-menu{
+    display:block;
+  }
+
+  .grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .opportunities{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .support-layout{
+    grid-template-columns:1fr;
+  }
+
+  .paypal-card{
+    max-width:430px;
+    margin:auto;
+    width:100%;
+  }
+}
+
+@media(max-width:700px){
+
+  .container{
+    width:min(100% - 22px,1180px);
+  }
+
+  section{
+    padding:65px 0;
+  }
+
+  .hero{
+    min-height:540px;
+  }
+
+  .hero-content{
+    padding:75px 0;
+  }
+
+  .stats{
+    grid-template-columns:repeat(2,1fr);
+    margin-top:-25px;
+  }
+
+  .grid{
+    grid-template-columns:1fr;
+  }
+
+  .opportunities{
+    grid-template-columns:1fr;
+  }
+
+  .form-grid{
+    grid-template-columns:1fr;
+  }
+
+  .form-group.full{
+    grid-column:auto;
+  }
+
+  .schedule-item{
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+
+  .roadmap-item{
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+
+  .detail-grid{
+    grid-template-columns:1fr;
+  }
+
+  .admin-edit{
+    grid-template-columns:1fr;
+  }
+
+  .admin-stats{
+    grid-template-columns:1fr;
+  }
+
+  .footer-grid{
+    grid-template-columns:1fr;
+  }
+
+  .footer-bottom{
+    flex-direction:column;
+  }
+
+  .paypal-frame-wrap{
+    min-height:550px;
+    overflow-x:auto;
+    justify-content:flex-start;
+  }
+
+  .paypal-frame{
+    flex:0 0 382px;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+
+  *,
+  *::before,
+  *::after{
+    scroll-behavior:auto!important;
+    animation:none!important;
+    transition:none!important;
+  }
+
+}
+</style>
+</head>
+
+<body>
+
+<!-- =========================================================
+     CINEMATIC INTRO
+========================================================= -->
+
+<div
+  id="crIntro"
+  class="cr-intro"
+  aria-hidden="false"
+>
+  <div class="cr-intro-inner">
+
+    <div class="cr-intro-logo">
+      CROW<span>[RULES]</span>
+    </div>
+
+    <div
+      id="crIntroStatus"
+      class="cr-intro-status"
+    >
+      INITIALIZING BUSINESS INFRASTRUCTURE
+    </div>
+
+    <div class="cr-intro-progress">
+      <div
+        id="crIntroProgress"
+        class="cr-intro-progress-bar"
+      ></div>
+    </div>
+
+    <button
+      id="crIntroSkip"
+      class="cr-intro-skip"
+      type="button"
+    >
+      SKIP INTRO
+    </button>
+
+  </div>
+</div>
+
+
+<!-- =========================================================
+     TOPBAR
+========================================================= -->
+
+<header class="topbar">
+
+  <div class="container topbar-inner">
+
+    <a
+      class="brand"
+      href="#top"
+    >
+
+      <div class="brand-mark">
+        CR
+      </div>
+
+      <div class="brand-text">
+        CROW RULES
+      </div>
+
+    </a>
+
+    <button
+      id="mobileMenu"
+      class="mobile-menu"
+      type="button"
+      aria-label="Open navigation"
+    >
+      MENU
+    </button>
+
+    <nav
+      id="navLinks"
+      class="nav-links"
+    >
+
+      <a href="#divisions">Divisions</a>
+      <a href="#projects">Projects</a>
+      <a href="#shows">Shows</a>
+      <a href="#schedule">Schedule</a>
+      <a href="#roadmap">Roadmap</a>
+      <a href="#news">News</a>
+      <a href="#updates">Updates</a>
+      <a href="#partnerships">Partner</a>
+      <a href="#support">Support</a>
+      <a href="#admin">Admin</a>
+      <a href="#top" id="replayIntro">Replay</a>
+
+    </nav>
+
+  </div>
+
+</header>
+
+
+<main id="top">
+
+<!-- =========================================================
+     HERO
+========================================================= -->
+
+<section class="hero">
+
+  <div class="container hero-content">
+
+    <div class="eyebrow">
+      CROW RULES ENTERTAINMENT / BUSINESS HUB v3.3
+    </div>
+
+    <h1>
+      ONE COMPANY.<br>
+      <span>ONE UNIVERSE.</span>
+    </h1>
+
+    <p>
+      CrowRules Entertainment is building an independent
+      entertainment ecosystem connecting original productions,
+      digital media, live programming, creators, partnerships,
+      community projects and future expansion.
+    </p>
+
+    <div class="hero-actions">
+
+      <a
+        class="btn btn-primary"
+        href="#projects"
+      >
+        EXPLORE PROJECTS
+      </a>
+
+      <a
+        class="btn"
+        href="#partnerships"
+      >
+        PARTNER WITH US
+      </a>
+
+      <a
+        class="btn btn-paypal"
+        href="https://www.paypal.com/donate/?hosted_button_id=9NLV7DEE95E8A"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        SUPPORT CROW RULES
+      </a>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     STATS
+========================================================= -->
+
+<div class="container">
+
+  <div class="stats">
+
+    <div class="stat">
+      <div
+        id="statDivisions"
+        class="stat-number"
+      >—</div>
+
+      <div class="stat-label">
+        Divisions
+      </div>
+    </div>
+
+    <div class="stat">
+      <div
+        id="statProjects"
+        class="stat-number"
+      >—</div>
+
+      <div class="stat-label">
+        Projects
+      </div>
+    </div>
+
+    <div class="stat">
+      <div
+        id="statShows"
+        class="stat-number"
+      >—</div>
+
+      <div class="stat-label">
+        Productions
+      </div>
+    </div>
+
+    <div class="stat">
+      <div
+        id="statUpdates"
+        class="stat-number"
+      >—</div>
+
+      <div class="stat-label">
+        Updates
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================================
+     DIVISIONS
+========================================================= -->
+
+<section id="divisions">
+
+  <div class="container">
+
+    <div class="section-head">
+      <div class="section-kicker">
+        Business Architecture
+      </div>
+
+      <h2>Divisions</h2>
+
+      <p>
+        The operating structure behind the CrowRules
+        Entertainment universe.
+      </p>
+    </div>
+
+    <div
+      id="divisionsGrid"
+      class="grid"
+    >
+      <div class="loading">
+        LOADING DIVISIONS
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     PROJECTS
+========================================================= -->
+
+<section id="projects">
+
+  <div class="container">
+
+    <div class="section-head">
+      <div class="section-kicker">
+        Active Development
+      </div>
+
+      <h2>Projects</h2>
+
+      <p>
+        Current and future CrowRules initiatives,
+        productions and business infrastructure.
+      </p>
+    </div>
+
+    <div
+      id="projectsGrid"
+      class="grid"
+    >
+      <div class="loading">
+        LOADING PROJECTS
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     SHOWS
+========================================================= -->
+
+<section id="shows">
+
+  <div class="container">
+
+    <div class="section-head">
+      <div class="section-kicker">
+        Original Productions
+      </div>
+
+      <h2>Shows</h2>
+
+      <p>
+        Original CrowRules programming and productions.
+      </p>
+    </div>
+
+    <div
+      id="showsGrid"
+      class="grid"
+    >
+      <div class="loading">
+        LOADING PRODUCTIONS
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     SCHEDULE
+========================================================= -->
+
+<section id="schedule">
+
+  <div class="container">
+
+    <div class="section-head">
+      <div class="section-kicker">
+        Programming
+      </div>
+
+      <h2>Schedule</h2>
+
+      <p>
+        Upcoming CrowRules programming and published events.
+      </p>
+    </div>
+
+    <div
+      id="scheduleList"
+      class="schedule-list"
+    >
+      <div class="loading">
+        LOADING SCHEDULE
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     ROADMAP
+========================================================= -->
+
+<section id="roadmap">
+
+  <div class="container">
+
+    <div class="section-head">
+      <div class="section-kicker">
+        Expansion Plan
+      </div>
+
+      <h2>Roadmap</h2>
+
+      <p>
+        The long-term development path for the CrowRules
+        Entertainment ecosystem.
+      </p>
+    </div>
+
+    <div
+      id="roadmapList"
+      class="roadmap-list"
+    >
+      <div class="loading">
+        LOADING ROADMAP
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     NEWS
+========================================================= -->
+
+<section id="news">
+
+  <div class="container">
+
+    <div class="section-head">
+      <div class="section-kicker">
+        Latest
+      </div>
+
+      <h2>News</h2>
+
+      <p>
+        Published CrowRules Entertainment news and stories.
+      </p>
+    </div>
+
+    <div
+      id="newsGrid"
+      class="grid"
+    >
+      <div class="loading">
+        LOADING NEWS
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     UPDATES
+========================================================= -->
+
+<section id="updates">
+
+  <div class="container">
+
+    <div class="section-head">
+      <div class="section-kicker">
+        Development Log
+      </div>
+
+      <h2>Updates</h2>
+
+      <p>
+        Current development, business and project updates.
+      </p>
+    </div>
+
+    <div
+      id="updatesGrid"
+      class="grid"
+    >
+      <div class="loading">
+        LOADING UPDATES
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     ANNOUNCEMENTS
+========================================================= -->
+
+<section id="announcements">
+
+  <div class="container">
+
+    <div class="section-head">
+      <div class="section-kicker">
+        System Notices
+      </div>
+
+      <h2>Announcements</h2>
+
+    </div>
+
+    <div
+      id="announcementsList"
+      class="announcements"
+    >
+      <div class="loading">
+        LOADING ANNOUNCEMENTS
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     PARTNERSHIPS
+========================================================= -->
+
+<section id="partnerships">
+
+  <div class="container">
+
+    <div class="section-head">
+
+      <div class="section-kicker">
+        Business Development
+      </div>
+
+      <h2>
+        Partnerships & Sponsorships
+      </h2>
+
+      <p>
+        CrowRules Entertainment is open to strategic
+        partnerships, sponsorships, media relationships
+        and community collaborations.
+      </p>
+
+    </div>
+
+
+    <div class="opportunities">
+
+      <div class="opportunity">
+
+        <h3>
+          Sponsorship
+        </h3>
+
+        <p>
+          Support individual shows, productions,
+          events or long-term initiatives.
+        </p>
+
+      </div>
+
+
+      <div class="opportunity">
+
+        <h3>
+          Business Partnership
+        </h3>
+
+        <p>
+          Build mutually beneficial relationships
+          with the CrowRules ecosystem.
+        </p>
+
+      </div>
+
+
+      <div class="opportunity">
+
+        <h3>
+          Media Partnership
+        </h3>
+
+        <p>
+          Collaborate on programming, promotion,
+          distribution and media projects.
+        </p>
+
+      </div>
+
+
+      <div class="opportunity">
+
+        <h3>
+          Community Partnership
+        </h3>
+
+        <p>
+          Connect CrowRules projects with local
+          organizations and community initiatives.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="form-shell">
+
+      <form id="partnershipForm">
+
+        <div class="form-grid">
+
+          <div class="form-group">
+
+            <label for="organization">
+              Organization
+            </label>
+
+            <input
+              id="organization"
+              name="organization"
+              type="text"
+              placeholder="Company / Organization"
+            >
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="contactName">
+              Contact Name *
+            </label>
+
+            <input
+              id="contactName"
+              name="contactName"
+              type="text"
+              required
+              autocomplete="name"
+              placeholder="Your name"
+            >
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="email">
+              Email *
+            </label>
+
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              autocomplete="email"
+              placeholder="you@example.com"
+            >
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="phone">
+              Phone
+            </label>
+
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              autocomplete="tel"
+              placeholder="Optional"
+            >
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="website">
+              Website
+            </label>
+
+            <input
+              id="website"
+              name="website"
+              type="url"
+              placeholder="https://"
+            >
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="partnershipType">
+              Partnership Type *
+            </label>
+
+            <select
+              id="partnershipType"
+              name="partnershipType"
+              required
+            >
+
+              <option value="">
+                Select one
+              </option>
+
+              <option value="business partnership">
+                Business Partnership
+              </option>
+
+              <option value="sponsorship">
+                Sponsorship
+              </option>
+
+              <option value="media partnership">
+                Media Partnership
+              </option>
+
+              <option value="community partnership">
+                Community Partnership
+              </option>
+
+              <option value="other">
+                Other
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="projectInterest">
+              Project / Show
+            </label>
+
+            <select
+              id="projectInterest"
+              name="projectInterest"
+            >
+
+              <option value="">
+                Select a project
+              </option>
+
+              <option value="Tacoma Nights">
+                Tacoma Nights
+              </option>
+
+              <option value="Back Deck Live">
+                Back Deck Live
+              </option>
+
+              <option value="CrowRules TV">
+                CrowRules TV
+              </option>
+
+              <option value="CrowRules Sports">
+                CrowRules Sports
+              </option>
+
+              <option value="CrowRules Podcasting">
+                CrowRules Podcasting
+              </option>
+
+              <option value="CrowSpace">
+                CrowSpace
+              </option>
+
+              <option value="CrowRules Yearbooks">
+                CrowRules Yearbooks
+              </option>
+
+              <option value="Spectrum Awards">
+                Spectrum Awards
+              </option>
+
+              <option value="CrowRules Records">
+                CrowRules Records
+              </option>
+
+              <option value="CrowRules Studios">
+                CrowRules Studios
+              </option>
+
+              <option value="Multiple Projects">
+                Multiple Projects
+              </option>
+
+              <option value="Other">
+                Other
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="budgetRange">
+              Budget Range
+            </label>
+
+            <select
+              id="budgetRange"
+              name="budgetRange"
+            >
+
+              <option value="">
+                Prefer not to say
+              </option>
+
+              <option value="Under $500">
+                Under $500
+              </option>
+
+              <option value="$500 - $1,000">
+                $500 - $1,000
+              </option>
+
+              <option value="$1,000 - $5,000">
+                $1,000 - $5,000
+              </option>
+
+              <option value="$5,000 - $10,000">
+                $5,000 - $10,000
+              </option>
+
+              <option value="$10,000+">
+                $10,000+
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="preferredContact">
+              Preferred Contact
+            </label>
+
+            <select
+              id="preferredContact"
+              name="preferredContact"
+            >
+
+              <option value="email">
+                Email
+              </option>
+
+              <option value="phone">
+                Phone
+              </option>
+
+              <option value="either">
+                Either
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="form-group full">
+
+            <label for="message">
+              Message *
+            </label>
+
+            <textarea
+              id="message"
+              name="message"
+              required
+              placeholder="Tell us about your partnership idea..."
+            ></textarea>
+
+          </div>
+
+
+          <!-- Honeypot -->
+          <div
+            class="form-group"
+            style="position:absolute;left:-9999px;opacity:0"
+            aria-hidden="true"
+          >
+
+            <label for="website_confirm">
+              Website Confirmation
+            </label>
+
+            <input
+              id="website_confirm"
+              name="website_confirm"
+              type="text"
+              tabindex="-1"
+              autocomplete="off"
+            >
+
+          </div>
+
+        </div>
+
+
+        <div class="form-actions">
+
+          <button
+            id="partnershipSubmit"
+            class="btn btn-primary"
+            type="submit"
+          >
+            SEND INQUIRY
+          </button>
+
+          <a
+            class="btn btn-paypal"
+            href="https://www.paypal.com/donate/?hosted_button_id=9NLV7DEE95E8A"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            SUPPORT WITH PAYPAL
+          </a>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     SUPPORT
+========================================================= -->
+
+<section id="support">
+
+  <div class="container">
+
+    <div class="section-head">
+
+      <div class="section-kicker">
+        Independent Media
+      </div>
+
+      <h2>
+        Support CrowRules
+      </h2>
+
+      <p>
+        Help build the CrowRules Entertainment universe.
+      </p>
+
+    </div>
+
+
+    <div class="support-layout">
+
+
+      <div class="support-copy">
+
+        <h3>
+          Help Build the CrowRules Universe
+        </h3>
+
+        <p>
+          CrowRules Entertainment is being developed as
+          an independent entertainment ecosystem. Support
+          helps create programming, develop projects,
+          improve production infrastructure and build
+          the foundation for future expansion.
+        </p>
+
+
+        <div class="support-points">
+
+          <div class="support-point">
+            <strong>Original Programming</strong><br>
+            Help develop shows, episodes and original content.
+          </div>
+
+          <div class="support-point">
+            <strong>Production Infrastructure</strong><br>
+            Help build the technology and resources behind
+            the CrowRules ecosystem.
+          </div>
+
+          <div class="support-point">
+            <strong>Future Expansion</strong><br>
+            Support future television, sports, podcasting,
+            studio, records and community initiatives.
+          </div>
+
+        </div>
+
+
+        <div class="hero-actions">
+
+          <a
+            class="btn btn-paypal"
+            href="https://www.paypal.com/donate/?hosted_button_id=9NLV7DEE95E8A"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            OPEN PAYPAL DONATION PAGE
+          </a>
+
+          <a
+            class="btn"
+            href="#partnerships"
+          >
+            BECOME A PARTNER
+          </a>
+
+        </div>
+
+      </div>
+
+
+      <!-- ===================================================
+           PAYPAL GIVING CAMPAIGN
+      ==================================================== -->
+
+      <aside class="paypal-card">
+
+        <div class="paypal-header">
+
+          <h3>
+            Support CrowRules Entertainment
+          </h3>
+
+          <p>
+            Donate securely through the CrowRules
+            PayPal Giving campaign.
+          </p>
+
+        </div>
+
+
+        <div class="paypal-frame-wrap">
+
+          <iframe
+            id="qqhbxb"
+            class="paypal-frame"
+            src="https://www.paypal.com/giving/campaigns?campaign_id=9NLV7DEE95E8A"
+            title="PayPal donate campaign card"
+            frameborder="0"
+            width="382"
+            height="550"
+            scrolling="no"
+            loading="lazy"
+            referrerpolicy="strict-origin-when-cross-origin"
+          ></iframe>
+
+        </div>
+
+
+        <div class="paypal-fallback">
+
+          <a
+            class="btn btn-paypal btn-small"
+            href="https://www.paypal.com/donate/?hosted_button_id=9NLV7DEE95E8A"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            OPEN DONATION PAGE
+          </a>
+
+        </div>
+
+      </aside>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     ADMIN
+========================================================= -->
+
+<section id="admin">
+
+  <div class="container">
+
+    <div class="section-head">
+
+      <div class="section-kicker">
+        Internal Operations
+      </div>
+
+      <h2>
+        Admin Control
+      </h2>
+
+      <p>
+        Authorized administrators can review and manage
+        CrowRules partnership inquiries.
+      </p>
+
+    </div>
+
+
+    <!-- LOGIN -->
+
+    <div
+      id="adminLogin"
+      class="admin-login"
+    >
+
+      <div class="admin-panel">
+
+        <h3>
+          Administrator Login
+        </h3>
+
+        <p class="muted">
+          Authorized CrowRules administrators only.
+        </p>
+
+
+        <form id="adminLoginForm">
+
+          <div class="form-group">
+
+            <label for="adminEmail">
+              Email
+            </label>
+
+            <input
+              id="adminEmail"
+              type="email"
+              required
+              autocomplete="username"
+              placeholder="Administrator email"
+            >
+
+          </div>
+
+
+          <div
+            class="form-group"
+            style="margin-top:15px"
+          >
+
+            <label for="adminPassword">
+              Password
+            </label>
+
+            <input
+              id="adminPassword"
+              type="password"
+              required
+              autocomplete="current-password"
+              placeholder="Password"
+            >
+
+          </div>
+
+
+          <div class="form-actions">
+
+            <button
+              id="adminLoginButton"
+              class="btn btn-primary"
+              type="submit"
+            >
+              ADMIN LOGIN
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+
+    </div>
+
+
+    <!-- ADMIN APP -->
+
+    <div
+      id="adminApp"
+      class="admin-panel hidden"
+    >
+
+      <div class="admin-toolbar">
+
+        <strong
+          style="font-family:Orbitron;font-size:13px"
+        >
+          Partnership Inbox
+        </strong>
+
+        <button
+          id="refreshInquiries"
+          class="btn btn-small"
+          type="button"
+        >
+          REFRESH
+        </button>
+
+        <button
+          id="adminLogout"
+          class="btn btn-small"
+          type="button"
+        >
+          LOG OUT
+        </button>
+
+      </div>
+
+
+      <div class="admin-stats">
+
+        <div class="admin-stat">
+
+          <strong id="adminTotal">
+            0
+          </strong>
+
+          <span>
+            Total
+          </span>
+
+        </div>
+
+
+        <div class="admin-stat">
+
+          <strong id="adminNew">
+            0
+          </strong>
+
+          <span>
+            New
+          </span>
+
+        </div>
+
+
+        <div class="admin-stat">
+
+          <strong id="adminUrgent">
+            0
+          </strong>
+
+          <span>
+            Urgent
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="admin-toolbar">
+
+        <input
+          id="inquirySearch"
+          type="search"
+          placeholder="Search inquiries..."
+        >
+
+        <select id="inquiryStatusFilter">
+
+          <option value="">
+            All Statuses
+          </option>
+
+          <option value="new">
+            New
+          </option>
+
+          <option value="reviewing">
+            Reviewing
+          </option>
+
+          <option value="contacted">
+            Contacted
+          </option>
+
+          <option value="qualified">
+            Qualified
+          </option>
+
+          <option value="proposal">
+            Proposal
+          </option>
+
+          <option value="won">
+            Won
+          </option>
+
+          <option value="declined">
+            Declined
+          </option>
+
+          <option value="closed">
+            Closed
+          </option>
+
+        </select>
+
+
+        <select id="inquiryPriorityFilter">
+
+          <option value="">
+            All Priorities
+          </option>
+
+          <option value="urgent">
+            Urgent
+          </option>
+
+          <option value="high">
+            High
+          </option>
+
+          <option value="normal">
+            Normal
+          </option>
+
+          <option value="low">
+            Low
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div
+        id="inquiryList"
+        class="inquiry-list"
+      >
+        <div class="empty">
+          Admin authentication required.
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+</main>
+
+
+<!-- =========================================================
+     FOOTER
+========================================================= -->
+
+<footer>
+
+  <div class="container">
+
+    <div class="footer-grid">
+
+      <div>
+
+        <div class="footer-brand">
+          CROW RULES ENTERTAINMENT
+        </div>
+
+        <p class="footer-copy">
+          One company. One universe. Building independent
+          entertainment infrastructure, original programming,
+          digital media and future creative ventures.
+        </p>
+
+      </div>
+
+
+      <div class="footer-links">
+
+        <strong
+          style="font-family:Orbitron;font-size:10px"
+        >
+          EXPLORE
+        </strong>
+
+        <a href="#projects">
+          Projects
+        </a>
+
+        <a href="#shows">
+          Shows
+        </a>
+
+        <a href="#schedule">
+          Schedule
+        </a>
+
+        <a href="#roadmap">
+          Roadmap
+        </a>
+
+        <a href="#news">
+          News
+        </a>
+
+      </div>
+
+
+      <div class="footer-links">
+
+        <strong
+          style="font-family:Orbitron;font-size:10px"
+        >
+          CONNECT
+        </strong>
+
+        <a href="#partnerships">
+          Partnerships
+        </a>
+
+        <a href="#support">
+          Support
+        </a>
+
+        <a
+          href="https://www.paypal.com/donate/?hosted_button_id=9NLV7DEE95E8A"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          PayPal Donation
+        </a>
+
+        <a href="#admin">
+          Admin
+        </a>
+
+      </div>
+
+    </div>
+
+
+    <div class="footer-bottom">
+
+      <span>
+        © <span id="footerYear"></span>
+        CrowRules Entertainment
+      </span>
+
+      <span>
+        BUSINESS HUB v1.0
+      </span>
+
+    </div>
+
+  </div>
+
+</footer>
+
+
+<!-- =========================================================
+     INQUIRY MODAL
+========================================================= -->
+
+<div
+  id="inquiryModal"
+  class="modal"
+  aria-hidden="true"
+>
+
+  <div class="modal-dialog">
+
+    <div class="modal-header">
+
+      <h3>
+        Partnership Inquiry
+      </h3>
+
+      <button
+        id="closeInquiryModal"
+        class="modal-close"
+        type="button"
+        aria-label="Close inquiry"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <div
+      id="inquiryModalBody"
+      class="modal-body"
+    ></div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================================
+     TOAST
+========================================================= -->
+
+<div
+  id="toast"
+  class="toast"
+  role="status"
+  aria-live="polite"
+>
+
+  <div
+    id="toastTitle"
+    class="toast-title"
+  ></div>
+
+  <div
+    id="toastMessage"
+    class="toast-message"
+  ></div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   CROW RULES BUSINESS HUB v3.3
+   APPLICATION
+========================================================= */
+
+'use strict';
+
+
 /* =========================================================
    CONFIG
 ========================================================= */
@@ -4062,6 +6998,9 @@ const SUPABASE_KEY =
 
 const PAYPAL_URL =
   'https://www.paypal.com/donate/?hosted_button_id=9NLV7DEE95E8A';
+
+const PAYPAL_GIVING_URL =
+  'https://www.paypal.com/giving/campaigns?campaign_id=9NLV7DEE95E8A';
 
 
 let sb = null;
@@ -4076,11 +7015,13 @@ let allInquiries = [];
    DOM HELPERS
 ========================================================= */
 
-const $ = selector =>
-  document.querySelector(selector);
+const $ =
+  selector =>
+    document.querySelector(selector);
 
-const $$ = selector =>
-  [...document.querySelectorAll(selector)];
+const $$ =
+  selector =>
+    [...document.querySelectorAll(selector)];
 
 
 /* =========================================================
@@ -4089,7 +7030,10 @@ const $$ = selector =>
 
 function escapeHTML(value){
 
-  if(value === null || value === undefined){
+  if(
+    value === null ||
+    value === undefined
+  ){
     return '';
   }
 
@@ -4099,6 +7043,7 @@ function escapeHTML(value){
     .replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;')
     .replace(/'/g,'&#039;');
+
 }
 
 
@@ -4121,12 +7066,15 @@ function safeURL(value){
       url.protocol === 'http:' ||
       url.protocol === 'https:'
     ){
+
       return url.href;
+
     }
 
   }catch(error){}
 
   return '';
+
 }
 
 
@@ -4145,6 +7093,10 @@ function showToast(
   const toast =
     $('#toast');
 
+  if(!toast){
+    return;
+  }
+
   $('#toastTitle').textContent =
     title;
 
@@ -4161,6 +7113,7 @@ function showToast(
         toast.classList.remove('show'),
       duration
     );
+
 }
 
 
@@ -4182,7 +7135,12 @@ function showToast(
   const skip =
     $('#crIntroSkip');
 
-  if(!intro){
+  if(
+    !intro ||
+    !progress ||
+    !status ||
+    !skip
+  ){
     return;
   }
 
@@ -4297,8 +7255,8 @@ function showToast(
       messages[0][1];
 
     for(
-      let i=0;
-      i<messages.length;
+      let i = 0;
+      i < messages.length;
       i++
     ){
 
@@ -4324,6 +7282,7 @@ function showToast(
     ){
 
       finish();
+
       return;
 
     }
@@ -4363,11 +7322,6 @@ function showToast(
   );
 
 
-  /*
-    Absolute backup timeout.
-    The intro can never trap the user.
-  */
-
   setTimeout(
     finish,
     INTRO_DURATION + 1500
@@ -4386,29 +7340,30 @@ $('#mobileMenu')
     () => {
 
       $('#navLinks')
-        .classList
+        ?.classList
         .toggle('mobile-open');
 
     }
   );
 
 
-$$('#navLinks a').forEach(
-  link => {
+$$('#navLinks a')
+  .forEach(
+    link => {
 
-    link.addEventListener(
-      'click',
-      () => {
+      link.addEventListener(
+        'click',
+        () => {
 
-        $('#navLinks')
-          .classList
-          .remove('mobile-open');
+          $('#navLinks')
+            ?.classList
+            .remove('mobile-open');
 
-      }
-    );
+        }
+      );
 
-  }
-);
+    }
+  );
 
 
 /* =========================================================
@@ -4418,7 +7373,9 @@ $$('#navLinks a').forEach(
 $('#replayIntro')
   ?.addEventListener(
     'click',
-    () => {
+    event => {
+
+      event.preventDefault();
 
       window.scrollTo({
         top:0,
@@ -4426,7 +7383,8 @@ $('#replayIntro')
       });
 
       setTimeout(
-        () => window.location.reload(),
+        () =>
+          window.location.reload(),
         250
       );
 
@@ -4438,8 +7396,12 @@ $('#replayIntro')
    FOOTER YEAR
 ========================================================= */
 
-$('#footerYear').textContent =
-  new Date().getFullYear();
+if($('#footerYear')){
+
+  $('#footerYear').textContent =
+    new Date().getFullYear();
+
+}
 
 
 /* =========================================================
@@ -4459,7 +7421,9 @@ function initSupabase(){
     );
 
     return false;
+
   }
+
 
   sb =
     window.supabase.createClient(
@@ -4474,7 +7438,9 @@ function initSupabase(){
       }
     );
 
+
   return true;
+
 }
 
 
@@ -4489,15 +7455,12 @@ function projectURL(project){
   }
 
   const slug =
-    String(project.slug || '')
-      .toLowerCase()
-      .trim();
+    String(
+      project.slug || ''
+    )
+    .toLowerCase()
+    .trim();
 
-
-  /*
-    Explicit project mappings.
-    These work even when page_url is blank.
-  */
 
   if(
     slug === 'tacoma-nights' ||
@@ -4521,7 +7484,9 @@ function projectURL(project){
 
 
   const supplied =
-    safeURL(project.page_url);
+    safeURL(
+      project.page_url
+    );
 
   if(supplied){
     return supplied;
@@ -4529,44 +7494,7 @@ function projectURL(project){
 
 
   return '';
-}
 
-
-/* =========================================================
-   PROJECT FALLBACK ROUTING BY NAME
-========================================================= */
-
-function projectURLByName(
-  name
-){
-
-  const normalized =
-    String(name || '')
-      .toLowerCase()
-      .trim();
-
-
-  if(
-    normalized ===
-    'tacoma nights'
-  ){
-
-    return 'tacomanights.html';
-
-  }
-
-
-  if(
-    normalized ===
-    'back deck live'
-  ){
-
-    return 'backdeck.html';
-
-  }
-
-
-  return '';
 }
 
 
@@ -4578,6 +7506,10 @@ async function loadDivisions(){
 
   const target =
     $('#divisionsGrid');
+
+  if(!target){
+    return;
+  }
 
   try{
 
@@ -4629,6 +7561,7 @@ async function loadDivisions(){
             safeURL(
               division.website_url
             );
+
 
           return `
 
@@ -4688,7 +7621,7 @@ async function loadDivisions(){
                   ?
                   `<a
                     class="show-link"
-                    href="${website}"
+                    href="${escapeHTML(website)}"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -4731,6 +7664,10 @@ async function loadProjects(){
 
   const target =
     $('#projectsGrid');
+
+  if(!target){
+    return;
+  }
 
   try{
 
@@ -4781,16 +7718,15 @@ async function loadProjects(){
           const url =
             projectURL(project);
 
-
-          let badgeClass =
-            '';
-
           const status =
             String(
               project.status ||
               ''
             ).toLowerCase();
 
+
+          let badgeClass =
+            '';
 
           if(
             status.includes(
@@ -4826,9 +7762,7 @@ async function loadProjects(){
 
           return `
 
-            <article
-              class="card project-card"
-            >
+            <article class="card project-card">
 
               <div class="project-top">
 
@@ -4838,17 +7772,15 @@ async function loadProjects(){
                       project.name ||
                       'CR'
                     )
-                      .substring(0,3)
-                      .toUpperCase()
+                    .substring(0,3)
+                    .toUpperCase()
                   )}
                 </div>
 
                 ${
                   project.status
                     ?
-                    `<span
-                      class="badge ${badgeClass}"
-                    >
+                    `<span class="badge ${badgeClass}">
                       ${escapeHTML(
                         project.status
                       )}
@@ -4916,7 +7848,7 @@ async function loadProjects(){
                           ''
                       }
                     >
-                      Open Project
+                      OPEN PROJECT
                     </a>
 
                   </div>`
@@ -4955,6 +7887,10 @@ async function loadShows(){
 
   const target =
     $('#showsGrid');
+
+  if(!target){
+    return;
+  }
 
   try{
 
@@ -5002,14 +7938,14 @@ async function loadShows(){
       data.map(
         show => {
 
-          let projectLink =
-            '';
-
-
           const title =
             String(
               show.title || ''
             ).toLowerCase();
+
+
+          let projectLink =
+            '';
 
 
           if(
@@ -5111,7 +8047,8 @@ async function loadShows(){
               ${
                 show.schedule_text
                   ?
-                  `<div class="muted" style="margin-top:12px;font-size:10px">
+                  `<div class="muted"
+                       style="margin-top:12px;font-size:10px">
                     ${escapeHTML(
                       show.schedule_text
                     )}
@@ -5168,6 +8105,10 @@ async function loadSchedule(){
   const target =
     $('#scheduleList');
 
+  if(!target){
+    return;
+  }
+
   try{
 
     const {
@@ -5221,6 +8162,7 @@ async function loadSchedule(){
               new Date(
                 item.start_at
               );
+
 
             if(
               !Number.isNaN(
@@ -5294,11 +8236,11 @@ async function loadSchedule(){
                     ?
                     `<a
                       class="btn btn-small"
-                      href="${stream}"
+                      href="${escapeHTML(stream)}"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      Watch
+                      WATCH
                     </a>`
                     :
                     ''
@@ -5337,6 +8279,10 @@ async function loadRoadmap(){
 
   const target =
     $('#roadmapList');
+
+  if(!target){
+    return;
+  }
 
   try{
 
@@ -5445,6 +8391,10 @@ async function loadNews(){
 
   const target =
     $('#newsGrid');
+
+  if(!target){
+    return;
+  }
 
   try{
 
@@ -5556,7 +8506,7 @@ async function loadNews(){
                   ?
                   `<a
                     class="article-link"
-                    href="${source}"
+                    href="${escapeHTML(source)}"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -5597,6 +8547,10 @@ async function loadUpdates(){
 
   const target =
     $('#updatesGrid');
+
+  if(!target){
+    return;
+  }
 
   try{
 
@@ -5701,7 +8655,14 @@ async function loadUpdates(){
                   ?
                   `<a
                     class="article-link"
-                    href="${link}"
+                    href="${escapeHTML(link)}"
+                    ${
+                      /^https?:\/\//i.test(link)
+                        ?
+                        'target="_blank" rel="noopener noreferrer"'
+                        :
+                        ''
+                    }
                   >
                     VIEW UPDATE →
                   </a>`
@@ -5744,6 +8705,10 @@ async function loadAnnouncements(){
   const target =
     $('#announcementsList');
 
+  if(!target){
+    return;
+  }
+
   try{
 
     const now =
@@ -5757,7 +8722,7 @@ async function loadAnnouncements(){
       await sb
         .from('cr_announcements')
         .select(
-          'id,title,message,severity,active,starts_at,expires_at'
+          'id,title,message,severity,active,starts_at,expires_at,created_at'
         )
         .eq(
           'active',
@@ -5860,28 +8825,15 @@ async function loadPublicData(){
     return;
   }
 
-  /*
-    Each loader handles its own errors.
-    One failed table does not destroy
-    the entire Business Hub.
-  */
-
   await Promise.allSettled([
 
     loadDivisions(),
-
     loadProjects(),
-
     loadShows(),
-
     loadSchedule(),
-
     loadRoadmap(),
-
     loadNews(),
-
     loadUpdates(),
-
     loadAnnouncements()
 
   ]);
@@ -5917,12 +8869,8 @@ $('#partnershipForm')
         event.currentTarget;
 
 
-      /*
-        Honeypot spam protection.
-      */
-
       if(
-        $('#website_confirm').value
+        $('#website_confirm')?.value
       ){
 
         showToast(
@@ -6004,12 +8952,6 @@ $('#partnershipForm')
           .trim();
 
 
-      /*
-        IMPORTANT:
-        These map directly to the verified
-        cr_partnership_inquiries schema.
-      */
-
       const payload = {
 
         organization_name:
@@ -6056,12 +8998,6 @@ $('#partnershipForm')
 
       try{
 
-        /*
-          Do NOT call .select() here.
-          Public INSERT policy intentionally
-          does not grant public SELECT.
-        */
-
         const {
           error
         } =
@@ -6087,11 +9023,6 @@ $('#partnershipForm')
           'Thank you. CrowRules Entertainment has received your partnership inquiry.'
         );
 
-
-        /*
-          If an admin is currently logged in,
-          refresh their inbox.
-        */
 
         if(currentAdmin){
 
@@ -6191,7 +9122,10 @@ async function checkAdmin(
   userId
 ){
 
-  if(!sb || !userId){
+  if(
+    !sb ||
+    !userId
+  ){
     return false;
   }
 
@@ -6243,38 +9177,38 @@ async function checkAdmin(
 
 
 /* =========================================================
-   SHOW ADMIN APP
+   ADMIN UI
 ========================================================= */
 
 function showAdminApp(){
 
   $('#adminLogin')
-    .classList
+    ?.classList
     .add('hidden');
 
   $('#adminApp')
-    .classList
+    ?.classList
     .remove('hidden');
 
 }
 
 
-/* =========================================================
-   HIDE ADMIN APP
-========================================================= */
-
 function hideAdminApp(){
 
   $('#adminLogin')
-    .classList
+    ?.classList
     .remove('hidden');
 
   $('#adminApp')
-    .classList
+    ?.classList
     .add('hidden');
 
-  $('#inquiryList').innerHTML =
-    '<div class="empty">Admin authentication required.</div>';
+  if($('#inquiryList')){
+
+    $('#inquiryList').innerHTML =
+      '<div class="empty">Admin authentication required.</div>';
+
+  }
 
 }
 
@@ -6422,7 +9356,7 @@ $('#adminLogout')
 
 
 /* =========================================================
-   ADMIN INQUIRY QUERY
+   LOAD ADMIN INQUIRIES
 ========================================================= */
 
 async function loadAdminInquiries(){
@@ -6439,15 +9373,16 @@ async function loadAdminInquiries(){
     $('#inquiryList');
 
 
+  if(!target){
+    return;
+  }
+
+
   target.innerHTML =
     '<div class="loading">LOADING INQUIRIES</div>';
 
 
   try{
-
-    /*
-      Includes every verified partnership field.
-    */
 
     const {
       data,
@@ -6501,26 +9436,26 @@ async function loadAdminInquiries(){
 
 
 /* =========================================================
-   FILTER ADMIN INQUIRIES
+   FILTER
 ========================================================= */
 
 function getFilteredInquiries(){
 
   const search =
     $('#inquirySearch')
-      .value
+      ?.value
       .trim()
-      .toLowerCase();
+      .toLowerCase() || '';
 
 
   const status =
     $('#inquiryStatusFilter')
-      .value;
+      ?.value || '';
 
 
   const priority =
     $('#inquiryPriorityFilter')
-      .value;
+      ?.value || '';
 
 
   return allInquiries.filter(
@@ -6552,21 +9487,13 @@ function getFilteredInquiries(){
           [
 
             inquiry.organization_name,
-
             inquiry.contact_name,
-
             inquiry.email,
-
             inquiry.phone,
-
             inquiry.partnership_type,
-
             inquiry.project_interest,
-
             inquiry.budget_range,
-
             inquiry.message,
-
             inquiry.admin_notes
 
           ]
@@ -6597,13 +9524,18 @@ function getFilteredInquiries(){
 
 
 /* =========================================================
-   RENDER ADMIN INQUIRIES
+   RENDER ADMIN
 ========================================================= */
 
 function renderAdminInquiries(){
 
   const target =
     $('#inquiryList');
+
+
+  if(!target){
+    return;
+  }
 
 
   const filtered =
@@ -6631,10 +9563,8 @@ function renderAdminInquiries(){
   $('#adminTotal').textContent =
     total;
 
-
   $('#adminNew').textContent =
     newCount;
-
 
   $('#adminUrgent').textContent =
     urgentCount;
@@ -6774,22 +9704,23 @@ function renderAdminInquiries(){
     ).join('');
 
 
-  $$('.inquiry-card').forEach(
-    card => {
+  $$('.inquiry-card')
+    .forEach(
+      card => {
 
-      card.addEventListener(
-        'click',
-        () => {
+        card.addEventListener(
+          'click',
+          () => {
 
-          openInquiry(
-            card.dataset.inquiryId
-          );
+            openInquiry(
+              card.dataset.inquiryId
+            );
 
-        }
-      );
+          }
+        );
 
-    }
-  );
+      }
+    );
 
 }
 
@@ -6844,7 +9775,8 @@ function openInquiry(
   const inquiry =
     allInquiries.find(
       item =>
-        item.id === inquiryId
+        String(item.id) ===
+        String(inquiryId)
     );
 
 
@@ -6868,7 +9800,6 @@ function openInquiry(
     <div class="detail-grid">
 
       <div class="detail">
-
         <div class="detail-label">
           Organization
         </div>
@@ -6879,11 +9810,10 @@ function openInquiry(
             'Not provided'
           )}
         </div>
-
       </div>
 
-      <div class="detail">
 
+      <div class="detail">
         <div class="detail-label">
           Contact
         </div>
@@ -6893,11 +9823,10 @@ function openInquiry(
             inquiry.contact_name
           )}
         </div>
-
       </div>
 
-      <div class="detail">
 
+      <div class="detail">
         <div class="detail-label">
           Email
         </div>
@@ -6916,11 +9845,10 @@ function openInquiry(
           </a>
 
         </div>
-
       </div>
 
-      <div class="detail">
 
+      <div class="detail">
         <div class="detail-label">
           Phone
         </div>
@@ -6931,11 +9859,10 @@ function openInquiry(
             'Not provided'
           )}
         </div>
-
       </div>
 
-      <div class="detail">
 
+      <div class="detail">
         <div class="detail-label">
           Inquiry Type
         </div>
@@ -6946,11 +9873,10 @@ function openInquiry(
             'Not specified'
           )}
         </div>
-
       </div>
 
-      <div class="detail">
 
+      <div class="detail">
         <div class="detail-label">
           Project / Show
         </div>
@@ -6961,11 +9887,10 @@ function openInquiry(
             'Not specified'
           )}
         </div>
-
       </div>
 
-      <div class="detail">
 
+      <div class="detail">
         <div class="detail-label">
           Budget
         </div>
@@ -6976,11 +9901,10 @@ function openInquiry(
             'Not specified'
           )}
         </div>
-
       </div>
 
-      <div class="detail">
 
+      <div class="detail">
         <div class="detail-label">
           Preferred Contact
         </div>
@@ -6991,11 +9915,10 @@ function openInquiry(
             'email'
           )}
         </div>
-
       </div>
 
-      <div class="detail">
 
+      <div class="detail">
         <div class="detail-label">
           Website
         </div>
@@ -7006,25 +9929,22 @@ function openInquiry(
             website
               ?
               `<a
-                href="${website}"
+                href="${escapeHTML(website)}"
                 target="_blank"
                 rel="noopener noreferrer"
                 style="color:var(--cyan)"
               >
-                ${escapeHTML(
-                  website
-                )}
+                ${escapeHTML(website)}
               </a>`
               :
               'Not provided'
           }
 
         </div>
-
       </div>
 
-      <div class="detail">
 
+      <div class="detail">
         <div class="detail-label">
           Submitted
         </div>
@@ -7040,7 +9960,6 @@ function openInquiry(
               ''
           )}
         </div>
-
       </div>
 
     </div>
@@ -7135,8 +10054,10 @@ function openInquiry(
       </div>
 
 
-      <div class="form-group"
-           style="grid-column:1/-1">
+      <div
+        class="form-group"
+        style="grid-column:1/-1"
+      >
 
         <label>
           Admin Notes
@@ -7168,7 +10089,7 @@ function openInquiry(
         class="btn btn-primary"
         type="button"
       >
-        Save Changes
+        SAVE CHANGES
       </button>
 
       <a
@@ -7177,7 +10098,7 @@ function openInquiry(
           inquiry.email
         )}"
       >
-        Email Contact
+        EMAIL CONTACT
       </a>
 
     </div>
@@ -7250,12 +10171,6 @@ async function saveInquiry(){
 
   try{
 
-    /*
-      UPDATE is permitted for authenticated
-      administrators because the database
-      policy verifies membership in cr_admins.
-    */
-
     const {
       data,
       error
@@ -7288,10 +10203,6 @@ async function saveInquiry(){
       throw error;
     }
 
-
-    /*
-      Replace local copy.
-    */
 
     allInquiries =
       allInquiries.map(
@@ -7355,11 +10266,11 @@ function closeInquiry(){
     null;
 
   $('#inquiryModal')
-    .classList
+    ?.classList
     .remove('open');
 
   $('#inquiryModal')
-    .setAttribute(
+    ?.setAttribute(
       'aria-hidden',
       'true'
     );
@@ -7399,7 +10310,7 @@ document.addEventListener(
     if(
       event.key === 'Escape' &&
       $('#inquiryModal')
-        .classList
+        ?.classList
         .contains('open')
     ){
 
@@ -7444,10 +10355,6 @@ function cleanupRealtime(){
 
 }
 
-
-/* =========================================================
-   SUBSCRIBE ADMIN REALTIME
-========================================================= */
 
 function subscribeAdminRealtime(){
 
@@ -7523,15 +10430,10 @@ async function initAuth(){
 
 
   sb.auth.onAuthStateChange(
-    async (
+    (
       event,
       session
     ) => {
-
-      /*
-        Defer the admin query so auth state
-        processing does not block Supabase.
-      */
 
       setTimeout(
         () =>
@@ -7548,7 +10450,7 @@ async function initAuth(){
 
 
 /* =========================================================
-   INITIALIZE APPLICATION
+   INITIALIZE
 ========================================================= */
 
 async function initApp(){
@@ -7562,18 +10464,7 @@ async function initApp(){
   }
 
 
-  /*
-    Public content starts immediately.
-    It is completely independent from
-    the cinematic intro.
-  */
-
   await loadPublicData();
-
-
-  /*
-    Authentication is initialized separately.
-  */
 
   await initAuth();
 
@@ -7593,3 +10484,4 @@ document.addEventListener(
 
 </body>
 </html>
+```
