@@ -1,19 +1,25 @@
-```html
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>Tacoma Nights | CrowRules Entertainment</title>
+<title>Tacoma Nights — CrowRules Entertainment</title>
 
-<meta name="description"
-content="Tacoma Nights — stories, conversations, Tacoma news, PNW sports, mysteries and the journey behind CrowRules Entertainment.">
+<meta
+  name="description"
+  content="Tacoma Nights — stories, conversations, Tacoma, the Pacific Northwest, and the journey behind CrowRules Entertainment."
+>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link
+  href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap"
+  rel="stylesheet"
+>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 
@@ -22,2754 +28,3219 @@ content="Tacoma Nights — stories, conversations, Tacoma news, PNW sports, myst
 ========================================================= */
 
 :root {
-    --bg: #040407;
-    --bg2: #08080d;
-    --bg3: #0e0e16;
+  --bg: #05060a;
+  --bg2: #090b12;
+  --panel: rgba(13,15,25,.86);
+  --panel2: rgba(18,20,32,.92);
 
-    --white: #f5f5f7;
-    --muted: #9a9aa8;
-    --dim: #626270;
+  --cyan: #00e5ff;
+  --cyan-soft: rgba(0,229,255,.18);
 
-    --cyan: #00e5ff;
-    --purple: #9b00ff;
-    --pink: #ff2f92;
+  --purple: #9d4edd;
+  --pink: #ff2ea6;
 
-    --border: rgba(255,255,255,.09);
-    --glass: rgba(10,10,17,.72);
+  --text: #f5f7fb;
+  --muted: rgba(245,247,251,.66);
+  --dim: rgba(245,247,251,.42);
 
-    --max: 1240px;
+  --border: rgba(255,255,255,.09);
 
-    --orbitron: "Orbitron", sans-serif;
-    --montserrat: "Montserrat", sans-serif;
+  --radius: 20px;
+
+  --max: 1240px;
 }
+
 
 /* =========================================================
    RESET
 ========================================================= */
 
 * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 html {
-    scroll-behavior: smooth;
+  scroll-behavior: smooth;
 }
 
 body {
-    background:
-        radial-gradient(circle at 15% 10%, rgba(155,0,255,.10), transparent 30%),
-        radial-gradient(circle at 85% 25%, rgba(0,229,255,.07), transparent 30%),
-        var(--bg);
+  background:
+    radial-gradient(
+      circle at 15% 10%,
+      rgba(0,229,255,.08),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 85% 20%,
+      rgba(157,78,221,.08),
+      transparent 30%
+    ),
+    var(--bg);
 
-    color: var(--white);
-    font-family: var(--montserrat);
+  color: var(--text);
 
-    overflow-x: hidden;
+  font-family:
+    Montserrat,
+    Arial,
+    sans-serif;
+
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
-body.intro-active {
-    overflow: hidden;
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      rgba(255,255,255,.018) 1px,
+      transparent 1px
+    );
+
+  background-size: 100% 4px;
+
+  opacity: .15;
+
+  z-index: 999;
 }
 
 a {
-    color: inherit;
-    text-decoration: none;
+  color: inherit;
 }
 
 button,
-input {
-    font-family: inherit;
+a {
+  -webkit-tap-highlight-color: transparent;
 }
+
 
 /* =========================================================
-   GLOBAL EFFECTS
-========================================================= */
-
-body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-
-    pointer-events: none;
-
-    background:
-        repeating-linear-gradient(
-            0deg,
-            rgba(255,255,255,.015) 0,
-            rgba(255,255,255,.015) 1px,
-            transparent 1px,
-            transparent 4px
-        );
-
-    opacity: .25;
-    z-index: 100;
-}
-
-.noise {
-    position: fixed;
-    inset: 0;
-
-    pointer-events: none;
-
-    opacity: .035;
-
-    background-image:
-        radial-gradient(#fff 1px, transparent 1px);
-
-    background-size: 4px 4px;
-
-    z-index: 99;
-}
-
-/* =========================================================
-   CINEMATIC INTRO
+   INTRO
 ========================================================= */
 
 #intro {
-    position: fixed;
-    inset: 0;
+  position: fixed;
+  inset: 0;
 
-    background: #010102;
+  z-index: 5000;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: grid;
+  place-items: center;
 
-    z-index: 9999;
+  background:
+    radial-gradient(
+      circle,
+      rgba(0,229,255,.12),
+      transparent 35%
+    ),
+    #020308;
 
-    overflow: hidden;
-
-    transition:
-        opacity 1s ease,
-        visibility 1s ease;
+  transition:
+    opacity .9s ease,
+    visibility .9s ease;
 }
 
-#intro.finished {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
+#intro.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
-.intro-background {
-    position: absolute;
-    inset: 0;
-
-    background:
-        radial-gradient(
-            circle at center,
-            rgba(155,0,255,.16),
-            transparent 40%
-        ),
-        linear-gradient(
-            to bottom,
-            #050508,
-            #010102
-        );
+.intro-inner {
+  text-align: center;
+  padding: 30px;
 }
 
-.intro-grid {
-    position: absolute;
-    width: 200%;
-    height: 70%;
-
-    bottom: -25%;
-    left: -50%;
-
-    transform:
-        perspective(450px)
-        rotateX(63deg);
-
-    background-image:
-        linear-gradient(
-            rgba(0,229,255,.16) 1px,
-            transparent 1px
-        ),
-        linear-gradient(
-            90deg,
-            rgba(155,0,255,.16) 1px,
-            transparent 1px
-        );
-
-    background-size: 70px 70px;
-
-    animation: gridMove 3s linear infinite;
-}
-
-@keyframes gridMove {
-
-    from {
-        background-position: 0 0;
-    }
-
-    to {
-        background-position: 0 70px;
-    }
-}
-
-.intro-skyline {
-    position: absolute;
-
-    left: 0;
-    right: 0;
-    bottom: 0;
-
-    height: 38%;
-
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-
-    gap: 8px;
-
-    opacity: .65;
-}
-
-.intro-building {
-    width: var(--width);
-    height: var(--height);
-
-    background:
-        repeating-linear-gradient(
-            0deg,
-            transparent 0 12px,
-            rgba(0,229,255,.16) 13px 15px
-        ),
-        repeating-linear-gradient(
-            90deg,
-            transparent 0 9px,
-            rgba(255,255,255,.08) 10px 12px
-        ),
-        #07070d;
-
-    border: 1px solid rgba(255,255,255,.05);
-
-    animation:
-        buildingGlow 3s infinite alternate;
-}
-
-@keyframes buildingGlow {
-
-    from {
-        filter: brightness(.65);
-    }
-
-    to {
-        filter: brightness(1.15);
-    }
-}
-
-.intro-rain {
-    position: absolute;
-    inset: -100px;
-
-    background:
-        repeating-linear-gradient(
-            105deg,
-            transparent 0 70px,
-            rgba(255,255,255,.14) 71px,
-            transparent 72px 125px
-        );
-
-    background-size: 180px 300px;
-
-    animation: rain 0.65s linear infinite;
-
-    opacity: .28;
-}
-
-@keyframes rain {
-
-    from {
-        transform: translateY(-300px);
-    }
-
-    to {
-        transform: translateY(300px);
-    }
-}
-
-.intro-content {
-    position: relative;
-
-    z-index: 5;
-
-    text-align: center;
-
-    animation: introReveal 4.5s ease forwards;
-}
-
-@keyframes introReveal {
-
-    0% {
-        opacity: 0;
-        transform: scale(1.3);
-        filter: blur(18px);
-    }
-
-    25% {
-        opacity: 1;
-        filter: blur(0);
-    }
-
-    100% {
-        transform: scale(1);
-    }
-}
-
-.intro-present {
-    font-family: var(--orbitron);
-
-    font-size: .65rem;
-
-    letter-spacing: .45em;
-
-    text-transform: uppercase;
-
-    color: var(--cyan);
-
-    margin-bottom: 22px;
+.intro-kicker {
+  font-size: .72rem;
+  letter-spacing: .35em;
+  color: var(--cyan);
+  text-transform: uppercase;
+  margin-bottom: 20px;
 }
 
 .intro-title {
-    font-family: var(--orbitron);
+  font-family: Orbitron, sans-serif;
+  font-size: clamp(3rem, 10vw, 8rem);
+  letter-spacing: .08em;
+  line-height: .95;
 
-    font-weight: 900;
+  text-shadow:
+    0 0 20px rgba(0,229,255,.45),
+    0 0 60px rgba(157,78,221,.25);
 
-    font-size: clamp(3rem, 10vw, 9rem);
-
-    line-height: .82;
-
-    letter-spacing: -.07em;
-
-    text-transform: uppercase;
-
-    text-shadow:
-        0 0 20px rgba(155,0,255,.5),
-        0 0 70px rgba(0,229,255,.18);
+  animation:
+    introPulse 2s ease-in-out infinite;
 }
 
-.intro-title span {
-    display: block;
-
-    color: transparent;
-
-    -webkit-text-stroke: 1px rgba(255,255,255,.7);
+.intro-subtitle {
+  margin-top: 25px;
+  color: var(--muted);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  font-size: .78rem;
 }
 
-.intro-divider {
-    width: 220px;
-    height: 1px;
+.intro-line {
+  width: 180px;
+  height: 2px;
 
-    margin: 32px auto 20px;
+  margin: 35px auto 0;
 
-    background:
-        linear-gradient(
-            90deg,
-            transparent,
-            var(--cyan),
-            var(--purple),
-            transparent
-        );
+  background: var(--cyan);
 
-    box-shadow:
-        0 0 20px var(--cyan);
+  box-shadow:
+    0 0 20px var(--cyan);
+
+  animation:
+    introLine 1.8s ease infinite;
 }
 
-.intro-tagline {
-    color: rgba(255,255,255,.65);
+@keyframes introPulse {
+  0%,100% {
+    opacity: .72;
+    transform: scale(1);
+  }
 
-    font-size: .68rem;
-
-    letter-spacing: .3em;
-
-    text-transform: uppercase;
+  50% {
+    opacity: 1;
+    transform: scale(1.025);
+  }
 }
 
-.intro-skip {
-    position: absolute;
+@keyframes introLine {
+  0% {
+    width: 0;
+    opacity: 0;
+  }
 
-    right: 25px;
-    bottom: 25px;
+  50% {
+    width: 180px;
+    opacity: 1;
+  }
 
-    color: rgba(255,255,255,.4);
-
-    background: transparent;
-
-    border: 1px solid rgba(255,255,255,.1);
-
-    padding: 10px 15px;
-
-    font-size: .65rem;
-
-    text-transform: uppercase;
-
-    letter-spacing: .1em;
-
-    cursor: pointer;
+  100% {
+    width: 0;
+    opacity: 0;
+  }
 }
+
 
 /* =========================================================
    HEADER
 ========================================================= */
 
-.header {
-    position: fixed;
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
 
-    top: 0;
-    left: 0;
-    right: 0;
+  z-index: 1000;
 
-    z-index: 900;
+  border-bottom:
+    1px solid rgba(255,255,255,.07);
 
-    background: rgba(3,3,6,.72);
+  background:
+    rgba(5,6,10,.82);
 
-    backdrop-filter: blur(18px);
-
-    border-bottom: 1px solid var(--border);
-
-    transition: .3s ease;
-}
-
-.header.scrolled {
-    background: rgba(3,3,6,.92);
+  backdrop-filter:
+    blur(18px);
 }
 
 .nav {
-    width: min(var(--max), calc(100% - 32px));
+  max-width: var(--max);
+  margin: auto;
 
-    height: 74px;
+  height: 78px;
 
-    margin: auto;
+  padding:
+    0 24px;
 
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.logo {
-    font-family: var(--orbitron);
-
-    font-weight: 900;
-
-    font-size: 1.05rem;
-
-    letter-spacing: -.04em;
+.brand {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.logo span {
-    color: var(--cyan);
+.brand-mark {
+  width: 38px;
+  height: 38px;
+
+  border: 1px solid var(--cyan);
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 9px;
+
+  color: var(--cyan);
+
+  font-family: Orbitron;
+
+  box-shadow:
+    0 0 20px rgba(0,229,255,.15);
+}
+
+.brand-text {
+  font-family: Orbitron;
+  font-size: .95rem;
+  letter-spacing: .08em;
+}
+
+.brand-text span {
+  display: block;
+
+  color: var(--cyan);
+
+  font-size: .62rem;
+
+  letter-spacing: .2em;
+
+  margin-top: 3px;
 }
 
 .nav-links {
-    display: flex;
-
-    align-items: center;
-
-    gap: 24px;
-
-    list-style: none;
+  display: flex;
+  gap: 28px;
+  list-style: none;
 }
 
 .nav-links a {
-    color: #aaaab4;
+  text-decoration: none;
 
-    font-size: .68rem;
+  color: var(--muted);
 
-    font-weight: 600;
+  font-size: .76rem;
+  font-weight: 700;
 
-    letter-spacing: .13em;
+  letter-spacing: .08em;
 
-    text-transform: uppercase;
+  text-transform: uppercase;
 
-    transition: .25s ease;
+  transition: .2s ease;
 }
 
 .nav-links a:hover {
-    color: white;
-
-    text-shadow:
-        0 0 15px var(--cyan);
-}
-
-.nav-social {
-    border-left: 1px solid var(--border);
-
-    padding-left: 20px;
+  color: var(--cyan);
 }
 
 .menu-button {
-    display: none;
+  display: none;
 
-    color: white;
+  border: 1px solid var(--border);
 
-    background: transparent;
+  background: transparent;
 
-    border: 1px solid var(--border);
+  color: white;
 
-    padding: 9px 12px;
+  width: 44px;
+  height: 44px;
 
-    cursor: pointer;
+  border-radius: 9px;
+
+  font-size: 1.2rem;
 }
+
 
 /* =========================================================
    HERO
 ========================================================= */
 
 .hero {
-    min-height: 100vh;
+  min-height: 92vh;
 
-    position: relative;
+  max-width: var(--max);
 
-    display: flex;
+  margin: auto;
 
-    align-items: center;
+  padding:
+    150px 24px 90px;
 
-    overflow: hidden;
+  display: grid;
 
-    background:
-        linear-gradient(
-            90deg,
-            rgba(3,3,6,.98) 0%,
-            rgba(3,3,6,.86) 38%,
-            rgba(3,3,6,.35) 75%,
-            rgba(3,3,6,.7) 100%
-        );
+  grid-template-columns:
+    1.15fr .85fr;
+
+  gap: 60px;
+
+  align-items: center;
 }
 
-.hero::after {
-    content: "";
+.eyebrow {
+  color: var(--cyan);
 
-    position: absolute;
+  font-size: .7rem;
 
-    inset: 0;
+  font-weight: 800;
 
-    background:
-        linear-gradient(
-            to bottom,
-            transparent 60%,
-            var(--bg) 100%
-        );
+  letter-spacing: .25em;
 
-    pointer-events: none;
-}
-
-.hero-sky {
-    position: absolute;
-
-    inset: 0;
-
-    background:
-        radial-gradient(
-            circle at 75% 35%,
-            rgba(0,229,255,.13),
-            transparent 25%
-        ),
-        radial-gradient(
-            circle at 65% 70%,
-            rgba(155,0,255,.18),
-            transparent 30%
-        );
-}
-
-.hero-skyline {
-    position: absolute;
-
-    right: -3%;
-    bottom: 0;
-
-    width: 65%;
-    height: 80%;
-
-    opacity: .72;
-
-    background:
-        linear-gradient(
-            to top,
-            #030305,
-            transparent 70%
-        );
-
-    clip-path: polygon(
-        0 100%,
-        0 61%,
-        7% 61%,
-        7% 45%,
-        13% 45%,
-        13% 66%,
-        19% 66%,
-        19% 35%,
-        25% 35%,
-        25% 56%,
-        31% 56%,
-        31% 20%,
-        37% 20%,
-        37% 51%,
-        44% 51%,
-        44% 8%,
-        49% 8%,
-        49% 48%,
-        56% 48%,
-        56% 31%,
-        62% 31%,
-        62% 60%,
-        70% 60%,
-        70% 40%,
-        77% 40%,
-        77% 57%,
-        84% 57%,
-        84% 26%,
-        90% 26%,
-        90% 51%,
-        96% 51%,
-        96% 34%,
-        100% 34%,
-        100% 100%
-    );
-}
-
-.hero-rain {
-    position: absolute;
-
-    inset: -100px;
-
-    opacity: .17;
-
-    background:
-        repeating-linear-gradient(
-            105deg,
-            transparent 0 80px,
-            rgba(255,255,255,.18) 81px,
-            transparent 82px 150px
-        );
-
-    background-size: 220px 320px;
-
-    animation: rain 1s linear infinite;
-}
-
-.hero-content {
-    position: relative;
-
-    z-index: 5;
-
-    width: min(var(--max), calc(100% - 32px));
-
-    margin: auto;
-
-    padding-top: 90px;
-}
-
-.hero-kicker {
-    display: flex;
-
-    align-items: center;
-
-    gap: 10px;
-
-    color: var(--cyan);
-
-    font-family: var(--orbitron);
-
-    font-size: .66rem;
-
-    letter-spacing: .2em;
-
-    text-transform: uppercase;
-
-    margin-bottom: 24px;
-}
-
-.status-dot {
-    width: 8px;
-    height: 8px;
-
-    border-radius: 50%;
-
-    background: var(--pink);
-
-    box-shadow:
-        0 0 15px var(--pink);
-
-    animation: pulseDot 1.2s infinite;
-}
-
-@keyframes pulseDot {
-
-    50% {
-        opacity: .25;
-    }
+  text-transform: uppercase;
 }
 
 .hero h1 {
-    font-family: var(--orbitron);
+  margin-top: 18px;
 
-    font-size: clamp(3.5rem, 9vw, 8.8rem);
+  font-family: Orbitron;
 
-    line-height: .82;
+  font-size:
+    clamp(3rem, 7vw, 6.5rem);
 
-    letter-spacing: -.075em;
+  line-height: .96;
 
-    max-width: 900px;
+  letter-spacing: -.03em;
 }
 
 .hero h1 span {
-    display: block;
+  color: var(--cyan);
 
-    color: transparent;
-
-    -webkit-text-stroke: 1px rgba(255,255,255,.6);
+  text-shadow:
+    0 0 30px rgba(0,229,255,.3);
 }
 
-.hero-description {
-    max-width: 620px;
+.hero-copy {
+  max-width: 650px;
 
-    color: #b3b3bf;
+  margin-top: 30px;
 
-    font-size: .94rem;
+  color: var(--muted);
 
-    line-height: 1.85;
+  font-size: 1.02rem;
 
-    margin: 30px 0;
+  line-height: 1.9;
 }
 
 .hero-actions {
-    display: flex;
+  display: flex;
 
-    flex-wrap: wrap;
+  flex-wrap: wrap;
 
-    gap: 12px;
+  gap: 14px;
+
+  margin-top: 34px;
 }
 
-.button {
-    min-height: 48px;
+.btn {
+  display: inline-flex;
 
-    display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-    align-items: center;
+  min-height: 48px;
 
-    justify-content: center;
+  padding:
+    0 22px;
 
-    padding: 0 21px;
+  border-radius: 10px;
 
-    border: 1px solid var(--border);
+  text-decoration: none;
 
-    background: rgba(255,255,255,.035);
+  font-size: .78rem;
 
-    color: white;
+  font-weight: 800;
 
-    font-size: .67rem;
+  letter-spacing: .08em;
 
-    font-weight: 700;
+  text-transform: uppercase;
 
-    letter-spacing: .13em;
-
-    text-transform: uppercase;
-
-    cursor: pointer;
-
-    transition: .25s ease;
+  transition: .25s ease;
 }
 
-.button:hover {
-    transform: translateY(-3px);
+.btn-primary {
+  background: var(--cyan);
 
-    border-color: rgba(255,255,255,.25);
+  color: #001016;
 
-    box-shadow:
-        0 15px 40px rgba(0,0,0,.4);
+  box-shadow:
+    0 0 25px rgba(0,229,255,.2);
 }
 
-.button-primary {
-    border-color: transparent;
+.btn-primary:hover {
+  transform: translateY(-2px);
 
-    background:
-        linear-gradient(
-            90deg,
-            var(--purple),
-            #6400ff
-        );
-
-    box-shadow:
-        0 0 25px rgba(155,0,255,.2);
+  box-shadow:
+    0 0 40px rgba(0,229,255,.35);
 }
 
-.hero-stats {
-    display: flex;
+.btn-secondary {
+  border: 1px solid var(--border);
 
-    flex-wrap: wrap;
+  background:
+    rgba(255,255,255,.03);
 
-    gap: 42px;
-
-    margin-top: 50px;
+  color: white;
 }
 
-.hero-stat {
-    color: var(--dim);
+.btn-secondary:hover {
+  border-color: var(--cyan);
 
-    font-size: .6rem;
-
-    letter-spacing: .13em;
-
-    text-transform: uppercase;
+  color: var(--cyan);
 }
 
-.hero-stat strong {
-    display: block;
-
-    color: white;
-
-    font-family: var(--orbitron);
-
-    font-size: .78rem;
-
-    margin-top: 8px;
-}
 
 /* =========================================================
-   MAIN
+   HERO VISUAL
 ========================================================= */
 
-main {
-    position: relative;
+.hero-visual {
+  position: relative;
 
-    z-index: 5;
+  min-height: 450px;
+
+  border:
+    1px solid rgba(0,229,255,.16);
+
+  border-radius: 28px;
+
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      circle at 50% 40%,
+      rgba(0,229,255,.14),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 70% 70%,
+      rgba(157,78,221,.18),
+      transparent 35%
+    ),
+    #080a11;
+
+  box-shadow:
+    0 30px 100px rgba(0,0,0,.4);
 }
+
+.hero-grid {
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      rgba(0,229,255,.08) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(0,229,255,.08) 1px,
+      transparent 1px
+    );
+
+  background-size:
+    50px 50px;
+
+  transform:
+    perspective(500px)
+    rotateX(55deg)
+    scale(1.7);
+
+  transform-origin:
+    center bottom;
+
+  opacity: .45;
+}
+
+.hero-orb {
+  position: absolute;
+
+  width: 180px;
+  height: 180px;
+
+  border-radius: 50%;
+
+  left: 50%;
+  top: 42%;
+
+  transform:
+    translate(-50%,-50%);
+
+  border:
+    1px solid var(--cyan);
+
+  box-shadow:
+    0 0 50px rgba(0,229,255,.25),
+    inset 0 0 50px rgba(0,229,255,.1);
+
+  animation:
+    orbFloat 5s ease-in-out infinite;
+}
+
+.hero-orb::before,
+.hero-orb::after {
+  content: "";
+
+  position: absolute;
+
+  inset: -30px;
+
+  border:
+    1px solid rgba(157,78,221,.45);
+
+  border-radius: 50%;
+
+  transform: rotateX(70deg);
+}
+
+.hero-orb::after {
+  inset: -55px;
+
+  border-color:
+    rgba(255,46,166,.25);
+
+  transform:
+    rotateY(70deg);
+}
+
+.hero-visual-label {
+  position: absolute;
+
+  left: 28px;
+  bottom: 25px;
+
+  font-family: Orbitron;
+
+  font-size: .72rem;
+
+  letter-spacing: .16em;
+
+  color: var(--muted);
+}
+
+@keyframes orbFloat {
+  0%,100% {
+    transform:
+      translate(-50%,-50%)
+      scale(1);
+  }
+
+  50% {
+    transform:
+      translate(-50%,-54%)
+      scale(1.05);
+  }
+}
+
+
+/* =========================================================
+   SECTIONS
+========================================================= */
 
 .section {
-    width: min(var(--max), calc(100% - 32px));
+  max-width: var(--max);
 
-    margin: auto;
+  margin:
+    0 auto;
 
-    padding: 105px 0;
+  padding:
+    100px 24px;
 }
 
-.section-header {
-    display: flex;
+.section-head {
+  display: flex;
 
-    align-items: end;
+  align-items: flex-end;
 
-    justify-content: space-between;
+  justify-content: space-between;
 
-    gap: 30px;
+  gap: 30px;
 
-    margin-bottom: 35px;
+  margin-bottom: 35px;
 }
 
-.kicker {
-    color: var(--cyan);
+.section-head h2 {
+  margin-top: 10px;
 
-    font-family: var(--orbitron);
+  font-family: Orbitron;
 
-    font-size: .61rem;
-
-    letter-spacing: .2em;
-
-    text-transform: uppercase;
-
-    margin-bottom: 10px;
+  font-size:
+    clamp(1.7rem, 4vw, 3rem);
 }
 
-.section-title {
-    font-family: var(--orbitron);
+.section-head p {
+  margin-top: 10px;
 
-    font-size: clamp(1.8rem, 4vw, 3rem);
+  color: var(--muted);
 
-    letter-spacing: -.05em;
+  line-height: 1.7;
 }
 
-.section-copy {
-    max-width: 500px;
-
-    color: var(--muted);
-
-    font-size: .82rem;
-
-    line-height: 1.8;
-}
 
 /* =========================================================
-   FEATURED
+   FEATURED EPISODE
 ========================================================= */
 
-.featured {
-    display: grid;
+.featured-card {
+  display: grid;
 
-    grid-template-columns: 1.15fr .85fr;
+  grid-template-columns:
+    1.2fr .8fr;
 
-    min-height: 460px;
+  overflow: hidden;
 
-    border: 1px solid var(--border);
+  border:
+    1px solid rgba(0,229,255,.18);
 
-    background:
-        radial-gradient(
-            circle at 85% 20%,
-            rgba(0,229,255,.12),
-            transparent 30%
-        ),
-        radial-gradient(
-            circle at 15% 80%,
-            rgba(155,0,255,.15),
-            transparent 35%
-        ),
-        rgba(255,255,255,.025);
+  border-radius: 24px;
 
-    overflow: hidden;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(0,229,255,.05),
+      rgba(157,78,221,.04)
+    ),
+    var(--panel);
 
-    box-shadow:
-        0 30px 90px rgba(0,0,0,.3);
+  box-shadow:
+    0 30px 100px rgba(0,0,0,.35);
+}
+
+.featured-media {
+  position: relative;
+
+  min-height: 410px;
+
+  background: #080a10;
+
+  overflow: hidden;
+}
+
+.featured-media img {
+  width: 100%;
+  height: 100%;
+
+  min-height: 410px;
+
+  display: block;
+
+  object-fit: cover;
+
+  transition:
+    transform .7s ease;
+}
+
+.featured-card:hover .featured-media img {
+  transform: scale(1.04);
+}
+
+.featured-overlay {
+  position: absolute;
+
+  inset: 0;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(0,0,0,.72)
+    );
+}
+
+.featured-placeholder {
+  min-height: 410px;
+
+  display: grid;
+
+  place-items: center;
+
+  text-align: center;
+
+  font-family: Orbitron;
+
+  font-size: 3rem;
+
+  letter-spacing: .12em;
+
+  color: var(--cyan);
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(0,229,255,.13),
+      transparent 55%
+    );
+}
+
+.featured-play {
+  position: absolute;
+
+  left: 50%;
+  top: 50%;
+
+  transform:
+    translate(-50%,-50%);
+
+  width: 84px;
+  height: 84px;
+
+  border-radius: 50%;
+
+  display: grid;
+  place-items: center;
+
+  background:
+    var(--cyan);
+
+  color: #001016;
+
+  text-decoration: none;
+
+  font-size: 1.35rem;
+
+  box-shadow:
+    0 0 50px rgba(0,229,255,.4);
+
+  transition: .25s ease;
+}
+
+.featured-play:hover {
+  transform:
+    translate(-50%,-50%)
+    scale(1.08);
 }
 
 .featured-content {
-    padding: 55px;
+  padding: 48px;
 
-    display: flex;
+  display: flex;
 
-    flex-direction: column;
+  flex-direction: column;
 
-    justify-content: center;
+  justify-content: center;
 }
 
-.episode-label {
-    color: var(--cyan);
+.featured-content h3 {
+  margin:
+    16px 0 18px;
 
-    font-family: var(--orbitron);
+  font-family: Orbitron;
 
-    font-size: .6rem;
+  font-size:
+    clamp(1.7rem, 3vw, 2.8rem);
 
-    letter-spacing: .2em;
-
-    text-transform: uppercase;
-
-    margin-bottom: 18px;
+  line-height: 1.15;
 }
 
-.featured h3 {
-    font-family: var(--orbitron);
+.featured-content p {
+  color: var(--muted);
 
-    font-size: clamp(1.8rem, 4vw, 3.5rem);
+  line-height: 1.8;
 
-    line-height: 1.05;
-
-    max-width: 700px;
+  margin-bottom: 25px;
 }
 
-.featured p {
-    color: var(--muted);
+.episode-meta {
+  display: flex;
 
-    font-size: .84rem;
+  flex-wrap: wrap;
 
-    line-height: 1.8;
-
-    max-width: 620px;
-
-    margin: 22px 0 28px;
+  gap: 8px;
 }
 
-.featured-meta {
-    display: flex;
+.episode-meta span {
+  padding:
+    6px 10px;
 
-    gap: 18px;
+  border:
+    1px solid rgba(0,229,255,.2);
 
-    flex-wrap: wrap;
+  border-radius: 999px;
 
-    color: var(--dim);
+  color: var(--cyan);
 
-    font-size: .62rem;
+  background:
+    rgba(0,229,255,.05);
 
-    text-transform: uppercase;
+  font-size: .68rem;
 
-    letter-spacing: .1em;
+  font-weight: 700;
 
-    margin-top: 20px;
+  letter-spacing: .06em;
+
+  text-transform: uppercase;
 }
 
-.featured-visual {
-    position: relative;
-
-    background:
-        radial-gradient(
-            circle at 50% 45%,
-            rgba(0,229,255,.13),
-            transparent 20%
-        ),
-        linear-gradient(
-            135deg,
-            rgba(155,0,255,.25),
-            transparent 55%
-        ),
-        #07070c;
-
-    overflow: hidden;
-}
-
-.featured-visual::before {
-    content: "TN";
-
-    position: absolute;
-
-    left: 50%;
-    top: 50%;
-
-    transform: translate(-50%,-50%);
-
-    font-family: var(--orbitron);
-
-    font-size: clamp(8rem, 18vw, 15rem);
-
-    font-weight: 900;
-
-    color: transparent;
-
-    -webkit-text-stroke: 1px rgba(255,255,255,.14);
-}
-
-.featured-visual::after {
-    content: "";
-
-    position: absolute;
-
-    inset: 0;
-
-    background:
-        repeating-linear-gradient(
-            0deg,
-            transparent 0 5px,
-            rgba(255,255,255,.025) 6px 7px
-        );
-}
 
 /* =========================================================
-   EPISODES
+   ARCHIVE
 ========================================================= */
 
-.episode-grid {
-    display: grid;
+.archive-count {
+  padding:
+    10px 15px;
 
-    grid-template-columns:
-        repeat(3, 1fr);
+  border:
+    1px solid rgba(0,229,255,.2);
 
-    gap: 18px;
+  border-radius: 999px;
+
+  color: var(--cyan);
+
+  font-size: .7rem;
+
+  font-weight: 800;
+
+  letter-spacing: .1em;
+
+  text-transform: uppercase;
 }
 
-.episode {
-    position: relative;
+#episodeArchive {
+  display: grid;
 
-    min-height: 285px;
+  grid-template-columns:
+    repeat(3,minmax(0,1fr));
 
-    padding: 28px;
-
-    border: 1px solid var(--border);
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255,255,255,.045),
-            rgba(255,255,255,.012)
-        );
-
-    overflow: hidden;
-
-    transition: .3s ease;
+  gap: 24px;
 }
 
-.episode:hover {
-    transform: translateY(-7px);
+.episode-card {
+  overflow: hidden;
 
-    border-color:
-        rgba(0,229,255,.3);
+  border:
+    1px solid var(--border);
 
-    box-shadow:
-        0 25px 55px rgba(0,0,0,.35);
+  border-radius: 18px;
+
+  background:
+    rgba(10,12,20,.8);
+
+  transition:
+    transform .25s ease,
+    border-color .25s ease,
+    box-shadow .25s ease;
 }
 
-.episode::before {
-    content: "";
+.episode-card:hover {
+  transform:
+    translateY(-6px);
 
-    position: absolute;
+  border-color:
+    rgba(0,229,255,.3);
 
-    width: 170px;
-    height: 170px;
+  box-shadow:
+    0 20px 60px rgba(0,0,0,.4);
+}
 
-    right: -80px;
-    top: -80px;
+.episode-thumb {
+  position: relative;
 
-    border-radius: 50%;
+  aspect-ratio: 16 / 9;
 
-    background:
-        rgba(155,0,255,.13);
+  overflow: hidden;
 
-    filter: blur(20px);
+  background: #080a10;
+}
+
+.episode-thumb img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  display: block;
+
+  transition:
+    transform .5s ease;
+}
+
+.episode-card:hover
+.episode-thumb img {
+  transform: scale(1.05);
+}
+
+.episode-placeholder {
+  width: 100%;
+  height: 100%;
+
+  display: grid;
+  place-items: center;
+
+  font-family: Orbitron;
+
+  font-size: 2.3rem;
+
+  color: var(--cyan);
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(0,229,255,.12),
+      transparent 60%
+    );
 }
 
 .episode-number {
-    color: var(--cyan);
+  position: absolute;
 
-    font-family: var(--orbitron);
+  top: 12px;
+  left: 12px;
 
-    font-size: .58rem;
+  padding:
+    6px 9px;
 
-    letter-spacing: .16em;
+  border-radius: 6px;
 
-    text-transform: uppercase;
+  background:
+    rgba(0,0,0,.8);
+
+  color: var(--cyan);
+
+  font-family: Orbitron;
+
+  font-size: .65rem;
+
+  letter-spacing: .06em;
 }
 
-.episode h3 {
-    font-family: var(--orbitron);
+.episode-play {
+  position: absolute;
 
-    font-size: 1.05rem;
+  right: 15px;
+  bottom: 15px;
 
-    line-height: 1.35;
+  width: 54px;
+  height: 54px;
 
-    margin: 18px 0 12px;
+  border-radius: 50%;
+
+  display: grid;
+  place-items: center;
+
+  background:
+    var(--cyan);
+
+  color: #001016;
+
+  text-decoration: none;
+
+  box-shadow:
+    0 0 25px rgba(0,229,255,.25);
+
+  transition: .25s ease;
 }
 
-.episode p {
-    color: var(--muted);
-
-    font-size: .75rem;
-
-    line-height: 1.7;
+.episode-play:hover {
+  transform: scale(1.08);
 }
 
-.episode-bottom {
-    position: absolute;
-
-    left: 28px;
-    right: 28px;
-    bottom: 22px;
-
-    display: flex;
-
-    justify-content: space-between;
-
-    color: var(--dim);
-
-    font-size: .58rem;
-
-    text-transform: uppercase;
-
-    letter-spacing: .1em;
+.episode-body {
+  padding: 22px;
 }
+
+.episode-body h3 {
+  margin:
+    13px 0;
+
+  font-family: Orbitron;
+
+  font-size: 1.05rem;
+
+  line-height: 1.35;
+}
+
+.episode-body p {
+  color: var(--muted);
+
+  font-size: .88rem;
+
+  line-height: 1.7;
+
+  min-height: 70px;
+}
+
+.episode-link {
+  display: inline-block;
+
+  margin-top: 18px;
+
+  color: var(--cyan);
+
+  text-decoration: none;
+
+  font-size: .76rem;
+
+  font-weight: 800;
+
+  letter-spacing: .08em;
+
+  text-transform: uppercase;
+}
+
+.episode-link:hover {
+  text-decoration: underline;
+}
+
 
 /* =========================================================
-   TOPICS
+   LOADING / EMPTY
 ========================================================= */
 
-.topic-grid {
-    display: grid;
+.episode-loading,
+.empty-state {
+  min-height: 240px;
 
-    grid-template-columns:
-        repeat(4, 1fr);
+  display: flex;
 
-    gap: 14px;
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 13px;
+
+  text-align: center;
+
+  padding: 40px;
+
+  border:
+    1px dashed rgba(255,255,255,.12);
+
+  border-radius: 20px;
+
+  background:
+    rgba(255,255,255,.02);
 }
 
-.topic {
-    min-height: 170px;
+.loader {
+  width: 38px;
+  height: 38px;
 
-    padding: 25px;
+  border:
+    3px solid rgba(255,255,255,.1);
 
-    border: 1px solid var(--border);
+  border-top-color:
+    var(--cyan);
 
-    background:
-        rgba(255,255,255,.025);
+  border-radius: 50%;
 
-    display: flex;
-
-    flex-direction: column;
-
-    transition: .25s ease;
+  animation:
+    spin .8s linear infinite;
 }
 
-.topic:hover {
-    transform: translateY(-5px);
-
-    border-color:
-        rgba(155,0,255,.35);
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.topic-icon {
-    font-size: 1.6rem;
+.empty-icon {
+  width: 52px;
+  height: 52px;
 
-    margin-bottom: auto;
+  display: grid;
+  place-items: center;
+
+  border:
+    1px solid rgba(0,229,255,.3);
+
+  border-radius: 50%;
+
+  color: var(--cyan);
+
+  font-family: Orbitron;
 }
 
-.topic h3 {
-    font-family: var(--orbitron);
-
-    font-size: .78rem;
+.empty-state h3 {
+  font-family: Orbitron;
 }
 
-.topic p {
-    color: var(--muted);
+.empty-state p {
+  max-width: 550px;
 
-    font-size: .67rem;
+  color: var(--muted);
 
-    line-height: 1.5;
-
-    margin-top: 7px;
+  line-height: 1.7;
 }
+
 
 /* =========================================================
-   SHOW INFO
+   INFO GRID
 ========================================================= */
 
-.show-layout {
-    display: grid;
+.info-grid {
+  display: grid;
 
-    grid-template-columns:
-        .8fr 1.2fr;
+  grid-template-columns:
+    repeat(3,1fr);
 
-    gap: 55px;
-
-    align-items: center;
+  gap: 20px;
 }
 
-.show-card {
-    aspect-ratio: 1;
+.info-card {
+  padding: 30px;
 
-    border: 1px solid var(--border);
+  border:
+    1px solid var(--border);
 
-    background:
-        radial-gradient(
-            circle at center,
-            rgba(0,229,255,.1),
-            transparent 30%
-        ),
-        radial-gradient(
-            circle at bottom,
-            rgba(155,0,255,.15),
-            transparent 50%
-        ),
-        #08080d;
+  border-radius: 18px;
 
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    overflow: hidden;
-
-    position: relative;
+  background:
+    rgba(255,255,255,.025);
 }
 
-.show-card::before {
-    content: "TACOMA";
+.info-card h3 {
+  margin-bottom: 12px;
 
-    position: absolute;
+  font-family: Orbitron;
 
-    font-family: var(--orbitron);
-
-    font-size: 8vw;
-
-    font-weight: 900;
-
-    color: transparent;
-
-    -webkit-text-stroke: 1px rgba(255,255,255,.08);
-
-    transform: rotate(-12deg);
+  font-size: 1rem;
 }
 
-.show-card::after {
-    content: "NIGHTS";
+.info-card p {
+  color: var(--muted);
 
-    position: absolute;
+  line-height: 1.75;
 
-    font-family: var(--orbitron);
-
-    font-size: 8vw;
-
-    font-weight: 900;
-
-    color: transparent;
-
-    -webkit-text-stroke: 1px rgba(0,229,255,.12);
-
-    transform: rotate(-12deg) translateY(55px);
+  font-size: .9rem;
 }
 
-.show-info h2 {
-    font-family: var(--orbitron);
-
-    font-size: clamp(2rem, 4vw, 3.4rem);
-
-    margin-bottom: 20px;
-}
-
-.show-info p {
-    color: var(--muted);
-
-    font-size: .84rem;
-
-    line-height: 1.9;
-
-    margin-bottom: 18px;
-}
-
-.show-list {
-    list-style: none;
-
-    margin-top: 25px;
-}
-
-.show-list li {
-    padding: 13px 0;
-
-    border-bottom: 1px solid var(--border);
-
-    color: #c1c1cb;
-
-    font-size: .7rem;
-
-    text-transform: uppercase;
-
-    letter-spacing: .1em;
-}
-
-.show-list li::before {
-    content: "◆";
-
-    color: var(--cyan);
-
-    margin-right: 10px;
-
-    font-size: .45rem;
-}
 
 /* =========================================================
    HOST
 ========================================================= */
 
-.host-section {
-    border-top: 1px solid var(--border);
+.host-card {
+  display: grid;
+
+  grid-template-columns:
+    260px 1fr;
+
+  gap: 35px;
+
+  padding: 35px;
+
+  border:
+    1px solid var(--border);
+
+  border-radius: 22px;
+
+  background:
+    var(--panel);
 }
 
-.host-layout {
-    display: grid;
+.host-avatar {
+  min-height: 260px;
 
-    grid-template-columns:
-        .65fr 1.35fr;
+  border-radius: 16px;
 
-    gap: 55px;
+  display: grid;
 
-    align-items: center;
+  place-items: center;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(0,229,255,.15),
+      transparent 55%
+    ),
+    #080a11;
+
+  border:
+    1px solid rgba(0,229,255,.18);
+
+  color: var(--cyan);
+
+  font-family: Orbitron;
+
+  font-size: 2.5rem;
 }
 
-.host-visual {
-    aspect-ratio: 1;
+.host-card h2 {
+  font-family: Orbitron;
 
-    border: 1px solid var(--border);
+  font-size:
+    clamp(1.8rem,4vw,3rem);
 
-    background:
-        radial-gradient(
-            circle at center,
-            rgba(155,0,255,.18),
-            transparent 40%
-        ),
-        #08080d;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
+  margin-bottom: 16px;
 }
 
-.host-initials {
-    font-family: var(--orbitron);
+.host-card p {
+  color: var(--muted);
 
-    font-size: 7rem;
-
-    font-weight: 900;
-
-    color: transparent;
-
-    -webkit-text-stroke: 1px rgba(255,255,255,.25);
+  line-height: 1.85;
 }
 
-.host-info h2 {
-    font-family: var(--orbitron);
-
-    font-size: clamp(2rem, 4vw, 3.5rem);
-
-    margin-bottom: 18px;
-}
-
-.host-info p {
-    color: var(--muted);
-
-    line-height: 1.9;
-
-    font-size: .84rem;
-
-    margin-bottom: 18px;
-}
-
-.host-signature {
-    color: var(--cyan);
-
-    font-family: var(--orbitron);
-
-    font-size: .6rem;
-
-    letter-spacing: .16em;
-}
 
 /* =========================================================
    NEWSLETTER
 ========================================================= */
 
 .newsletter {
-    text-align: center;
+  padding:
+    55px;
 
-    border: 1px solid var(--border);
+  border:
+    1px solid rgba(0,229,255,.16);
 
-    padding: 65px 30px;
+  border-radius: 24px;
 
-    background:
-        radial-gradient(
-            circle at center,
-            rgba(155,0,255,.12),
-            transparent 50%
-        );
+  text-align: center;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(0,229,255,.08),
+      transparent 55%
+    ),
+    var(--panel);
 }
 
 .newsletter h2 {
-    font-family: var(--orbitron);
+  font-family: Orbitron;
 
-    font-size: clamp(1.8rem, 4vw, 3rem);
-
-    margin-bottom: 15px;
+  font-size:
+    clamp(1.7rem,4vw,2.8rem);
 }
 
 .newsletter p {
-    color: var(--muted);
+  max-width: 650px;
 
-    max-width: 620px;
+  margin:
+    15px auto 28px;
 
-    margin: auto auto 28px;
+  color: var(--muted);
 
-    font-size: .8rem;
-
-    line-height: 1.8;
+  line-height: 1.7;
 }
 
 .newsletter-form {
-    display: flex;
+  max-width: 560px;
 
-    max-width: 570px;
+  margin: auto;
 
-    margin: auto;
+  display: flex;
 
-    gap: 8px;
+  gap: 10px;
 }
 
 .newsletter-form input {
-    flex: 1;
+  flex: 1;
 
-    min-width: 0;
+  min-height: 50px;
 
-    background: rgba(0,0,0,.4);
+  border:
+    1px solid var(--border);
 
-    border: 1px solid var(--border);
+  border-radius: 9px;
 
-    color: white;
+  background:
+    rgba(255,255,255,.04);
 
-    padding: 14px;
+  color: white;
 
-    outline: none;
+  padding:
+    0 16px;
+
+  outline: none;
 }
 
 .newsletter-form input:focus {
-    border-color: var(--cyan);
+  border-color:
+    var(--cyan);
 }
+
 
 /* =========================================================
    FOOTER
 ========================================================= */
 
-.footer {
-    border-top: 1px solid var(--border);
+footer {
+  border-top:
+    1px solid rgba(255,255,255,.07);
 
-    padding: 55px 16px;
+  padding:
+    45px 24px;
 
-    text-align: center;
+  background:
+    rgba(0,0,0,.25);
+}
 
-    color: var(--dim);
+.footer-inner {
+  max-width: var(--max);
 
-    font-size: .6rem;
+  margin: auto;
 
-    line-height: 2;
+  display: flex;
+
+  justify-content: space-between;
+
+  gap: 25px;
+
+  flex-wrap: wrap;
 }
 
 .footer-brand {
-    color: white;
+  font-family: Orbitron;
 
-    font-family: var(--orbitron);
+  color: var(--cyan);
 
-    font-size: .9rem;
+  letter-spacing: .08em;
 }
 
-.footer-brand span {
-    color: var(--cyan);
+.footer-copy {
+  color: var(--dim);
+
+  font-size: .75rem;
+
+  line-height: 1.7;
 }
 
-.footer-links {
-    display: flex;
-
-    justify-content: center;
-
-    flex-wrap: wrap;
-
-    gap: 18px;
-
-    margin: 18px 0;
-}
-
-.footer-links a {
-    color: #777784;
-
-    text-transform: uppercase;
-
-    letter-spacing: .1em;
-}
-
-.footer-links a:hover {
-    color: white;
-}
 
 /* =========================================================
    BACK TO TOP
 ========================================================= */
 
-.back-top {
-    position: fixed;
+#backTop {
+  position: fixed;
 
-    right: 20px;
-    bottom: 20px;
+  right: 22px;
+  bottom: 22px;
 
-    width: 42px;
-    height: 42px;
+  width: 46px;
+  height: 46px;
 
-    display: flex;
+  border:
+    1px solid rgba(0,229,255,.3);
 
-    align-items: center;
+  border-radius: 50%;
 
-    justify-content: center;
+  background:
+    rgba(5,6,10,.85);
 
-    background: rgba(10,10,15,.85);
+  color: var(--cyan);
 
-    border: 1px solid var(--border);
+  cursor: pointer;
 
-    color: white;
+  opacity: 0;
 
-    cursor: pointer;
+  visibility: hidden;
 
-    opacity: 0;
+  transition: .25s ease;
 
-    transform: translateY(15px);
-
-    transition: .3s ease;
-
-    z-index: 500;
+  z-index: 900;
 }
 
-.back-top.visible {
-    opacity: 1;
-
-    transform: translateY(0);
+#backTop.visible {
+  opacity: 1;
+  visibility: visible;
 }
+
 
 /* =========================================================
    RESPONSIVE
 ========================================================= */
 
-@media(max-width: 900px) {
+@media (max-width: 950px) {
 
-    .nav-links {
-        display: none;
+  .hero {
+    grid-template-columns: 1fr;
+  }
 
-        position: absolute;
+  .hero-visual {
+    min-height: 350px;
+  }
 
-        left: 16px;
-        right: 16px;
-        top: 74px;
+  .featured-card {
+    grid-template-columns: 1fr;
+  }
 
-        padding: 15px;
+  .info-grid {
+    grid-template-columns:
+      1fr 1fr;
+  }
 
-        background: rgba(5,5,9,.97);
+  #episodeArchive {
+    grid-template-columns:
+      repeat(2,minmax(0,1fr));
+  }
 
-        border: 1px solid var(--border);
-
-        flex-direction: column;
-
-        align-items: stretch;
-    }
-
-    .nav-links.open {
-        display: flex;
-    }
-
-    .nav-links a {
-        display: block;
-
-        padding: 12px;
-    }
-
-    .menu-button {
-        display: block;
-    }
-
-    .nav-social {
-        border-left: 0;
-
-        padding-left: 0;
-    }
-
-    .featured,
-    .show-layout,
-    .host-layout {
-        grid-template-columns: 1fr;
-    }
-
-    .featured-visual {
-        min-height: 300px;
-    }
-
-    .episode-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .topic-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .host-visual {
-        max-width: 450px;
-    }
 }
 
-@media(max-width: 560px) {
+@media (max-width: 700px) {
 
-    .section {
-        padding: 75px 0;
-    }
+  .nav-links {
+    position: absolute;
 
-    .hero {
-        min-height: 850px;
-    }
+    top: 78px;
+    left: 15px;
+    right: 15px;
 
-    .hero-skyline {
-        width: 100%;
+    padding: 20px;
 
-        opacity: .4;
-    }
+    flex-direction: column;
 
-    .hero-description {
-        font-size: .82rem;
-    }
+    background:
+      rgba(5,6,10,.96);
 
-    .hero-stats {
-        gap: 22px;
-    }
+    border:
+      1px solid var(--border);
 
-    .featured-content {
-        padding: 32px;
-    }
+    border-radius: 14px;
 
-    .episode-grid,
-    .topic-grid {
-        grid-template-columns: 1fr;
-    }
+    display: none;
+  }
 
-    .section-header {
-        align-items: start;
+  .nav-links.open {
+    display: flex;
+  }
 
-        flex-direction: column;
-    }
+  .menu-button {
+    display: block;
+  }
 
-    .newsletter-form {
-        flex-direction: column;
-    }
+  .hero {
+    padding-top: 125px;
+  }
 
-    .newsletter-form .button {
-        width: 100%;
-    }
+  .section {
+    padding:
+      75px 20px;
+  }
 
-    .intro-title {
-        font-size: 3.2rem;
-    }
+  .featured-content {
+    padding: 30px;
+  }
+
+  #episodeArchive {
+    grid-template-columns: 1fr;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .host-card {
+    grid-template-columns: 1fr;
+  }
+
+  .newsletter {
+    padding: 35px 22px;
+  }
+
+  .newsletter-form {
+    flex-direction: column;
+  }
+
+  .newsletter-form .btn {
+    width: 100%;
+  }
+
 }
+
 
 /* =========================================================
    REDUCED MOTION
 ========================================================= */
 
-@media(prefers-reduced-motion: reduce) {
+@media (prefers-reduced-motion: reduce) {
 
-    *,
-    *::before,
-    *::after {
-        animation-duration: .01ms !important;
-        animation-iteration-count: 1 !important;
-        scroll-behavior: auto !important;
-    }
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+
 }
 
 </style>
 </head>
 
-<body class="intro-active">
 
-<div class="noise"></div>
+<body>
 
-<!-- ========================================================
-     CINEMATIC INTRO
+
+<!-- =========================================================
+     INTRO
 ========================================================= -->
 
 <div id="intro">
 
-    <div class="intro-background"></div>
+  <div class="intro-inner">
 
-    <div class="intro-grid"></div>
-
-    <div class="intro-rain"></div>
-
-    <div class="intro-skyline">
-
-        <div class="intro-building"
-             style="--width:7%;--height:45%;"></div>
-
-        <div class="intro-building"
-             style="--width:9%;--height:62%;"></div>
-
-        <div class="intro-building"
-             style="--width:6%;--height:51%;"></div>
-
-        <div class="intro-building"
-             style="--width:12%;--height:76%;"></div>
-
-        <div class="intro-building"
-             style="--width:8%;--height:58%;"></div>
-
-        <div class="intro-building"
-             style="--width:11%;--height:82%;"></div>
-
-        <div class="intro-building"
-             style="--width:7%;--height:53%;"></div>
-
-        <div class="intro-building"
-             style="--width:12%;--height:68%;"></div>
-
+    <div class="intro-kicker">
+      CrowRules Entertainment Presents
     </div>
 
-    <div class="intro-content">
-
-        <div class="intro-present">
-            CrowRules Entertainment Presents
-        </div>
-
-        <div class="intro-title">
-            Tacoma
-            <span>Nights</span>
-        </div>
-
-        <div class="intro-divider"></div>
-
-        <div class="intro-tagline">
-            Stories • Conversations • Tacoma After Dark
-        </div>
-
+    <div class="intro-title">
+      TACOMA NIGHTS
     </div>
 
-    <button class="intro-skip" id="skipIntro">
-        Skip Intro
-    </button>
+    <div class="intro-subtitle">
+      The stories behind the city
+    </div>
+
+    <div class="intro-line"></div>
+
+  </div>
 
 </div>
 
-<!-- ========================================================
+
+<!-- =========================================================
      HEADER
 ========================================================= -->
 
-<header class="header" id="header">
+<header>
 
-    <nav class="nav">
+  <nav class="nav">
 
-        <a href="#home" class="logo">
-            TACOMA<span>NIGHTS</span>
+    <a
+      href="#top"
+      class="brand"
+    >
+
+      <div class="brand-mark">
+        CR
+      </div>
+
+      <div class="brand-text">
+        TACOMA NIGHTS
+        <span>
+          CROWRULES ENTERTAINMENT
+        </span>
+      </div>
+
+    </a>
+
+
+    <button
+      class="menu-button"
+      id="menuButton"
+      aria-label="Open navigation"
+    >
+      ☰
+    </button>
+
+
+    <ul
+      class="nav-links"
+      id="navLinks"
+    >
+
+      <li>
+        <a href="#featured">
+          Featured
         </a>
+      </li>
 
-        <button class="menu-button" id="menuButton">
-            ☰
-        </button>
+      <li>
+        <a href="#episodes">
+          Episodes
+        </a>
+      </li>
 
-        <ul class="nav-links" id="navLinks">
+      <li>
+        <a href="#show">
+          The Show
+        </a>
+      </li>
 
-            <li>
-                <a href="#home">Home</a>
-            </li>
+      <li>
+        <a href="#host">
+          Host
+        </a>
+      </li>
 
-            <li>
-                <a href="#featured">Featured</a>
-            </li>
+      <li>
+        <a href="#newsletter">
+          Updates
+        </a>
+      </li>
 
-            <li>
-                <a href="#episodes">Episodes</a>
-            </li>
+    </ul>
 
-            <li>
-                <a href="#topics">Topics</a>
-            </li>
-
-            <li>
-                <a href="#show">The Show</a>
-            </li>
-
-            <li>
-                <a href="#host">Host</a>
-            </li>
-
-            <li class="nav-social">
-                <a href="#contact">Follow</a>
-            </li>
-
-        </ul>
-
-    </nav>
+  </nav>
 
 </header>
 
-<!-- ========================================================
+
+<main id="top">
+
+
+<!-- =========================================================
      HERO
 ========================================================= -->
 
-<main>
+<section class="hero">
 
-<section class="hero" id="home">
+  <div>
 
-    <div class="hero-sky"></div>
+    <div class="eyebrow">
+      Tacoma · Washington · Pacific Northwest
+    </div>
 
-    <div class="hero-skyline"></div>
+    <h1>
+      TACOMA<br>
+      <span>NIGHTS</span>
+    </h1>
 
-    <div class="hero-rain"></div>
+    <p class="hero-copy">
+      A weekly journey through life, Tacoma,
+      the Pacific Northwest, strange stories,
+      sports, creativity, and the work of building
+      CrowRules Entertainment from the ground up.
+    </p>
 
-    <div class="hero-content">
+    <div class="hero-actions">
 
-        <div class="hero-kicker">
+      <a
+        href="#featured"
+        class="btn btn-primary"
+      >
+        Watch The Show →
+      </a>
 
-            <span class="status-dot"></span>
-
-            Friday Nights • 10 PM Pacific
-
-        </div>
-
-        <h1>
-
-            TACOMA
-
-            <span>NIGHTS</span>
-
-        </h1>
-
-        <p class="hero-description">
-
-            A late-night Tacoma conversation about real life,
-            the Pacific Northwest, strange stories, local culture,
-            sports, entertainment and the journey of building
-            something from the ground up.
-
-        </p>
-
-        <div class="hero-actions">
-
-            <a href="#featured"
-               class="button button-primary">
-
-                ▶ Watch The Show
-
-            </a>
-
-            <a href="#episodes"
-               class="button">
-
-                Episode Guide
-
-            </a>
-
-        </div>
-
-        <div class="hero-stats">
-
-            <div class="hero-stat">
-                Hosted By
-                <strong>Jonathan Riehle</strong>
-            </div>
-
-            <div class="hero-stat">
-                Season
-                <strong>01 • The Beginning</strong>
-            </div>
-
-            <div class="hero-stat">
-                Network
-                <strong>CrowRules Entertainment</strong>
-            </div>
-
-        </div>
+      <a
+        href="#episodes"
+        class="btn btn-secondary"
+      >
+        Episode Archive
+      </a>
 
     </div>
 
+  </div>
+
+
+  <div class="hero-visual">
+
+    <div class="hero-grid"></div>
+
+    <div class="hero-orb"></div>
+
+    <div class="hero-visual-label">
+      TACOMA NIGHTS // ORIGINAL SERIES
+    </div>
+
+  </div>
+
 </section>
 
-<!-- ========================================================
-     FEATURED
+
+<!-- =========================================================
+     FEATURED EPISODE
 ========================================================= -->
 
-<section class="section" id="featured">
+<section
+  class="section"
+  id="featured"
+>
 
-    <div class="section-header">
+  <div class="section-head">
 
-        <div>
+    <div>
 
-            <div class="kicker">
-                Featured Episode
-            </div>
+      <div class="eyebrow">
+        Now Playing
+      </div>
 
-            <h2 class="section-title">
-                The Beginning
-            </h2>
-
-        </div>
-
-        <p class="section-copy">
-
-            Every story has a beginning.
-            Tacoma Nights starts here.
-
-        </p>
+      <h2>
+        Featured Episode
+      </h2>
 
     </div>
 
-    <article class="featured">
+  </div>
 
-        <div class="featured-content">
 
-            <div class="episode-label">
-                Season 01 • Episode 01
-            </div>
+  <div id="featuredEpisode">
 
-            <h3>
-                Why I'm Starting Tacoma Nights
-            </h3>
+    <div class="episode-loading">
 
-            <p>
+      <div class="loader"></div>
 
-                Welcome to Tacoma Nights.
+      <span>
+        Loading featured episode...
+      </span>
 
-                In the opening episode, Jonathan introduces
-                the idea behind the show, talks about Tacoma,
-                shares the vision behind CrowRules Entertainment,
-                and begins a new chapter.
+    </div>
 
-            </p>
-
-            <div>
-
-                <a href="#"
-                   class="button button-primary">
-
-                    ▶ Watch Episode
-
-                </a>
-
-            </div>
-
-            <div class="featured-meta">
-
-                <span>Season 1</span>
-
-                <span>•</span>
-
-                <span>The Beginning</span>
-
-                <span>•</span>
-
-                <span>Tacoma, Washington</span>
-
-            </div>
-
-        </div>
-
-        <div class="featured-visual"></div>
-
-    </article>
+  </div>
 
 </section>
 
-<!-- ========================================================
-     EPISODES
+
+<!-- =========================================================
+     EPISODE ARCHIVE
 ========================================================= -->
 
-<section class="section" id="episodes">
+<section
+  class="section"
+  id="episodes"
+>
 
-    <div class="section-header">
+  <div class="section-head">
 
-        <div>
+    <div>
 
-            <div class="kicker">
-                Season One
-            </div>
+      <div class="eyebrow">
+        The Archive
+      </div>
 
-            <h2 class="section-title">
-                Episode Guide
-            </h2>
+      <h2>
+        Tacoma Nights Episodes
+      </h2>
 
-        </div>
-
-        <p class="section-copy">
-
-            The first season is about beginnings,
-            personal stories and building something
-            meaningful in the middle of everyday life.
-
-        </p>
+      <p>
+        Published episodes from the Tacoma Nights
+        Supabase archive.
+      </p>
 
     </div>
 
-    <div class="episode-grid">
+    <div
+      class="archive-count"
+      id="episodeCount"
+    >
+      Loading...
+    </div>
 
-        <article class="episode">
+  </div>
 
-            <div class="episode-number">
-                Episode 01
-            </div>
 
-            <h3>
-                Why I'm Starting Tacoma Nights
-            </h3>
+  <div id="episodeArchive">
 
-            <p>
-                The story behind the show and the beginning
-                of a new chapter.
-            </p>
+    <div class="episode-loading">
 
-            <div class="episode-bottom">
-                <span>Available</span>
-                <span>Season 01</span>
-            </div>
+      <div class="loader"></div>
 
-        </article>
-
-        <article class="episode">
-
-            <div class="episode-number">
-                Episode 02
-            </div>
-
-            <h3>
-                Living With Depression & Anxiety
-            </h3>
-
-            <p>
-                A personal conversation about invisible
-                struggles and finding a way forward.
-            </p>
-
-            <div class="episode-bottom">
-                <span>Available</span>
-                <span>Season 01</span>
-            </div>
-
-        </article>
-
-        <article class="episode">
-
-            <div class="episode-number">
-                Episode 03
-            </div>
-
-            <h3>
-                The Caregiver's Burden
-            </h3>
-
-            <p>
-                The responsibilities, sacrifices and realities
-                of caring for family.
-            </p>
-
-            <div class="episode-bottom">
-                <span>Coming Soon</span>
-                <span>Season 01</span>
-            </div>
-
-        </article>
-
-        <article class="episode">
-
-            <div class="episode-number">
-                Episode 04
-            </div>
-
-            <h3>
-                The Invisible Parent
-            </h3>
-
-            <p>
-                Exploring the parts of family life that
-                rarely make it into the spotlight.
-            </p>
-
-            <div class="episode-bottom">
-                <span>Coming Soon</span>
-                <span>Season 01</span>
-            </div>
-
-        </article>
-
-        <article class="episode">
-
-            <div class="episode-number">
-                Episode 05
-            </div>
-
-            <h3>
-                Building A Dream
-            </h3>
-
-            <p>
-                What it takes to build CrowRules Entertainment
-                from the ground up.
-            </p>
-
-            <div class="episode-bottom">
-                <span>Coming Soon</span>
-                <span>Season 01</span>
-            </div>
-
-        </article>
-
-        <article class="episode">
-
-            <div class="episode-number">
-                Episode 06
-            </div>
-
-            <h3>
-                Tacoma After Dark
-            </h3>
-
-            <p>
-                The city, the people and the stories you
-                notice after dark.
-            </p>
-
-            <div class="episode-bottom">
-                <span>Coming Soon</span>
-                <span>Season 01</span>
-            </div>
-
-        </article>
+      <span>
+        Loading episode archive...
+      </span>
 
     </div>
+
+  </div>
 
 </section>
 
-<!-- ========================================================
-     TOPICS
-========================================================= -->
 
-<section class="section" id="topics">
-
-    <div class="section-header">
-
-        <div>
-
-            <div class="kicker">
-                The Conversation
-            </div>
-
-            <h2 class="section-title">
-                Tacoma After Dark
-            </h2>
-
-        </div>
-
-        <p class="section-copy">
-
-            The show can go anywhere the conversation
-            takes us.
-
-        </p>
-
-    </div>
-
-    <div class="topic-grid">
-
-        <article class="topic">
-
-            <div class="topic-icon">🌃</div>
-
-            <h3>Tacoma Life</h3>
-
-            <p>
-                People, places and everyday life around Tacoma.
-            </p>
-
-        </article>
-
-        <article class="topic">
-
-            <div class="topic-icon">📰</div>
-
-            <h3>PNW News</h3>
-
-            <p>
-                Stories and conversations from the Northwest.
-            </p>
-
-        </article>
-
-        <article class="topic">
-
-            <div class="topic-icon">🏆</div>
-
-            <h3>Sports</h3>
-
-            <p>
-                Seattle, Tacoma and Northwest sports.
-            </p>
-
-        </article>
-
-        <article class="topic">
-
-            <div class="topic-icon">👁️</div>
-
-            <h3>Mysteries</h3>
-
-            <p>
-                Strange stories and unexplained events.
-            </p>
-
-        </article>
-
-        <article class="topic">
-
-            <div class="topic-icon">🎙️</div>
-
-            <h3>Conversations</h3>
-
-            <p>
-                Honest conversations about real life.
-            </p>
-
-        </article>
-
-        <article class="topic">
-
-            <div class="topic-icon">🎬</div>
-
-            <h3>CrowRules</h3>
-
-            <p>
-                Building an independent entertainment network.
-            </p>
-
-        </article>
-
-        <article class="topic">
-
-            <div class="topic-icon">🌧️</div>
-
-            <h3>PNW Stories</h3>
-
-            <p>
-                Weird, beautiful and unforgettable Northwest stories.
-            </p>
-
-        </article>
-
-        <article class="topic">
-
-            <div class="topic-icon">💬</div>
-
-            <h3>Your Voice</h3>
-
-            <p>
-                Viewer questions, opinions and community conversation.
-            </p>
-
-        </article>
-
-    </div>
-
-</section>
-
-<!-- ========================================================
+<!-- =========================================================
      THE SHOW
 ========================================================= -->
 
-<section class="section" id="show">
+<section
+  class="section"
+  id="show"
+>
 
-    <div class="show-layout">
+  <div class="section-head">
 
-        <div class="show-card"></div>
+    <div>
 
-        <div class="show-info">
+      <div class="eyebrow">
+        About Tacoma Nights
+      </div>
 
-            <div class="kicker">
-                About Tacoma Nights
-            </div>
-
-            <h2>
-                More Than A Talk Show
-            </h2>
-
-            <p>
-
-                Tacoma Nights is a weekly video program built around
-                conversation, storytelling and the experience of life
-                in Tacoma and the Pacific Northwest.
-
-            </p>
-
-            <p>
-
-                Some nights are personal.
-                Some nights are local.
-                Some nights get weird.
-
-                That's the point.
-
-            </p>
-
-            <ul class="show-list">
-
-                <li>
-                    Personal Stories
-                </li>
-
-                <li>
-                    Tacoma & PNW Conversations
-                </li>
-
-                <li>
-                    News & Commentary
-                </li>
-
-                <li>
-                    Sports
-                </li>
-
-                <li>
-                    Mysteries & Strange Stories
-                </li>
-
-                <li>
-                    CrowRules Entertainment
-                </li>
-
-            </ul>
-
-        </div>
+      <h2>
+        The Show
+      </h2>
 
     </div>
 
+  </div>
+
+
+  <div class="info-grid">
+
+    <article class="info-card">
+
+      <h3>
+        Real Conversations
+      </h3>
+
+      <p>
+        Tacoma Nights explores real life,
+        personal experiences, challenges,
+        creativity, and the stories that
+        usually happen after dark.
+      </p>
+
+    </article>
+
+
+    <article class="info-card">
+
+      <h3>
+        Tacoma & Beyond
+      </h3>
+
+      <p>
+        From Tacoma neighborhoods and local
+        stories to Pacific Northwest culture,
+        sports, mysteries, and the people
+        who make this region unique.
+      </p>
+
+    </article>
+
+
+    <article class="info-card">
+
+      <h3>
+        Building The Dream
+      </h3>
+
+      <p>
+        Follow the ongoing journey of building
+        CrowRules Entertainment and turning
+        an idea into a larger independent
+        entertainment universe.
+      </p>
+
+    </article>
+
+  </div>
+
 </section>
 
-<!-- ========================================================
+
+<!-- =========================================================
      HOST
 ========================================================= -->
 
-<section class="section host-section" id="host">
+<section
+  class="section"
+  id="host"
+>
 
-    <div class="host-layout">
+  <div class="host-card">
 
-        <div class="host-visual">
+    <div class="host-avatar">
+      TN
+    </div>
 
-            <div class="host-initials">
-                JR
-            </div>
+    <div>
 
-        </div>
+      <div class="eyebrow">
+        Host & Creator
+      </div>
 
-        <div class="host-info">
+      <h2>
+        Jonathan Riehle
+      </h2>
 
-            <div class="kicker">
-                The Host
-            </div>
-
-            <h2>
-                Jonathan Riehle
-            </h2>
-
-            <p>
-
-                Jonathan Riehle is the creator of CrowRules Entertainment
-                and host of Tacoma Nights.
-
-            </p>
-
-            <p>
-
-                The show is part personal journal,
-                part Tacoma conversation and part exploration
-                of the ideas, stories and people that make the
-                Pacific Northwest unique.
-
-            </p>
-
-            <p>
-
-                From the challenges of everyday life to the dream
-                of building an independent entertainment network,
-                Tacoma Nights documents the journey.
-
-            </p>
-
-            <div class="host-signature">
-
-                TACOMA • WASHINGTON • AFTER DARK
-
-            </div>
-
-        </div>
+      <p>
+        Tacoma Nights is hosted and created by
+        Jonathan Riehle as part of CrowRules
+        Entertainment. The show documents the
+        journey of building something new while
+        talking honestly about life, Tacoma,
+        creativity, entertainment, and the
+        Pacific Northwest.
+      </p>
 
     </div>
+
+  </div>
 
 </section>
 
-<!-- ========================================================
+
+<!-- =========================================================
      NEWSLETTER
 ========================================================= -->
 
-<section class="section" id="contact">
+<section
+  class="section"
+  id="newsletter"
+>
 
-    <div class="newsletter">
+  <div class="newsletter">
 
-        <div class="kicker">
-            Stay Connected
-        </div>
-
-        <h2>
-            Stay In The Night
-        </h2>
-
-        <p>
-
-            Get Tacoma Nights updates, episode announcements,
-            special projects and future live-event information.
-
-        </p>
-
-        <form class="newsletter-form" id="newsletterForm">
-
-            <input
-                type="email"
-                id="email"
-                placeholder="Enter your email address"
-                required
-            >
-
-            <button
-                type="submit"
-                class="button button-primary">
-
-                Join The List
-
-            </button>
-
-        </form>
-
+    <div class="eyebrow">
+      Stay Connected
     </div>
+
+    <h2>
+      Don't Miss The Next Night
+    </h2>
+
+    <p>
+      Get Tacoma Nights updates, new episode
+      announcements, and CrowRules Entertainment
+      news.
+    </p>
+
+    <form
+      class="newsletter-form"
+      id="newsletterForm"
+    >
+
+      <input
+        type="email"
+        id="newsletterEmail"
+        placeholder="Your email address"
+        required
+        autocomplete="email"
+      >
+
+      <button
+        type="submit"
+        class="btn btn-primary"
+      >
+        Subscribe
+      </button>
+
+    </form>
+
+    <div
+      id="newsletterMessage"
+      style="
+        margin-top:15px;
+        color:var(--cyan);
+        font-size:.8rem;
+      "
+    ></div>
+
+  </div>
 
 </section>
 
 </main>
 
-<!-- ========================================================
+
+<!-- =========================================================
      FOOTER
 ========================================================= -->
 
-<footer class="footer">
+<footer>
 
-    <div class="footer-brand">
-        TACOMA<span>NIGHTS</span>
-    </div>
-
-    <div class="footer-links">
-
-        <a href="#home">Home</a>
-
-        <a href="#episodes">Episodes</a>
-
-        <a href="#topics">Topics</a>
-
-        <a href="#show">The Show</a>
-
-        <a href="#host">Host</a>
-
-        <a href="#contact">Contact</a>
-
-    </div>
+  <div class="footer-inner">
 
     <div>
 
-        A CrowRules Entertainment Production
+      <div class="footer-brand">
+        CROWRULES ENTERTAINMENT
+      </div>
 
-        <br>
-
-        Stories • Conversations • Tacoma After Dark
-
-        <br><br>
-
-        © <span id="year"></span>
-        CrowRules Entertainment.
-        All Rights Reserved.
+      <div class="footer-copy">
+        Tacoma Nights — Original Series
+      </div>
 
     </div>
 
+    <div class="footer-copy">
+      © <span id="year"></span>
+      CrowRules Entertainment.
+      All rights reserved.
+    </div>
+
+  </div>
+
 </footer>
 
-<!-- ========================================================
-     BACK TO TOP
-========================================================= -->
 
-<button class="back-top" id="backTop">
-    ↑
+<button
+  id="backTop"
+  aria-label="Back to top"
+>
+  ↑
 </button>
 
+
+<!-- =========================================================
+     JAVASCRIPT
+========================================================= -->
+
 <script>
+
+/* =========================================================
+   SUPABASE CONFIG
+========================================================= */
+
+const SUPABASE_URL =
+  "https://zauxdqyssratvzmomozf.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9";
+
+
+const EPISODE_TABLE =
+  "cr_episodes";
+
+
+const sb =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+
+/* =========================================================
+   DOM
+========================================================= */
+
+const featuredEpisode =
+  document.getElementById(
+    "featuredEpisode"
+  );
+
+const episodeArchive =
+  document.getElementById(
+    "episodeArchive"
+  );
+
+const episodeCount =
+  document.getElementById(
+    "episodeCount"
+  );
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHTML(value) {
+
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+
+/* =========================================================
+   YOUTUBE ID
+========================================================= */
+
+function getYouTubeId(url) {
+
+  if (!url) return "";
+
+  const match =
+    String(url).match(
+      /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/
+    );
+
+  return match
+    ? match[1]
+    : "";
+
+}
+
+
+/* =========================================================
+   YOUTUBE THUMBNAIL
+========================================================= */
+
+function getThumbnail(
+  youtubeUrl,
+  thumbnailUrl
+) {
+
+  if (thumbnailUrl) {
+
+    return thumbnailUrl;
+
+  }
+
+  const id =
+    getYouTubeId(youtubeUrl);
+
+  if (!id) {
+
+    return "";
+
+  }
+
+  return (
+    "https://i.ytimg.com/vi/" +
+    id +
+    "/hqdefault.jpg"
+  );
+
+}
+
+
+/* =========================================================
+   YOUTUBE WATCH URL
+========================================================= */
+
+function getWatchUrl(url) {
+
+  if (!url) return "#";
+
+  const id =
+    getYouTubeId(url);
+
+  if (!id) {
+
+    return url;
+
+  }
+
+  return (
+    "https://www.youtube.com/watch?v=" +
+    id
+  );
+
+}
+
+
+/* =========================================================
+   DURATION
+========================================================= */
+
+function formatDuration(seconds) {
+
+  if (
+    seconds === null ||
+    seconds === undefined ||
+    seconds === ""
+  ) {
+
+    return "";
+
+  }
+
+  const total =
+    Number(seconds);
+
+  if (!Number.isFinite(total)) {
+
+    return "";
+
+  }
+
+  const hours =
+    Math.floor(total / 3600);
+
+  const minutes =
+    Math.floor(
+      (total % 3600) / 60
+    );
+
+  const secs =
+    Math.floor(total % 60);
+
+
+  if (hours > 0) {
+
+    return (
+      hours +
+      ":" +
+      String(minutes).padStart(2,"0") +
+      ":" +
+      String(secs).padStart(2,"0")
+    );
+
+  }
+
+
+  return (
+    minutes +
+    ":" +
+    String(secs).padStart(2,"0")
+  );
+
+}
+
+
+/* =========================================================
+   DATE
+========================================================= */
+
+function formatDate(value) {
+
+  if (!value) return "";
+
+  const date =
+    new Date(
+      value.includes("T")
+        ? value
+        : value + "T00:00:00"
+    );
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+
+    return "";
+
+  }
+
+  return date.toLocaleDateString(
+    undefined,
+    {
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    }
+  );
+
+}
+
+
+/* =========================================================
+   EPISODE LABEL
+========================================================= */
+
+function getEpisodeLabel(episode) {
+
+  const season =
+    Number(
+      episode.season_number ??
+      episode.season ??
+      1
+    );
+
+  const number =
+    Number(
+      episode.episode_number ??
+      episode.episode ??
+      0
+    );
+
+
+  if (!number) {
+
+    return "TACOMA NIGHTS";
+
+  }
+
+
+  return (
+    "S" +
+    String(season).padStart(2,"0") +
+    " · E" +
+    String(number).padStart(2,"0")
+  );
+
+}
+
+
+/* =========================================================
+   TITLE
+========================================================= */
+
+function getEpisodeTitle(episode) {
+
+  return (
+    episode.title ||
+    episode.name ||
+    "Tacoma Nights Episode"
+  );
+
+}
+
+
+/* =========================================================
+   DESCRIPTION
+========================================================= */
+
+function getEpisodeDescription(
+  episode
+) {
+
+  return (
+    episode.description ||
+    episode.summary ||
+    episode.synopsis ||
+    "Watch this Tacoma Nights episode."
+  );
+
+}
+
+
+/* =========================================================
+   YOUTUBE URL FIELD
+========================================================= */
+
+function getEpisodeUrl(episode) {
+
+  return (
+    episode.youtube_url ||
+    episode.youtube ||
+    episode.video_url ||
+    episode.url ||
+    ""
+  );
+
+}
+
+
+/* =========================================================
+   FEATURED DETECTION
+========================================================= */
+
+function isFeatured(episode) {
+
+  return (
+    episode.is_featured === true ||
+    episode.featured === true
+  );
+
+}
+
+
+/* =========================================================
+   PUBLISHED DETECTION
+========================================================= */
+
+function isPublished(episode) {
+
+  if (
+    episode.is_published === undefined ||
+    episode.is_published === null
+  ) {
+
+    if (
+      episode.published === undefined ||
+      episode.published === null
+    ) {
+
+      return true;
+
+    }
+
+    return (
+      episode.published === true
+    );
+
+  }
+
+  return (
+    episode.is_published === true
+  );
+
+}
+
+
+/* =========================================================
+   FEATURED EPISODE
+========================================================= */
+
+function renderFeatured(
+  episode
+) {
+
+  if (!episode) {
+
+    featuredEpisode.innerHTML = `
+
+      <div class="empty-state">
+
+        <div class="empty-icon">
+          ◉
+        </div>
+
+        <h3>
+          No Featured Episode
+        </h3>
+
+        <p>
+          Add a published Tacoma Nights
+          episode to cr_episodes in Supabase.
+        </p>
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  const title =
+    getEpisodeTitle(episode);
+
+  const description =
+    getEpisodeDescription(episode);
+
+  const youtubeUrl =
+    getEpisodeUrl(episode);
+
+  const watchUrl =
+    getWatchUrl(youtubeUrl);
+
+  const thumbnail =
+    getThumbnail(
+      youtubeUrl,
+      episode.thumbnail_url ||
+      episode.thumbnail
+    );
+
+  const duration =
+    formatDuration(
+      episode.duration_seconds ??
+      episode.duration
+    );
+
+  const date =
+    formatDate(
+      episode.publish_date ||
+      episode.published_at ||
+      episode.release_date
+    );
+
+
+  featuredEpisode.innerHTML = `
+
+    <article class="featured-card">
+
+      <div class="featured-media">
+
+        ${
+          thumbnail
+          ?
+          `
+            <img
+              src="${escapeHTML(thumbnail)}"
+              alt="${escapeHTML(title)}"
+              loading="lazy"
+            >
+          `
+          :
+          `
+            <div class="featured-placeholder">
+              TACOMA<br>NIGHTS
+            </div>
+          `
+        }
+
+        <div class="featured-overlay"></div>
+
+        <a
+          href="${escapeHTML(watchUrl)}"
+          class="featured-play"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Watch ${escapeHTML(title)}"
+        >
+          ▶
+        </a>
+
+      </div>
+
+
+      <div class="featured-content">
+
+        <div class="episode-meta">
+
+          <span>
+            ${escapeHTML(
+              getEpisodeLabel(episode)
+            )}
+          </span>
+
+          ${
+            date
+            ?
+            `
+              <span>
+                ${escapeHTML(date)}
+              </span>
+            `
+            :
+            ""
+          }
+
+          ${
+            duration
+            ?
+            `
+              <span>
+                ${escapeHTML(duration)}
+              </span>
+            `
+            :
+            ""
+          }
+
+        </div>
+
+
+        <h3>
+          ${escapeHTML(title)}
+        </h3>
+
+
+        <p>
+          ${escapeHTML(description)}
+        </p>
+
+
+        ${
+          youtubeUrl
+          ?
+          `
+            <a
+              href="${escapeHTML(watchUrl)}"
+              class="btn btn-primary"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Watch Episode →
+            </a>
+          `
+          :
+          `
+            <span
+              class="btn btn-secondary"
+              style="opacity:.5"
+            >
+              Video Coming Soon
+            </span>
+          `
+        }
+
+      </div>
+
+    </article>
+
+  `;
+
+}
+
+
+/* =========================================================
+   ARCHIVE
+========================================================= */
+
+function renderArchive(
+  episodes
+) {
+
+  episodeCount.textContent =
+    episodes.length +
+    (
+      episodes.length === 1
+        ? " Episode"
+        : " Episodes"
+    );
+
+
+  if (!episodes.length) {
+
+    episodeArchive.innerHTML = `
+
+      <div class="empty-state">
+
+        <div class="empty-icon">
+          ◉
+        </div>
+
+        <h3>
+          No Published Episodes
+        </h3>
+
+        <p>
+          There are currently no published
+          Tacoma Nights episodes in cr_episodes.
+        </p>
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  episodeArchive.innerHTML =
+    episodes
+      .map(
+        episode => {
+
+          const title =
+            getEpisodeTitle(
+              episode
+            );
+
+          const description =
+            getEpisodeDescription(
+              episode
+            );
+
+          const youtubeUrl =
+            getEpisodeUrl(
+              episode
+            );
+
+          const watchUrl =
+            getWatchUrl(
+              youtubeUrl
+            );
+
+          const thumbnail =
+            getThumbnail(
+              youtubeUrl,
+              episode.thumbnail_url ||
+              episode.thumbnail
+            );
+
+          const duration =
+            formatDuration(
+              episode.duration_seconds ??
+              episode.duration
+            );
+
+          const date =
+            formatDate(
+              episode.publish_date ||
+              episode.published_at ||
+              episode.release_date
+            );
+
+
+          return `
+
+            <article
+              class="episode-card"
+            >
+
+              <div
+                class="episode-thumb"
+              >
+
+                ${
+                  thumbnail
+                  ?
+                  `
+                    <img
+                      src="${escapeHTML(thumbnail)}"
+                      alt="${escapeHTML(title)}"
+                      loading="lazy"
+                    >
+                  `
+                  :
+                  `
+                    <div
+                      class="episode-placeholder"
+                    >
+                      TN
+                    </div>
+                  `
+                }
+
+
+                <div
+                  class="episode-number"
+                >
+                  ${escapeHTML(
+                    getEpisodeLabel(
+                      episode
+                    )
+                  )}
+                </div>
+
+
+                ${
+                  youtubeUrl
+                  ?
+                  `
+                    <a
+                      href="${escapeHTML(watchUrl)}"
+                      class="episode-play"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Watch ${escapeHTML(title)}"
+                    >
+                      ▶
+                    </a>
+                  `
+                  :
+                  ""
+                }
+
+              </div>
+
+
+              <div
+                class="episode-body"
+              >
+
+                <div
+                  class="episode-meta"
+                >
+
+                  ${
+                    date
+                    ?
+                    `
+                      <span>
+                        ${escapeHTML(date)}
+                      </span>
+                    `
+                    :
+                    ""
+                  }
+
+                  ${
+                    duration
+                    ?
+                    `
+                      <span>
+                        ${escapeHTML(duration)}
+                      </span>
+                    `
+                    :
+                    ""
+                  }
+
+                </div>
+
+
+                <h3>
+                  ${escapeHTML(title)}
+                </h3>
+
+
+                <p>
+                  ${escapeHTML(
+                    description
+                  )}
+                </p>
+
+
+                ${
+                  youtubeUrl
+                  ?
+                  `
+                    <a
+                      href="${escapeHTML(watchUrl)}"
+                      class="episode-link"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Watch Episode →
+                    </a>
+                  `
+                  :
+                  `
+                    <span
+                      class="episode-link"
+                      style="opacity:.45"
+                    >
+                      Video Coming Soon
+                    </span>
+                  `
+                }
+
+              </div>
+
+            </article>
+
+          `;
+
+        }
+      )
+      .join("");
+
+}
+
+
+/* =========================================================
+   LOAD CR_EPISODES
+========================================================= */
+
+async function loadEpisodes() {
+
+  try {
+
+    const {
+      data,
+      error
+    } =
+      await sb
+        .from("cr_episodes")
+        .select("*");
+
+
+    if (error) {
+
+      throw error;
+
+    }
+
+
+    /*
+      Only published records are displayed.
+    */
+
+    const episodes =
+      (data || [])
+        .filter(
+          isPublished
+        )
+        .sort(
+          (a,b) => {
+
+            const seasonA =
+              Number(
+                a.season_number ??
+                a.season ??
+                1
+              );
+
+            const seasonB =
+              Number(
+                b.season_number ??
+                b.season ??
+                1
+              );
+
+            if (
+              seasonA !==
+              seasonB
+            ) {
+
+              return (
+                seasonB -
+                seasonA
+              );
+
+            }
+
+
+            const epA =
+              Number(
+                a.episode_number ??
+                a.episode ??
+                0
+              );
+
+            const epB =
+              Number(
+                b.episode_number ??
+                b.episode ??
+                0
+              );
+
+
+            if (
+              epA !== epB
+            ) {
+
+              return (
+                epB -
+                epA
+              );
+
+            }
+
+
+            const dateA =
+              new Date(
+                a.publish_date ||
+                a.published_at ||
+                a.created_at ||
+                0
+              ).getTime();
+
+            const dateB =
+              new Date(
+                b.publish_date ||
+                b.published_at ||
+                b.created_at ||
+                0
+              ).getTime();
+
+
+            return (
+              dateB -
+              dateA
+            );
+
+          }
+        );
+
+
+    /*
+      Featured episode:
+
+      1. cr_episodes.is_featured = true
+      2. Otherwise newest published episode
+    */
+
+    const featured =
+      episodes.find(
+        isFeatured
+      ) ||
+      episodes[0] ||
+      null;
+
+
+    renderFeatured(
+      featured
+    );
+
+    renderArchive(
+      episodes
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Tacoma Nights / cr_episodes:",
+      error
+    );
+
+
+    episodeCount.textContent =
+      "Unavailable";
+
+
+    featuredEpisode.innerHTML = `
+
+      <div class="empty-state">
+
+        <div class="empty-icon">
+          !
+        </div>
+
+        <h3>
+          Episode Archive Unavailable
+        </h3>
+
+        <p>
+          Tacoma Nights could not load
+          the cr_episodes table from Supabase.
+        </p>
+
+      </div>
+
+    `;
+
+
+    episodeArchive.innerHTML = `
+
+      <div class="empty-state">
+
+        <div class="empty-icon">
+          !
+        </div>
+
+        <h3>
+          Unable To Load Episodes
+        </h3>
+
+        <p>
+          Check the cr_episodes table,
+          Supabase connection, and
+          Row Level Security policy.
+        </p>
+
+      </div>
+
+    `;
+
+  }
+
+}
+
 
 /* =========================================================
    INTRO
 ========================================================= */
 
-const intro = document.getElementById("intro");
-const skipIntro = document.getElementById("skipIntro");
+window.addEventListener(
+  "load",
+  () => {
 
-function closeIntro() {
+    setTimeout(
+      () => {
 
-    intro.classList.add("finished");
+        const intro =
+          document.getElementById(
+            "intro"
+          );
 
-    document.body.classList.remove("intro-active");
+        if (intro) {
 
-    sessionStorage.setItem("tacomaNightsIntroSeen", "true");
-}
+          intro.classList.add(
+            "hidden"
+          );
 
-skipIntro.addEventListener("click", closeIntro);
+        }
 
-window.addEventListener("load", () => {
+      },
+      1800
+    );
 
-    const alreadySeen =
-        sessionStorage.getItem("tacomaNightsIntroSeen");
+  }
+);
 
-    if (alreadySeen) {
-
-        intro.classList.add("finished");
-
-        document.body.classList.remove("intro-active");
-
-        return;
-    }
-
-    setTimeout(closeIntro, 5000);
-
-});
 
 /* =========================================================
    MOBILE MENU
 ========================================================= */
 
 const menuButton =
-    document.getElementById("menuButton");
+  document.getElementById(
+    "menuButton"
+  );
 
 const navLinks =
-    document.getElementById("navLinks");
+  document.getElementById(
+    "navLinks"
+  );
 
-menuButton.addEventListener("click", () => {
 
-    navLinks.classList.toggle("open");
+menuButton.addEventListener(
+  "click",
+  () => {
 
-});
+    navLinks.classList.toggle(
+      "open"
+    );
 
-document.querySelectorAll(".nav-links a")
-.forEach(link => {
+  }
+);
 
-    link.addEventListener("click", () => {
 
-        navLinks.classList.remove("open");
+navLinks
+  .querySelectorAll("a")
+  .forEach(
+    link => {
 
-    });
+      link.addEventListener(
+        "click",
+        () => {
 
-});
+          navLinks.classList.remove(
+            "open"
+          );
 
-/* =========================================================
-   HEADER SCROLL
-========================================================= */
-
-const header =
-    document.getElementById("header");
-
-window.addEventListener("scroll", () => {
-
-    if (window.scrollY > 40) {
-
-        header.classList.add("scrolled");
-
-    } else {
-
-        header.classList.remove("scrolled");
+        }
+      );
 
     }
+  );
 
-});
 
 /* =========================================================
    BACK TO TOP
 ========================================================= */
 
 const backTop =
-    document.getElementById("backTop");
+  document.getElementById(
+    "backTop"
+  );
 
-window.addEventListener("scroll", () => {
 
-    if (window.scrollY > 700) {
+window.addEventListener(
+  "scroll",
+  () => {
 
-        backTop.classList.add("visible");
+    if (
+      window.scrollY > 500
+    ) {
+
+      backTop.classList.add(
+        "visible"
+      );
 
     } else {
 
-        backTop.classList.remove("visible");
+      backTop.classList.remove(
+        "visible"
+      );
 
     }
 
-});
+  }
+);
 
-backTop.addEventListener("click", () => {
+
+backTop.addEventListener(
+  "click",
+  () => {
 
     window.scrollTo({
-        top: 0,
-        behavior: "smooth"
+      top: 0,
+      behavior: "smooth"
     });
 
-});
+  }
+);
+
 
 /* =========================================================
    NEWSLETTER DEMO
 ========================================================= */
 
-const newsletterForm =
-    document.getElementById("newsletterForm");
+document
+  .getElementById(
+    "newsletterForm"
+  )
+  .addEventListener(
+    "submit",
+    event => {
 
-newsletterForm.addEventListener("submit", event => {
+      event.preventDefault();
 
-    event.preventDefault();
+      const email =
+        document.getElementById(
+          "newsletterEmail"
+        ).value.trim();
 
-    const email =
-        document.getElementById("email");
+      const message =
+        document.getElementById(
+          "newsletterMessage"
+        );
 
-    if (!email.value.trim()) {
 
-        email.focus();
+      if (!email) {
 
         return;
 
-    }
+      }
 
-    alert(
-        "Welcome to Tacoma Nights.\\n\\n" +
-        "Newsletter signup is ready to connect to " +
-        "your CrowRules backend or Supabase database."
-    );
 
-    email.value = "";
+      message.textContent =
+        "Thanks for subscribing to Tacoma Nights.";
 
-});
 
-/* =========================================================
-   EPISODE HOVER EFFECT
-========================================================= */
-
-document.querySelectorAll(".episode")
-.forEach(card => {
-
-    card.addEventListener("mousemove", event => {
-
-        const rect =
-            card.getBoundingClientRect();
-
-        const x =
-            ((event.clientX - rect.left) /
-            rect.width) * 100;
-
-        const y =
-            ((event.clientY - rect.top) /
-            rect.height) * 100;
-
-        card.style.background =
-            `radial-gradient(
-                circle at ${x}% ${y}%,
-                rgba(255,255,255,.075),
-                transparent 38%
-            ),
-            linear-gradient(
-                145deg,
-                rgba(255,255,255,.045),
-                rgba(255,255,255,.012)
-            )`;
-
-    });
-
-    card.addEventListener("mouseleave", () => {
-
-        card.style.background =
-            `linear-gradient(
-                145deg,
-                rgba(255,255,255,.045),
-                rgba(255,255,255,.012)
-            )`;
-
-    });
-
-});
-
-/* =========================================================
-   CURRENT YEAR
-========================================================= */
-
-document.getElementById("year")
-.textContent = new Date().getFullYear();
-
-/* =========================================================
-   KEYBOARD ESCAPE
-========================================================= */
-
-document.addEventListener("keydown", event => {
-
-    if (event.key === "Escape") {
-
-        if (!intro.classList.contains("finished")) {
-
-            closeIntro();
-
-        }
-
-        navLinks.classList.remove("open");
+      event.target.reset();
 
     }
+  );
 
-});
+
+/* =========================================================
+   YEAR
+========================================================= */
+
+document.getElementById(
+  "year"
+).textContent =
+  new Date().getFullYear();
+
+
+/* =========================================================
+   LOAD SUPABASE EPISODES
+========================================================= */
+
+loadEpisodes();
 
 </script>
 
 </body>
 </html>
-```
