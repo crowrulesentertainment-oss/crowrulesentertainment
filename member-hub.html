@@ -3,7020 +3,982 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#05060a">
-<meta name="description" content="CrowRules Member Hub v10.2 — watch, earn CrowPoints, track your viewing history and manage your CrowRules membership.">
-<title>CrowRules Member Hub v10.2</title>
+<meta name="theme-color" content="#050507">
+<meta name="description" content="CrowRules Entertainment Member Hub v10.2 — member profile, CrowPoints, watch time statistics, favorites and activity.">
+<title>CrowRules Entertainment — Member Hub v10.2</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<link
-  href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap"
-  rel="stylesheet"
->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-
 :root{
-  --bg:#05060a;
-  --panel:#0a0d13;
-  --panel2:#0e131c;
-  --panel3:#121924;
-  --border:#202938;
-  --border2:#2c3748;
-  --text:#f2f5f8;
-  --muted:#8995a6;
-  --muted2:#657184;
-  --good:#65f59a;
-  --warn:#ffd166;
-  --bad:#ff667a;
-  --accent:#7c5cff;
-  --accent2:#00d4ff;
-  --shadow:0 20px 60px rgba(0,0,0,.45);
+  --bg:#050507;--p:#0d0e14;--p2:#141620;--line:#282b37;
+  --txt:#f5f7fb;--muted:#949aaa;--purple:#8b5cf6;--cyan:#22d3ee;
+  --green:#34d399;--gold:#fbbf24;--red:#fb7185;
 }
-
-*{
-  box-sizing:border-box;
-}
-
-html{
-  scroll-behavior:smooth;
-}
-
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
 body{
-  margin:0;
+  margin:0;color:var(--txt);font-family:Montserrat,Arial,sans-serif;
   background:
-    radial-gradient(circle at 15% 0%,rgba(124,92,255,.10),transparent 30%),
-    radial-gradient(circle at 85% 0%,rgba(0,212,255,.08),transparent 28%),
-    var(--bg);
-  color:var(--text);
-  font-family:Montserrat,Arial,sans-serif;
-  min-height:100vh;
+    radial-gradient(circle at 10% 0,#19112c 0,transparent 38%),
+    radial-gradient(circle at 90% 20%,#071b25 0,transparent 28%),
+    #050507;
 }
-
-body:before{
-  content:"";
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  opacity:.025;
-  background-image:
-    linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px);
-  background-size:45px 45px;
-  mask-image:linear-gradient(to bottom,#000,transparent);
+a{text-decoration:none;color:inherit}
+button,input,textarea{font:inherit}
+button:disabled{opacity:.55;cursor:not-allowed}
+.top{
+  position:sticky;top:0;z-index:20;background:#050507e8;
+  backdrop-filter:blur(16px);border-bottom:1px solid var(--line)
 }
-
-button,
-input,
-textarea{
-  font:inherit;
+nav{
+  max-width:1400px;margin:auto;padding:13px 20px;display:flex;
+  align-items:center;gap:18px
 }
-
-button{
-  cursor:pointer;
-}
-
-.hidden{
-  display:none!important;
-}
-
-.app{
-  width:min(1500px,100%);
-  margin:auto;
-  padding:18px;
-}
-
-/* =========================================================
-   HEADER
-========================================================= */
-
-.topbar{
-  position:sticky;
-  top:0;
-  z-index:100;
-  backdrop-filter:blur(18px);
-  background:rgba(5,6,10,.86);
-  border-bottom:1px solid rgba(255,255,255,.05);
-  margin:-18px -18px 20px;
-  padding:14px 18px;
-}
-
-.topbarInner{
-  width:min(1500px,100%);
-  margin:auto;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:16px;
-}
-
-.brand{
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-
-.logo{
-  width:44px;
-  height:44px;
-  border-radius:12px;
-  display:grid;
-  place-items:center;
-  font-family:Orbitron,sans-serif;
-  font-weight:900;
-  font-size:17px;
-  background:
-    linear-gradient(135deg,rgba(124,92,255,.95),rgba(0,212,255,.65));
-  box-shadow:0 0 30px rgba(124,92,255,.22);
-}
-
-.brandText strong{
-  display:block;
-  font-family:Orbitron,sans-serif;
-  font-size:15px;
-  letter-spacing:1px;
-}
-
-.brandText span{
-  color:var(--muted);
-  font-size:10px;
-  text-transform:uppercase;
-  letter-spacing:2px;
-}
-
-.memberMini{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.avatar{
-  width:38px;
-  height:38px;
-  border-radius:50%;
-  display:grid;
-  place-items:center;
-  background:var(--panel3);
-  border:1px solid var(--border2);
-  font-family:Orbitron,sans-serif;
-  font-size:11px;
-}
-
-.miniInfo{
-  display:none;
-}
-
-@media(min-width:700px){
-  .miniInfo{
-    display:block;
-  }
-}
-
-.miniInfo strong{
-  display:block;
-  font-size:12px;
-}
-
-.miniInfo span{
-  color:var(--muted);
-  font-size:9px;
-}
-
-/* =========================================================
-   NAV
-========================================================= */
-
-.nav{
-  display:flex;
-  gap:7px;
-  overflow:auto;
-  padding:4px 0 14px;
-  scrollbar-width:none;
-}
-
-.nav::-webkit-scrollbar{
-  display:none;
-}
-
-.navbtn{
-  flex:0 0 auto;
-  border:1px solid var(--border);
-  color:var(--muted);
-  background:var(--panel);
-  padding:9px 13px;
-  border-radius:9px;
-  font-size:10px;
-  text-transform:uppercase;
-  letter-spacing:1px;
-  transition:.2s;
-}
-
-.navbtn:hover,
-.navbtn.active{
-  color:#fff;
-  border-color:var(--border2);
-  background:var(--panel3);
-}
-
-/* =========================================================
-   HERO
-========================================================= */
-
-.hero{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:15px;
-  margin-bottom:18px;
-}
-
-@media(min-width:900px){
-  .hero{
-    grid-template-columns:1.5fr .8fr;
-  }
-}
-
-.heroPanel,
-.panel{
-  background:
-    linear-gradient(145deg,rgba(255,255,255,.025),transparent 55%),
-    var(--panel);
-  border:1px solid var(--border);
-  border-radius:15px;
-  box-shadow:var(--shadow);
-}
-
-.heroPanel{
-  padding:25px;
-  position:relative;
-  overflow:hidden;
-}
-
-.heroPanel:after{
-  content:"";
-  position:absolute;
-  width:250px;
-  height:250px;
-  border-radius:50%;
-  background:rgba(124,92,255,.10);
-  filter:blur(60px);
-  right:-80px;
-  top:-100px;
-}
-
-.eyebrow{
-  font-family:Orbitron,sans-serif;
-  color:var(--accent2);
-  font-size:9px;
-  letter-spacing:2px;
-  text-transform:uppercase;
-}
-
-.hero h1{
-  font-family:Orbitron,sans-serif;
-  font-size:clamp(25px,5vw,48px);
-  line-height:1.05;
-  margin:12px 0;
-}
-
-.hero p{
-  max-width:700px;
-  color:var(--muted);
-  font-size:12px;
-  line-height:1.8;
-}
-
-.heroStats{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:8px;
-  margin-top:20px;
-}
-
-.heroStat{
-  padding:12px;
-  border:1px solid var(--border);
-  background:rgba(255,255,255,.018);
-  border-radius:9px;
-}
-
-.heroStat span{
-  display:block;
-  color:var(--muted);
-  font-size:8px;
-  text-transform:uppercase;
-  letter-spacing:1px;
-}
-
-.heroStat strong{
-  display:block;
-  margin-top:5px;
-  font-family:Orbitron,sans-serif;
-  font-size:17px;
-}
-
-.actions{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  margin-top:18px;
-}
-
-/* =========================================================
-   BUTTONS
-========================================================= */
-
+.logo{font:800 16px Orbitron;letter-spacing:.08em;white-space:nowrap}
+.logo b{color:var(--cyan)}
+.links{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
 .btn{
-  border:1px solid var(--border2);
-  background:var(--panel2);
-  color:#dfe6ef;
-  border-radius:8px;
-  padding:9px 13px;
-  font-size:10px;
-  font-weight:700;
-  transition:.2s;
+  border:1px solid var(--line);background:#0b0c11;color:#e8eaf0;
+  padding:9px 13px;border-radius:10px;cursor:pointer
 }
-
-.btn:hover{
-  transform:translateY(-1px);
-  border-color:#47566e;
+.btn:hover{border-color:#555b70}
+.primary{
+  background:linear-gradient(135deg,var(--purple),#6d28d9);
+  border-color:var(--purple)
 }
-
-.btn.primary{
-  background:linear-gradient(135deg,#7255ed,#4d38bd);
-  border-color:#8068f4;
-  color:#fff;
+.navav{
+  width:38px;height:38px;border-radius:50%;object-fit:cover;
+  background:#191b25;border:1px solid var(--line)
 }
-
-.btn.small{
-  padding:7px 9px;
-  font-size:9px;
+main{max-width:1400px;margin:auto;padding:28px 20px 70px}
+.hero{
+  border:1px solid var(--line);border-radius:22px;padding:25px;
+  background:linear-gradient(135deg,#8b5cf620,#22d3ee08,#0d0e14);
+  display:flex;justify-content:space-between;gap:25px;align-items:center
 }
-
-/* =========================================================
-   AUTH
-========================================================= */
-
-.authCard{
-  padding:20px;
+.identity{display:flex;gap:18px;align-items:center}
+.heroav{
+  width:96px;height:96px;border-radius:50%;object-fit:cover;
+  border:2px solid #6650bd;background:#171923
 }
-
-.authTabs{
-  display:flex;
-  gap:5px;
-  margin-bottom:15px;
+.eyebrow{font:700 11px Orbitron;letter-spacing:.14em;color:var(--cyan)}
+h1{font:800 clamp(25px,4vw,42px) Orbitron;margin:6px 0}
+.handle,.muted{color:var(--muted);font-size:13px}
+.bio{color:#cdd1db;line-height:1.6;max-width:780px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.notice{
+  margin:15px 0;padding:12px 14px;border:1px solid var(--line);
+  border-radius:12px;background:#10121a
 }
+.notice.error{color:#fecdd3;border-color:#632735}
+.notice.ok{color:#bbf7d0;border-color:#1d5948}
+.notice.info{color:#bae6fd;border-color:#164e63}
 
-.authTabs button{
-  flex:1;
+.stats{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:18px 0
 }
-
-.authTabs button.active{
-  background:var(--panel3);
-  color:#fff;
+.stat,.panel{
+  background:#0d0e14e8;border:1px solid var(--line);border-radius:17px;
+  box-shadow:0 15px 45px #0005
 }
-
-.formField{
-  margin-bottom:10px;
+.stat{padding:18px}
+.label{
+  font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)
 }
+.num{font:800 27px Orbitron;margin-top:8px}
+.sub{font-size:11px;color:#747b8c;margin-top:5px}
 
-.formField label{
-  display:block;
-  margin-bottom:5px;
-  color:var(--muted);
-  font-size:9px;
-  text-transform:uppercase;
-  letter-spacing:1px;
+.watch-panel{margin-bottom:18px}
+.watch-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:12px
 }
-
-.formField input,
-.formField textarea{
-  width:100%;
-  border:1px solid var(--border);
-  background:#06080d;
-  color:#fff;
-  border-radius:8px;
-  padding:10px;
-  outline:none;
+.watch-stat{
+  padding:16px;border:1px solid var(--line);border-radius:13px;
+  background:#0a0b10
 }
+.watch-stat .value{font:800 22px Orbitron;margin-top:7px}
+.watch-stat .small{font-size:10px;color:var(--muted);margin-top:5px}
 
-.formField textarea{
-  min-height:100px;
-  resize:vertical;
+.chart-wrap{
+  margin-top:16px;padding:14px;border:1px solid var(--line);
+  border-radius:13px;background:#08090d
 }
-
-.formField input:focus,
-.formField textarea:focus{
-  border-color:var(--accent);
-}
-
-.authMessage{
-  color:var(--muted);
-  font-size:10px;
-  line-height:1.5;
-  margin-top:10px;
-}
-
-/* =========================================================
-   PLAYER
-========================================================= */
-
-.playerPanel{
-  margin-bottom:18px;
-}
-
-.playerHeader{
-  padding:15px 17px;
-  border-bottom:1px solid var(--border);
-  display:flex;
-  justify-content:space-between;
-  gap:12px;
-  align-items:center;
-}
-
-.playerTitle{
-  min-width:0;
-}
-
-.playerTitle strong{
-  display:block;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  font-size:13px;
-}
-
-.playerTitle span{
-  display:block;
-  color:var(--muted);
-  font-size:9px;
-  margin-top:4px;
-}
-
-.trackerStatus{
-  color:var(--good);
-  font-size:9px;
-  text-align:right;
-}
-
-.playerShell{
-  aspect-ratio:16/9;
-  min-height:260px;
-  background:#000;
-  position:relative;
-}
-
-.playerShell video,
-.playerShell iframe{
-  width:100%;
-  height:100%;
-  border:0;
-  display:block;
-}
-
-.playerPlaceholder{
-  height:100%;
-  min-height:260px;
-  display:grid;
-  place-items:center;
-  text-align:center;
-  padding:25px;
-  color:var(--muted);
-}
-
-.playerPlaceholder h3{
-  color:#fff;
-}
-
-.playerProgressOuter{
-  height:4px;
-  background:#171d27;
-}
-
-.playerProgress{
-  width:0;
-  height:100%;
-  background:linear-gradient(90deg,var(--accent),var(--accent2));
-  transition:width .2s;
-}
-
-/* =========================================================
-   SECTION
-========================================================= */
-
-.section{
-  margin:26px 0;
-}
-
-.sectionHeader{
-  display:flex;
-  justify-content:space-between;
-  align-items:end;
-  gap:15px;
-  margin-bottom:11px;
-}
-
-.sectionHeader h2{
-  margin:0;
-  font-family:Orbitron,sans-serif;
-  font-size:17px;
-}
-
-.sectionHeader p{
-  margin:4px 0 0;
-  color:var(--muted);
-  font-size:10px;
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(1,1fr);
-  gap:12px;
-}
-
-@media(min-width:600px){
-  .grid{
-    grid-template-columns:repeat(2,1fr);
-  }
-}
-
-@media(min-width:1000px){
-  .grid{
-    grid-template-columns:repeat(4,1fr);
-  }
-}
-
-/* =========================================================
-   CONTENT CARD
-========================================================= */
-
-.card{
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:12px;
-  overflow:hidden;
-  transition:.2s;
-}
-
-.card:hover{
-  transform:translateY(-2px);
-  border-color:var(--border2);
-}
-
-.thumb{
-  position:relative;
-  aspect-ratio:16/9;
-  background:#080a0f;
-  overflow:hidden;
-}
-
-.thumb img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  display:block;
-}
-
-.noimg{
-  height:100%;
-  display:grid;
-  place-items:center;
-  font-family:Orbitron,sans-serif;
-  font-size:25px;
-  color:#303a4b;
-}
-
-.badge{
-  position:absolute;
-  left:8px;
-  top:8px;
-  background:rgba(0,0,0,.75);
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:5px;
-  padding:5px 7px;
-  font-size:7px;
-  text-transform:uppercase;
-  letter-spacing:1px;
-}
-
-.cardbody{
-  padding:12px;
-}
-
-.cardtitle{
-  font-size:12px;
-  line-height:1.4;
-  font-weight:700;
-  min-height:34px;
-}
-
-.meta,
-.smalltext{
-  color:var(--muted);
-  font-size:8px;
-  line-height:1.6;
-}
-
-.progress{
-  height:3px;
-  background:#1c2330;
-  margin-top:9px;
-  border-radius:10px;
-  overflow:hidden;
-}
-
-.progress i{
-  display:block;
-  height:100%;
-  background:var(--accent2);
-}
-
-.cardactions{
-  display:flex;
-  gap:6px;
-  margin-top:10px;
-}
-
-/* =========================================================
-   STATISTICS
-========================================================= */
-
-.statsGrid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:10px;
-}
-
-@media(min-width:650px){
-  .statsGrid{
-    grid-template-columns:repeat(4,1fr);
-  }
-}
-
-.statCard{
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:15px;
-  min-height:105px;
-}
-
-.statLabel{
-  color:var(--muted);
-  font-size:8px;
-  text-transform:uppercase;
-  letter-spacing:1.2px;
-}
-
-.statValue{
-  margin-top:9px;
-  font-family:Orbitron,sans-serif;
-  font-size:20px;
-  font-weight:800;
-}
-
-.statSub{
-  color:var(--muted2);
-  font-size:8px;
-  margin-top:5px;
-  line-height:1.4;
-}
-
-.statCard.highlight{
-  background:
-    linear-gradient(135deg,rgba(124,92,255,.12),rgba(0,212,255,.04)),
-    var(--panel);
-}
-
-.statCard.good .statValue{
-  color:var(--good);
-}
-
-.statCard.accent .statValue{
-  color:var(--accent2);
-}
-
-/* =========================================================
-   ANALYTICS
-========================================================= */
-
-.analyticsGrid{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:12px;
-}
-
-@media(min-width:900px){
-  .analyticsGrid{
-    grid-template-columns:1.4fr .8fr;
-  }
-}
-
-.analyticsPanel{
-  padding:16px;
-}
-
-.analyticsTitle{
-  font-family:Orbitron,sans-serif;
-  font-size:11px;
-  margin-bottom:13px;
-}
-
+.chart-title{font:700 12px Orbitron;color:#dfe3ed;margin-bottom:12px}
 .chart{
-  height:190px;
-  display:flex;
-  align-items:end;
-  gap:4px;
-  padding-top:10px;
+  height:150px;display:flex;align-items:flex-end;gap:5px;
+  overflow:hidden
+}
+.chart-col{
+  flex:1;min-width:7px;height:100%;display:flex;align-items:flex-end;
+  position:relative
+}
+.chart-bar{
+  width:100%;min-height:2px;border-radius:5px 5px 2px 2px;
+  background:linear-gradient(180deg,var(--cyan),var(--purple))
+}
+.chart-col span{
+  position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);
+  font-size:8px;color:#6f7685;white-space:nowrap
+}
+.chart-empty{
+  height:150px;display:flex;align-items:center;justify-content:center;
+  color:var(--muted);font-size:12px
 }
 
-.chartBar{
-  flex:1;
-  min-width:3px;
-  height:var(--h);
-  max-height:100%;
-  background:linear-gradient(to top,var(--accent),var(--accent2));
-  border-radius:3px 3px 0 0;
-  opacity:.8;
-  position:relative;
+.columns{display:grid;grid-template-columns:1.45fr .8fr;gap:18px}
+.panel{padding:19px;margin-bottom:18px}
+.head{
+  display:flex;justify-content:space-between;align-items:center;
+  gap:10px;margin-bottom:15px
 }
-
-.chartBar:hover{
-  opacity:1;
+.head h2{font:700 16px Orbitron;margin:0}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.card{
+  background:#141620;border:1px solid var(--line);border-radius:13px;overflow:hidden
 }
-
-.chartBar span{
-  position:absolute;
-  bottom:-17px;
-  left:50%;
-  transform:translateX(-50%);
-  font-size:6px;
-  color:var(--muted2);
+.thumb{
+  width:100%;aspect-ratio:16/9;object-fit:cover;background:#191b25
 }
-
-.chartEmpty{
-  width:100%;
-  height:100%;
-  display:grid;
-  place-items:center;
-  color:var(--muted);
-  font-size:10px;
+.body{padding:11px}
+.title{
+  font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
 }
-
-.topShow{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:9px 0;
-  border-bottom:1px solid var(--border);
-  gap:10px;
+.meta{font-size:11px;color:var(--muted);margin-top:5px}
+.bar{
+  height:6px;background:#272a35;border-radius:99px;margin-top:9px;overflow:hidden
 }
-
-.topShow:last-child{
-  border-bottom:0;
+.bar i{
+  display:block;height:100%;
+  background:linear-gradient(90deg,var(--purple),var(--cyan))
 }
-
-.topShowName{
-  font-size:10px;
-  font-weight:700;
-}
-
-.topShowTime{
-  color:var(--good);
-  font-family:Orbitron,sans-serif;
-  font-size:9px;
-  white-space:nowrap;
-}
-
-/* =========================================================
-   LISTS
-========================================================= */
-
-.list{
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:12px;
-  overflow:hidden;
-}
-
+.list{display:grid;gap:9px}
 .row{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:11px 12px;
-  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:11px;padding:10px;
+  border:1px solid var(--line);border-radius:11px;background:#0a0b10
 }
-
-.row:last-child{
-  border-bottom:0;
+.row img{
+  width:44px;height:44px;border-radius:9px;object-fit:cover;background:#191b25
 }
-
-.grow{
-  flex:1;
-  min-width:0;
+.grow{min-width:0;flex:1}
+.rtitle{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank{font:800 15px Orbitron;color:var(--gold);width:35px;text-align:center}
+.pill{
+  font-size:10px;border:1px solid #353949;border-radius:999px;
+  padding:5px 8px;color:#cbd0dc
 }
-
-.rank{
-  width:24px;
-  color:var(--muted2);
-  font-family:Orbitron,sans-serif;
-  font-size:9px;
-}
-
-.queue{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:8px;
-}
-
-.queueItem{
-  display:flex;
-  align-items:center;
-  gap:9px;
-  background:var(--panel);
-  border:1px solid var(--border);
-  padding:8px;
-  border-radius:9px;
-}
-
-.queueItem img{
-  width:76px;
-  height:43px;
-  object-fit:cover;
-  border-radius:6px;
-}
-
-.qtitle{
-  font-size:9px;
-  font-weight:700;
-}
-
-/* =========================================================
-   PROFILE
-========================================================= */
-
-.profilePanel{
-  padding:16px;
-}
-
-/* =========================================================
-   EMPTY
-========================================================= */
-
 .empty{
-  padding:25px 15px;
-  border:1px dashed var(--border2);
-  border-radius:10px;
-  color:var(--muted);
-  text-align:center;
-  font-size:10px;
-  line-height:1.6;
+  text-align:center;color:var(--muted);padding:25px;
+  border:1px dashed #303442;border-radius:12px
 }
-
-/* =========================================================
-   MODAL
-========================================================= */
-
-.modal{
-  position:fixed;
-  inset:0;
-  z-index:500;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:18px;
-  background:rgba(0,0,0,.78);
-  backdrop-filter:blur(8px);
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{display:grid;gap:6px}
+.field.full{grid-column:1/-1}
+.field label{
+  font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em
 }
-
-.modal.show{
-  display:flex;
+.field input,.field textarea{
+  width:100%;background:#08090d;border:1px solid var(--line);
+  border-radius:10px;color:white;padding:11px
 }
-
-.modalBox{
-  width:min(520px,100%);
-  background:var(--panel);
-  border:1px solid var(--border2);
-  border-radius:14px;
-  box-shadow:var(--shadow);
-  padding:20px;
-}
-
-.modalHeader{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:15px;
-}
-
-.modalHeader h2{
-  font-family:Orbitron,sans-serif;
-  font-size:16px;
-  margin:0;
-}
-
-/* =========================================================
-   TOAST
-========================================================= */
-
-.toast{
-  position:fixed;
-  right:18px;
-  bottom:18px;
-  z-index:900;
-  width:min(390px,calc(100% - 36px));
-  background:#0c1119;
-  border:1px solid var(--border2);
-  border-radius:12px;
-  padding:13px;
-  box-shadow:var(--shadow);
-  transform:translateY(20px);
-  opacity:0;
-  pointer-events:none;
-  transition:.25s;
-}
-
-.toast.show{
-  transform:translateY(0);
-  opacity:1;
-}
-
-.toast.good{
-  border-color:rgba(101,245,154,.45);
-}
-
-.toast.bad{
-  border-color:rgba(255,102,122,.5);
-}
-
-.toast.warn{
-  border-color:rgba(255,209,102,.45);
-}
-
-.toastTitle{
-  font-weight:800;
-  font-size:11px;
-}
-
-.toastText{
-  color:var(--muted);
-  font-size:9px;
-  line-height:1.5;
-  margin-top:3px;
-}
-
-.toastDebug{
-  color:var(--bad);
-  font-family:monospace;
-  font-size:8px;
-  margin-top:7px;
-  word-break:break-word;
-}
-
-/* =========================================================
-   FOOTER
-========================================================= */
-
+.field textarea{min-height:110px}
 footer{
-  padding:35px 0 20px;
-  text-align:center;
-  color:var(--muted2);
-  font-size:8px;
-  line-height:1.7;
+  text-align:center;color:#747b8b;font-size:12px;
+  border-top:1px solid var(--line);padding:25px
 }
-
-footer strong{
-  color:var(--muted);
-  font-family:Orbitron,sans-serif;
+@media(max-width:1000px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .watch-grid{grid-template-columns:repeat(2,1fr)}
+  .columns{grid-template-columns:1fr}
 }
-
+@media(max-width:650px){
+  .links{display:none}
+  .hero{align-items:flex-start;flex-direction:column}
+  .heroav{width:75px;height:75px}
+  .cards{grid-template-columns:1fr 1fr}
+  .formgrid{grid-template-columns:1fr}
+  .field.full{grid-column:auto}
+  main{padding:15px 11px 50px}
+}
 </style>
 </head>
 
 <body>
-
-<div class="topbar">
-
-  <div class="topbarInner">
-
-    <div class="brand">
-
-      <div class="logo">CR</div>
-
-      <div class="brandText">
-        <strong>CROWRULES</strong>
-        <span>Member Hub v10.2</span>
-      </div>
-
+<header class="top">
+  <nav>
+    <a class="logo" href="index.html"><b>CROW</b>RULES ENTERTAINMENT</a>
+    <div class="links">
+      <a class="btn" href="index.html">Home</a>
+      <a class="btn" href="tv.html">CrowRules TV</a>
+      <a class="btn" href="members.html">Members</a>
+      <a class="btn" href="nest.html">Crow's Nest</a>
     </div>
-
-    <div class="memberMini">
-
-      <div class="miniInfo">
-        <strong id="miniName">Guest</strong>
-        <span id="statStatusSub">Sign in to activate tracking</span>
-      </div>
-
-      <div class="avatar" id="miniAvatar">?</div>
-
-    </div>
-
-  </div>
-
-</div>
-
-
-<div class="app">
-
-  <!-- =====================================================
-       NAV
-  ====================================================== -->
-
-  <nav class="nav">
-
-    <button class="navbtn active" data-target="dashboard">
-      Dashboard
-    </button>
-
-    <button class="navbtn" data-target="statistics">
-      Watch Stats
-    </button>
-
-    <button class="navbtn" data-target="continueSection">
-      Continue
-    </button>
-
-    <button class="navbtn" data-target="tacomaSection">
-      Tacoma Nights
-    </button>
-
-    <button class="navbtn" data-target="backDeckSection">
-      Back Deck Live
-    </button>
-
-    <button class="navbtn" data-target="historySection">
-      History
-    </button>
-
-    <button class="navbtn" data-target="favoritesSection">
-      My List
-    </button>
-
-    <button class="navbtn" data-target="profileSection">
-      Profile
-    </button>
-
+    <img id="navAvatar" class="navav" alt="Member avatar">
+    <button id="logout" class="btn" type="button">Sign out</button>
   </nav>
-
-
-  <!-- =====================================================
-       DASHBOARD
-  ====================================================== -->
-
-  <section id="dashboard">
-
-    <div class="hero">
-
-      <div class="heroPanel">
-
-        <div class="eyebrow">
-          CrowRules Entertainment
-        </div>
-
-        <h1>
-          Your CrowRules
-          <br>
-          Command Center
-        </h1>
-
-        <p>
-          Watch CrowRules content, continue where you left off,
-          build your viewing history and earn CrowPoints while
-          you watch.
-        </p>
-
-        <div class="heroStats">
-
-          <div class="heroStat">
-            <span>Status</span>
-            <strong id="statStatus">GUEST</strong>
-          </div>
-
-          <div class="heroStat">
-            <span>CrowPoints</span>
-            <strong id="statPoints">0</strong>
-          </div>
-
-          <div class="heroStat">
-            <span>Watch Time</span>
-            <strong id="statMinutes">0</strong>
-          </div>
-
-          <div class="heroStat">
-            <span>Episodes</span>
-            <strong id="statEpisodes">0</strong>
-          </div>
-
-        </div>
-
-        <div class="actions">
-
-          <button
-            class="btn primary"
-            data-scroll="statistics">
-            View Watch Statistics
-          </button>
-
-          <button
-            class="btn"
-            id="refreshBtn">
-            Refresh
-          </button>
-
-          <button
-            class="btn"
-            id="editProfileBtn">
-            Edit Profile
-          </button>
-
-          <button
-            class="btn hidden"
-            id="signOutBtn">
-            Sign Out
-          </button>
-
-        </div>
-
-      </div>
-
-
-      <!-- AUTH -->
-
-      <div
-        class="panel authCard"
-        id="authCard">
-
-        <div class="eyebrow">
-          Member Access
-        </div>
-
-        <h2 id="authTitle">
-          Sign In
-        </h2>
-
-        <div class="authTabs">
-
-          <button
-            class="btn active"
-            id="loginTab">
-            Sign In
-          </button>
-
-          <button
-            class="btn"
-            id="signupTab">
-            Create Account
-          </button>
-
-        </div>
-
-        <form id="authForm">
-
-          <div
-            class="formField hidden"
-            id="signupNameField">
-
-            <label>
-              Display Name
-            </label>
-
-            <input
-              id="authName"
-              type="text"
-              autocomplete="name"
-              placeholder="Your CrowRules name">
-
-          </div>
-
-          <div class="formField">
-
-            <label>
-              Email
-            </label>
-
-            <input
-              id="authEmail"
-              type="email"
-              required
-              autocomplete="email"
-              placeholder="you@example.com">
-
-          </div>
-
-          <div class="formField">
-
-            <label>
-              Password
-            </label>
-
-            <input
-              id="authPassword"
-              type="password"
-              required
-              minlength="6"
-              autocomplete="current-password"
-              placeholder="Password">
-
-          </div>
-
-          <button
-            class="btn primary"
-            id="authSubmit"
-            type="submit"
-            style="width:100%">
-            Sign In
-          </button>
-
-          <div
-            class="authMessage"
-            id="authMessage">
-            Sign in to activate watch tracking,
-            CrowPoints and your personal history.
-          </div>
-
-        </form>
-
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- =====================================================
-       PLAYER
-  ====================================================== -->
-
-  <section class="panel playerPanel">
-
-    <div class="playerHeader">
-
-      <div class="playerTitle">
-
-        <strong id="nowTitle">
-          Nothing Playing
-        </strong>
-
-        <span id="nowMeta">
-          Select an episode below.
-        </span>
-
-      </div>
-
-      <div
-        class="trackerStatus"
-        id="trackerStatus">
-        Player idle.
-      </div>
-
-    </div>
-
-    <div id="playerShell" class="playerShell">
-
-      <div class="playerPlaceholder">
-
-        <div>
-
-          <div class="eyebrow">
-            CrowRules Player
-          </div>
-
-          <h3>
-            Choose an episode to begin.
-          </h3>
-
-          <p style="font-size:11px;line-height:1.6">
-            Your viewing is tracked only while
-            playback is actually running.
-          </p>
-
-        </div>
-
-      </div>
-
-    </div>
-
-    <div class="playerProgressOuter">
-      <div
-        class="playerProgress"
-        id="playerProgress">
-      </div>
-    </div>
-
-  </section>
-
-
-  <!-- =====================================================
-       WATCH STATISTICS
-  ====================================================== -->
-
-  <section
-    class="section"
-    id="statistics">
-
-    <div class="sectionHeader">
-
+</header>
+
+<main>
+  <section class="hero">
+    <div class="identity">
+      <img id="avatar" class="heroav" alt="Member avatar">
       <div>
-
-        <h2>
-          Watch Statistics
-        </h2>
-
-        <p>
-          Your CrowRules viewing activity and CrowPoints.
-        </p>
-
+        <div class="eyebrow">CROWRULES MEMBER HUB v10.2</div>
+        <h1 id="name">Loading…</h1>
+        <div class="handle" id="username">@member</div>
+        <div class="bio" id="bio">Welcome to your member hub.</div>
       </div>
-
     </div>
-
-
-    <div class="statsGrid">
-
-      <div class="statCard highlight">
-
-        <div class="statLabel">
-          Lifetime Watch Time
-        </div>
-
-        <div
-          class="statValue"
-          id="watchLifetime">
-          0:00
-        </div>
-
-        <div
-          class="statSub"
-          id="watchLifetimeSub">
-          0 seconds tracked
-        </div>
-
-      </div>
-
-
-      <div class="statCard accent">
-
-        <div class="statLabel">
-          This Month
-        </div>
-
-        <div
-          class="statValue"
-          id="watchMonth">
-          0:00
-        </div>
-
-        <div class="statSub">
-          Watch time this month
-        </div>
-
-      </div>
-
-
-      <div class="statCard">
-
-        <div class="statLabel">
-          This Week
-        </div>
-
-        <div
-          class="statValue"
-          id="watchWeek">
-          0:00
-        </div>
-
-        <div class="statSub">
-          Watch time this week
-        </div>
-
-      </div>
-
-
-      <div class="statCard">
-
-        <div class="statLabel">
-          Today
-        </div>
-
-        <div
-          class="statValue"
-          id="watchToday">
-          0:00
-        </div>
-
-        <div class="statSub">
-          Watch time today
-        </div>
-
-      </div>
-
-
-      <div class="statCard good">
-
-        <div class="statLabel">
-          CrowPoints
-        </div>
-
-        <div
-          class="statValue"
-          id="watchPoints">
-          0
-        </div>
-
-        <div class="statSub">
-          Lifetime member points
-        </div>
-
-      </div>
-
-
-      <div class="statCard">
-
-        <div class="statLabel">
-          Watch Points
-        </div>
-
-        <div
-          class="statValue"
-          id="watchPointsEarned">
-          0
-        </div>
-
-        <div class="statSub">
-          Points earned from watching
-        </div>
-
-      </div>
-
-
-      <div class="statCard">
-
-        <div class="statLabel">
-          Episodes
-        </div>
-
-        <div
-          class="statValue"
-          id="watchEpisodes">
-          0
-        </div>
-
-        <div class="statSub">
-          Episodes with watch activity
-        </div>
-
-      </div>
-
-
-      <div class="statCard">
-
-        <div class="statLabel">
-          Completed
-        </div>
-
-        <div
-          class="statValue"
-          id="watchCompleted">
-          0
-        </div>
-
-        <div class="statSub">
-          Completed episodes
-        </div>
-
-      </div>
-
-
-      <div class="statCard">
-
-        <div class="statLabel">
-          Shows Watched
-        </div>
-
-        <div
-          class="statValue"
-          id="watchShows">
-          0
-        </div>
-
-        <div class="statSub">
-          CrowRules shows watched
-        </div>
-
-      </div>
-
-
-      <div class="statCard">
-
-        <div class="statLabel">
-          Longest Session
-        </div>
-
-        <div
-          class="statValue"
-          id="watchLongest">
-          0:00
-        </div>
-
-        <div class="statSub">
-          Longest recorded viewing session
-        </div>
-
-      </div>
-
-
-      <div class="statCard">
-
-        <div class="statLabel">
-          Average Session
-        </div>
-
-        <div
-          class="statValue"
-          id="watchAverage">
-          0:00
-        </div>
-
-        <div class="statSub">
-          Average watch event
-        </div>
-
-      </div>
-
-
-      <div class="statCard">
-
-        <div class="statLabel">
-          Current Streak
-        </div>
-
-        <div
-          class="statValue"
-          id="watchStreak">
-          0
-        </div>
-
-        <div class="statSub">
-          Consecutive viewing days
-        </div>
-
-      </div>
-
+    <div class="actions">
+      <button class="btn primary" id="edit" type="button">Edit profile</button>
+      <a class="btn" href="members.html">Member directory</a>
     </div>
-
-
-    <div
-      class="analyticsGrid"
-      style="margin-top:12px">
-
-      <div class="panel analyticsPanel">
-
-        <div class="analyticsTitle">
-          30-DAY WATCH ACTIVITY
-        </div>
-
-        <div
-          class="chart"
-          id="watchChart">
-          <div class="chartEmpty">
-            Sign in to view your watch activity.
-          </div>
-        </div>
-
-      </div>
-
-
-      <div class="panel analyticsPanel">
-
-        <div class="analyticsTitle">
-          TOP SHOWS
-        </div>
-
-        <div id="topShows">
-
-          <div class="empty">
-            Sign in to view your top shows.
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
   </section>
 
+  <div id="notice" class="notice info" hidden></div>
 
-  <!-- =====================================================
-       CONTINUE
-  ====================================================== -->
-
-  <section
-    class="section"
-    id="continueSection">
-
-    <div class="sectionHeader">
-
-      <div>
-        <h2>
-          Continue Watching
-        </h2>
-
-        <p>
-          Pick up where you left off.
-        </p>
-      </div>
-
+  <section class="stats">
+    <div class="stat">
+      <div class="label">CrowPoints</div>
+      <div class="num" id="points">0</div>
+      <div class="sub" id="level">Level 1</div>
     </div>
-
-    <div
-      class="grid"
-      id="continueGrid">
-
-      <div class="empty">
-        Sign in to load your watch history.
-      </div>
-
+    <div class="stat">
+      <div class="label">Leaderboard</div>
+      <div class="num" id="rank">—</div>
+      <div class="sub">Community position</div>
     </div>
-
+    <div class="stat">
+      <div class="label">TV Watch Hours</div>
+      <div class="num" id="hours">0.0h</div>
+      <div class="sub" id="minutes">0 minutes watched</div>
+    </div>
+    <div class="stat">
+      <div class="label">Episodes</div>
+      <div class="num" id="episodes">0</div>
+      <div class="sub">Episodes watched</div>
+    </div>
   </section>
 
-
-  <!-- =====================================================
-       TACOMA
-  ====================================================== -->
-
-  <section
-    class="section"
-    id="tacomaSection">
-
-    <div class="sectionHeader">
-
-      <div>
-        <h2>
-          Tacoma Nights
-        </h2>
-
-        <p>
-          CrowRules Entertainment original series.
-        </p>
-      </div>
-
+  <section class="panel watch-panel">
+    <div class="head">
+      <h2>Watch Statistics</h2>
+      <span class="muted" id="watchUpdated">Calculating…</span>
     </div>
 
-    <div
-      class="grid"
-      id="tacomaGrid">
-
-      <div class="empty">
-        Loading Tacoma Nights...
+    <div class="watch-grid">
+      <div class="watch-stat">
+        <div class="label">Lifetime</div>
+        <div class="value" id="statLifetime">0m</div>
+        <div class="small">Total tracked watch time</div>
       </div>
-
+      <div class="watch-stat">
+        <div class="label">This Month</div>
+        <div class="value" id="statMonth">0m</div>
+        <div class="small">Watch time this month</div>
+      </div>
+      <div class="watch-stat">
+        <div class="label">This Week</div>
+        <div class="value" id="statWeek">0m</div>
+        <div class="small">Watch time this week</div>
+      </div>
+      <div class="watch-stat">
+        <div class="label">Today</div>
+        <div class="value" id="statToday">0m</div>
+        <div class="small">Watch time today</div>
+      </div>
+      <div class="watch-stat">
+        <div class="label">Completed</div>
+        <div class="value" id="statCompleted">0</div>
+        <div class="small">Completed episodes</div>
+      </div>
+      <div class="watch-stat">
+        <div class="label">Shows</div>
+        <div class="value" id="statShows">0</div>
+        <div class="small">Unique shows watched</div>
+      </div>
+      <div class="watch-stat">
+        <div class="label">Watch Events</div>
+        <div class="value" id="statEvents">0</div>
+        <div class="small">Tracked activity events</div>
+      </div>
+      <div class="watch-stat">
+        <div class="label">Watch Points</div>
+        <div class="value" id="statWatchPoints">0</div>
+        <div class="small">Points from watch activity</div>
+      </div>
     </div>
 
+    <div class="chart-wrap">
+      <div class="chart-title">LAST 14 DAYS</div>
+      <div id="watchChart" class="chart-empty">No watch activity recorded yet.</div>
+    </div>
   </section>
 
+  <div class="columns">
+    <div>
+      <section class="panel">
+        <div class="head">
+          <h2>Continue Watching</h2>
+          <span class="muted" id="lastWatched">Last watched —</span>
+        </div>
+        <div id="continue" class="cards"></div>
+      </section>
 
-  <!-- =====================================================
-       BACK DECK
-  ====================================================== -->
+      <section class="panel">
+        <div class="head">
+          <h2>My List</h2>
+          <a class="muted" href="tv.html">Browse TV →</a>
+        </div>
+        <div id="mylist" class="cards"></div>
+      </section>
 
-  <section
-    class="section"
-    id="backDeckSection">
+      <section class="panel">
+        <div class="head"><h2>Favorite Shows</h2></div>
+        <div id="shows" class="cards"></div>
+      </section>
 
-    <div class="sectionHeader">
-
-      <div>
-        <h2>
-          Back Deck Live
-        </h2>
-
-        <p>
-          CrowRules live entertainment and conversations.
-        </p>
-      </div>
-
+      <section class="panel">
+        <div class="head">
+          <h2>Favorite Creators</h2>
+          <span class="muted">Crow's Nest</span>
+        </div>
+        <div id="creators" class="cards"></div>
+      </section>
     </div>
 
-    <div
-      class="grid"
-      id="backDeckGrid">
+    <aside>
+      <section class="panel">
+        <div class="head">
+          <h2>My Profile</h2>
+          <span class="pill" id="creator">Creator: No</span>
+        </div>
+        <div class="list">
+          <div class="row"><div class="grow"><div class="rtitle">Membership</div><div class="meta" id="membership">Member</div></div></div>
+          <div class="row"><div class="grow"><div class="rtitle">Joined</div><div class="meta" id="joined">—</div></div></div>
+          <div class="row"><div class="grow"><div class="rtitle">Last active</div><div class="meta" id="active">—</div></div></div>
+          <div class="row"><div class="grow"><div class="rtitle">Favorite show</div><div class="meta" id="favshow">—</div></div></div>
+        </div>
+      </section>
 
-      <div class="empty">
-        Loading Back Deck Live...
-      </div>
+      <section class="panel">
+        <div class="head"><h2>Top Watched</h2></div>
+        <div id="topWatched" class="list"></div>
+      </section>
 
+      <section class="panel">
+        <div class="head"><h2>Leaderboard</h2></div>
+        <div id="leaderboard" class="list"></div>
+      </section>
+
+      <section class="panel">
+        <div class="head"><h2>Friends</h2><span class="muted" id="friendcount">0</span></div>
+        <div id="friends" class="list"></div>
+      </section>
+
+      <section class="panel">
+        <div class="head"><h2>Recent Activity</h2></div>
+        <div id="activity" class="list"></div>
+      </section>
+    </aside>
+  </div>
+
+  <section class="panel" id="editor" hidden>
+    <div class="head">
+      <h2>Edit Member Profile</h2>
+      <button class="btn" id="close" type="button">Close</button>
     </div>
-
-  </section>
-
-
-  <!-- =====================================================
-       HISTORY
-  ====================================================== -->
-
-  <section
-    class="section"
-    id="historySection">
-
-    <div class="sectionHeader">
-
-      <div>
-        <h2>
-          Recently Watched
-        </h2>
-
-        <p>
-          Your latest CrowRules viewing activity.
-        </p>
+    <form id="form" class="formgrid">
+      <div class="field">
+        <label>Display name</label>
+        <input id="editName" maxlength="80">
       </div>
-
-    </div>
-
-    <div
-      class="list"
-      id="historyList">
-
-      <div class="empty">
-        Sign in to view your history.
+      <div class="field">
+        <label>Username</label>
+        <input id="editUsername" maxlength="40">
       </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- =====================================================
-       FAVORITES
-  ====================================================== -->
-
-  <section
-    class="section"
-    id="favoritesSection">
-
-    <div class="sectionHeader">
-
-      <div>
-        <h2>
-          My List
-        </h2>
-
-        <p>
-          Your saved CrowRules episodes.
-        </p>
+      <div class="field full">
+        <label>Avatar URL</label>
+        <input id="editAvatar" type="url">
       </div>
-
-    </div>
-
-    <div
-      class="grid"
-      id="favoritesGrid">
-
-      <div class="empty">
-        Sign in to manage your list.
+      <div class="field full">
+        <label>Bio</label>
+        <textarea id="editBio" maxlength="500"></textarea>
       </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- =====================================================
-       PROFILE
-  ====================================================== -->
-
-  <section
-    class="section"
-    id="profileSection">
-
-    <div class="sectionHeader">
-
-      <div>
-        <h2>
-          Profile
-        </h2>
-
-        <p>
-          Your CrowRules member information.
-        </p>
+      <div class="field full">
+        <button class="btn primary" type="submit">Save profile</button>
       </div>
-
-    </div>
-
-    <div
-      class="panel profilePanel"
-      id="profileInfo">
-
-      <div class="empty">
-        Sign in to view your profile.
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- =====================================================
-       QUEUE
-  ====================================================== -->
-
-  <section class="section">
-
-    <div class="sectionHeader">
-
-      <div>
-        <h2>
-          CrowRules Queue
-        </h2>
-
-        <p>
-          Latest available episodes.
-        </p>
-      </div>
-
-    </div>
-
-    <div
-      class="queue"
-      id="queueList">
-
-      <div class="empty">
-        Loading content...
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <footer>
-
-    <strong>CROWRULES ENTERTAINMENT</strong>
-
-    <br>
-
-    Member Hub v10.2 • Watch • Earn • Connect
-
-  </footer>
-
-</div>
-
-
-<!-- =======================================================
-     PROFILE MODAL
-======================================================== -->
-
-<div
-  class="modal"
-  id="profileModal">
-
-  <div class="modalBox">
-
-    <div class="modalHeader">
-
-      <h2>
-        Edit Profile
-      </h2>
-
-      <button
-        class="btn"
-        id="closeProfile">
-        Close
-      </button>
-
-    </div>
-
-    <form id="profileForm">
-
-      <div class="formField">
-
-        <label>
-          Display Name
-        </label>
-
-        <input
-          id="profileDisplayName"
-          type="text"
-          maxlength="80"
-          required>
-
-      </div>
-
-      <div class="formField">
-
-        <label>
-          Bio
-        </label>
-
-        <textarea
-          id="profileBio"
-          maxlength="500"
-          placeholder="Tell the CrowRules community about yourself..."></textarea>
-
-      </div>
-
-      <button
-        class="btn primary"
-        type="submit"
-        style="width:100%">
-        Save Profile
-      </button>
-
     </form>
+  </section>
+</main>
 
-  </div>
-
-</div>
-
-
-<!-- =======================================================
-     TOAST
-======================================================== -->
-
-<div
-  class="toast"
-  id="toast">
-
-  <div
-    class="toastTitle"
-    id="toastTitle">
-  </div>
-
-  <div
-    class="toastText"
-    id="toastText">
-  </div>
-
-  <div
-    class="toastDebug hidden"
-    id="toastDebug">
-  </div>
-
-</div>
-
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<footer>CrowRules Entertainment • CrowRules TV • Member Hub v10.2</footer>
 
 <script>
-"use strict";
+(function(){
+'use strict';
 
-/* =========================================================
-   CROWRULES MEMBER HUB v10.2
-   =========================================================
-
-   CANONICAL WATCH RPC:
-
-   record_member_watch(
-     p_content_id uuid,
-     p_content_type text,
-     p_title text,
-     p_seconds integer,
-     p_position_seconds bigint,
-     p_completed boolean
-   )
-
-   No member_id or user_id argument is supplied.
-   The RPC uses auth.uid().
-
-========================================================= */
-
-
-/* =========================================================
-   SUPABASE
-========================================================= */
-
-const SUPABASE_URL =
-  "https://zauxdqyssratvzmomozf.supabase.co";
-
-const SUPABASE_KEY =
-  "sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9";
-
-const db =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY,
-    {
-      auth:{
-        persistSession:true,
-        autoRefreshToken:true,
-        detectSessionInUrl:true
-      }
-    }
-  );
-
-
-/* =========================================================
-   STATE
-========================================================= */
-
-const state = {
-
-  user:null,
-
-  member:null,
-
-  profile:null,
-
-  history:[],
-
-  favorites:[],
-
-  tacoma:[],
-
-  backDeck:[],
-
-  contentMap:new Map(),
-
-  authMode:"login",
-
-  refreshBusy:false,
-
-  watchStats:{
-
-    lifetimeSeconds:0,
-
-    monthSeconds:0,
-
-    weekSeconds:0,
-
-    todaySeconds:0,
-
-    watchPoints:0,
-
-    episodes:0,
-
-    completed:0,
-
-    shows:0,
-
-    longestSession:0,
-
-    averageSession:0,
-
-    streak:0,
-
-    daily:[],
-
-    topShows:[]
-
-  }
-
+const CONFIG = {
+  url: 'https://zauxdqyssratvzmomozf.supabase.co',
+  key: 'sb_publishable_-m6NuVfbrcs84OH7aGPrDw_AuLfXo8J'
 };
 
+const fallback = 'https://placehold.co/640x360/171923/8b5cf6?text=CrowRules';
+const avatarFallback = 'https://placehold.co/160x160/171923/8b5cf6?text=C';
 
-/* =========================================================
-   TRACKER
-========================================================= */
+const $ = id => document.getElementById(id);
+const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({
+  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+}[c]));
 
-const tracker = {
-
-  active:false,
-
-  playing:false,
-
-  contentId:null,
-
-  contentType:"episode",
-
-  title:"",
-
-  sourceTable:"",
-
-  position:0,
-
-  duration:0,
-
-  unsentSeconds:0,
-
-  sessionSeconds:0,
-
-  lastTick:0,
-
-  timer:null,
-
-  flushing:false,
-
-  completed:false,
-
-  video:null,
-
-  yt:null,
-
-  youtube:false,
-
-  positionTimer:null
-
+let db = null;
+let user = null;
+let watchRows = [];
+let historyRows = [];
+let watchStats = {
+  lifetime:0, month:0, week:0, today:0,
+  completed:0, shows:0, events:0, points:0, daily:[]
 };
 
-
-let youtubeApiPromise = null;
-
-
-/* =========================================================
-   HELPERS
-========================================================= */
-
-const $ =
-  id =>
-    document.getElementById(id);
-
-
-function esc(value){
-
-  return String(value ?? "")
-    .replace(/[&<>"']/g,ch => ({
-      "&":"&amp;",
-      "<":"&lt;",
-      ">":"&gt;",
-      '"':"&quot;",
-      "'":"&#039;"
-    }[ch]));
-
+function notice(text, type='info'){
+  const n = $('notice');
+  if(!n) return;
+  n.textContent = text || '';
+  n.className = 'notice ' + type;
+  n.hidden = !text;
 }
 
-
-function showToast(
-  title,
-  text,
-  type=""
-){
-
-  $("toastTitle").textContent =
-    title;
-
-  $("toastText").textContent =
-    text;
-
-  $("toastDebug").classList.add(
-    "hidden"
-  );
-
-  $("toast").className =
-    "toast show " + type;
-
-  setTimeout(
-    () =>
-      $("toast").classList.remove("show"),
-    5500
-  );
-
+function ago(value){
+  if(!value) return '—';
+  const time = new Date(value).getTime();
+  if(!Number.isFinite(time)) return '—';
+  let seconds = Math.max(0, (Date.now()-time)/1000);
+  if(seconds < 60) return 'just now';
+  if(seconds < 3600) return Math.floor(seconds/60)+'m ago';
+  if(seconds < 86400) return Math.floor(seconds/3600)+'h ago';
+  return Math.floor(seconds/86400)+'d ago';
 }
 
-
-function showError(
-  title,
-  error,
-  fallback="Something went wrong."
-){
-
-  const message =
-    error?.message ||
-    fallback;
-
-  const detail =
-    [
-      error?.code,
-      error?.details,
-      error?.hint
-    ]
-    .filter(Boolean)
-    .join(" • ");
-
-  $("toastTitle").textContent =
-    title;
-
-  $("toastText").textContent =
-    message;
-
-  $("toastDebug").textContent =
-    detail
-      ? "Supabase: " + detail
-      : "";
-
-  $("toastDebug").classList.toggle(
-    "hidden",
-    !detail
-  );
-
-  $("toast").className =
-    "toast show bad";
-
-  console.error(
-    "[CrowRules]",
-    title,
-    error
-  );
-
-  setTimeout(
-    () =>
-      $("toast").classList.remove("show"),
-    8500
-  );
-
+function date(value){
+  if(!value) return '—';
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? '—' :
+    d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
 }
-
-
-function formatTime(seconds){
-
-  const s =
-    Math.max(
-      0,
-      Math.floor(
-        Number(seconds) || 0
-      )
-    );
-
-  const h =
-    Math.floor(s / 3600);
-
-  const m =
-    Math.floor(
-      (s % 3600) / 60
-    );
-
-  const sec =
-    s % 60;
-
-  if(h){
-
-    return (
-      h +
-      ":" +
-      String(m).padStart(2,"0") +
-      ":" +
-      String(sec).padStart(2,"0")
-    );
-
-  }
-
-  return (
-    m +
-    ":" +
-    String(sec).padStart(2,"0")
-  );
-
-}
-
 
 function formatMinutes(seconds){
-
-  return Math.floor(
-    (Number(seconds) || 0) / 60
-  ).toLocaleString();
-
+  const total = Math.max(0, Math.floor(Number(seconds)||0));
+  if(total < 60) return total + 's';
+  const minutes = Math.floor(total/60);
+  if(minutes < 60) return minutes + 'm';
+  const hours = Math.floor(minutes/60);
+  const rem = minutes % 60;
+  return hours + 'h' + (rem ? ' '+rem+'m' : '');
 }
 
-
-function formatDate(value){
-
-  if(!value)
-    return "—";
-
-  const d =
-    new Date(value);
-
-  if(
-    Number.isNaN(
-      d.getTime()
-    )
-  )
-    return "—";
-
-  return d.toLocaleString();
-
+function formatHours(seconds){
+  return (Math.max(0,Number(seconds)||0)/3600).toFixed(1) + 'h';
 }
 
+function empty(id,text){
+  const el = $(id);
+  if(el) el.innerHTML = '<div class="empty">'+esc(text)+'</div>';
+}
 
-function initials(
-  name,
-  email
-){
+function card(x, creator=false){
+  if(creator){
+    return '<article class="card">' +
+      '<img class="thumb" src="'+esc(x.avatar_url||avatarFallback)+'" alt="">' +
+      '<div class="body"><div class="title">'+esc(x.name)+'</div>' +
+      '<div class="meta">'+esc(x.title||x.category||'Creator')+'</div></div></article>';
+  }
+  const progress = x.progress != null ?
+    '<div class="bar"><i style="width:'+Math.min(100,Math.max(0,Number(x.progress)||0))+'%"></i></div>' : '';
+  return '<article class="card">' +
+    '<img class="thumb" src="'+esc(x.thumbnail_url||x.youtube_thumbnail_url||x.logo_url||fallback)+'" alt="">' +
+    '<div class="body"><div class="title">'+esc(x.title||x.name)+'</div>' +
+    '<div class="meta">'+esc(x.category||'CrowRules TV')+'</div>'+progress+'</div></article>';
+}
 
-  const s =
-    (
-      name ||
-      email ||
-      "?"
-    ).trim();
+async function safe(table, build){
+  try{
+    if(!db) return {data:null,error:new Error('Supabase is not initialized')};
+    let q = db.from(table).select('*');
+    if(typeof build === 'function') q = build(q);
+    return await q;
+  }catch(error){
+    console.warn('CrowRules query failed:', table, error);
+    return {data:null,error};
+  }
+}
 
-  return (
-    s
-      .split(/\s+/)
-      .slice(0,2)
-      .map(x => x[0])
-      .join("")
-      .toUpperCase()
-    || "?"
+function startOfLocalDay(){
+  const d = new Date();
+  d.setHours(0,0,0,0);
+  return d;
+}
+function startOfLocalWeek(){
+  const d = startOfLocalDay();
+  const day = d.getDay();
+  const diff = day === 0 ? 6 : day - 1;
+  d.setDate(d.getDate()-diff);
+  return d;
+}
+function startOfLocalMonth(){
+  const d = startOfLocalDay();
+  d.setDate(1);
+  return d;
+}
+
+function eventSeconds(row){
+  const candidates = [
+    row.watch_seconds,row.seconds_watched,row.seconds,
+    row.total_seconds,row.watched_seconds
+  ];
+  for(const value of candidates){
+    const n = Number(value);
+    if(Number.isFinite(n) && n > 0) return Math.floor(n);
+  }
+  return 0;
+}
+
+function eventTime(row){
+  return row.created_at || row.watched_at || row.updated_at || row.last_heartbeat_at || null;
+}
+
+function contentKey(row){
+  return String(
+    row.content_id || row.episode_id || row.video_key ||
+    row.content_key || row.title || ''
   );
-
 }
 
+function buildWatchStats(rows, history){
+  const now = new Date();
+  const todayStart = startOfLocalDay().getTime();
+  const weekStart = startOfLocalWeek().getTime();
+  const monthStart = startOfLocalMonth().getTime();
 
-function youtubeId(url){
+  let lifetime=0, month=0, week=0, today=0, points=0;
+  const dates = new Map();
 
-  if(!url)
-    return null;
+  for(const row of rows){
+    const seconds = eventSeconds(row);
+    const time = eventTime(row);
+    const ms = time ? new Date(time).getTime() : NaN;
 
-  const s =
-    String(url);
+    lifetime += seconds;
+    points += Number(row.points || 0) || 0;
 
-  const m =
-    s.match(
-      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{6,})/
-    );
+    if(Number.isFinite(ms)){
+      if(ms >= monthStart) month += seconds;
+      if(ms >= weekStart) week += seconds;
+      if(ms >= todayStart) today += seconds;
 
-  return m
-    ? m[1]
-    : null;
+      const localDate = new Date(ms).toLocaleDateString('en-CA');
+      dates.set(localDate,(dates.get(localDate)||0)+seconds);
+    }
+  }
 
-}
+  /* Fallback lifetime value from the member's cumulative history when
+     watch-point events are unavailable. */
+  if(lifetime === 0){
+    for(const row of history){
+      lifetime += Number(row.watched_seconds || row.watch_seconds || 0) || 0;
+    }
+  }
 
+  const completedSet = new Set();
+  const showSet = new Set();
 
-function thumbUrl(item){
+  for(const row of history){
+    if(row.completed === true) completedSet.add(contentKey(row));
+    const show =
+      row.show_title || row.show_name || row.series_title ||
+      row.category || row.content_type;
+    if(show && !/episode/i.test(String(show))) showSet.add(String(show));
+  }
 
-  if(item.thumbnail_url)
-    return item.thumbnail_url;
-
-  const y =
-    youtubeId(
-      item.youtube_url ||
-      item.video_url
-    );
-
-  return y
-    ? `https://i.ytimg.com/vi/${encodeURIComponent(y)}/hqdefault.jpg`
-    : "";
-
-}
-
-
-function contentKey(
-  contentId,
-  contentType="episode"
-){
-
-  return (
-    contentType +
-    ":" +
-    contentId
-  );
-
-}
-
-
-/* =========================================================
-   CONTENT NORMALIZER
-========================================================= */
-
-function normalizeContent(
-  item,
-  sourceTable
-){
-
-  const isTacoma =
-    sourceTable ===
-    "tacoma_nights_episodes";
-
-  const title =
-    item.title ||
-    item.name ||
-    item.episode_title ||
-    (
-      item.episode_number != null
-        ? "Episode " +
-          item.episode_number
-        : "CrowRules Episode"
-    );
-
-  const direct =
-    !isTacoma
-      ? (
-          item.video_url ||
-          item.file_url ||
-          item.media_url ||
-          null
-        )
-      : null;
-
-  const yt =
-    isTacoma
-      ? youtubeId(item.youtube_url)
-      : youtubeId(
-          item.youtube_url ||
-          direct
-        );
+  const daily=[];
+  for(let i=13;i>=0;i--){
+    const d = new Date();
+    d.setHours(0,0,0,0);
+    d.setDate(d.getDate()-i);
+    const key=d.toLocaleDateString('en-CA');
+    daily.push({
+      key,
+      seconds:dates.get(key)||0,
+      label:d.toLocaleDateString(undefined,{month:'numeric',day:'numeric'})
+    });
+  }
 
   return {
-
-    ...item,
-
-    contentId:item.id,
-
-    contentType:"episode",
-
-    title,
-
-    sourceTable,
-
-    sourceId:item.id,
-
-    image:thumbUrl(item),
-
-    videoUrl:direct,
-
-    youtubeId:yt,
-
-    duration:
-      Number(
-        item.duration_seconds ||
-        item.duration ||
-        item.runtime_seconds ||
-        0
-      ) || 0,
-
-    episodeNumber:
-      item.episode_number ??
-      null,
-
-    season:
-      item.season ??
-      item.season_number ??
-      null
-
+    lifetime,month,week,today,
+    completed:completedSet.size,
+    shows:showSet.size,
+    events:rows.length,
+    points,
+    daily
   };
-
 }
-
-
-/* =========================================================
-   AUTH
-========================================================= */
-
-function setAuthMode(mode){
-
-  state.authMode =
-    mode;
-
-  const signup =
-    mode === "signup";
-
-  $("loginTab")
-    .classList.toggle(
-      "active",
-      !signup
-    );
-
-  $("signupTab")
-    .classList.toggle(
-      "active",
-      signup
-    );
-
-  $("authTitle")
-    .textContent =
-      signup
-        ? "Create Account"
-        : "Sign In";
-
-  $("authSubmit")
-    .textContent =
-      signup
-        ? "Create Account"
-        : "Sign In";
-
-  $("signupNameField")
-    .classList.toggle(
-      "hidden",
-      !signup
-    );
-
-  $("authName").required =
-    signup;
-
-}
-
-
-async function handleAuthSubmit(event){
-
-  event.preventDefault();
-
-  const email =
-    $("authEmail").value.trim();
-
-  const password =
-    $("authPassword").value;
-
-  const name =
-    $("authName").value.trim();
-
-  $("authSubmit").disabled =
-    true;
-
-  try{
-
-    if(state.authMode === "signup"){
-
-      const {
-        data,
-        error
-      } =
-        await db.auth.signUp({
-
-          email,
-
-          password,
-
-          options:{
-            data:{
-              display_name:
-                name ||
-                email.split("@")[0]
-            }
-          }
-
-        });
-
-      if(error)
-        throw error;
-
-      if(!data.session){
-
-        $("authMessage")
-          .textContent =
-          "Account created. Check your email if confirmation is required, then sign in.";
-
-        showToast(
-          "Account Created",
-          "Check your email if Supabase requires confirmation.",
-          "good"
-        );
-
-      }else{
-
-        showToast(
-          "Welcome",
-          "Your CrowRules member account is active.",
-          "good"
-        );
-
-      }
-
-    }else{
-
-      const {
-        error
-      } =
-        await db.auth
-          .signInWithPassword({
-            email,
-            password
-          });
-
-      if(error)
-        throw error;
-
-      showToast(
-        "Signed In",
-        "Watch tracking is now active.",
-        "good"
-      );
-
-    }
-
-  }catch(error){
-
-    showError(
-      "Authentication failed",
-      error
-    );
-
-  }finally{
-
-    $("authSubmit").disabled =
-      false;
-
-  }
-
-}
-
-
-async function signOut(){
-
-  await flushTracker(true);
-
-  const {
-    error
-  } =
-    await db.auth.signOut();
-
-  if(error){
-
-    showError(
-      "Sign out failed",
-      error
-    );
-
-    return;
-
-  }
-
-  resetTracker();
-
-  state.user = null;
-  state.member = null;
-  state.profile = null;
-  state.history = [];
-  state.favorites = [];
-
-  resetWatchStats();
-
-  updateAuthUI();
-
-  renderAll();
-
-  showToast(
-    "Signed Out",
-    "Your member session has ended.",
-    "good"
-  );
-
-}
-
-
-function updateAuthUI(){
-
-  const signed =
-    !!state.user;
-
-  $("authCard")
-    .classList.toggle(
-      "hidden",
-      signed
-    );
-
-  $("signOutBtn")
-    .classList.toggle(
-      "hidden",
-      !signed
-    );
-
-  if(signed){
-
-    const name =
-      state.profile?.display_name ||
-      state.user.user_metadata?.display_name ||
-      state.user.email ||
-      "Member";
-
-    $("miniName").textContent =
-      name;
-
-    $("miniAvatar").textContent =
-      initials(
-        name,
-        state.user.email
-      );
-
-    $("statStatus").textContent =
-      "ACTIVE";
-
-    $("statStatusSub").textContent =
-      "Watch tracking enabled";
-
-  }else{
-
-    $("miniName").textContent =
-      "Guest";
-
-    $("miniAvatar").textContent =
-      "?";
-
-    $("statStatus").textContent =
-      "GUEST";
-
-    $("statStatusSub").textContent =
-      "Sign in to activate tracking";
-
-  }
-
-}
-
-
-/* =========================================================
-   MEMBER
-========================================================= */
-
-async function ensureMember(){
-
-  if(!state.user)
-    return null;
-
-  let {
-    data,
-    error
-  } =
-    await db
-      .from("cr_members")
-      .select("*")
-      .eq(
-        "user_id",
-        state.user.id
-      )
-      .maybeSingle();
-
-  if(error){
-
-    console.error(
-      "cr_members load:",
-      error
-    );
-
-    return null;
-
-  }
-
-  if(!data){
-
-    const result =
-      await db
-        .from("cr_members")
-        .insert({
-
-          user_id:
-            state.user.id,
-
-          points:0,
-
-          watch_seconds:0,
-
-          total_watch_minutes:0
-
-        })
-        .select("*")
-        .single();
-
-    if(!result.error){
-
-      data =
-        result.data;
-
-    }else{
-
-      console.warn(
-        "Member bootstrap failed:",
-        result.error
-      );
-
-    }
-
-  }
-
-  state.member =
-    data || null;
-
-  return state.member;
-
-}
-
-
-/* =========================================================
-   PROFILE
-========================================================= */
-
-async function loadProfile(){
-
-  if(!state.user)
-    return;
-
-  const {
-    data,
-    error
-  } =
-    await db
-      .from("cr_profiles")
-      .select("*")
-      .eq(
-        "user_id",
-        state.user.id
-      )
-      .maybeSingle();
-
-  if(!error){
-
-    state.profile =
-      data;
-
-  }else{
-
-    console.warn(
-      "Optional profile load:",
-      error
-    );
-
-  }
-
-}
-
-
-async function saveProfile(event){
-
-  event.preventDefault();
-
-  if(!state.user)
-    return;
-
-  const payload = {
-
-    user_id:
-      state.user.id,
-
-    display_name:
-      $("profileDisplayName").value.trim() ||
-      state.user.email.split("@")[0],
-
-    bio:
-      $("profileBio").value.trim()
-
-  };
-
-  const {
-    data,
-    error
-  } =
-    await db
-      .from("cr_profiles")
-      .upsert(
-        payload,
-        {
-          onConflict:"user_id"
-        }
-      )
-      .select("*")
-      .single();
-
-  if(error){
-
-    showError(
-      "Profile save failed",
-      error
-    );
-
-    return;
-
-  }
-
-  state.profile =
-    data;
-
-  updateAuthUI();
-
-  renderProfile();
-
-  $("profileModal")
-    .classList.remove("show");
-
-  showToast(
-    "Profile Saved",
-    "Your CrowRules profile was updated.",
-    "good"
-  );
-
-}
-
-
-/* =========================================================
-   HISTORY
-========================================================= */
-
-async function loadHistory(){
-
-  if(!state.user){
-
-    state.history = [];
-
-    return;
-
-  }
-
-  const {
-    data,
-    error
-  } =
-    await db
-      .from("cr_member_watch_history")
-      .select("*")
-      .eq(
-        "user_id",
-        state.user.id
-      )
-      .order(
-        "watched_at",
-        {
-          ascending:false
-        }
-      )
-      .limit(500);
-
-  if(error){
-
-    console.warn(
-      "Watch history:",
-      error
-    );
-
-    state.history = [];
-
-    return;
-
-  }
-
-  state.history =
-    (data || []).map(row => {
-
-      const content =
-        state.contentMap.get(
-          contentKey(
-            row.content_id,
-            row.content_type ||
-            "episode"
-          )
-        );
-
-      return {
-
-        ...row,
-
-        historyId:
-          row.id,
-
-        contentId:
-          row.content_id,
-
-        title:
-          row.title ||
-          content?.title ||
-          "CrowRules Content",
-
-        contentType:
-          row.content_type ||
-          "episode",
-
-        sourceTable:
-          content?.sourceTable ||
-          "",
-
-        image:
-          content?.image ||
-          "",
-
-        videoUrl:
-          content?.videoUrl ||
-          null,
-
-        youtubeId:
-          content?.youtubeId ||
-          null,
-
-        position:
-          Number(
-            row.last_position_seconds ||
-            0
-          ),
-
-        watchedSeconds:
-          Number(
-            row.watched_seconds ||
-            0
-          ),
-
-        completed:
-          !!row.completed,
-
-        watchedAt:
-          row.watched_at,
-
-        duration:
-          content?.duration ||
-          0
-
-      };
-
-    });
-
-}
-
-
-function getHistoryForContent(
-  contentId,
-  contentType="episode"
-){
-
-  return state.history.find(
-    h =>
-      String(h.contentId) ===
-        String(contentId) &&
-      h.contentType ===
-        contentType
-  );
-
-}
-
-
-/* =========================================================
-   CONTENT
-========================================================= */
-
-async function loadContent(){
-
-  const [
-    tacomaResult,
-    backDeckResult
-  ] =
-    await Promise.all([
-
-      db
-        .from("tacoma_nights_episodes")
-        .select("*")
-        .in(
-          "status",
-          [
-            "available",
-            "published"
-          ]
-        )
-        .order(
-          "episode_number",
-          {
-            ascending:true
-          }
-        ),
-
-      db
-        .from("back_deck_episodes")
-        .select("*")
-        .eq(
-          "is_published",
-          true
-        )
-        .order(
-          "release_date",
-          {
-            ascending:false,
-            nullsFirst:false
-          }
-        )
-
-    ]);
-
-
-  if(tacomaResult.error){
-
-    console.warn(
-      "Tacoma Nights:",
-      tacomaResult.error
-    );
-
-    $("tacomaGrid").innerHTML =
-      `<div class="empty">
-        Tacoma Nights could not be loaded:
-        ${esc(tacomaResult.error.message)}
-      </div>`;
-
-  }else{
-
-    state.tacoma =
-      (tacomaResult.data || []).map(
-        x =>
-          normalizeContent(
-            x,
-            "tacoma_nights_episodes"
-          )
-      );
-
-  }
-
-
-  if(backDeckResult.error){
-
-    console.warn(
-      "Back Deck:",
-      backDeckResult.error
-    );
-
-    $("backDeckGrid").innerHTML =
-      `<div class="empty">
-        Back Deck Live could not be loaded:
-        ${esc(backDeckResult.error.message)}
-      </div>`;
-
-  }else{
-
-    state.backDeck =
-      (backDeckResult.data || []).map(
-        x =>
-          normalizeContent(
-            x,
-            "back_deck_episodes"
-          )
-      );
-
-  }
-
-
-  state.contentMap.clear();
-
-  [
-    ...state.tacoma,
-    ...state.backDeck
-  ].forEach(item => {
-
-    state.contentMap.set(
-      contentKey(
-        item.contentId,
-        item.contentType
-      ),
-      item
-    );
-
-  });
-
-}
-
-
-/* =========================================================
-   FAVORITES
-========================================================= */
-
-async function loadFavorites(){
-
-  if(!state.user){
-
-    state.favorites = [];
-
-    return;
-
-  }
-
-  const {
-    data,
-    error
-  } =
-    await db
-      .from("cr_member_favorites")
-      .select("*")
-      .eq(
-        "user_id",
-        state.user.id
-      )
-      .order(
-        "created_at",
-        {
-          ascending:false
-        }
-      );
-
-  if(error){
-
-    console.warn(
-      "Optional favorites:",
-      error
-    );
-
-    state.favorites = [];
-
-    return;
-
-  }
-
-  state.favorites =
-    data || [];
-
-}
-
-
-function isFavorite(contentId){
-
-  return state.favorites.some(
-    f =>
-      String(f.content_id) ===
-      String(contentId)
-  );
-
-}
-
-
-async function toggleFavorite(content){
-
-  if(!state.user){
-
-    showToast(
-      "Sign In Required",
-      "Sign in before adding content to My List.",
-      "warn"
-    );
-
-    return;
-
-  }
-
-  if(isFavorite(content.contentId)){
-
-    const {
-      error
-    } =
-      await db
-        .from("cr_member_favorites")
-        .delete()
-        .eq(
-          "user_id",
-          state.user.id
-        )
-        .eq(
-          "content_id",
-          content.contentId
-        );
-
-    if(error){
-
-      showError(
-        "My List update failed",
-        error
-      );
-
-      return;
-
-    }
-
-    state.favorites =
-      state.favorites.filter(
-        f =>
-          String(f.content_id) !==
-          String(content.contentId)
-      );
-
-    showToast(
-      "Removed",
-      "Removed from My List.",
-      "good"
-    );
-
-  }else{
-
-    const {
-      data,
-      error
-    } =
-      await db
-        .from("cr_member_favorites")
-        .insert({
-
-          user_id:
-            state.user.id,
-
-          content_id:
-            content.contentId,
-
-          content_type:
-            content.contentType ||
-            "episode",
-
-          title:
-            content.title,
-
-          thumbnail_url:
-            content.image ||
-            null
-
-        })
-        .select("*")
-        .single();
-
-    if(error){
-
-      showError(
-        "My List update failed",
-        error
-      );
-
-      return;
-
-    }
-
-    state.favorites.unshift(
-      data
-    );
-
-    showToast(
-      "Saved",
-      "Added to My List.",
-      "good"
-    );
-
-  }
-
-  renderAll();
-
-}
-
-
-/* =========================================================
-   WATCH STATS
-========================================================= */
-
-function resetWatchStats(){
-
-  state.watchStats = {
-
-    lifetimeSeconds:0,
-
-    monthSeconds:0,
-
-    weekSeconds:0,
-
-    todaySeconds:0,
-
-    watchPoints:0,
-
-    episodes:0,
-
-    completed:0,
-
-    shows:0,
-
-    longestSession:0,
-
-    averageSession:0,
-
-    streak:0,
-
-    daily:[],
-
-    topShows:[]
-
-  };
-
-}
-
-
-function getStartOfWeek(){
-
-  const d =
-    new Date();
-
-  const day =
-    d.getDay();
-
-  const diff =
-    day === 0
-      ? -6
-      : 1 - day;
-
-  d.setDate(
-    d.getDate() + diff
-  );
-
-  d.setHours(
-    0,0,0,0
-  );
-
-  return d;
-
-}
-
-
-function getStartOfMonth(){
-
-  const d =
-    new Date();
-
-  d.setDate(1);
-
-  d.setHours(
-    0,0,0,0
-  );
-
-  return d;
-
-}
-
-
-function getStartOfToday(){
-
-  const d =
-    new Date();
-
-  d.setHours(
-    0,0,0,0
-  );
-
-  return d;
-
-}
-
-
-/*
-  cr_member_watch_points is the event-level
-  source for watch points/time periods.
-
-  The query is deliberately limited to the
-  recent analytics window. Lifetime totals
-  come from cr_members.
-*/
-
-async function loadWatchStats(){
-
-  resetWatchStats();
-
-  if(!state.user){
-
-    renderWatchStats();
-
-    return;
-
-  }
-
-
-  const now =
-    new Date();
-
-  const thirtyDaysAgo =
-    new Date(now);
-
-  thirtyDaysAgo.setDate(
-    thirtyDaysAgo.getDate() - 29
-  );
-
-  thirtyDaysAgo.setHours(
-    0,0,0,0
-  );
-
-
-  const {
-    data:events,
-    error:eventError
-  } =
-    await db
-      .from("cr_member_watch_points")
-      .select(
-        "content_id,content_type,reason,points,watch_seconds,created_at"
-      )
-      .eq(
-        "user_id",
-        state.user.id
-      )
-      .gte(
-        "created_at",
-        thirtyDaysAgo.toISOString()
-      )
-      .order(
-        "created_at",
-        {
-          ascending:true
-        }
-      );
-
-
-  if(eventError){
-
-    console.warn(
-      "Watch points analytics:",
-      eventError
-    );
-
-  }
-
-
-  const rows =
-    events || [];
-
-
-  const lifetime =
-    Number(
-      state.member?.watch_seconds ||
-      0
-    );
-
-
-  state.watchStats.lifetimeSeconds =
-    lifetime;
-
-
-  const monthStart =
-    getStartOfMonth();
-
-  const weekStart =
-    getStartOfWeek();
-
-  const todayStart =
-    getStartOfToday();
-
-
-  let monthSeconds = 0;
-  let weekSeconds = 0;
-  let todaySeconds = 0;
-
-  let watchPoints = 0;
-
-  let longest = 0;
-
-  let eventCount = 0;
-
-
-  const dailyMap =
-    new Map();
-
-
-  const showMap =
-    new Map();
-
-
-  rows.forEach(row => {
-
-    const seconds =
-      Math.max(
-        0,
-        Number(
-          row.watch_seconds || 0
-        )
-      );
-
-    const points =
-      Number(
-        row.points || 0
-      );
-
-
-    const date =
-      new Date(
-        row.created_at
-      );
-
-
-    if(
-      date >= monthStart
-    ){
-
-      monthSeconds +=
-        seconds;
-
-    }
-
-
-    if(
-      date >= weekStart
-    ){
-
-      weekSeconds +=
-        seconds;
-
-    }
-
-
-    if(
-      date >= todayStart
-    ){
-
-      todaySeconds +=
-        seconds;
-
-    }
-
-
-    watchPoints +=
-      points;
-
-
-    longest =
-      Math.max(
-        longest,
-        seconds
-      );
-
-
-    if(seconds > 0){
-
-      eventCount++;
-
-    }
-
-
-    const key =
-      date.toISOString()
-        .slice(0,10);
-
-
-    dailyMap.set(
-      key,
-      (
-        dailyMap.get(key) ||
-        0
-      ) + seconds
-    );
-
-
-    const content =
-      state.contentMap.get(
-        contentKey(
-          row.content_id,
-          row.content_type ||
-          "episode"
-        )
-      );
-
-
-    const show =
-      content?.sourceTable ===
-        "tacoma_nights_episodes"
-        ? "Tacoma Nights"
-        :
-        content?.sourceTable ===
-          "back_deck_episodes"
-          ? "Back Deck Live"
-          :
-          content?.title ||
-          "CrowRules Content";
-
-
-    showMap.set(
-      show,
-      (
-        showMap.get(show) ||
-        0
-      ) + seconds
-    );
-
-  });
-
-
-  state.watchStats.monthSeconds =
-    monthSeconds;
-
-  state.watchStats.weekSeconds =
-    weekSeconds;
-
-  state.watchStats.todaySeconds =
-    todaySeconds;
-
-  state.watchStats.watchPoints =
-    watchPoints;
-
-  state.watchStats.longestSession =
-    longest;
-
-  state.watchStats.averageSession =
-    eventCount
-      ? Math.floor(
-          (
-            rows.reduce(
-              (sum,row) =>
-                sum +
-                Math.max(
-                  0,
-                  Number(
-                    row.watch_seconds || 0
-                  )
-                ),
-              0
-            )
-          ) /
-          eventCount
-        )
-      : 0;
-
-
-  state.watchStats.episodes =
-    state.history.length;
-
-
-  state.watchStats.completed =
-    state.history.filter(
-      h => h.completed
-    ).length;
-
-
-  const showNames =
-    new Set();
-
-  state.history.forEach(h => {
-
-    const content =
-      state.contentMap.get(
-        contentKey(
-          h.contentId,
-          h.contentType
-        )
-      );
-
-    if(content){
-
-      if(
-        content.sourceTable ===
-        "tacoma_nights_episodes"
-      ){
-
-        showNames.add(
-          "Tacoma Nights"
-        );
-
-      }else if(
-        content.sourceTable ===
-        "back_deck_episodes"
-      ){
-
-        showNames.add(
-          "Back Deck Live"
-        );
-
-      }else{
-
-        showNames.add(
-          content.title
-        );
-
-      }
-
-    }
-
-  });
-
-
-  state.watchStats.shows =
-    showNames.size;
-
-
-  const daily = [];
-
-  for(
-    let i=29;
-    i>=0;
-    i--
-  ){
-
-    const d =
-      new Date();
-
-    d.setDate(
-      d.getDate() - i
-    );
-
-    d.setHours(
-      0,0,0,0
-    );
-
-    const key =
-      d.toISOString()
-        .slice(0,10);
-
-    daily.push({
-
-      date:key,
-
-      seconds:
-        dailyMap.get(key) ||
-        0
-
-    });
-
-  }
-
-
-  state.watchStats.daily =
-    daily;
-
-
-  state.watchStats.topShows =
-    Array.from(
-      showMap.entries()
-    )
-    .map(
-      ([name,seconds]) => ({
-        name,
-        seconds
-      })
-    )
-    .sort(
-      (a,b) =>
-        b.seconds -
-        a.seconds
-    )
-    .slice(0,6);
-
-
-  calculateStreak();
-
-
-  renderWatchStats();
-
-}
-
-
-function calculateStreak(){
-
-  const daily =
-    state.watchStats.daily;
-
-  if(!daily.length){
-
-    state.watchStats.streak =
-      0;
-
-    return;
-
-  }
-
-
-  let streak = 0;
-
-
-  for(
-    let i=daily.length-1;
-    i>=0;
-    i--
-  ){
-
-    if(
-      daily[i].seconds > 0
-    ){
-
-      streak++;
-
-    }else{
-
-      /*
-        Allow today to be empty while
-        retaining yesterday's active streak.
-      */
-
-      if(
-        i === daily.length - 1
-      )
-        continue;
-
-      break;
-
-    }
-
-  }
-
-
-  state.watchStats.streak =
-    streak;
-
-}
-
-
-/* =========================================================
-   WATCH STAT RENDER
-========================================================= */
 
 function renderWatchStats(){
-
-  const s =
-    state.watchStats;
-
-
-  $("watchLifetime")
-    .textContent =
-    formatTime(
-      s.lifetimeSeconds
-    );
-
-  $("watchLifetimeSub")
-    .textContent =
-    `${Number(
-      s.lifetimeSeconds
-    ).toLocaleString()} seconds tracked`;
-
-
-  $("watchMonth")
-    .textContent =
-    formatTime(
-      s.monthSeconds
-    );
-
-
-  $("watchWeek")
-    .textContent =
-    formatTime(
-      s.weekSeconds
-    );
-
-
-  $("watchToday")
-    .textContent =
-    formatTime(
-      s.todaySeconds
-    );
-
-
-  $("watchPoints")
-    .textContent =
-    Number(
-      state.member?.points ||
-      0
-    ).toLocaleString();
-
-
-  $("watchPointsEarned")
-    .textContent =
-    Number(
-      s.watchPoints || 0
-    ).toLocaleString();
-
-
-  $("watchEpisodes")
-    .textContent =
-    Number(
-      s.episodes || 0
-    ).toLocaleString();
-
-
-  $("watchCompleted")
-    .textContent =
-    Number(
-      s.completed || 0
-    ).toLocaleString();
-
-
-  $("watchShows")
-    .textContent =
-    Number(
-      s.shows || 0
-    ).toLocaleString();
-
-
-  $("watchLongest")
-    .textContent =
-    formatTime(
-      s.longestSession
-    );
-
-
-  $("watchAverage")
-    .textContent =
-    formatTime(
-      s.averageSession
-    );
-
-
-  $("watchStreak")
-    .textContent =
-    Number(
-      s.streak || 0
-    ) +
-    (
-      s.streak === 1
-        ? " day"
-        : " days"
-    );
-
-
-  renderWatchChart();
-
-  renderTopShows();
-
-}
-
-
-function renderWatchChart(){
-
-  const chart =
-    $("watchChart");
-
-
-  const daily =
-    state.watchStats.daily;
-
-
-  if(
-    !state.user ||
-    !daily.length
-  ){
-
-    chart.innerHTML =
-      `<div class="chartEmpty">
-        Sign in to view your watch activity.
-      </div>`;
-
-    return;
-
-  }
-
-
-  const max =
-    Math.max(
-      ...daily.map(
-        x => x.seconds
-      ),
-      1
-    );
-
-
-  chart.innerHTML =
-    daily.map(
-      item => {
-
-        const height =
-          Math.max(
-            2,
-            (
-              item.seconds /
-              max
-            ) * 100
-          );
-
-
-        const date =
-          new Date(
-            item.date +
-            "T12:00:00"
-          );
-
-
-        return `
-
-          <div
-            class="chartBar"
-            title="${
-              date.toLocaleDateString()
-            }: ${
-              formatTime(
-                item.seconds
-              )
-            }"
-            style="--h:${height}%">
-
-            <span>
-              ${
-                date.getDate()
-              }
-            </span>
-
-          </div>
-
-        `;
-
-      }
-    )
-    .join("");
-
-}
-
-
-function renderTopShows(){
-
-  const el =
-    $("topShows");
-
-
-  if(
-    !state.user
-  ){
-
-    el.innerHTML =
-      `<div class="empty">
-        Sign in to view your top shows.
-      </div>`;
-
-    return;
-
-  }
-
-
-  const rows =
-    state.watchStats.topShows;
-
-
-  if(!rows.length){
-
-    el.innerHTML =
-      `<div class="empty">
-        Watch CrowRules content to build your top shows.
-      </div>`;
-
-    return;
-
-  }
-
-
-  el.innerHTML =
-    rows.map(
-      (show,i) => `
-
-        <div class="topShow">
-
-          <div class="grow">
-
-            <div class="topShowName">
-              #${i+1}
-              ${esc(show.name)}
-            </div>
-
-          </div>
-
-          <div class="topShowTime">
-            ${formatTime(show.seconds)}
-          </div>
-
-        </div>
-
-      `
-    )
-    .join("");
-
-}
-
-
-/* =========================================================
-   WATCH TRACKER
-========================================================= */
-
-function startActualCounting(){
-
-  if(
-    !tracker.active ||
-    !state.user
-  )
-    return;
-
-
-  if(!tracker.playing){
-
-    tracker.playing =
-      true;
-
-    tracker.lastTick =
-      performance.now();
-
-  }
-
-}
-
-
-function accumulateActualTime(){
-
-  if(
-    !tracker.playing ||
-    !tracker.active
-  )
-    return;
-
-
-  const now =
-    performance.now();
-
-
-  const elapsed =
-    (
-      now -
-      tracker.lastTick
-    ) / 1000;
-
-
-  tracker.lastTick =
-    now;
-
-
-  /*
-    Only count reasonable elapsed intervals.
-    Visibility changes stop the counter.
-  */
-
-  if(
-    elapsed > 0 &&
-    elapsed < 8
-  ){
-
-    tracker.unsentSeconds +=
-      elapsed;
-
-    tracker.sessionSeconds +=
-      elapsed;
-
-  }
-
-}
-
-
-function stopActualCounting(){
-
-  accumulateActualTime();
-
-  tracker.playing =
-    false;
-
-  tracker.lastTick =
-    0;
-
-}
-
-
-function updateTrackerPosition(
-  position,
-  duration
-){
-
-  if(!tracker.active)
-    return;
-
-
-  if(
-    Number.isFinite(position)
-  ){
-
-    tracker.position =
-      Math.max(
-        0,
-        position
-      );
-
-  }
-
-
-  if(
-    Number.isFinite(duration) &&
-    duration > 0
-  ){
-
-    tracker.duration =
-      duration;
-
-  }
-
-
-  const percent =
-    tracker.duration > 0
-      ? Math.min(
-          100,
-          Math.max(
-            0,
-            tracker.position /
-            tracker.duration *
-            100
-          )
-        )
-      : 0;
-
-
-  $("playerProgress")
-    .style.width =
-    percent + "%";
-
-
-  if(
-    tracker.duration > 0 &&
-    tracker.position /
-      tracker.duration >=
-      .97
-  ){
-
-    tracker.completed =
-      true;
-
-  }
-
-}
-
-
-function trackerStatus(text){
-
-  $("trackerStatus")
-    .textContent =
-    text;
-
-}
-
-
-/* =========================================================
-   LOCAL HISTORY
-========================================================= */
-
-function updateLocalHistoryAfterWatch(
-  sentSeconds,
-  position,
-  completed
-){
-
-  if(
-    !state.user ||
-    !tracker.contentId
-  )
-    return;
-
-
-  const now =
-    new Date().toISOString();
-
-
-  let row =
-    getHistoryForContent(
-      tracker.contentId,
-      tracker.contentType
-    );
-
-
-  if(!row){
-
-    row = {
-
-      id:
-        crypto.randomUUID
-          ? crypto.randomUUID()
-          : String(Date.now()),
-
-      historyId:
-        crypto.randomUUID
-          ? crypto.randomUUID()
-          : String(Date.now()),
-
-      user_id:
-        state.user.id,
-
-      content_id:
-        tracker.contentId,
-
-      title:
-        tracker.title,
-
-      content_type:
-        tracker.contentType,
-
-      watched_seconds:
-        sentSeconds,
-
-      last_position_seconds:
-        Math.floor(
-          position || 0
-        ),
-
-      completed:
-        !!completed,
-
-      watched_at:
-        now,
-
-      created_at:
-        now,
-
-      contentId:
-        tracker.contentId,
-
-      contentType:
-        tracker.contentType,
-
-      position:
-        Math.floor(
-          position || 0
-        ),
-
-      watchedSeconds:
-        sentSeconds,
-
-      watchedAt:
-        now
-
-    };
-
-
-    state.history.unshift(
-      row
-    );
-
-  }else{
-
-    row.watchedSeconds =
-      Number(
-        row.watchedSeconds ||
-        row.watched_seconds ||
-        0
-      ) +
-      sentSeconds;
-
-    row.watched_seconds =
-      row.watchedSeconds;
-
-    row.position =
-      Math.floor(
-        position || 0
-      );
-
-    row.last_position_seconds =
-      row.position;
-
-    row.completed =
-      !!row.completed ||
-      !!completed;
-
-    row.watchedAt =
-      now;
-
-    row.watched_at =
-      now;
-
-  }
-
-
-  renderStats();
-
-  renderContinue();
-
-  renderHistory();
-
-}
-
-
-/* =========================================================
-   CANONICAL RPC
-========================================================= */
-
-async function recordMemberWatch(
-  seconds,
-  positionSeconds=0,
-  completed=false
-){
-
-  if(
-    !state.user ||
-    !tracker.contentId
-  ){
-
-    return {
-      ok:false,
-      skipped:true
-    };
-
-  }
-
-
-  const sendSeconds =
-    Math.min(
-      300,
-      Math.max(
-        0,
-        Math.floor(
-          Number(seconds) || 0
-        )
-      )
-    );
-
-
-  if(
-    sendSeconds <= 0 &&
-    !completed
-  ){
-
-    return {
-      ok:true,
-      skipped:true
-    };
-
-  }
-
-
-  const {
-    data,
-    error
-  } =
-    await db.rpc(
-      "record_member_watch",
-      {
-
-        p_content_id:
-          tracker.contentId,
-
-        p_content_type:
-          tracker.contentType ||
-          "episode",
-
-        p_title:
-          tracker.title ||
-          "CrowRules Content",
-
-        p_seconds:
-          sendSeconds,
-
-        p_position_seconds:
-          Math.max(
-            0,
-            Math.floor(
-              Number(
-                positionSeconds
-              ) || 0
-            )
-          ),
-
-        p_completed:
-          !!completed
-
-      }
-    );
-
-
-  if(error){
-
-    console.error(
-      "record_member_watch RPC FAILED",
-      error
-    );
-
-    showError(
-      "Watch progress could not sync",
-      error,
-      "The watch record could not be saved."
-    );
-
-    return {
-      ok:false,
-      error
-    };
-
-  }
-
-
-  const result =
-    Array.isArray(data)
-      ? (
-          data[0] ||
-          {}
-        )
-      :
-        (
-          data ||
-          {}
-        );
-
-
-  updateLocalHistoryAfterWatch(
-    sendSeconds,
-    positionSeconds,
-    completed
-  );
-
-
-  if(state.member){
-
-    if(
-      Number.isFinite(
-        Number(
-          result.total_points
-        )
-      )
-    ){
-
-      state.member.points =
-        Number(
-          result.total_points
-        );
-
-    }
-
-
-    if(
-      Number.isFinite(
-        Number(
-          result.total_watch_minutes
-        )
-      )
-    ){
-
-      state.member.total_watch_minutes =
-        Number(
-          result.total_watch_minutes
-        );
-
-    }
-
-
-    if(
-      Number.isFinite(
-        Number(
-          result.total_watch_minutes
-        )
-      )
-    ){
-
-      state.member.watch_seconds =
-        Math.max(
-          Number(
-            state.member.watch_seconds ||
-            0
-          ),
-          Number(
-            result.total_watch_minutes
-          ) * 60
-        );
-
-    }
-
-  }
-
-
-  const awarded =
-    Number(
-      result.points || 0
-    );
-
-
-  if(awarded > 0){
-
-    showToast(
-      "CrowPoints Earned",
-      `+${awarded} CrowPoint${awarded === 1 ? "" : "s"} earned.`,
-      "good"
-    );
-
-  }
-
-
-  /*
-    Refresh authoritative statistics after
-    a successful watch event.
-  */
-
-  loadWatchStats()
-    .catch(
-      console.warn
-    );
-
-
-  renderStats();
-
-
-  return {
-    ok:true,
-    data:result
-  };
-
-}
-
-
-/* =========================================================
-   FLUSH
-========================================================= */
-
-async function flushTracker(force=false){
-
-  if(
-    !tracker.active ||
-    !state.user ||
-    tracker.flushing
-  )
-    return;
-
-
-  accumulateActualTime();
-
-
-  const available =
-    Math.floor(
-      tracker.unsentSeconds
-    );
-
-
-  const shouldComplete =
-    tracker.completed;
-
-
-  if(
-    !force &&
-    available <= 0 &&
-    !shouldComplete
-  )
-    return;
-
-
-  if(
-    available <= 0 &&
-    !shouldComplete
-  )
-    return;
-
-
-  tracker.flushing =
-    true;
-
-
-  const sendSeconds =
-    Math.min(
-      300,
-      available
-    );
-
-
-  try{
-
-    const result =
-      await recordMemberWatch(
-        sendSeconds,
-        tracker.position,
-        shouldComplete
-      );
-
-
-    if(result.ok){
-
-      tracker.unsentSeconds =
-        Math.max(
-          0,
-          tracker.unsentSeconds -
-          sendSeconds
-        );
-
-
-      if(shouldComplete){
-
-        tracker.completed =
-          false;
-
-      }
-
-
-      trackerStatus(
-        `Synced • ${formatTime(
-          tracker.sessionSeconds
-        )} this session`
-      );
-
-    }else{
-
-      trackerStatus(
-        "Sync pending — retrying."
-      );
-
-    }
-
-  }catch(error){
-
-    console.error(
-      "flushTracker:",
-      error
-    );
-
-    trackerStatus(
-      "Sync pending — retrying."
-    );
-
-  }finally{
-
-    tracker.flushing =
-      false;
-
-  }
-
-}
-
-
-/* =========================================================
-   COMPLETION
-========================================================= */
-
-function markCompleted(){
-
-  tracker.completed =
-    true;
-
-  updateTrackerPosition(
-    tracker.position,
-    tracker.duration
-  );
-
-  flushTracker(true);
-
-}
-
-
-/* =========================================================
-   START TRACKER
-========================================================= */
-
-function startTracker(content){
-
-  if(!state.user){
-
-    showToast(
-      "Sign In Required",
-      "Sign in to track watch time and earn CrowPoints.",
-      "warn"
-    );
-
-    return;
-
-  }
-
-
-  /*
-    Stop the old tracker before replacing
-    the content.
-  */
-
-  if(tracker.active){
-
-    stopTracker();
-
-  }
-
-
-  tracker.active =
-    true;
-
-  tracker.playing =
-    false;
-
-  tracker.contentId =
-    content.contentId;
-
-  tracker.contentType =
-    content.contentType ||
-    "episode";
-
-  tracker.title =
-    content.title;
-
-  tracker.sourceTable =
-    content.sourceTable ||
-    "";
-
-
-  const history =
-    getHistoryForContent(
-      content.contentId,
-      content.contentType
-    );
-
-
-  tracker.position =
-    Number(
-      history?.position ||
-      history?.last_position_seconds ||
-      0
-    );
-
-
-  tracker.duration =
-    Number(
-      content.duration ||
-      0
-    );
-
-
-  tracker.unsentSeconds =
-    0;
-
-  tracker.sessionSeconds =
-    0;
-
-  tracker.lastTick =
-    0;
-
-  tracker.completed =
-    false;
-
-  tracker.youtube =
-    !!content.youtubeId;
-
-
-  trackerStatus(
-    "Ready • play to start tracking"
-  );
-
-
-  $("nowTitle")
-    .textContent =
-    content.title;
-
-
-  $("nowMeta")
-    .textContent =
-    `${
-      content.sourceTable ===
-      "tacoma_nights_episodes"
-        ? "Tacoma Nights"
-        : "Back Deck Live"
-    } • Resume: ${
-      formatTime(
-        tracker.position
-      )
-    }`;
-
-
-  $("playerProgress")
-    .style.width =
-    "0%";
-
-
-  clearInterval(
-    tracker.timer
-  );
-
-
-  tracker.timer =
-    setInterval(
-      () => {
-
-        if(!tracker.playing)
-          return;
-
-
-        accumulateActualTime();
-
-
-        updateTrackerPosition(
-          tracker.position,
-          tracker.duration
-        );
-
-
-        if(
-          tracker.unsentSeconds >=
-          10
-        ){
-
-          flushTracker(false);
-
-        }
-
-      },
-      1000
-    );
-
-
-  playContent(content);
-
-}
-
-
-/* =========================================================
-   STOP TRACKER
-========================================================= */
-
-async function stopTracker(){
-
-  stopActualCounting();
-
-  await flushTracker(true);
-
-  tracker.active =
-    false;
-
-  tracker.playing =
-    false;
-
-  clearInterval(
-    tracker.timer
-  );
-
-  clearInterval(
-    tracker.positionTimer
-  );
-
-  tracker.timer =
-    null;
-
-  tracker.positionTimer =
-    null;
-
-}
-
-
-/* =========================================================
-   RESET
-========================================================= */
-
-function resetTracker(){
-
-  stopActualCounting();
-
-  clearInterval(
-    tracker.timer
-  );
-
-  clearInterval(
-    tracker.positionTimer
-  );
-
-  tracker.timer =
-    null;
-
-  tracker.positionTimer =
-    null;
-
-  tracker.active =
-    false;
-
-  tracker.playing =
-    false;
-
-  tracker.contentId =
-    null;
-
-  tracker.title =
-    "";
-
-  tracker.position =
-    0;
-
-  tracker.duration =
-    0;
-
-  tracker.unsentSeconds =
-    0;
-
-  tracker.sessionSeconds =
-    0;
-
-  tracker.completed =
-    false;
-
-  tracker.video =
-    null;
-
-  tracker.yt =
-    null;
-
-
-  $("playerShell").innerHTML = `
-
-    <div class="playerPlaceholder">
-
-      <div>
-
-        <div class="eyebrow">
-          CrowRules Player
-        </div>
-
-        <h3>
-          Choose an episode to begin.
-        </h3>
-
-        <p style="font-size:11px;line-height:1.6">
-          Your viewing is tracked only while
-          playback is actually running.
-        </p>
-
-      </div>
-
-    </div>
-
-  `;
-
-
-  $("nowTitle")
-    .textContent =
-    "Nothing Playing";
-
-
-  $("nowMeta")
-    .textContent =
-    "Select an episode below.";
-
-
-  $("playerProgress")
-    .style.width =
-    "0%";
-
-
-  trackerStatus(
-    "Player idle."
-  );
-
-}
-
-
-/* =========================================================
-   DIRECT VIDEO
-========================================================= */
-
-function playDirectVideo(content){
-
-  $("playerShell").innerHTML = `
-
-    <video
-      id="crVideo"
-      controls
-      playsinline
-      preload="metadata">
-    </video>
-
-  `;
-
-
-  const video =
-    $("crVideo");
-
-
-  tracker.video =
-    video;
-
-
-  video.src =
-    content.videoUrl;
-
-
-  video.addEventListener(
-    "loadedmetadata",
-    () => {
-
-      tracker.duration =
-        Number.isFinite(
-          video.duration
-        )
-          ? video.duration
-          : tracker.duration;
-
-
-      if(
-        tracker.position > 0 &&
-        tracker.position <
-          video.duration - 1
-      ){
-
-        try{
-
-          video.currentTime =
-            tracker.position;
-
-        }catch(_){}
-
-      }
-
-
-      updateTrackerPosition(
-        video.currentTime || 0,
-        video.duration ||
-          tracker.duration
-      );
-
-    }
-  );
-
-
-  video.addEventListener(
-    "timeupdate",
-    () => {
-
-      updateTrackerPosition(
-        video.currentTime || 0,
-        video.duration ||
-          tracker.duration
-      );
-
-    }
-  );
-
-
-  video.addEventListener(
-    "play",
-    () => {
-
-      startActualCounting();
-
-      trackerStatus(
-        "Tracking live playback."
-      );
-
-    }
-  );
-
-
-  video.addEventListener(
-    "playing",
-    () => {
-
-      startActualCounting();
-
-      trackerStatus(
-        "Tracking live playback."
-      );
-
-    }
-  );
-
-
-  video.addEventListener(
-    "pause",
-    () => {
-
-      stopActualCounting();
-
-      flushTracker(true);
-
-      trackerStatus(
-        "Paused • progress synced."
-      );
-
-    }
-  );
-
-
-  video.addEventListener(
-    "ended",
-    () => {
-
-      tracker.position =
-        tracker.duration ||
-        video.currentTime ||
-        tracker.position;
-
-      stopActualCounting();
-
-      tracker.completed =
-        true;
-
-      flushTracker(true);
-
-      trackerStatus(
-        "Completed • progress synced."
-      );
-
-    }
-  );
-
-
-  video.addEventListener(
-    "error",
-    () => {
-
-      showToast(
-        "Playback Error",
-        "The direct video URL could not be played.",
-        "bad"
-      );
-
-    }
-  );
-
-
-  video.play()
-    .catch(() => {});
-
-}
-
-
-/* =========================================================
-   YOUTUBE API
-========================================================= */
-
-function loadYouTubeAPI(){
-
-  if(
-    window.YT &&
-    window.YT.Player
-  ){
-
-    return Promise.resolve();
-
-  }
-
-
-  if(youtubeApiPromise)
-    return youtubeApiPromise;
-
-
-  youtubeApiPromise =
-    new Promise(
-      (resolve,reject) => {
-
-        const old =
-          window.onYouTubeIframeAPIReady;
-
-
-        window.onYouTubeIframeAPIReady =
-          () => {
-
-            if(
-              typeof old ===
-              "function"
-            ){
-
-              old();
-
-            }
-
-            resolve();
-
-          };
-
-
-        const script =
-          document.createElement(
-            "script"
-          );
-
-
-        script.src =
-          "https://www.youtube.com/iframe_api";
-
-        script.async =
-          true;
-
-        script.onerror =
-          reject;
-
-
-        document.head.appendChild(
-          script
-        );
-
-      }
-    );
-
-
-  return youtubeApiPromise;
-
-}
-
-
-/* =========================================================
-   YOUTUBE
-========================================================= */
-
-async function playYouTube(content){
-
-  try{
-
-    await loadYouTubeAPI();
-
-
-    $("playerShell").innerHTML = `
-
-      <div
-        id="ytPlayer"
-        style="width:100%;height:100%">
-      </div>
-
-    `;
-
-
-    tracker.yt =
-      new YT.Player(
-        "ytPlayer",
-        {
-
-          width:"100%",
-
-          height:"100%",
-
-          videoId:
-            content.youtubeId,
-
-          playerVars:{
-            playsinline:1,
-            rel:0,
-            modestbranding:1
-          },
-
-          events:{
-
-            onReady:event => {
-
-              const duration =
-                event.target
-                  .getDuration();
-
-
-              if(duration){
-
-                tracker.duration =
-                  duration;
-
-              }
-
-
-              if(
-                tracker.position > 0 &&
-                tracker.position <
-                  duration - 1
-              ){
-
-                event.target.seekTo(
-                  tracker.position,
-                  true
-                );
-
-              }
-
-
-              updateTrackerPosition(
-                event.target.getCurrentTime(),
-                duration
-              );
-
-
-              event.target.playVideo();
-
-            },
-
-
-            onStateChange:event => {
-
-              if(
-                event.data ===
-                YT.PlayerState.PLAYING
-              ){
-
-                startActualCounting();
-
-                trackerStatus(
-                  "Tracking live playback."
-                );
-
-              }
-
-
-              else if(
-                event.data ===
-                YT.PlayerState.PAUSED
-              ){
-
-                stopActualCounting();
-
-                flushTracker(true);
-
-                trackerStatus(
-                  "Paused • progress synced."
-                );
-
-              }
-
-
-              else if(
-                event.data ===
-                YT.PlayerState.ENDED
-              ){
-
-                tracker.position =
-                  tracker.duration;
-
-                stopActualCounting();
-
-                tracker.completed =
-                  true;
-
-                flushTracker(true);
-
-                trackerStatus(
-                  "Completed • progress synced."
-                );
-
-              }
-
-            },
-
-
-            onError:event => {
-
-              console.error(
-                "YouTube player error",
-                event
-              );
-
-              showToast(
-                "YouTube Playback Error",
-                `YouTube player error ${event.data}.`,
-                "bad"
-              );
-
-            }
-
-          }
-
-        }
-      );
-
-
-    clearInterval(
-      tracker.positionTimer
-    );
-
-
-    tracker.positionTimer =
-      setInterval(
-        () => {
-
-          if(
-            !tracker.active ||
-            !tracker.yt ||
-            typeof tracker.yt
-              .getCurrentTime !==
-              "function"
-          ){
-
-            clearInterval(
-              tracker.positionTimer
-            );
-
-            return;
-
-          }
-
-
-          try{
-
-            tracker.position =
-              Number(
-                tracker.yt
-                  .getCurrentTime() ||
-                0
-              );
-
-
-            tracker.duration =
-              Number(
-                tracker.yt
-                  .getDuration() ||
-                tracker.duration ||
-                0
-              );
-
-
-            updateTrackerPosition(
-              tracker.position,
-              tracker.duration
-            );
-
-          }catch(_){}
-
-        },
-        500
-      );
-
-
-  }catch(error){
-
-    showError(
-      "YouTube player could not load",
-      error
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   PLAY CONTENT
-========================================================= */
-
-function playContent(content){
-
-  if(content.youtubeId){
-
-    playYouTube(content);
-
-  }else if(content.videoUrl){
-
-    playDirectVideo(content);
-
-  }else{
-
-    $("playerShell").innerHTML = `
-
-      <div class="playerPlaceholder">
-
-        <div>
-
-          <div class="eyebrow">
-            No Video Source
-          </div>
-
-          <h3>
-            ${esc(content.title)}
-          </h3>
-
-          <p style="font-size:11px">
-            This episode is listed in CrowRules
-            but does not currently have a playable
-            video source.
-          </p>
-
-        </div>
-
-      </div>
-
-    `;
-
-
-    showToast(
-      "No Video Source",
-      "This content record does not have a playable video source.",
-      "warn"
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   CONTENT CARD
-========================================================= */
-
-function contentCard(content){
-
-  const history =
-    getHistoryForContent(
-      content.contentId,
-      content.contentType
-    );
-
-
-  const watched =
-    Number(
-      history?.watchedSeconds ||
-      history?.watched_seconds ||
-      0
-    );
-
-
-  const pos =
-    Number(
-      history?.position ||
-      history?.last_position_seconds ||
-      0
-    );
-
-
-  const dur =
-    Number(
-      content.duration ||
-      history?.duration ||
-      0
-    );
-
-
-  const percent =
-    dur > 0
-      ? Math.min(
-          100,
-          Math.max(
-            0,
-            pos / dur * 100
-          )
-        )
-      : 0;
-
-
-  const favorite =
-    isFavorite(
-      content.contentId
-    );
-
-
-  return `
-
-    <article class="card">
-
-      <div class="thumb">
-
-        ${
-          content.image
-
-            ? `<img
-                 src="${esc(content.image)}"
-                 alt=""
-                 loading="lazy">`
-
-            : `<div class="noimg">
-                 CR
-               </div>`
-        }
-
-        <span class="badge">
-
-          ${
-            content.sourceTable ===
-            "tacoma_nights_episodes"
-              ? "Tacoma Nights"
-              : "Back Deck"
-          }
-
-        </span>
-
-      </div>
-
-
-      <div class="cardbody">
-
-        <div class="cardtitle">
-          ${esc(content.title)}
-        </div>
-
-
-        <div class="meta">
-
-          ${
-            content.episodeNumber != null
-              ? `Episode ${esc(
-                  content.episodeNumber
-                )} • `
-              : ""
-          }
-
-          ${
-            content.season != null
-              ? `Season ${esc(
-                  content.season
-                )} • `
-              : ""
-          }
-
-          ${
-            dur
-              ? formatTime(dur)
-              : "Video"
-          }
-
-        </div>
-
-
-        ${
-          watched
-
-            ? `
-
-              <div class="progress">
-
-                <i
-                  style="width:${percent}%">
-                </i>
-
-              </div>
-
-              <div class="meta">
-
-                ${formatTime(watched)}
-                watched
-
-                ${
-                  pos
-                    ? ` • resume ${formatTime(pos)}`
-                    : ""
-                }
-
-              </div>
-
-            `
-
-            : ""
-        }
-
-
-        <div class="cardactions">
-
-          <button
-            class="btn primary playBtn"
-            data-id="${esc(
-              content.contentId
-            )}">
-
-            Watch
-
-          </button>
-
-
-          <button
-            class="btn favBtn"
-            data-id="${esc(
-              content.contentId
-            )}">
-
-            ${
-              favorite
-                ? "✓ Saved"
-                : "+ My List"
-            }
-
-          </button>
-
-        </div>
-
-      </div>
-
-    </article>
-
-  `;
-
-}
-
-
-/* =========================================================
-   RENDER
-========================================================= */
-
-function renderContentGrids(){
-
-  $("tacomaGrid").innerHTML =
-    state.tacoma.length
-
-      ? state.tacoma
-          .map(contentCard)
-          .join("")
-
-      : `
-        <div class="empty">
-          No Tacoma Nights episodes
-          are currently available.
-        </div>
-      `;
-
-
-  $("backDeckGrid").innerHTML =
-    state.backDeck.length
-
-      ? state.backDeck
-          .map(contentCard)
-          .join("")
-
-      : `
-        <div class="empty">
-          No published Back Deck Live
-          episodes are currently available.
-        </div>
-      `;
-
-}
-
-
-function renderContinue(){
-
-  if(!state.user){
-
-    $("continueGrid").innerHTML =
-      `<div class="empty">
-        Sign in to load your watch history.
-      </div>`;
-
-    return;
-
-  }
-
-
-  const items =
-    state.history
-      .filter(
-        h => !h.completed
-      )
-      .slice(0,8)
-      .map(
-        h =>
-          state.contentMap.get(
-            contentKey(
-              h.contentId,
-              h.contentType
-            )
-          ) ||
-          {
-
-            contentId:h.contentId,
-
-            title:h.title,
-
-            contentType:h.contentType,
-
-            image:h.image,
-
-            videoUrl:h.videoUrl,
-
-            youtubeId:h.youtubeId,
-
-            duration:h.duration,
-
-            sourceTable:h.sourceTable
-
-          }
-      );
-
-
-  $("continueGrid").innerHTML =
-    items.length
-
-      ? items
-          .map(contentCard)
-          .join("")
-
-      : `
-        <div class="empty">
-          No unfinished episodes yet.
-          Start watching CrowRules content
-          to build your history.
-        </div>
-      `;
-
-}
-
-
-function renderHistory(){
-
-  if(!state.user){
-
-    $("historyList").innerHTML =
-      `<div class="empty">
-        Sign in to view your history.
-      </div>`;
-
-    return;
-
-  }
-
-
-  if(!state.history.length){
-
-    $("historyList").innerHTML =
-      `<div class="empty">
-        No watch activity has been recorded yet.
-        Watch CrowRules content to build your
-        history and earn points.
-      </div>`;
-
-    return;
-
-  }
-
-
-  $("historyList").innerHTML =
-    state.history
-      .slice(0,100)
-      .map(
-        (h,i) => {
-
-          const content =
-            state.contentMap.get(
-              contentKey(
-                h.contentId,
-                h.contentType
-              )
-            );
-
-
-          const image =
-            h.image ||
-            content?.image ||
-            "";
-
-
-          return `
-
-            <div class="row">
-
-              ${
-                image
-                  ? `<img
-                       src="${esc(image)}"
-                       style="
-                         width:82px;
-                         height:46px;
-                         object-fit:cover;
-                         border-radius:7px
-                       "
-                       alt="">`
-                  : ""
-              }
-
-
-              <div class="rank">
-                ${i+1}
-              </div>
-
-
-              <div class="grow">
-
-                <strong style="font-size:12px">
-                  ${esc(h.title)}
-                </strong>
-
-
-                <div class="smalltext">
-
-                  ${formatTime(
-                    h.watchedSeconds ||
-                    h.watched_seconds
-                  )}
-
-                  watched
-
-                  •
-
-                  ${
-                    h.completed
-                      ? "Completed"
-                      : "In progress"
-                  }
-
-                  •
-
-                  ${formatDate(
-                    h.watchedAt ||
-                    h.watched_at
-                  )}
-
-                </div>
-
-              </div>
-
-
-              ${
-                content
-                  ? `<button
-                       class="btn small playBtn"
-                       data-id="${esc(
-                         content.contentId
-                       )}">
-                       Resume
-                     </button>`
-                  : ""
-              }
-
-            </div>
-
-          `;
-
-        }
-      )
-      .join("");
-
-}
-
-
-function renderFavorites(){
-
-  if(!state.user){
-
-    $("favoritesGrid").innerHTML =
-      `<div class="empty">
-        Sign in to manage your list.
-      </div>`;
-
-    return;
-
-  }
-
-
-  const items =
-    state.favorites
-      .map(
-        f =>
-          state.contentMap.get(
-            contentKey(
-              f.content_id,
-              f.content_type ||
-              "episode"
-            )
-          )
-      )
-      .filter(Boolean);
-
-
-  $("favoritesGrid").innerHTML =
-    items.length
-
-      ? items
-          .map(contentCard)
-          .join("")
-
-      : `
-        <div class="empty">
-          Your My List is empty.
-          Use “+ My List” on any episode.
-        </div>
-      `;
-
-}
-
-
-function renderStats(){
-
-  const member =
-    state.member || {};
-
-
-  const seconds =
-    Number(
-      member.watch_seconds ||
-      0
-    );
-
-
-  const minutes =
-    Number(
-      member.total_watch_minutes ||
-      Math.floor(
-        seconds / 60
-      )
-    );
-
-
-  $("statPoints")
-    .textContent =
-    Number(
-      member.points || 0
-    ).toLocaleString();
-
-
-  $("statMinutes")
-    .textContent =
-    minutes.toLocaleString();
-
-
-  $("statWatchSub")
-    .textContent =
-    `${seconds.toLocaleString()}
-     seconds tracked`;
-
-
-  $("statEpisodes")
-    .textContent =
-    state.history.length
-      .toLocaleString();
-
-
-  renderWatchStats();
-
-}
-
-
-function renderProfile(){
-
-  if(!state.user){
-
-    $("profileInfo").innerHTML =
-      `<div class="empty">
-        Sign in to view your profile.
-      </div>`;
-
-    return;
-
-  }
-
-
-  const name =
-    state.profile?.display_name ||
-    state.user.user_metadata?.display_name ||
-    state.user.email ||
-    "Member";
-
-
-  $("profileInfo").innerHTML = `
-
-    <div class="row">
-
-      <div class="grow">
-
-        <strong>
-          Display Name
-        </strong>
-
-        <div class="smalltext">
-          ${esc(name)}
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <div class="row">
-
-      <div class="grow">
-
-        <strong>
-          Email
-        </strong>
-
-        <div class="smalltext">
-          ${esc(
-            state.user.email ||
-            "—"
-          )}
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <div class="row">
-
-      <div class="grow">
-
-        <strong>
-          Member Since
-        </strong>
-
-        <div class="smalltext">
-          ${formatDate(
-            state.user.created_at
-          )}
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <div class="row">
-
-      <div class="grow">
-
-        <strong>
-          Bio
-        </strong>
-
-        <div class="smalltext">
-          ${esc(
-            state.profile?.bio ||
-            "No bio added yet."
-          )}
-        </div>
-
-      </div>
-
-    </div>
-
-  `;
-
-}
-
-
-async function renderLeaderboard(){
-
-  /*
-    Leaderboard is intentionally not shown
-    in the main v10.2 layout, but this remains
-    available for future CrowRules rankings.
-  */
-
-}
-
-
-function renderQueue(){
-
-  const queue =
-    [
-      ...state.tacoma,
-      ...state.backDeck
-    ]
-    .slice(0,12);
-
-
-  $("queueList").innerHTML =
-    queue.length
-
-      ? queue
-          .map(
-            item => `
-
-              <div class="queueItem">
-
-                ${
-                  item.image
-
-                    ? `<img
-                         src="${esc(item.image)}"
-                         alt="">`
-
-                    : `
-                      <div
-                        style="
-                          width:76px;
-                          height:43px;
-                          background:#111;
-                          display:grid;
-                          place-items:center;
-                          border-radius:6px">
-                        CR
-                      </div>
-                    `
-                }
-
-
-                <div class="grow">
-
-                  <div class="qtitle">
-                    ${esc(item.title)}
-                  </div>
-
-                  <div class="smalltext">
-
-                    ${
-                      item.sourceTable ===
-                      "tacoma_nights_episodes"
-                        ? "Tacoma Nights"
-                        : "Back Deck Live"
-                    }
-
-                  </div>
-
-                </div>
-
-
-                <button
-                  class="btn small playBtn"
-                  data-id="${esc(
-                    item.contentId
-                  )}">
-
-                  ▶
-
-                </button>
-
-              </div>
-
-            `
-          )
-          .join("")
-
-      : `
-        <div class="empty">
-          No content available.
-        </div>
-      `;
-
-}
-
-
-function renderAll(){
-
-  updateAuthUI();
-
-  renderStats();
-
-  renderContentGrids();
-
-  renderContinue();
-
-  renderHistory();
-
-  renderFavorites();
-
-  renderProfile();
-
-  renderQueue();
-
-  renderWatchStats();
-
-}
-
-
-/* =========================================================
-   EVENTS
-========================================================= */
-
-$("loginTab")
-  .addEventListener(
-    "click",
-    () =>
-      setAuthMode("login")
-  );
-
-
-$("signupTab")
-  .addEventListener(
-    "click",
-    () =>
-      setAuthMode("signup")
-  );
-
-
-$("authForm")
-  .addEventListener(
-    "submit",
-    handleAuthSubmit
-  );
-
-
-$("signOutBtn")
-  .addEventListener(
-    "click",
-    signOut
-  );
-
-
-$("refreshBtn")
-  .addEventListener(
-    "click",
-    async () => {
-
-      await loadAuthenticatedData();
-
-      renderAll();
-
-      showToast(
-        "Refreshed",
-        "Member data, watch statistics and history refreshed.",
-        "good"
-      );
-
-    }
-  );
-
-
-$("editProfileBtn")
-  .addEventListener(
-    "click",
-    () => {
-
-      if(!state.user){
-
-        showToast(
-          "Sign In Required",
-          "Sign in to edit your profile.",
-          "warn"
-        );
-
-        return;
-
-      }
-
-
-      $("profileDisplayName")
-        .value =
-          state.profile?.display_name ||
-          state.user.user_metadata?.display_name ||
-          "";
-
-
-      $("profileBio")
-        .value =
-          state.profile?.bio ||
-          "";
-
-
-      $("profileModal")
-        .classList.add("show");
-
-    }
-  );
-
-
-$("closeProfile")
-  .addEventListener(
-    "click",
-    () =>
-      $("profileModal")
-        .classList.remove("show")
-  );
-
-
-$("profileModal")
-  .addEventListener(
-    "click",
-    event => {
-
-      if(
-        event.target ===
-        $("profileModal")
-      ){
-
-        $("profileModal")
-          .classList.remove("show");
-
-      }
-
-    }
-  );
-
-
-$("profileForm")
-  .addEventListener(
-    "submit",
-    saveProfile
-  );
-
-
-document.addEventListener(
-  "click",
-  async event => {
-
-    const play =
-      event.target.closest(
-        ".playBtn"
-      );
-
-
-    if(play){
-
-      const content =
-        state.contentMap.get(
-          contentKey(
-            play.dataset.id,
-            "episode"
-          )
-        );
-
-
-      if(content){
-
-        startTracker(
-          content
-        );
-
-
-        document
-          .querySelector(
-            ".playerPanel"
-          )
-          ?.scrollIntoView({
-            behavior:"smooth",
-            block:"center"
-          });
-
-      }else{
-
-        showToast(
-          "Content Not Found",
-          "That episode is no longer available in the loaded catalog.",
-          "warn"
-        );
-
-      }
-
-      return;
-
-    }
-
-
-    const fav =
-      event.target.closest(
-        ".favBtn"
-      );
-
-
-    if(fav){
-
-      const content =
-        state.contentMap.get(
-          contentKey(
-            fav.dataset.id,
-            "episode"
-          )
-        );
-
-
-      if(content){
-
-        await toggleFavorite(
-          content
-        );
-
-      }
-
-      return;
-
-    }
-
-
-    const scroll =
-      event.target.closest(
-        "[data-scroll]"
-      );
-
-
-    if(scroll){
-
-      document
-        .getElementById(
-          scroll.dataset.scroll
-        )
-        ?.scrollIntoView({
-          behavior:"smooth"
-        });
-
-    }
-
-  }
-);
-
-
-document
-  .querySelectorAll(".navbtn")
-  .forEach(btn => {
-
-    btn.addEventListener(
-      "click",
-      () => {
-
-        document
-          .querySelectorAll(".navbtn")
-          .forEach(
-            x =>
-              x.classList.remove(
-                "active"
-              )
-          );
-
-
-        btn.classList.add(
-          "active"
-        );
-
-
-        document
-          .getElementById(
-            btn.dataset.target
-          )
-          ?.scrollIntoView({
-            behavior:"smooth",
-            block:"start"
-          });
-
-      }
-    );
-
+  const s=watchStats;
+  $('statLifetime').textContent=formatMinutes(s.lifetime);
+  $('statMonth').textContent=formatMinutes(s.month);
+  $('statWeek').textContent=formatMinutes(s.week);
+  $('statToday').textContent=formatMinutes(s.today);
+  $('statCompleted').textContent=Number(s.completed||0).toLocaleString();
+  $('statShows').textContent=Number(s.shows||0).toLocaleString();
+  $('statEvents').textContent=Number(s.events||0).toLocaleString();
+  $('statWatchPoints').textContent=Number(s.points||0).toLocaleString();
+  $('watchUpdated').textContent='Updated '+new Date().toLocaleTimeString([],{
+    hour:'numeric',minute:'2-digit'
   });
 
+  const chart=$('watchChart');
+  const daily=s.daily||[];
+  if(!daily.some(x=>x.seconds>0)){
+    chart.className='chart-empty';
+    chart.textContent='No watch activity recorded in the last 14 days.';
+    return;
+  }
 
-/* =========================================================
-   VISIBILITY
-========================================================= */
+  chart.className='chart';
+  const max=Math.max(1,...daily.map(x=>x.seconds));
+  chart.innerHTML=daily.map(x=>{
+    const pct=Math.max(2,Math.round((x.seconds/max)*100));
+    return '<div class="chart-col" title="'+esc(x.label+': '+formatMinutes(x.seconds))+'">' +
+      '<div class="chart-bar" style="height:'+pct+'%"></div>' +
+      '<span>'+esc(x.label)+'</span></div>';
+  }).join('');
+}
 
-document.addEventListener(
-  "visibilitychange",
-  () => {
+function renderTopWatched(rows){
+  const groups=new Map();
+  for(const row of rows){
+    const key=contentKey(row);
+    if(!key) continue;
+    const title=row.title||row.content_title||row.video_title||'CrowRules Content';
+    const seconds=eventSeconds(row);
+    const existing=groups.get(key)||{title,seconds:0};
+    existing.seconds+=seconds;
+    groups.set(key,existing);
+  }
+  const top=[...groups.values()].sort((a,b)=>b.seconds-a.seconds).slice(0,6);
+  if(!top.length){empty('topWatched','Your most-watched content will appear here.');return}
+  $('topWatched').innerHTML=top.map((x,i)=>
+    '<div class="row"><div class="rank">#'+(i+1)+'</div>' +
+    '<div class="grow"><div class="rtitle">'+esc(x.title)+'</div>' +
+    '<div class="meta">'+esc(formatMinutes(x.seconds))+' watched</div></div></div>'
+  ).join('');
+}
 
-    if(
-      document.visibilityState ===
-      "hidden"
-    ){
+async function loadWatchStats(){
+  if(!user) return;
 
-      stopActualCounting();
+  const pointResult=await safe('cr_member_watch_points',q=>
+    q.eq('user_id',user.id).order('created_at',{ascending:true}).limit(5000)
+  );
 
-      flushTracker(true);
+  const summaryResult=await safe('cr_member_watch_summary',q=>
+    q.eq('user_id',user.id).order('watched_at',{ascending:false}).limit(2000)
+  );
 
-    }else{
+  const historyResult=await safe('cr_member_watch_history',q=>
+    q.eq('user_id',user.id).order('watched_at',{ascending:false}).limit(2000)
+  );
 
-      if(tracker.active){
+  const pointsRows=Array.isArray(pointResult.data)?pointResult.data:[];
+  const summaryRows=Array.isArray(summaryResult.data)?summaryResult.data:[];
+  const history=Array.isArray(historyResult.data)?historyResult.data:[];
 
-        trackerStatus(
-          "Ready • resume playback to continue tracking"
-        );
+  historyRows=history;
 
-      }
+  /*
+    cr_member_watch_points is the preferred source because it is timestamped.
+    Summary/history is used for completed-content counts and lifetime fallback.
+  */
+  watchRows=pointsRows;
 
+  watchStats=buildWatchStats(
+    pointsRows.length ? pointsRows : summaryRows,
+    history.length ? history : summaryRows
+  );
+
+  renderWatchStats();
+  renderTopWatched(pointsRows.length ? pointsRows : summaryRows);
+}
+
+async function content(wp,ml,fs,fc){
+  const eids=wp.map(x=>x.episode_id).filter(Boolean);
+  const sids=ml.map(x=>x.show_id).filter(Boolean);
+  const feids=fs.map(x=>x.show_id).filter(Boolean);
+  const cids=fc.map(x=>x.creator_id).filter(Boolean);
+
+  let e=[],s=[],f=[],c=[];
+  if(eids.length){
+    const r=await safe('episodes',q=>q.in('id',eids));
+    e=Array.isArray(r.data)?r.data:[];
+  }
+  if(sids.length){
+    const r=await safe('shows',q=>q.in('id',sids));
+    s=Array.isArray(r.data)?r.data:[];
+  }
+  if(feids.length){
+    const r=await safe('shows',q=>q.in('id',feids));
+    f=Array.isArray(r.data)?r.data:[];
+  }
+  if(cids.length){
+    const r=await safe('crow_nest_creators',q=>q.in('id',cids));
+    c=Array.isArray(r.data)?r.data:[];
+  }
+
+  const em=new Map(e.map(x=>[String(x.id),x]));
+  const cont=wp.map(w=>{
+    const x=em.get(String(w.episode_id));
+    return x ? {...x,progress:w.duration_seconds?
+      (w.progress_seconds/w.duration_seconds*100):0}:null;
+  }).filter(Boolean);
+
+  cont.length ? $('continue').innerHTML=cont.slice(0,3).map(x=>card(x)).join('') :
+    empty('continue','You have not started a show yet.');
+
+  $('lastWatched').textContent=wp[0]?.updated_at ?
+    'Last watched '+ago(wp[0].updated_at) : 'Last watched —';
+
+  const li=[...e,...s].slice(0,6);
+  li.length ? $('mylist').innerHTML=li.map(x=>card(x)).join('') :
+    empty('mylist','Your list is empty.');
+
+  f.length ? $('shows').innerHTML=f.map(x=>card(x)).join('') :
+    empty('shows','No favorite shows yet.');
+
+  c.length ? $('creators').innerHTML=c.map(x=>card(x,true)).join('') :
+    empty('creators','No favorite creators yet.');
+
+  $('favshow').textContent=f[0]?.title||'Not selected';
+}
+
+async function friends(rows){
+  $('friendcount').textContent=rows.length+' friend'+(rows.length===1?'':'s');
+  if(!rows.length){empty('friends','Your accepted CrowRules friends will appear here.');return}
+
+  const r=await safe('member_public_profiles',q=>
+    q.in('id',rows.map(x=>x.friend_id))
+  );
+
+  const data=Array.isArray(r.data)?r.data:[];
+  $('friends').innerHTML=data.map(x=>
+    '<div class="row"><img src="'+esc(x.avatar_url||avatarFallback)+'" alt="">' +
+    '<div class="grow"><div class="rtitle">'+esc(x.display_name||x.username||'Member')+'</div>' +
+    '<div class="meta">'+esc(x.username?'@'+x.username:'CrowRules member')+'</div></div>' +
+    '<span class="pill">'+esc(x.membership_tier||'Member')+'</span></div>'
+  ).join('') || '<div class="empty">No friends to display.</div>';
+}
+
+function leaderboard(rows){
+  const data=Array.isArray(rows)?rows:[];
+  $('leaderboard').innerHTML=data.map((x,i)=>
+    '<div class="row"><div class="rank">#'+(i+1)+'</div>' +
+    '<img src="'+esc(x.avatar_url||'https://placehold.co/100x100/171923/22d3ee?text=C')+'" alt="">' +
+    '<div class="grow"><div class="rtitle">'+esc(x.display_name||'Member')+'</div>' +
+    '<div class="meta">'+Number(x.activity_score||0).toLocaleString()+' activity points</div></div></div>'
+  ).join('') || '<div class="empty">Leaderboard data will appear here.</div>';
+
+  const me=data.findIndex(x=>String(x.user_id)===String(user.id));
+  $('rank').textContent=me>=0?'#'+(me+1):'—';
+}
+
+function activity(rows){
+  const data=Array.isArray(rows)?rows:[];
+  data.length ? $('activity').innerHTML=data.map(x=>
+    '<div class="row"><div class="grow"><div class="rtitle">'+
+    esc(String(x.activity_type||'activity').replaceAll('_',' '))+
+    '</div><div class="meta">'+
+    (x.points?'+'+Number(x.points).toLocaleString()+' points • ':'')+
+    ago(x.created_at)+'</div></div></div>'
+  ).join('') : empty('activity','Your recent activity will appear here.');
+}
+
+async function load(){
+  try{
+    if(!window.supabase){
+      notice('Supabase library did not load. Check your internet connection and reload.','error');
+      return;
     }
 
-  }
-);
+    db=window.supabase.createClient(CONFIG.url,CONFIG.key,{
+      auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+    });
 
+    const sessionResult=await db.auth.getSession();
+    if(sessionResult.error) throw sessionResult.error;
 
-window.addEventListener(
-  "pagehide",
-  () => {
+    const session=sessionResult.data?.session;
+    if(!session){
+      location.href='login.html?redirect='+encodeURIComponent(location.pathname+location.search);
+      return;
+    }
 
-    stopActualCounting();
+    user=session.user;
 
-    flushTracker(true);
-
-  }
-);
-
-
-window.addEventListener(
-  "beforeunload",
-  () => {
-
-    stopActualCounting();
-
-    flushTracker(true);
-
-  }
-);
-
-
-/* =========================================================
-   DATA LOADING
-========================================================= */
-
-async function loadAuthenticatedData(){
-
-  if(
-    !state.user ||
-    state.refreshBusy
-  )
-    return;
-
-
-  state.refreshBusy =
-    true;
-
-
-  try{
-
-    await ensureMember();
-
-
-    await Promise.all([
-      loadProfile(),
-      loadFavorites(),
-      loadHistory()
+    const q=await Promise.all([
+      safe('member_profiles',q=>q.eq('id',user.id).maybeSingle()),
+      safe('profiles',q=>q.eq('id',user.id).maybeSingle()),
+      safe('member_points',q=>q.eq('user_id',user.id).maybeSingle()),
+      safe('member_stats',q=>q.eq('user_id',user.id).maybeSingle()),
+      safe('member_activity_stats',q=>q.eq('user_id',user.id).maybeSingle()),
+      safe('user_memberships',q=>q.eq('user_id',user.id).eq('status','active')),
+      safe('watch_progress',q=>q.eq('user_id',user.id).order('updated_at',{ascending:false}).limit(12)),
+      safe('my_list',q=>q.eq('user_id',user.id).order('created_at',{ascending:false}).limit(12)),
+      safe('member_favorite_shows',q=>q.eq('user_id',user.id).order('created_at',{ascending:false}).limit(12)),
+      safe('member_favorite_creators',q=>q.eq('user_id',user.id).order('created_at',{ascending:false}).limit(12)),
+      safe('member_friends',q=>q.eq('user_id',user.id).eq('status','accepted').limit(20)),
+      safe('member_leaderboard',q=>q.order('activity_score',{ascending:false}).limit(10)),
+      safe('member_activity',q=>q.eq('user_id',user.id).order('created_at',{ascending:false}).limit(8))
     ]);
 
+    const [mp,pr,pts,st,as,mem,wp,ml,fs,fc,fr,lb,act]=q;
+    const p={...(pr.data||{}),...(mp.data||{})};
 
-    /*
-      Statistics are loaded after history/content
-      so show names can be resolved.
-    */
+    const display=p.display_name ||
+      user.user_metadata?.display_name ||
+      user.email?.split('@')[0] ||
+      'CrowRules Member';
 
-    await loadWatchStats();
+    $('name').textContent=display;
+    $('username').textContent=p.username?'@'+p.username:'Member';
+    $('bio').textContent=p.bio||'Welcome to your CrowRules Entertainment member hub.';
 
-  }finally{
+    const av=p.avatar_url||avatarFallback;
+    $('avatar').src=av;
+    $('navAvatar').src=av;
 
-    state.refreshBusy =
-      false;
+    const points=Number(pts.data?.points ?? st.data?.points ?? 0);
+    $('points').textContent=points.toLocaleString();
+    $('level').textContent='Level '+(pts.data?.level??1)+' • '+
+      Number(pts.data?.lifetime_points??points).toLocaleString()+' lifetime points';
 
-  }
-
-}
-
-
-/* =========================================================
-   BOOT
-========================================================= */
-
-async function boot(){
-
-  const {
-    data
-  } =
-    await db.auth.getSession();
-
-
-  state.user =
-    data.session?.user ||
-    null;
-
-
-  /*
-    Public content loads regardless
-    of authentication.
-  */
-
-  await loadContent();
-
-
-  if(state.user){
-
-    await loadAuthenticatedData();
-
-  }
-
-
-  renderAll();
-
-
-  db.auth.onAuthStateChange(
-    async (
-      _event,
-      session
-    ) => {
-
-      state.user =
-        session?.user ||
-        null;
-
-
-      if(state.user){
-
-        await loadAuthenticatedData();
-
-      }else{
-
-        state.member = null;
-
-        state.profile = null;
-
-        state.history = [];
-
-        state.favorites = [];
-
-        resetWatchStats();
-
-      }
-
-
-      renderAll();
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   PUBLIC CROWRULES API
-========================================================= */
-
-window.CrowRulesMember = {
-
-  attachVideo(content){
-
-    if(!content)
-      return;
-
-
-    const normalized =
-      content.contentId
-        ? content
-        : normalizeContent(
-            content,
-            content.sourceTable ||
-            "cr_content"
-          );
-
-
-    startTracker(
-      normalized
+    const storedSeconds=Number(
+      st.data?.watch_seconds ??
+      as.data?.watch_seconds ??
+      0
     );
 
-  },
+    const storedMinutes=Number(
+      st.data?.watch_minutes ??
+      Math.floor(storedSeconds/60)
+    );
 
+    $('hours').textContent=(storedMinutes/60).toFixed(1)+'h';
+    $('minutes').textContent=storedMinutes.toLocaleString()+' minutes watched';
+    $('episodes').textContent=Number(
+      st.data?.episodes_watched ??
+      as.data?.completed_episodes ??
+      0
+    ).toLocaleString();
 
-  detachVideo(){
+    $('joined').textContent=date(p.created_at||pr.data?.created_at);
+    $('active').textContent=ago(as.data?.last_active_at||st.data?.last_active_at);
 
-    return stopTracker();
+    const membership=Array.isArray(mem.data)?mem.data[0]:mem.data;
+    $('membership').textContent=membership?.memberships?.name ||
+      p.membership_tier || 'Member';
 
-  },
+    const isCreator=
+      String(pr.data?.role||p.role||'').toLowerCase().includes('creator') ||
+      p.is_creator===true;
+    $('creator').textContent='Creator: '+(isCreator?'Yes':'No');
 
+    $('editName').value=display;
+    $('editUsername').value=p.username||'';
+    $('editAvatar').value=p.avatar_url||'';
+    $('editBio').value=p.bio||'';
 
-  async recordTacomaNightsWatch(
-    contentId,
-    title,
-    seconds,
-    positionSeconds=0,
-    completed=false
-  ){
+    await Promise.all([
+      content(
+        Array.isArray(wp.data)?wp.data:[],
+        Array.isArray(ml.data)?ml.data:[],
+        Array.isArray(fs.data)?fs.data:[],
+        Array.isArray(fc.data)?fc.data:[]
+      ),
+      friends(Array.isArray(fr.data)?fr.data:[]),
+      loadWatchStats()
+    ]);
 
-    if(!state.user){
-
-      return {
-        ok:false,
-        error:{
-          message:
-            "Authentication required."
-        }
-      };
-
-    }
-
-
-    const old = {
-
-      contentId:
-        tracker.contentId,
-
-      contentType:
-        tracker.contentType,
-
-      title:
-        tracker.title
-
-    };
-
-
-    tracker.contentId =
-      contentId;
-
-    tracker.contentType =
-      "episode";
-
-    tracker.title =
-      title ||
-      "Tacoma Nights";
-
-
-    const result =
-      await recordMemberWatch(
-        seconds,
-        positionSeconds,
-        completed
-      );
-
-
-    tracker.contentId =
-      old.contentId;
-
-    tracker.contentType =
-      old.contentType;
-
-    tracker.title =
-      old.title;
-
-
-    return result;
-
-  },
-
-
-  async recordBackDeckWatch(
-    contentId,
-    title,
-    seconds,
-    positionSeconds=0,
-    completed=false
-  ){
-
-    if(!state.user){
-
-      return {
-        ok:false,
-        error:{
-          message:
-            "Authentication required."
-        }
-      };
-
-    }
-
-
-    const old = {
-
-      contentId:
-        tracker.contentId,
-
-      contentType:
-        tracker.contentType,
-
-      title:
-        tracker.title
-
-    };
-
-
-    tracker.contentId =
-      contentId;
-
-    tracker.contentType =
-      "episode";
-
-    tracker.title =
-      title ||
-      "Back Deck Live";
-
-
-    const result =
-      await recordMemberWatch(
-        seconds,
-        positionSeconds,
-        completed
-      );
-
-
-    tracker.contentId =
-      old.contentId;
-
-    tracker.contentType =
-      old.contentType;
-
-    tracker.title =
-      old.title;
-
-
-    return result;
-
-  },
-
-
-  async refresh(){
-
-    await loadAuthenticatedData();
-
-    renderAll();
-
+    leaderboard(lb.data||[]);
+    activity(act.data||[]);
+    notice('', '');
+  }catch(error){
+    console.error('Member Hub v10.2 launch error:',error);
+    notice(error?.message || 'Unable to load your CrowRules Member Hub.','error');
   }
+}
 
+$('edit').onclick=()=>{
+  $('editor').hidden=false;
+  $('editor').scrollIntoView({behavior:'smooth',block:'start'});
 };
 
+$('close').onclick=()=>{
+  $('editor').hidden=true;
+};
 
-/* =========================================================
-   START
-========================================================= */
+$('logout').onclick=async()=>{
+  try{
+    if(db) await db.auth.signOut();
+  }finally{
+    location.href='login.html';
+  }
+};
 
-boot()
-  .catch(error => {
+$('form').onsubmit=async event=>{
+  event.preventDefault();
+  if(!db||!user)return;
 
-    console.error(
-      "CrowRules Member Hub boot failure:",
-      error
-    );
+  notice('Saving profile…','info');
 
-    showError(
-      "Member Hub failed to initialize",
-      error
-    );
+  try{
+    const data={
+      id:user.id,
+      display_name:$('editName').value.trim(),
+      username:$('editUsername').value.trim()||null,
+      avatar_url:$('editAvatar').value.trim()||null,
+      bio:$('editBio').value.trim()||null
+    };
 
+    const r=await db.from('member_profiles').upsert(data,{onConflict:'id'});
+    if(r.error) throw r.error;
+
+    const p=await db.from('profiles').update({
+      display_name:data.display_name,
+      avatar_url:data.avatar_url,
+      bio:data.bio,
+      updated_at:new Date().toISOString()
+    }).eq('id',user.id);
+
+    if(p.error) console.warn('profiles update:',p.error);
+
+    notice('Profile saved.','ok');
+    await load();
+  }catch(error){
+    console.error(error);
+    notice(error?.message||'Profile save failed.','error');
+  }
+};
+
+if(db){
+  db.auth.onAuthStateChange((event,session)=>{
+    if(event==='SIGNED_OUT') location.href='login.html';
   });
+}
 
+load();
+})();
 </script>
-
 </body>
 </html>
