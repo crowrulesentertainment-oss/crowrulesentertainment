@@ -7,7 +7,7 @@
 
 <meta
   name="description"
-  content="Tacoma Nights — CrowRules Entertainment original programming."
+  content="Tacoma Nights — CrowRules Entertainment original series."
 >
 
 <title>Tacoma Nights | CrowRules Entertainment</title>
@@ -16,42 +16,42 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
 <link
-  href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap"
+  href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@400;500;600;700;800;900&display=swap"
   rel="stylesheet"
 >
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 
-/* =========================================================
-   CROWRULES TACOMA NIGHTS
-   CINEMATIC NETWORK EDITION
-   v11.0
-   ========================================================= */
-
 :root{
-  --bg:#05060a;
-  --bg2:#090c13;
-  --panel:rgba(14,18,28,.88);
-  --panel2:rgba(20,25,37,.95);
+  --bg:#030409;
+  --bg2:#070a10;
+  --panel:#090c13;
+  --panel2:#0d1119;
+  --panel3:#111722;
 
-  --text:#f5f7fb;
-  --muted:#8993a7;
-  --muted2:#596274;
+  --text:#f6f8fb;
+  --muted:#8490a2;
+  --dim:#566174;
 
-  --line:rgba(255,255,255,.09);
-  --line2:rgba(255,255,255,.16);
+  --cyan:#00e5ff;
+  --cyan-soft:rgba(0,229,255,.12);
 
-  --accent:#dce7ff;
-  --accent2:#91a8ff;
+  --purple:#8b4dff;
+  --purple-soft:rgba(139,77,255,.12);
 
-  --success:#8cffc1;
-  --warning:#ffd580;
-  --danger:#ff7187;
+  --red:#ff3152;
+  --green:#3ce68f;
+  --yellow:#ffd166;
 
-  --radius:20px;
+  --line:rgba(255,255,255,.075);
+  --line2:rgba(255,255,255,.15);
+
+  --radius:18px;
 
   --shadow:
-    0 30px 90px rgba(0,0,0,.58);
+    0 30px 90px rgba(0,0,0,.55);
 }
 
 *{
@@ -65,674 +65,689 @@ html{
 body{
   margin:0;
   min-height:100vh;
+  overflow-x:hidden;
 
   color:var(--text);
-
-  background:
-    radial-gradient(
-      circle at 10% 0%,
-      rgba(72,92,170,.18),
-      transparent 32%
-    ),
-    radial-gradient(
-      circle at 90% 20%,
-      rgba(110,80,160,.13),
-      transparent 30%
-    ),
-    linear-gradient(
-      180deg,
-      #080a10 0%,
-      #05060a 48%,
-      #020307 100%
-    );
 
   font-family:
     Montserrat,
     Arial,
     sans-serif;
+
+  background:
+    radial-gradient(
+      circle at 15% 5%,
+      rgba(0,229,255,.055),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 85% 10%,
+      rgba(139,77,255,.065),
+      transparent 32%
+    ),
+    linear-gradient(
+      180deg,
+      #020308 0%,
+      #070910 50%,
+      #030409 100%
+    );
 }
 
-button,
-a{
-  -webkit-tap-highlight-color:transparent;
+body.intro-active{
+  overflow:hidden;
 }
 
 button{
-  font-family:inherit;
+  font:inherit;
+  cursor:pointer;
 }
 
-::-webkit-scrollbar{
-  width:9px;
+a{
+  color:inherit;
 }
 
-::-webkit-scrollbar-track{
-  background:#030408;
+/* =========================================================
+   BACKGROUND
+   ========================================================= */
+
+.background-grid{
+  position:fixed;
+  inset:0;
+  z-index:-5;
+  pointer-events:none;
+
+  opacity:.10;
+
+  background-image:
+    linear-gradient(
+      rgba(0,229,255,.11) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(0,229,255,.11) 1px,
+      transparent 1px
+    );
+
+  background-size:72px 72px;
+
+  mask-image:
+    linear-gradient(
+      to bottom,
+      #000,
+      transparent 82%
+    );
 }
 
-::-webkit-scrollbar-thumb{
-  background:#252b39;
-  border-radius:99px;
+.background-noise{
+  position:fixed;
+  inset:-50%;
+  z-index:-4;
+  pointer-events:none;
+
+  opacity:.025;
+
+  background-image:
+    repeating-radial-gradient(
+      circle at 50% 50%,
+      rgba(255,255,255,.3) 0,
+      rgba(255,255,255,.3) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+
+  animation:
+    noiseShift .18s steps(2) infinite;
 }
 
+@keyframes noiseShift{
+  0%{transform:translate(0,0)}
+  25%{transform:translate(1%,-1%)}
+  50%{transform:translate(-1%,1%)}
+  75%{transform:translate(1%,1%)}
+  100%{transform:translate(-1%,-1%)}
+}
+
+.bg-glow{
+  position:fixed;
+  z-index:-3;
+  pointer-events:none;
+  border-radius:50%;
+  filter:blur(120px);
+}
+
+.bg-glow.one{
+  width:450px;
+  height:450px;
+  left:-250px;
+  top:25%;
+  background:rgba(0,229,255,.045);
+}
+
+.bg-glow.two{
+  width:550px;
+  height:550px;
+  right:-300px;
+  top:50%;
+  background:rgba(139,77,255,.05);
+}
 
 /* =========================================================
    CINEMATIC INTRO
    ========================================================= */
 
-.cinematic-intro{
+#intro{
   position:fixed;
   inset:0;
   z-index:99999;
 
-  display:grid;
-  place-items:center;
-
-  background:
-    radial-gradient(
-      circle at center,
-      rgba(52,68,130,.18),
-      transparent 35%
-    ),
-    #020307;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 
   overflow:hidden;
 
+  background:#000;
+
   transition:
-    opacity 1s ease,
-    visibility 1s ease;
+    opacity .9s ease,
+    visibility .9s ease;
 }
 
-.cinematic-intro.hide{
+#intro.hide{
   opacity:0;
   visibility:hidden;
   pointer-events:none;
 }
 
-.intro-grid{
+.intro-scanlines{
   position:absolute;
   inset:0;
 
-  opacity:.14;
-
-  background-image:
-    linear-gradient(
-      rgba(255,255,255,.05) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      90deg,
-      rgba(255,255,255,.05) 1px,
-      transparent 1px
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(255,255,255,.045) 0,
+      rgba(255,255,255,.045) 1px,
+      transparent 1px,
+      transparent 5px
     );
 
-  background-size:50px 50px;
-
-  animation:introGrid 8s linear infinite;
+  opacity:.24;
 }
 
-@keyframes introGrid{
-  from{
-    transform:translateY(0);
-  }
-  to{
-    transform:translateY(50px);
-  }
-}
-
-.intro-scan{
+.intro-vignette{
   position:absolute;
-  left:0;
-  right:0;
+  inset:0;
 
-  height:2px;
+  background:
+    radial-gradient(
+      circle,
+      transparent 5%,
+      rgba(0,0,0,.25) 45%,
+      #000 100%
+    );
+}
+
+.intro-center{
+  position:relative;
+  width:min(1050px,90vw);
+  text-align:center;
+
+  animation:
+    introEnter 1.6s ease both;
+}
+
+@keyframes introEnter{
+  from{
+    opacity:0;
+    transform:
+      scale(.88)
+      translateY(25px);
+    filter:blur(12px);
+  }
+
+  to{
+    opacity:1;
+    transform:none;
+    filter:none;
+  }
+}
+
+.intro-kicker{
+  color:var(--cyan);
+
+  font-family:Orbitron,sans-serif;
+  font-size:clamp(9px,1.2vw,14px);
+  font-weight:800;
+
+  letter-spacing:.42em;
+  text-transform:uppercase;
+
+  text-shadow:
+    0 0 25px
+    rgba(0,229,255,.7);
+}
+
+.intro-title{
+  position:relative;
+
+  margin-top:25px;
+
+  font-family:Orbitron,sans-serif;
+  font-size:clamp(42px,8vw,108px);
+  font-weight:900;
+
+  line-height:.9;
+  letter-spacing:.045em;
+
+  text-transform:uppercase;
+
+  text-shadow:
+    0 0 5px #fff,
+    0 0 30px rgba(0,229,255,.25);
+}
+
+.intro-title:before,
+.intro-title:after{
+  content:"TACOMA NIGHTS";
+
+  position:absolute;
+  inset:0;
+
+  pointer-events:none;
+
+  opacity:.4;
+}
+
+.intro-title:before{
+  color:var(--cyan);
+
+  transform:translateX(-3px);
+
+  clip-path:
+    inset(0 0 52% 0);
+
+  animation:
+    glitchA 2.2s infinite steps(2);
+}
+
+.intro-title:after{
+  color:var(--red);
+
+  transform:translateX(3px);
+
+  clip-path:
+    inset(52% 0 0 0);
+
+  animation:
+    glitchB 1.8s infinite steps(2);
+}
+
+@keyframes glitchA{
+  0%,82%,100%{
+    transform:translateX(-3px);
+  }
+
+  84%{
+    transform:translate(14px,-2px);
+  }
+
+  87%{
+    transform:translate(-10px,2px);
+  }
+}
+
+@keyframes glitchB{
+  0%,70%,100%{
+    transform:translateX(3px);
+  }
+
+  72%{
+    transform:translate(-13px,2px);
+  }
+
+  75%{
+    transform:translate(9px,-2px);
+  }
+}
+
+.intro-rule{
+  width:min(560px,75vw);
+  height:1px;
+
+  margin:30px auto;
 
   background:
     linear-gradient(
       90deg,
       transparent,
-      rgba(255,255,255,.7),
+      var(--cyan),
       transparent
     );
 
   box-shadow:
-    0 0 25px rgba(145,168,255,.65);
-
-  animation:scan 3s ease-in-out infinite;
+    0 0 20px
+    rgba(0,229,255,.6);
 }
 
-@keyframes scan{
-  0%{
-    top:-5%;
-    opacity:0;
-  }
+.intro-sub{
+  color:#8f99aa;
 
-  20%{
-    opacity:1;
-  }
+  font-size:clamp(9px,1.3vw,14px);
+  line-height:1.9;
 
-  80%{
-    opacity:1;
-  }
-
-  100%{
-    top:105%;
-    opacity:0;
-  }
+  letter-spacing:.23em;
+  text-transform:uppercase;
 }
 
-.intro-content{
-  position:relative;
-  z-index:2;
+.intro-status{
+  color:#566174;
 
-  text-align:center;
-
-  animation:
-    introReveal 1.5s cubic-bezier(.2,.8,.2,1);
-}
-
-@keyframes introReveal{
-  from{
-    opacity:0;
-    transform:
-      scale(.92)
-      translateY(25px);
-  }
-
-  to{
-    opacity:1;
-    transform:
-      scale(1)
-      translateY(0);
-  }
-}
-
-.intro-brand{
   font-family:Orbitron,sans-serif;
+  font-size:8px;
 
-  font-size:
-    clamp(15px,3vw,25px);
-
-  font-weight:900;
-
-  letter-spacing:.35em;
+  letter-spacing:.2em;
 }
 
-.intro-line{
-  width:
-    min(420px,70vw);
+.intro-progress{
+  width:min(440px,70vw);
+  height:2px;
 
-  height:1px;
+  margin:13px auto;
 
-  margin:22px auto;
+  overflow:hidden;
+
+  background:#151a23;
+}
+
+.intro-progress span{
+  display:block;
+
+  width:0;
+  height:100%;
 
   background:
     linear-gradient(
       90deg,
-      transparent,
-      rgba(255,255,255,.65),
-      transparent
+      var(--cyan),
+      #fff,
+      var(--purple)
     );
-}
 
-.intro-title{
-  font-family:Orbitron,sans-serif;
-
-  font-size:
-    clamp(40px,10vw,110px);
-
-  line-height:.9;
-
-  font-weight:900;
-
-  letter-spacing:-.05em;
-
-  text-shadow:
-    0 0 30px rgba(145,168,255,.25);
-}
-
-.intro-subtitle{
-  margin-top:20px;
-
-  color:var(--muted);
-
-  font-size:11px;
-
-  font-weight:800;
-
-  letter-spacing:.28em;
-}
-
-.intro-loader{
-  margin:38px auto 0;
-
-  width:min(280px,60vw);
-
-  height:2px;
-
-  overflow:hidden;
-
-  background:
-    rgba(255,255,255,.08);
-}
-
-.intro-loader span{
-  display:block;
-
-  width:0%;
-  height:100%;
-
-  background:#fff;
+  box-shadow:
+    0 0 20px
+    var(--cyan);
 
   animation:
-    introLoad 2.7s ease forwards;
+    introProgress 4.2s linear forwards;
 }
 
-@keyframes introLoad{
-  to{
-    width:100%;
-  }
+@keyframes introProgress{
+  to{width:100%}
 }
 
+#skipIntro{
+  position:absolute;
+  right:24px;
+  bottom:24px;
+
+  padding:10px 15px;
+
+  border:1px solid var(--line2);
+  border-radius:999px;
+
+  background:
+    rgba(8,10,15,.75);
+
+  color:#9ca7b8;
+
+  font-size:9px;
+  font-weight:800;
+
+  letter-spacing:.14em;
+
+  backdrop-filter:blur(15px);
+}
+
+#skipIntro:hover{
+  color:#fff;
+  border-color:rgba(0,229,255,.45);
+}
 
 /* =========================================================
    HEADER
    ========================================================= */
 
-.site-header{
+header{
   position:sticky;
   top:0;
-  z-index:1000;
+  z-index:900;
 
-  border-bottom:
-    1px solid var(--line);
+  border-bottom:1px solid var(--line);
 
   background:
-    rgba(5,6,10,.88);
+    rgba(3,4,8,.84);
 
-  backdrop-filter:
-    blur(18px);
+  backdrop-filter:blur(22px);
 }
 
-.header-inner{
-  width:min(1400px,92vw);
-
-  min-height:72px;
+.nav{
+  width:min(1480px,94vw);
+  min-height:70px;
 
   margin:auto;
 
   display:flex;
-
   align-items:center;
-
   justify-content:space-between;
 
-  gap:25px;
+  gap:20px;
 }
 
 .brand{
-  color:#fff;
-  text-decoration:none;
-
-  font-family:Orbitron,sans-serif;
-
-  font-size:18px;
-  font-weight:900;
-
-  letter-spacing:.09em;
-}
-
-.brand small{
-  display:block;
-
-  margin-top:3px;
-
-  color:var(--muted);
-
-  font-family:Montserrat,sans-serif;
-
-  font-size:8px;
-  font-weight:700;
-
-  letter-spacing:.24em;
-}
-
-.nav{
   display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-}
-
-.nav a{
-  color:rgba(255,255,255,.65);
+  align-items:center;
+  gap:12px;
 
   text-decoration:none;
+}
 
-  padding:9px 12px;
+.brand-logo{
+  width:40px;
+  height:40px;
+
+  display:grid;
+  place-items:center;
+
+  border:
+    1px solid
+    rgba(0,229,255,.4);
 
   border-radius:10px;
 
-  font-size:11px;
-  font-weight:700;
-
-  transition:.2s ease;
-}
-
-.nav a:hover{
-  color:#fff;
-  background:rgba(255,255,255,.07);
-}
-
-.member-button{
-  border:1px solid var(--line2);
-
   background:
-    rgba(255,255,255,.06);
+    rgba(0,229,255,.035);
 
-  color:#fff;
+  color:var(--cyan);
 
-  padding:10px 15px;
-
-  border-radius:11px;
-
+  font-family:Orbitron,sans-serif;
   font-size:11px;
+  font-weight:900;
+
+  box-shadow:
+    0 0 25px
+    rgba(0,229,255,.08);
+}
+
+.brand-name{
+  font-family:Orbitron,sans-serif;
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.09em;
+}
+
+.brand-sub{
+  margin-top:3px;
+
+  color:#626d7f;
+
+  font-size:8px;
+  letter-spacing:.18em;
+}
+
+.nav-links{
+  display:flex;
+  align-items:center;
+  gap:3px;
+}
+
+.nav-links a{
+  padding:9px 10px;
+
+  border-radius:8px;
+
+  color:#808b9d;
+
+  text-decoration:none;
+
+  font-size:8px;
   font-weight:800;
 
-  cursor:pointer;
+  letter-spacing:.05em;
+
+  transition:.2s;
 }
 
+.nav-links a:hover,
+.nav-links a.active{
+  color:#fff;
+  background:rgba(255,255,255,.055);
+}
+
+.member-link{
+  padding:10px 13px;
+
+  border:1px solid var(--line2);
+  border-radius:9px;
+
+  background:
+    rgba(255,255,255,.025);
+
+  color:#cbd3df;
+
+  text-decoration:none;
+
+  font-size:8px;
+  font-weight:800;
+
+  letter-spacing:.06em;
+}
 
 /* =========================================================
    HERO
    ========================================================= */
 
 .hero{
-  position:relative;
-
-  min-height:
-    min(690px,82vh);
-
-  display:flex;
-  align-items:flex-end;
-
-  overflow:hidden;
-
-  border-bottom:
-    1px solid var(--line);
-
-  background:
-    linear-gradient(
-      90deg,
-      rgba(3,4,8,.98),
-      rgba(3,4,8,.72) 42%,
-      rgba(3,4,8,.28) 75%,
-      rgba(3,4,8,.88)
-    );
-}
-
-.hero::before{
-  content:"";
-
-  position:absolute;
-  inset:0;
-
-  background:
-    radial-gradient(
-      circle at 76% 34%,
-      rgba(115,145,255,.22),
-      transparent 28%
-    );
-}
-
-.hero::after{
-  content:"";
-
-  position:absolute;
-  inset:0;
-
-  background:
-    linear-gradient(
-      to top,
-      #05060a,
-      transparent 42%
-    );
-}
-
-.hero-grid{
-  position:absolute;
-  inset:0;
-
-  opacity:.13;
-
-  background-image:
-    linear-gradient(
-      rgba(255,255,255,.05) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      90deg,
-      rgba(255,255,255,.05) 1px,
-      transparent 1px
-    );
-
-  background-size:50px 50px;
-
-  mask-image:
-    linear-gradient(
-      to bottom,
-      transparent,
-      black 25%,
-      black 75%,
-      transparent
-    );
-}
-
-.hero-content{
-  position:relative;
-  z-index:3;
-
-  width:min(1400px,92vw);
+  width:min(1480px,94vw);
 
   margin:auto;
 
-  padding:
-    100px 0 85px;
+  padding:72px 0 40px;
 }
 
-.hero-kicker{
+.hero-status{
+  display:flex;
+  align-items:center;
+  gap:8px;
+
+  color:var(--cyan);
+
   font-family:Orbitron,sans-serif;
-
-  font-size:11px;
-
+  font-size:9px;
   font-weight:800;
 
-  letter-spacing:.24em;
+  letter-spacing:.25em;
+}
 
-  color:rgba(255,255,255,.58);
+.live-dot{
+  width:7px;
+  height:7px;
 
-  margin-bottom:18px;
+  flex:0 0 7px;
+
+  border-radius:50%;
+
+  background:var(--red);
+
+  box-shadow:
+    0 0 14px
+    rgba(255,49,82,.9);
+
+  animation:
+    livePulse 1.35s infinite;
+}
+
+@keyframes livePulse{
+  50%{
+    opacity:.35;
+    transform:scale(.7);
+  }
 }
 
 .hero h1{
-  margin:0;
-
-  max-width:850px;
+  margin:19px 0 0;
 
   font-family:Orbitron,sans-serif;
 
   font-size:
-    clamp(42px,8vw,100px);
+    clamp(44px,7.5vw,104px);
 
-  line-height:.96;
+  font-weight:900;
 
-  letter-spacing:-.035em;
+  line-height:.86;
+
+  letter-spacing:.03em;
 }
 
-.hero-subtitle{
-  margin-top:20px;
+.hero h1 span{
+  color:transparent;
 
-  max-width:690px;
-
-  color:rgba(255,255,255,.68);
-
-  font-size:
-    clamp(14px,2vw,18px);
-
-  line-height:1.7;
+  -webkit-text-stroke:
+    1px rgba(255,255,255,.45);
 }
 
-.hero-actions{
-  margin-top:30px;
+.hero-copy{
+  max-width:800px;
 
-  display:flex;
+  margin-top:27px;
 
-  gap:12px;
+  color:#7d889b;
 
-  flex-wrap:wrap;
+  font-size:13px;
+  line-height:1.9;
 }
-
-.primary-button,
-.secondary-button{
-  display:inline-flex;
-
-  align-items:center;
-  justify-content:center;
-
-  gap:8px;
-
-  border-radius:12px;
-
-  padding:13px 18px;
-
-  font-size:12px;
-  font-weight:800;
-
-  text-decoration:none;
-
-  cursor:pointer;
-
-  border:1px solid var(--line2);
-
-  transition:.2s ease;
-}
-
-.primary-button{
-  background:#fff;
-  color:#05060a;
-}
-
-.secondary-button{
-  background:
-    rgba(255,255,255,.06);
-
-  color:#fff;
-}
-
-.primary-button:hover,
-.secondary-button:hover{
-  transform:translateY(-2px);
-}
-
 
 /* =========================================================
    MAIN
    ========================================================= */
 
 main{
-  width:min(1400px,92vw);
+  width:min(1480px,94vw);
 
   margin:auto;
 
-  padding:
-    65px 0 100px;
+  padding-bottom:90px;
 }
-
-.section{
-  margin-bottom:75px;
-}
-
-.section-heading{
-  display:flex;
-
-  align-items:flex-end;
-
-  justify-content:space-between;
-
-  gap:20px;
-
-  margin-bottom:22px;
-}
-
-.section-kicker{
-  color:var(--muted);
-
-  font-family:Orbitron,sans-serif;
-
-  font-size:10px;
-  font-weight:800;
-
-  letter-spacing:.20em;
-}
-
-.section-title{
-  margin:7px 0 0;
-
-  font-family:Orbitron,sans-serif;
-
-  font-size:
-    clamp(24px,4vw,38px);
-}
-
-.section-description{
-  color:var(--muted);
-
-  font-size:10px;
-
-  font-weight:700;
-}
-
 
 /* =========================================================
    PLAYER
    ========================================================= */
 
-.player-section{
-  position:relative;
+.stage{
+  display:grid;
 
-  margin-bottom:75px;
+  grid-template-columns:
+    minmax(0,1.72fr)
+    minmax(300px,.72fr);
+
+  gap:14px;
 }
 
-.player-shell{
+.player-card,
+.chat-card,
+.panel{
+  border:1px solid var(--line);
+
+  border-radius:var(--radius);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.035),
+      rgba(255,255,255,.012)
+    ),
+    #07090e;
+
+  box-shadow:var(--shadow);
+}
+
+.player-card{
+  overflow:hidden;
+}
+
+.player{
   position:relative;
+
+  aspect-ratio:16/9;
 
   overflow:hidden;
-
-  border:
-    1px solid var(--line2);
-
-  border-radius:24px;
-
-  background:#020307;
-
-  box-shadow:
-    0 35px 100px rgba(0,0,0,.65);
-}
-
-.player-frame{
-  position:relative;
-
-  width:100%;
-
-  aspect-ratio:16 / 9;
-
-  min-height:360px;
 
   background:#000;
-
-  overflow:hidden;
 }
 
-#videoPlayer,
-#youtubeFrame{
+#nativeVideo,
+#youtubePlayer{
   position:absolute;
 
   inset:0;
@@ -740,481 +755,662 @@ main{
   width:100%;
   height:100%;
 
+  display:block;
+
   border:0;
 
   background:#000;
 }
 
-#videoPlayer{
+#nativeVideo{
   object-fit:contain;
-}
-
-.player-placeholder{
-  position:absolute;
-
-  inset:0;
-
-  display:grid;
-
-  place-items:center;
-
-  text-align:center;
-
-  padding:30px;
-
-  background:
-    radial-gradient(
-      circle at center,
-      rgba(70,90,160,.18),
-      transparent 40%
-    ),
-    #030408;
-}
-
-.player-placeholder.hidden{
-  display:none;
-}
-
-.player-placeholder-inner{
-  max-width:550px;
-}
-
-.player-placeholder-logo{
-  font-family:Orbitron,sans-serif;
-
-  font-size:11px;
-  font-weight:900;
-
-  letter-spacing:.3em;
-
-  color:var(--muted);
-
-  margin-bottom:20px;
-}
-
-.player-placeholder-title{
-  font-family:Orbitron,sans-serif;
-
-  font-size:
-    clamp(25px,5vw,52px);
-
-  font-weight:900;
-
-  line-height:1;
-}
-
-.player-placeholder-copy{
-  margin-top:15px;
-
-  color:var(--muted);
-
-  font-size:12px;
-
-  line-height:1.7;
 }
 
 .player-overlay{
   position:absolute;
-
-  left:0;
-  right:0;
-  bottom:0;
-
-  padding:
-    35px 28px 20px;
+  inset:0;
 
   pointer-events:none;
 
   background:
     linear-gradient(
-      to top,
-      rgba(0,0,0,.75),
-      transparent
+      180deg,
+      rgba(0,0,0,.3),
+      transparent 25%,
+      transparent 75%,
+      rgba(0,0,0,.42)
     );
 }
 
 .player-badge{
-  display:inline-flex;
+  position:absolute;
 
+  top:14px;
+  left:14px;
+
+  z-index:10;
+
+  display:none;
   align-items:center;
-
   gap:7px;
 
-  padding:6px 9px;
+  padding:7px 10px;
 
-  border-radius:7px;
+  border:
+    1px solid
+    rgba(255,255,255,.12);
+
+  border-radius:999px;
 
   background:
     rgba(0,0,0,.65);
 
-  font-size:9px;
-
-  font-weight:900;
-
-  letter-spacing:.12em;
-}
-
-.player-badge.live{
-  color:var(--success);
-}
-
-.player-badge.autoplay{
-  color:var(--accent);
-}
-
-.player-info{
-  padding:22px 25px;
-
-  display:flex;
-
-  justify-content:space-between;
-
-  align-items:center;
-
-  gap:20px;
-
-  border-top:
-    1px solid var(--line);
-
-  background:
-    linear-gradient(
-      135deg,
-      rgba(20,24,36,.96),
-      rgba(7,9,14,.98)
-    );
-}
-
-.player-info-main{
-  min-width:0;
-}
-
-.player-now{
-  color:var(--muted);
-
-  font-size:9px;
-  font-weight:800;
-
-  letter-spacing:.18em;
-}
-
-.player-title{
-  margin-top:7px;
+  color:#fff;
 
   font-family:Orbitron,sans-serif;
+  font-size:8px;
 
-  font-size:
-    clamp(17px,3vw,28px);
+  letter-spacing:.1em;
 
-  font-weight:800;
+  backdrop-filter:blur(10px);
+}
 
-  line-height:1.2;
+.player-badge.show{
+  display:flex;
 }
 
 .player-meta{
-  margin-top:7px;
+  padding:19px 20px 21px;
+}
 
-  color:var(--muted);
+.player-meta h2{
+  margin:0;
+
+  font-family:Orbitron,sans-serif;
+
+  font-size:19px;
+
+  line-height:1.3;
+}
+
+.player-meta p{
+  margin:8px 0 0;
+
+  color:#707b8d;
 
   font-size:11px;
+  line-height:1.65;
 }
+
+.watch-progress{
+  margin-top:17px;
+}
+
+.progress-track{
+  height:3px;
+
+  overflow:hidden;
+
+  border-radius:999px;
+
+  background:#181d27;
+}
+
+.progress-bar{
+  width:0;
+  height:100%;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--cyan),
+      var(--purple)
+    );
+
+  box-shadow:
+    0 0 13px
+    rgba(0,229,255,.4);
+
+  transition:width .2s linear;
+}
+
+.resume-text{
+  margin-top:8px;
+
+  color:#5d687a;
+
+  font-size:9px;
+}
+
+/* =========================================================
+   PLAYER CONTROLS
+   ========================================================= */
 
 .player-actions{
   display:flex;
+  flex-wrap:wrap;
 
   gap:8px;
 
-  flex-shrink:0;
+  margin-top:14px;
 }
 
-.player-action{
-  border:
-    1px solid var(--line2);
-
-  background:
-    rgba(255,255,255,.06);
-
-  color:#fff;
-
-  border-radius:10px;
-
-  padding:10px 13px;
-
-  font-size:10px;
-
-  font-weight:800;
-
-  cursor:pointer;
-}
-
-.player-action:hover{
-  background:
-    rgba(255,255,255,.12);
-}
-
-.resume-note{
-  margin-top:8px;
-
-  color:var(--accent2);
-
-  font-size:10px;
-}
-
-.autoplay-notice{
-  position:absolute;
-
-  top:16px;
-  right:16px;
-
-  z-index:5;
-
-  padding:8px 10px;
-
-  border:
-    1px solid rgba(255,255,255,.15);
-
-  border-radius:9px;
-
-  background:
-    rgba(0,0,0,.68);
-
-  backdrop-filter:blur(10px);
-
-  font-size:9px;
-  font-weight:800;
-
-  letter-spacing:.08em;
-
-  opacity:0;
-
-  transform:translateY(-5px);
-
-  transition:.3s ease;
-
-  pointer-events:none;
-}
-
-.autoplay-notice.show{
-  opacity:1;
-  transform:translateY(0);
-}
-
-
-/* =========================================================
-   WATCH SYNC STATUS
-   ========================================================= */
-
-.watch-sync{
-  display:flex;
-
-  align-items:center;
-
-  justify-content:space-between;
-
-  gap:15px;
-
-  padding:12px 15px;
-
-  border-top:
-    1px solid var(--line);
-
-  background:
-    rgba(0,0,0,.25);
-
-  font-size:10px;
-}
-
-.sync-left{
-  display:flex;
-
-  align-items:center;
-
-  gap:9px;
-}
-
-.sync-dot{
-  width:8px;
-  height:8px;
-
-  border-radius:50%;
-
-  background:var(--success);
-
-  box-shadow:
-    0 0 12px currentColor;
-}
-
-.sync-dot.pending{
-  background:var(--warning);
-}
-
-.sync-dot.error{
-  background:var(--danger);
-}
-
-.sync-label{
-  color:var(--muted);
-
-  font-weight:800;
-
-  letter-spacing:.08em;
-}
-
-.sync-retry{
-  display:none;
+.btn{
+  padding:10px 14px;
 
   border:1px solid var(--line2);
 
-  border-radius:7px;
+  border-radius:9px;
 
-  padding:6px 9px;
+  background:#0b0e14;
 
-  background:rgba(255,255,255,.06);
+  color:#cbd3df;
+
+  font-size:9px;
+  font-weight:800;
+
+  letter-spacing:.04em;
+
+  transition:.2s;
+}
+
+.btn:hover{
+  color:#fff;
+
+  border-color:
+    rgba(0,229,255,.35);
+
+  background:#10141c;
+}
+
+.btn.primary{
+  color:var(--cyan);
+
+  border-color:
+    rgba(0,229,255,.3);
+
+  background:
+    rgba(0,229,255,.055);
+}
+
+/* =========================================================
+   CHAT
+   ========================================================= */
+
+.chat-card{
+  overflow:hidden;
+
+  display:flex;
+  flex-direction:column;
+}
+
+.chat-head{
+  min-height:62px;
+
+  padding:13px 15px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  border-bottom:1px solid var(--line);
+
+  background:#080a0f;
+}
+
+.chat-brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.chat-icon{
+  width:32px;
+  height:32px;
+
+  display:grid;
+  place-items:center;
+
+  border:1px solid var(--line2);
+
+  border-radius:9px;
+
+  background:#10141c;
+}
+
+.chat-title{
+  font-family:Orbitron,sans-serif;
+
+  font-size:10px;
+  font-weight:900;
+
+  letter-spacing:.14em;
+}
+
+.chat-sub{
+  margin-top:3px;
+
+  color:#606b7c;
+
+  font-size:8px;
+}
+
+.chat-live{
+  color:#ff7083;
+
+  font-family:Orbitron,sans-serif;
+
+  font-size:8px;
+
+  letter-spacing:.1em;
+}
+
+.chat-live:before{
+  content:"";
+
+  display:inline-block;
+
+  width:6px;
+  height:6px;
+
+  margin-right:5px;
+
+  border-radius:50%;
+
+  background:var(--red);
+
+  box-shadow:
+    0 0 8px
+    rgba(255,49,82,.8);
+}
+
+.chat-body{
+  position:relative;
+
+  flex:1;
+
+  min-height:500px;
+
+  background:#050608;
+}
+
+#youtubeChat{
+  width:100%;
+  height:100%;
+
+  min-height:500px;
+
+  border:0;
+}
+
+.chat-empty{
+  position:absolute;
+  inset:0;
+  z-index:2;
+
+  display:flex;
+  flex-direction:column;
+
+  align-items:center;
+  justify-content:center;
+
+  padding:30px;
+
+  text-align:center;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(0,229,255,.035),
+      transparent 60%
+    ),
+    #050608;
+}
+
+.chat-empty.hidden{
+  display:none;
+}
+
+.chat-empty-icon{
+  margin-bottom:14px;
+
+  font-size:31px;
+
+  opacity:.6;
+}
+
+.chat-empty strong{
+  font-family:Orbitron,sans-serif;
+
+  font-size:10px;
+
+  letter-spacing:.13em;
+}
+
+.chat-empty span{
+  max-width:280px;
+
+  margin-top:9px;
+
+  color:#606b7c;
+
+  font-size:10px;
+
+  line-height:1.7;
+}
+
+.chat-buttons{
+  display:flex;
+  gap:6px;
+}
+
+.chat-button{
+  padding:6px 8px;
+
+  border:1px solid var(--line2);
+
+  border-radius:6px;
+
+  background:#0d1118;
+
+  color:#818c9e;
+
+  font-size:7px;
+  font-weight:800;
+
+  letter-spacing:.08em;
+}
+
+.chat-button:hover{
+  color:#fff;
+}
+
+/* =========================================================
+   SECTION
+   ========================================================= */
+
+.section{
+  margin-top:44px;
+}
+
+.section-header{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+
+  gap:20px;
+
+  margin-bottom:16px;
+}
+
+.section-title{
+  margin:0;
+
+  font-family:Orbitron,sans-serif;
+
+  font-size:17px;
+
+  letter-spacing:.07em;
+}
+
+.section-description{
+  margin:6px 0 0;
+
+  color:#606b7d;
+
+  font-size:10px;
+}
+
+/* =========================================================
+   MEMBER HUD
+   ========================================================= */
+
+.member-hud{
+  display:grid;
+
+  grid-template-columns:
+    repeat(3,1fr)
+    minmax(180px,auto);
+
+  gap:10px;
+
+  padding:14px;
+}
+
+.stat{
+  min-width:0;
+
+  padding:13px;
+
+  border:1px solid var(--line);
+
+  border-radius:12px;
+
+  background:#090c12;
+}
+
+.stat-label{
+  color:#606b7c;
+
+  font-family:Orbitron,sans-serif;
+
+  font-size:8px;
+
+  letter-spacing:.13em;
+}
+
+.stat-value{
+  margin-top:8px;
+
+  font-family:Orbitron,sans-serif;
+
+  font-size:20px;
+  font-weight:800;
+
+  white-space:nowrap;
+
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.sync-status{
+  min-height:66px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  gap:8px;
+
+  padding:10px;
+
+  border:1px solid var(--line);
+
+  border-radius:12px;
+
+  background:#090c12;
+
+  color:#6c7788;
+
+  font-family:Orbitron,sans-serif;
+
+  font-size:8px;
+
+  letter-spacing:.08em;
+
+  text-align:center;
+}
+
+.sync-status:before{
+  content:"";
+
+  width:7px;
+  height:7px;
+
+  flex:0 0 7px;
+
+  border-radius:50%;
+
+  background:#687386;
+}
+
+.sync-status.synced{
+  color:var(--green);
+}
+
+.sync-status.synced:before{
+  background:var(--green);
+
+  box-shadow:
+    0 0 10px
+    rgba(57,229,140,.65);
+}
+
+.sync-status.pending{
+  color:var(--yellow);
+}
+
+.sync-status.pending:before{
+  background:var(--yellow);
+
+  animation:
+    livePulse 1s infinite;
+}
+
+.sync-status.error{
+  color:#ff7185;
+}
+
+.sync-status.error:before{
+  background:var(--red);
+}
+
+#retrySync{
+  display:none;
+
+  padding:4px 7px;
+
+  border:1px solid rgba(255,255,255,.15);
+
+  border-radius:5px;
+
+  background:#141821;
 
   color:#fff;
 
-  font-size:9px;
-
-  font-weight:800;
-
-  cursor:pointer;
+  font-size:7px;
 }
 
-.sync-retry.show{
-  display:block;
+.sync-status.error #retrySync{
+  display:inline-block;
 }
-
 
 /* =========================================================
    FEATURED
    ========================================================= */
 
 .featured{
-  display:grid;
+  position:relative;
 
-  grid-template-columns:
-    minmax(0,1.4fr)
-    minmax(300px,.6fr);
-
-  gap:20px;
-}
-
-.featured-main,
-.featured-side{
-  border:
-    1px solid var(--line);
-
-  border-radius:
-    var(--radius);
-
-  background:
-    linear-gradient(
-      145deg,
-      rgba(22,26,38,.95),
-      rgba(8,10,15,.96)
-    );
-
-  box-shadow:
-    var(--shadow);
+  min-height:260px;
 
   overflow:hidden;
+
+  border:1px solid var(--line);
+
+  border-radius:17px;
+
+  background:#07090e;
 }
 
-.featured-main{
-  min-height:420px;
-
-  display:flex;
-
-  flex-direction:column;
-
-  justify-content:flex-end;
-
-  padding:32px;
-
-  position:relative;
-}
-
-.featured-main::before{
-  content:"";
-
+.featured-background{
   position:absolute;
-
   inset:0;
 
   background:
     radial-gradient(
-      circle at 75% 30%,
-      rgba(120,145,255,.15),
-      transparent 35%
+      circle at 75% 50%,
+      rgba(0,229,255,.14),
+      transparent 25%
+    ),
+    radial-gradient(
+      circle at 40% 60%,
+      rgba(139,77,255,.12),
+      transparent 30%
+    ),
+    linear-gradient(
+      120deg,
+      #090d14,
+      #05070c
     );
 }
 
-.featured-main > *{
+.featured-background img{
+  position:absolute;
+  inset:0;
+
+  width:100%;
+  height:100%;
+
+  object-fit:cover;
+
+  opacity:.38;
+}
+
+.featured-gradient{
+  position:absolute;
+  inset:0;
+
+  background:
+    linear-gradient(
+      90deg,
+      #06080d 0%,
+      rgba(6,8,13,.84) 43%,
+      rgba(6,8,13,.15) 100%
+    );
+}
+
+.featured-content{
   position:relative;
-  z-index:1;
+  z-index:2;
+
+  max-width:800px;
+
+  padding:32px;
 }
 
-.featured-label{
-  font-size:10px;
+.featured-kicker{
+  color:var(--cyan);
 
-  font-weight:800;
+  font-family:Orbitron,sans-serif;
 
-  letter-spacing:.18em;
+  font-size:8px;
 
-  color:var(--muted);
+  letter-spacing:.2em;
 }
 
-.featured-title{
-  margin:10px 0;
+.featured-content h2{
+  margin:13px 0 8px;
 
   font-family:Orbitron,sans-serif;
 
   font-size:
-    clamp(24px,4vw,46px);
+    clamp(22px,3vw,38px);
 
   line-height:1.05;
 }
 
-.featured-copy{
-  max-width:680px;
+.featured-content p{
+  max-width:620px;
 
-  color:var(--muted);
+  margin:0;
 
-  line-height:1.65;
-
-  font-size:13px;
-}
-
-.featured-side{
-  padding:25px;
-}
-
-.stat{
-  padding:18px 0;
-
-  border-bottom:
-    1px solid var(--line);
-}
-
-.stat:last-child{
-  border-bottom:0;
-}
-
-.stat-number{
-  font-family:Orbitron,sans-serif;
-
-  font-size:28px;
-
-  font-weight:800;
-}
-
-.stat-label{
-  color:var(--muted);
+  color:#758093;
 
   font-size:11px;
 
-  margin-top:5px;
+  line-height:1.7;
 }
-
 
 /* =========================================================
    EPISODES
@@ -1224,1013 +1420,1013 @@ main{
   display:grid;
 
   grid-template-columns:
-    repeat(
-      auto-fill,
-      minmax(275px,1fr)
-    );
+    repeat(3,minmax(0,1fr));
 
-  gap:20px;
+  gap:13px;
 }
 
-.episode-card{
+.episode{
   overflow:hidden;
 
-  border:
-    1px solid var(--line);
+  border:1px solid var(--line);
 
-  border-radius:17px;
+  border-radius:15px;
 
-  background:var(--panel);
+  background:#080a0f;
+
+  cursor:pointer;
 
   transition:
-    transform .2s ease,
-    border-color .2s ease,
-    box-shadow .2s ease;
+    transform .22s ease,
+    border-color .22s ease,
+    box-shadow .22s ease;
 }
 
-.episode-card:hover{
-  transform:translateY(-4px);
+.episode:hover{
+  transform:translateY(-3px);
 
-  border-color:var(--line2);
-
-  box-shadow:
-    0 20px 50px rgba(0,0,0,.35);
-}
-
-.episode-card.active{
   border-color:
-    rgba(145,168,255,.65);
+    rgba(0,229,255,.3);
 
   box-shadow:
-    0 0 0 1px rgba(145,168,255,.15),
-    0 25px 60px rgba(0,0,0,.45);
+    0 20px 45px
+    rgba(0,0,0,.35);
+}
+
+.episode.active{
+  border-color:
+    rgba(0,229,255,.52);
+
+  box-shadow:
+    0 0 28px
+    rgba(0,229,255,.08);
 }
 
 .episode-thumb{
   position:relative;
 
-  aspect-ratio:16 / 9;
+  aspect-ratio:16/9;
 
   overflow:hidden;
 
   background:
-    #10131a center/cover no-repeat;
+    radial-gradient(
+      circle at center,
+      rgba(0,229,255,.06),
+      transparent 50%
+    ),
+    #07090e;
 }
 
-.episode-thumb::after{
-  content:"";
+.episode-thumb img{
+  width:100%;
+  height:100%;
 
+  display:block;
+
+  object-fit:cover;
+
+  opacity:.82;
+
+  transition:.3s;
+}
+
+.episode:hover .episode-thumb img{
+  opacity:1;
+  transform:scale(1.045);
+}
+
+.thumbnail-placeholder{
   position:absolute;
-
   inset:0;
 
-  background:
-    linear-gradient(
-      to top,
-      rgba(0,0,0,.68),
-      transparent 55%
-    );
+  display:grid;
+  place-items:center;
+
+  color:#536074;
+
+  font-family:Orbitron,sans-serif;
+
+  font-size:10px;
+
+  letter-spacing:.13em;
 }
 
-.episode-number{
+.episode-badge{
   position:absolute;
 
-  left:12px;
-  bottom:10px;
-
-  z-index:2;
+  top:10px;
+  left:10px;
 
   padding:6px 8px;
 
-  border-radius:7px;
+  border:
+    1px solid
+    rgba(255,255,255,.11);
+
+  border-radius:6px;
 
   background:
-    rgba(0,0,0,.68);
+    rgba(0,0,0,.72);
+
+  color:#cbd2df;
+
+  font-family:Orbitron,sans-serif;
+
+  font-size:7px;
+
+  letter-spacing:.1em;
+}
+
+.episode-badge.youtube{
+  color:#ff7083;
+}
+
+.episode-badge.latest{
+  left:auto;
+  right:10px;
+
+  color:var(--cyan);
+
+  border-color:
+    rgba(0,229,255,.3);
+}
+
+.episode-content{
+  padding:14px;
+}
+
+.episode-content h3{
+  margin:0;
+
+  font-size:12px;
+
+  line-height:1.45;
+}
+
+.episode-content p{
+  margin:7px 0 0;
+
+  color:#626d7f;
 
   font-size:9px;
 
-  font-weight:800;
-
-  letter-spacing:.12em;
+  line-height:1.55;
 }
 
-.play-badge{
-  position:absolute;
+.episode-bottom{
+  display:flex;
+  justify-content:space-between;
 
-  right:12px;
-  bottom:10px;
+  gap:8px;
 
-  z-index:2;
+  margin-top:11px;
 
-  width:34px;
-  height:34px;
+  color:#515c6e;
 
-  display:grid;
-
-  place-items:center;
-
-  border-radius:50%;
-
-  background:rgba(255,255,255,.94);
-
-  color:#05060a;
-
-  font-size:13px;
+  font-size:8px;
 }
 
-.episode-body{
-  padding:17px;
+.episode-progress{
+  height:2px;
+
+  margin-top:11px;
+
+  overflow:hidden;
+
+  border-radius:999px;
+
+  background:#191d27;
 }
 
-.episode-status{
-  font-size:9px;
+.episode-progress span{
+  display:block;
 
-  font-weight:800;
-
-  letter-spacing:.15em;
-
-  color:var(--success);
-}
-
-.episode-status.coming{
-  color:var(--warning);
-}
-
-.episode-title{
-  margin:8px 0;
-
-  font-size:17px;
-
-  line-height:1.35;
-
-  font-weight:800;
-}
-
-.episode-meta{
-  color:var(--muted);
-
-  font-size:11px;
-
-  line-height:1.5;
-
-  min-height:34px;
-}
-
-.watch-button{
-  width:100%;
-
-  margin-top:15px;
-
-  padding:11px;
-
-  border:
-    1px solid var(--line2);
-
-  border-radius:10px;
-
-  background:
-    rgba(255,255,255,.08);
-
-  color:#fff;
-
-  font-weight:800;
-
-  font-size:11px;
-
-  cursor:pointer;
-}
-
-.watch-button:hover:not(:disabled){
-  background:
-    rgba(255,255,255,.15);
-}
-
-.watch-button:disabled{
-  cursor:not-allowed;
-  opacity:.45;
-}
-
-
-/* =========================================================
-   MEMBER PANEL
-   ========================================================= */
-
-.member-panel{
-  border:
-    1px solid var(--line);
-
-  border-radius:var(--radius);
-
-  padding:30px;
+  width:0;
+  height:100%;
 
   background:
     linear-gradient(
-      135deg,
-      rgba(18,23,35,.9),
-      rgba(7,9,14,.9)
+      90deg,
+      var(--cyan),
+      var(--purple)
     );
 }
 
-.member-panel h2{
-  margin:0 0 8px;
+/* =========================================================
+   EMPTY
+   ========================================================= */
 
-  font-family:Orbitron,sans-serif;
+.empty{
+  grid-column:1/-1;
+
+  padding:42px 20px;
+
+  border:1px solid var(--line);
+
+  border-radius:15px;
+
+  text-align:center;
+
+  color:#657084;
+
+  font-size:10px;
 }
 
-.member-panel p{
-  color:var(--muted);
+.spinner{
+  width:22px;
+  height:22px;
 
-  font-size:13px;
+  margin:
+    0
+    auto
+    12px;
 
-  line-height:1.7;
+  border:
+    2px solid #1b202b;
+
+  border-top-color:
+    var(--cyan);
+
+  border-radius:50%;
+
+  animation:
+    spin .7s linear infinite;
 }
 
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
 
 /* =========================================================
    TOAST
    ========================================================= */
 
-.toast{
+#toast{
   position:fixed;
 
   right:20px;
   bottom:20px;
 
-  z-index:100000;
+  z-index:10000;
 
-  max-width:380px;
+  max-width:
+    min(
+      430px,
+      calc(100vw - 40px)
+    );
 
-  padding:14px 16px;
+  padding:13px 15px;
 
-  border:
-    1px solid var(--line2);
+  border:1px solid var(--line2);
 
-  border-radius:12px;
+  border-radius:11px;
 
   background:
-    rgba(10,13,20,.96);
+    rgba(8,10,15,.95);
+
+  color:#d9dfe8;
 
   box-shadow:
-    0 20px 60px rgba(0,0,0,.5);
+    0 20px 55px
+    rgba(0,0,0,.5);
 
-  color:#fff;
+  backdrop-filter:blur(16px);
 
-  font-size:11px;
-  font-weight:700;
+  font-size:10px;
+
+  line-height:1.5;
 
   opacity:0;
 
-  transform:translateY(10px);
+  transform:translateY(12px);
 
   pointer-events:none;
 
-  transition:.25s ease;
+  transition:.25s;
 }
 
-.toast.show{
+#toast.show{
   opacity:1;
-
-  transform:translateY(0);
+  transform:none;
 }
 
-.toast.error{
+#toast.success{
   border-color:
-    rgba(255,113,135,.4);
+    rgba(57,229,140,.3);
 }
 
-.toast.success{
+#toast.error{
   border-color:
-    rgba(140,255,193,.35);
+    rgba(255,49,82,.3);
 }
-
-
-/* =========================================================
-   LOADING
-   ========================================================= */
-
-.loading,
-.empty{
-  padding:40px;
-
-  text-align:center;
-
-  color:var(--muted);
-
-  border:
-    1px dashed var(--line);
-
-  border-radius:15px;
-}
-
-.empty{
-  background:
-    rgba(255,255,255,.015);
-}
-
 
 /* =========================================================
    FOOTER
    ========================================================= */
 
 footer{
-  border-top:
-    1px solid var(--line);
+  border-top:1px solid var(--line);
 
-  padding:40px 5vw;
-
-  color:var(--muted);
-
-  font-size:11px;
+  padding:30px 20px;
 
   text-align:center;
+
+  color:#4e596a;
+
+  font-size:9px;
+
+  line-height:1.8;
 }
 
+footer strong{
+  color:#758093;
+
+  font-family:Orbitron,sans-serif;
+
+  letter-spacing:.13em;
+}
 
 /* =========================================================
-   MOBILE
+   RESPONSIVE
    ========================================================= */
 
-@media(max-width:850px){
+@media(max-width:1100px){
 
-  .header-inner{
-    min-height:auto;
-
-    padding:16px 0;
-
-    flex-wrap:wrap;
-  }
-
-  .nav{
-    order:3;
-
-    width:100%;
-
-    overflow-x:auto;
-
-    flex-wrap:nowrap;
-  }
-
-  .hero{
-    min-height:680px;
-  }
-
-  .featured{
+  .stage{
     grid-template-columns:1fr;
   }
 
-  .player-info{
-    align-items:flex-start;
-
-    flex-direction:column;
+  .chat-body,
+  #youtubeChat{
+    min-height:450px;
   }
 
-  .player-actions{
-    width:100%;
+  .member-hud{
+    grid-template-columns:
+      repeat(2,1fr);
   }
 
-  .player-action{
-    flex:1;
+  .sync-status{
+    grid-column:1/-1;
   }
 
-  .watch-sync{
-    align-items:flex-start;
-
-    flex-direction:column;
-  }
 }
 
-@media(max-width:600px){
+@media(max-width:850px){
 
-  main{
-    padding-top:45px;
+  .nav-links{
+    display:none;
   }
 
-  .hero-content{
-    padding-bottom:55px;
+  .hero{
+    padding-top:52px;
   }
 
-  .hero h1{
-    font-size:
-      clamp(38px,13vw,64px);
+  .episode-grid{
+    grid-template-columns:
+      repeat(2,minmax(0,1fr));
   }
 
-  .hero-actions{
-    flex-direction:column;
-  }
+}
 
-  .primary-button,
-  .secondary-button{
-    width:100%;
-  }
+@media(max-width:560px){
 
   .episode-grid{
     grid-template-columns:1fr;
   }
 
-  .featured-main{
-    min-height:380px;
-
-    padding:24px;
+  .member-hud{
+    grid-template-columns:1fr 1fr;
   }
 
-  .featured-side{
-    padding:20px;
+  .featured-content{
+    padding:25px;
   }
 
-  .player-frame{
-    min-height:220px;
+  .intro-title{
+    font-size:40px;
   }
 
-  .player-overlay{
-    padding:30px 15px 15px;
+  .intro-sub{
+    letter-spacing:.12em;
   }
 
-  .toast{
-    left:15px;
-    right:15px;
-    bottom:15px;
+  .chat-body,
+  #youtubeChat{
+    min-height:500px;
   }
+
+}
+
+@media(prefers-reduced-motion:reduce){
+
+  *,
+  *:before,
+  *:after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    scroll-behavior:auto !important;
+    transition:none !important;
+  }
+
 }
 
 </style>
 </head>
 
-<body>
+<body class="intro-active">
 
+<div class="background-grid"></div>
+<div class="background-noise"></div>
 
-<!-- =======================================================
+<div class="bg-glow one"></div>
+<div class="bg-glow two"></div>
+
+<!-- =========================================================
      CINEMATIC INTRO
-     ======================================================= -->
+     ========================================================= -->
 
-<div
-  class="cinematic-intro"
-  id="cinematicIntro"
->
+<section
+  id="intro"
+  aria-label="Tacoma Nights introduction">
 
-  <div class="intro-grid"></div>
+  <div class="intro-scanlines"></div>
+  <div class="intro-vignette"></div>
 
-  <div class="intro-scan"></div>
+  <div class="intro-center">
 
-  <div class="intro-content">
-
-    <div class="intro-brand">
-      CROWRULES ENTERTAINMENT
+    <div class="intro-kicker">
+      CROWRULES ENTERTAINMENT NETWORK
     </div>
-
-    <div class="intro-line"></div>
 
     <div class="intro-title">
-      TACOMA<br>NIGHTS
+      TACOMA NIGHTS
     </div>
 
-    <div class="intro-subtitle">
-      REAL STORIES • REAL PEOPLE • REAL TACOMA
+    <div class="intro-rule"></div>
+
+    <div class="intro-sub">
+      STORIES FROM TACOMA
+      <br>
+      THE BEGINNING OF SOMETHING NEW
     </div>
 
-    <div class="intro-loader">
+    <div class="intro-rule"></div>
+
+    <div class="intro-status">
+      ESTABLISHING CROWRULES SIGNAL
+    </div>
+
+    <div class="intro-progress">
       <span></span>
     </div>
 
   </div>
 
-</div>
+  <button
+    id="skipIntro"
+    type="button">
 
+    SKIP INTRO
 
-<!-- =======================================================
+  </button>
+
+</section>
+
+<!-- =========================================================
      HEADER
-     ======================================================= -->
+     ========================================================= -->
 
-<header class="site-header">
+<header>
 
-  <div class="header-inner">
+  <nav class="nav">
 
     <a
-      href="#top"
       class="brand"
-    >
-      CROWRULES
-      <small>ENTERTAINMENT</small>
+      href="index.html">
+
+      <div class="brand-logo">
+        CR
+      </div>
+
+      <div>
+
+        <div class="brand-name">
+          CROWRULES
+        </div>
+
+        <div class="brand-sub">
+          ENTERTAINMENT NETWORK
+        </div>
+
+      </div>
+
     </a>
 
-    <nav class="nav">
+    <div class="nav-links">
 
-      <a href="#watch">
-        Watch
+      <a href="index.html">
+        HOME
       </a>
 
-      <a href="#episodes">
-        Episodes
-      </a>
+      <a
+        href="tacomanights.html"
+        class="active">
 
-      <a href="#about">
-        About
-      </a>
+        TACOMA NIGHTS
 
-      <a href="#members">
-        Members
       </a>
 
       <a href="backdeck.html">
-        Back Deck Live
+        BACK DECK LIVE
       </a>
 
-    </nav>
+    </div>
 
-    <button
-      class="member-button"
-      id="memberButton"
-      type="button"
-    >
-      MEMBER LOGIN
-    </button>
+    <a
+      class="member-link"
+      href="members.html">
 
-  </div>
+      MEMBER HUB
+
+    </a>
+
+  </nav>
 
 </header>
 
-
-<!-- =======================================================
+<!-- =========================================================
      HERO
-     ======================================================= -->
+     ========================================================= -->
 
-<section
-  class="hero"
-  id="top"
->
+<section class="hero">
 
-  <div class="hero-grid"></div>
+  <div class="hero-status">
 
-  <div class="hero-content">
+    <span class="live-dot"></span>
 
-    <div class="hero-kicker">
-      CROWRULES ORIGINAL SERIES • TACOMA, WASHINGTON
-    </div>
-
-    <h1>
-      TACOMA<br>
-      NIGHTS
-    </h1>
-
-    <p class="hero-subtitle">
-      Real stories. Real people. Real Tacoma.
-      An original CrowRules Entertainment series
-      exploring life, struggle, creativity, community,
-      caregiving, dreams and everything in between.
-    </p>
-
-    <div class="hero-actions">
-
-      <a
-        class="primary-button"
-        href="#watch"
-      >
-        ▶ WATCH NOW
-      </a>
-
-      <a
-        class="secondary-button"
-        href="backdeck.html"
-      >
-        BACK DECK LIVE →
-      </a>
-
-    </div>
+    CROWRULES ORIGINAL
+    •
+    TACOMA NIGHTS
 
   </div>
 
+  <h1>
+    TACOMA<br>
+    <span>NIGHTS</span>
+  </h1>
+
+  <p class="hero-copy">
+
+    Tacoma Nights is a CrowRules Entertainment original
+    series exploring Tacoma, Washington through real
+    conversations, personal stories, community,
+    culture, creativity and the people who make this
+    city what it is.
+
+    <br><br>
+
+    <strong style="color:#a9b3c2;">
+      Season 01:
+    </strong>
+
+    The Beginning.
+
+  </p>
+
 </section>
 
-
-<!-- =======================================================
+<!-- =========================================================
      MAIN
-     ======================================================= -->
+     ========================================================= -->
 
 <main>
 
+  <!-- =======================================================
+       PLAYER + CHAT
+       ======================================================= -->
 
-<!-- =======================================================
-     PLAYER
-     ======================================================= -->
+  <section class="stage">
 
-<section
-  class="player-section"
-  id="watch"
->
+    <div class="player-card">
 
-  <div class="section-heading">
+      <div class="player">
 
-    <div>
+        <video
+          id="nativeVideo"
+          controls
+          playsinline
+          preload="metadata"
+          style="display:none;">
+        </video>
 
-      <div class="section-kicker">
-        CROWRULES WATCH
+        <iframe
+          id="youtubePlayer"
+          title="Tacoma Nights YouTube Player"
+          allow="
+            autoplay;
+            encrypted-media;
+            picture-in-picture;
+            web-share;
+            fullscreen
+          "
+          allowfullscreen
+          style="display:none;">
+        </iframe>
+
+        <div class="player-overlay"></div>
+
+        <div
+          id="playerBadge"
+          class="player-badge">
+
+          <span class="live-dot"></span>
+
+          TACOMA NIGHTS
+
+        </div>
+
       </div>
 
-      <h2 class="section-title">
-        Now Playing
-      </h2>
+      <div class="player-meta">
+
+        <h2 id="nowTitle">
+          Loading latest Tacoma Nights episode...
+        </h2>
+
+        <p id="nowDescription">
+          Connecting to the CrowRules content network.
+        </p>
+
+        <div class="watch-progress">
+
+          <div class="progress-track">
+
+            <div
+              id="progressBar"
+              class="progress-bar">
+            </div>
+
+          </div>
+
+          <div
+            id="resumeText"
+            class="resume-text">
+
+            Preparing playback...
+
+          </div>
+
+        </div>
+
+        <div class="player-actions">
+
+          <button
+            id="latestButton"
+            class="btn primary"
+            type="button">
+
+            ▶ LATEST EPISODE
+
+          </button>
+
+          <button
+            id="stopButton"
+            class="btn"
+            type="button">
+
+            ■ STOP
+
+          </button>
+
+        </div>
+
+      </div>
 
     </div>
 
-  </div>
+    <!-- =====================================================
+         YOUTUBE CHAT
+         ===================================================== -->
 
+    <aside class="chat-card">
 
-  <div class="player-shell">
+      <div class="chat-head">
 
-    <div class="player-frame">
+        <div class="chat-brand">
 
-      <video
-        id="videoPlayer"
-        controls
-        playsinline
-        preload="metadata"
-        style="display:none"
-      ></video>
+          <div class="chat-icon">
+            💬
+          </div>
 
+          <div>
 
-      <iframe
-        id="youtubeFrame"
-        title="Tacoma Nights"
-        allow="
-          autoplay;
-          encrypted-media;
-          picture-in-picture;
-          fullscreen
-        "
-        allowfullscreen
-        style="display:none"
-      ></iframe>
+            <div class="chat-title">
+              COMMUNITY CHAT
+            </div>
 
+            <div class="chat-sub">
+              TACOMA NIGHTS
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="chat-buttons">
+
+          <button
+            id="refreshChat"
+            class="chat-button"
+            type="button">
+
+            REFRESH
+
+          </button>
+
+          <button
+            id="openChat"
+            class="chat-button"
+            type="button">
+
+            OPEN
+
+          </button>
+
+        </div>
+
+      </div>
+
+      <div class="chat-body">
+
+        <iframe
+          id="youtubeChat"
+          title="Tacoma Nights YouTube Live Chat"
+          allow="autoplay; encrypted-media"
+          style="display:none;">
+        </iframe>
+
+        <div
+          id="chatEmpty"
+          class="chat-empty">
+
+          <div class="chat-empty-icon">
+            💬
+          </div>
+
+          <strong>
+            COMMUNITY CHAT STANDBY
+          </strong>
+
+          <span>
+            Select a Tacoma Nights YouTube episode to
+            activate the YouTube community panel.
+          </span>
+
+        </div>
+
+      </div>
+
+    </aside>
+
+  </section>
+
+  <!-- =======================================================
+       MEMBER HUD
+       ======================================================= -->
+
+  <section class="section">
+
+    <div class="section-header">
+
+      <div>
+
+        <h2 class="section-title">
+          MEMBER WATCH HUD
+        </h2>
+
+        <p class="section-description">
+          Actual Tacoma Nights playback time counts toward your CrowRules activity.
+        </p>
+
+      </div>
+
+    </div>
+
+    <div class="panel member-hud">
+
+      <div class="stat">
+
+        <div class="stat-label">
+          CROWPOINTS
+        </div>
+
+        <div
+          id="memberPoints"
+          class="stat-value">
+
+          —
+
+        </div>
+
+      </div>
+
+      <div class="stat">
+
+        <div class="stat-label">
+          WATCH MINUTES
+        </div>
+
+        <div
+          id="memberMinutes"
+          class="stat-value">
+
+          —
+
+        </div>
+
+      </div>
+
+      <div class="stat">
+
+        <div class="stat-label">
+          ACCOUNT
+        </div>
+
+        <div
+          id="memberStatus"
+          class="stat-value"
+          style="font-size:13px;">
+
+          GUEST
+
+        </div>
+
+      </div>
 
       <div
-        class="player-placeholder"
-        id="playerPlaceholder"
-      >
+        id="syncStatus"
+        class="sync-status synced">
 
-        <div class="player-placeholder-inner">
-
-          <div class="player-placeholder-logo">
-            CROWRULES ORIGINAL PROGRAMMING
-          </div>
-
-          <div class="player-placeholder-title">
-            TACOMA NIGHTS
-          </div>
-
-          <div class="player-placeholder-copy">
-            Loading the latest Tacoma Nights
-            transmission…
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <div
-        class="autoplay-notice"
-        id="autoplayNotice"
-      >
-        AUTOPLAY • MUTED
-      </div>
-
-
-      <div class="player-overlay">
-
-        <div
-          class="player-badge autoplay"
-          id="autoplayBadge"
-        >
-          ● INITIALIZING
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <div class="player-info">
-
-      <div class="player-info-main">
-
-        <div class="player-now">
-          NOW PLAYING
-        </div>
-
-        <div
-          class="player-title"
-          id="playerTitle"
-        >
-          Tacoma Nights
-        </div>
-
-        <div
-          class="player-meta"
-          id="playerMeta"
-        >
-          Loading latest episode…
-        </div>
-
-        <div
-          class="resume-note"
-          id="resumeNote"
-        ></div>
-
-      </div>
-
-
-      <div class="player-actions">
-
-        <button
-          class="player-action"
-          id="muteButton"
-          type="button"
-        >
-          🔊 UNMUTE
-        </button>
-
-        <button
-          class="player-action"
-          id="nextButton"
-          type="button"
-        >
-          NEXT EPISODE →
-        </button>
-
-      </div>
-
-    </div>
-
-
-    <div class="watch-sync">
-
-      <div class="sync-left">
-
-        <span
-          class="sync-dot"
-          id="syncDot"
-        ></span>
-
-        <span
-          class="sync-label"
-          id="syncLabel"
-        >
+        <span id="syncText">
           WATCH SYNC READY
         </span>
 
-      </div>
+        <button
+          id="retrySync"
+          type="button">
 
-      <button
-        class="sync-retry"
-        id="syncRetry"
-        type="button"
-      >
-        RETRY SYNC
-      </button>
+          RETRY
 
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- =======================================================
-     SERIES
-     ======================================================= -->
-
-<section
-  class="section"
-  id="about"
->
-
-  <div class="section-heading">
-
-    <div>
-
-      <div class="section-kicker">
-        THE SERIES
-      </div>
-
-      <h2 class="section-title">
-        Tacoma After Dark
-      </h2>
-
-    </div>
-
-  </div>
-
-
-  <div class="featured">
-
-    <div class="featured-main">
-
-      <div class="featured-label">
-        CROWRULES ORIGINAL PROGRAMMING
-      </div>
-
-      <div class="featured-title">
-        The Beginning
-      </div>
-
-      <p class="featured-copy">
-        Tacoma Nights is a documentary-style
-        original series from CrowRules Entertainment.
-        Each episode tells a piece of a larger story —
-        personal experiences, life in Tacoma,
-        difficult conversations, creativity and
-        the people who keep moving forward.
-      </p>
-
-      <div class="hero-actions">
-
-        <a
-          href="#episodes"
-          class="primary-button"
-        >
-          EXPLORE EPISODES
-        </a>
+        </button>
 
       </div>
 
     </div>
 
+  </section>
 
-    <div class="featured-side">
+  <!-- =======================================================
+       FEATURED
+       ======================================================= -->
 
-      <div class="stat">
+  <section class="section">
 
-        <div
-          class="stat-number"
-          id="episodeCount"
-        >
-          —
-        </div>
+    <div class="section-header">
 
-        <div class="stat-label">
-          PLAYABLE EPISODES
-        </div>
+      <div>
 
-      </div>
+        <h2 class="section-title">
+          LATEST TRANSMISSION
+        </h2>
 
-
-      <div class="stat">
-
-        <div
-          class="stat-number"
-          id="seasonCount"
-        >
-          —
-        </div>
-
-        <div class="stat-label">
-          SEASONS
-        </div>
+        <p class="section-description">
+          The newest available Tacoma Nights episode from Supabase.
+        </p>
 
       </div>
-
-
-      <div class="stat">
-
-        <div
-          class="stat-number"
-          id="memberStatus"
-        >
-          GUEST
-        </div>
-
-        <div class="stat-label">
-          WATCH STATUS
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- =======================================================
-     EPISODES
-     ======================================================= -->
-
-<section
-  class="section"
-  id="episodes"
->
-
-  <div class="section-heading">
-
-    <div>
-
-      <div class="section-kicker">
-        WATCH NOW
-      </div>
-
-      <h2 class="section-title">
-        Episodes
-      </h2>
 
     </div>
 
     <div
-      class="section-description"
-      id="episodeStatus"
-    >
-      Loading Tacoma Nights episodes…
+      id="featured"
+      class="featured">
+
+      <div class="featured-background">
+
+        <img
+          id="featuredImage"
+          alt=""
+          style="display:none;">
+
+      </div>
+
+      <div class="featured-gradient"></div>
+
+      <div class="featured-content">
+
+        <div class="featured-kicker">
+          TACOMA NIGHTS • SEASON 01
+        </div>
+
+        <h2 id="featuredTitle">
+          Loading transmission...
+        </h2>
+
+        <p id="featuredDescription">
+          Connecting to the CrowRules content network.
+        </p>
+
+        <div class="player-actions">
+
+          <button
+            id="featuredButton"
+            class="btn primary"
+            type="button">
+
+            ▶ WATCH NOW
+
+          </button>
+
+        </div>
+
+      </div>
+
     </div>
 
-  </div>
+  </section>
 
+  <!-- =======================================================
+       EPISODE ARCHIVE
+       ======================================================= -->
 
-  <div
-    id="episodeGrid"
-    class="episode-grid"
-  >
+  <section class="section">
 
-    <div class="loading">
-      Loading episodes…
+    <div class="section-header">
+
+      <div>
+
+        <h2 class="section-title">
+          TACOMA NIGHTS ARCHIVE
+        </h2>
+
+        <p class="section-description">
+          Published Tacoma Nights episodes from the CrowRules content network.
+        </p>
+
+      </div>
+
     </div>
 
-  </div>
+    <div
+      id="episodeGrid"
+      class="episode-grid">
 
-</section>
+      <div class="empty">
 
+        <div class="spinner"></div>
 
-<!-- =======================================================
-     MEMBERS
-     ======================================================= -->
+        Loading Tacoma Nights...
 
-<section
-  class="section"
-  id="members"
->
+      </div>
 
-  <div class="member-panel">
-
-    <div class="section-kicker">
-      CROWRULES MEMBERS
     </div>
 
-    <h2>
-      Watch. Earn. Continue.
-    </h2>
-
-    <p id="memberMessage">
-      Sign in to CrowRules to automatically save
-      your Tacoma Nights watch history, resume
-      episodes where you left off, earn eligible
-      CrowPoints and build your viewing history.
-    </p>
-
-    <button
-      class="primary-button"
-      id="memberAction"
-      type="button"
-    >
-      SIGN IN TO CROWRULES
-    </button>
-
-  </div>
-
-</section>
+  </section>
 
 </main>
 
+<!-- =========================================================
+     FOOTER
+     ========================================================= -->
 
 <footer>
 
-  ©
-  <span id="year"></span>
-  CrowRules Entertainment.
-  Tacoma Nights is an original CrowRules production.
+  <strong>
+    CROWRULES ENTERTAINMENT
+  </strong>
+
+  <br>
+
+  Tacoma Nights • CrowRules TV • Tacoma, Washington
+
+  <br>
+
+  © 2026 CrowRules Entertainment
 
 </footer>
 
-
-<div
-  class="toast"
-  id="toast"
-></div>
-
-
-<!-- =======================================================
-     SUPABASE
-     ======================================================= -->
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+<div id="toast"></div>
 
 <script>
 
 /* =========================================================
    CROWRULES TACOMA NIGHTS
-   WATCH ENGINE
+   v11.0
    ========================================================= */
 
 "use strict";
-
 
 /* =========================================================
    SUPABASE
@@ -2255,6 +2451,90 @@ const db =
     }
   );
 
+/* =========================================================
+   DOM
+   ========================================================= */
+
+const intro =
+  document.getElementById("intro");
+
+const skipIntro =
+  document.getElementById("skipIntro");
+
+const nativeVideo =
+  document.getElementById("nativeVideo");
+
+const youtubePlayer =
+  document.getElementById("youtubePlayer");
+
+const youtubeChat =
+  document.getElementById("youtubeChat");
+
+const chatEmpty =
+  document.getElementById("chatEmpty");
+
+const refreshChat =
+  document.getElementById("refreshChat");
+
+const openChat =
+  document.getElementById("openChat");
+
+const playerBadge =
+  document.getElementById("playerBadge");
+
+const nowTitle =
+  document.getElementById("nowTitle");
+
+const nowDescription =
+  document.getElementById("nowDescription");
+
+const progressBar =
+  document.getElementById("progressBar");
+
+const resumeText =
+  document.getElementById("resumeText");
+
+const episodeGrid =
+  document.getElementById("episodeGrid");
+
+const latestButton =
+  document.getElementById("latestButton");
+
+const stopButton =
+  document.getElementById("stopButton");
+
+const memberPoints =
+  document.getElementById("memberPoints");
+
+const memberMinutes =
+  document.getElementById("memberMinutes");
+
+const memberStatus =
+  document.getElementById("memberStatus");
+
+const syncStatus =
+  document.getElementById("syncStatus");
+
+const syncText =
+  document.getElementById("syncText");
+
+const retrySync =
+  document.getElementById("retrySync");
+
+const featuredTitle =
+  document.getElementById("featuredTitle");
+
+const featuredDescription =
+  document.getElementById("featuredDescription");
+
+const featuredImage =
+  document.getElementById("featuredImage");
+
+const featuredButton =
+  document.getElementById("featuredButton");
+
+const toast =
+  document.getElementById("toast");
 
 /* =========================================================
    STATE
@@ -2262,308 +2542,328 @@ const db =
 
 const state = {
 
-  episodes:[],
-
   user:null,
+
+  member:null,
+
+  episodes:[],
 
   currentEpisode:null,
 
   currentIndex:-1,
 
-  initialized:false,
+  watchHistory:[],
 
-  currentMedia:"none",
+  watchQueue:[],
+
+  watchWorkerRunning:false,
+
+  watchError:null,
 
   nativeTracker:null,
 
   youtubeTracker:null,
 
-  youtubeReady:false,
+  currentYoutubeId:null,
 
-  youtubeDuration:0,
+  youtubeMuted:true,
 
-  youtubeCurrentTime:0,
+  toastTimer:null,
 
-  watchSyncQueue:[],
+  introClosed:false,
 
-  watchSyncBusy:false,
-
-  watchSyncError:null,
-
-  history:[],
-
-  autoplayStarted:false
+  latestEpisode:null
 
 };
 
-
 /* =========================================================
-   DOM
+   INTRO
    ========================================================= */
 
-const cinematicIntro =
-  document.getElementById("cinematicIntro");
+function closeIntro(){
 
-const episodeGrid =
-  document.getElementById("episodeGrid");
+  if(state.introClosed)
+    return;
 
-const episodeStatus =
-  document.getElementById("episodeStatus");
+  state.introClosed = true;
 
-const episodeCount =
-  document.getElementById("episodeCount");
+  intro.classList.add("hide");
 
-const seasonCount =
-  document.getElementById("seasonCount");
+  document.body.classList.remove(
+    "intro-active"
+  );
 
-const memberStatus =
-  document.getElementById("memberStatus");
+}
 
-const memberButton =
-  document.getElementById("memberButton");
+skipIntro.addEventListener(
+  "click",
+  closeIntro
+);
 
-const memberAction =
-  document.getElementById("memberAction");
-
-const memberMessage =
-  document.getElementById("memberMessage");
-
-const videoPlayer =
-  document.getElementById("videoPlayer");
-
-const youtubeFrame =
-  document.getElementById("youtubeFrame");
-
-const playerPlaceholder =
-  document.getElementById("playerPlaceholder");
-
-const playerTitle =
-  document.getElementById("playerTitle");
-
-const playerMeta =
-  document.getElementById("playerMeta");
-
-const resumeNote =
-  document.getElementById("resumeNote");
-
-const autoplayNotice =
-  document.getElementById("autoplayNotice");
-
-const autoplayBadge =
-  document.getElementById("autoplayBadge");
-
-const muteButton =
-  document.getElementById("muteButton");
-
-const nextButton =
-  document.getElementById("nextButton");
-
-const syncDot =
-  document.getElementById("syncDot");
-
-const syncLabel =
-  document.getElementById("syncLabel");
-
-const syncRetry =
-  document.getElementById("syncRetry");
-
-const toast =
-  document.getElementById("toast");
-
-
-document.getElementById("year").textContent =
-  new Date().getFullYear();
-
+setTimeout(
+  closeIntro,
+  4800
+);
 
 /* =========================================================
    HELPERS
    ========================================================= */
 
-function first(...values){
+function number(
+  value,
+  fallback=0
+){
 
-  for(const value of values){
-
-    if(
-      value !== null &&
-      value !== undefined &&
-      String(value).trim() !== ""
-    ){
-      return value;
-    }
-
-  }
-
-  return "";
-}
-
-
-function integer(value){
-
-  const n =
-    Number(value);
-
-  return Number.isFinite(n)
-    ? Math.max(0,Math.floor(n))
-    : 0;
-}
-
-
-function number(value){
-
-  const n =
-    Number(value);
+  const n = Number(value);
 
   return Number.isFinite(n)
     ? n
-    : 0;
+    : fallback;
+
 }
 
+function integer(
+  value,
+  fallback=0
+){
 
-function escapeHTML(value){
-
-  return String(
-    value ?? ""
-  ).replace(
-    /[&<>"']/g,
-    char => ({
-      "&":"&amp;",
-      "<":"&lt;",
-      ">":"&gt;",
-      '"':"&quot;",
-      "'":"&#039;"
-    })[char]
+  return Math.max(
+    0,
+    Math.floor(
+      number(
+        value,
+        fallback
+      )
+    )
   );
 
 }
 
+function first(
+  ...values
+){
 
-function episodeTitle(row){
+  return values.find(
+    value =>
+      value !== null &&
+      value !== undefined &&
+      String(value).trim() !== ""
+  ) || "";
+
+}
+
+function escapeHtml(
+  value
+){
+
+  return String(value ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+
+}
+
+function formatDate(
+  value
+){
+
+  if(!value)
+    return "";
+
+  const date =
+    new Date(value);
+
+  if(
+    Number.isNaN(
+      date.getTime()
+    )
+  )
+    return "";
+
+  return date.toLocaleDateString(
+    undefined,
+    {
+      year:"numeric",
+      month:"short",
+      day:"numeric"
+    }
+  );
+
+}
+
+function showToast(
+  message,
+  type=""
+){
+
+  clearTimeout(
+    state.toastTimer
+  );
+
+  toast.textContent =
+    message;
+
+  toast.className =
+    "show " + type;
+
+  state.toastTimer =
+    setTimeout(
+      ()=>{
+        toast.className = "";
+      },
+      4500
+    );
+
+}
+
+/* =========================================================
+   EPISODE HELPERS
+   ========================================================= */
+
+function getEpisodeTitle(
+  episode
+){
 
   return first(
-    row?.title,
-    row?.name,
-    row?.episode_title,
-    "Untitled Tacoma Nights Episode"
+    episode?.title,
+    "Tacoma Nights"
   );
 
 }
 
-
-function episodeDescription(row){
+function getEpisodeDescription(
+  episode
+){
 
   return first(
-    row?.description,
-    row?.summary,
-    row?.excerpt,
-    ""
+    episode?.description,
+    "A Tacoma Nights original episode from CrowRules Entertainment."
   );
 
 }
 
+function getEpisodeNumber(
+  episode
+){
 
-function episodeSeason(row){
+  return integer(
+    episode?.episode_number
+  );
+
+}
+
+function getEpisodeSeason(
+  episode
+){
 
   return first(
-    row?.season,
-    row?.season_number,
-    ""
+    episode?.season,
+    "Season 01"
   );
 
 }
 
-
-function episodeNumber(row){
+function getEpisodeTheme(
+  episode
+){
 
   return first(
-    row?.episode_number,
-    row?.episode,
-    ""
+    episode?.season_theme,
+    "The Beginning"
   );
 
 }
 
-
-function episodeReleaseDate(row){
+function getEpisodeDate(
+  episode
+){
 
   return first(
-    row?.release_date,
-    row?.published_at,
-    row?.air_date,
-    row?.created_at,
-    ""
+    episode?.published_at,
+    episode?.created_at,
+    episode?.updated_at
   );
 
 }
 
-
-function episodeVideo(row){
+function getEpisodeThumbnail(
+  episode
+){
 
   return first(
-    row?.video_url,
-    row?.video,
-    row?.file_url,
-    row?.media_url,
-    row?.stream_url,
-    row?.playback_url,
-    row?.video_path,
-    ""
+    episode?.thumbnail_url
   );
 
 }
 
+function getEpisodeYoutubeId(
+  episode
+){
 
-function episodeYouTube(row){
+  const values = [
 
-  return first(
-    row?.youtube_url,
-    row?.youtube,
-    row?.youtube_video_url,
-    row?.youtube_live_url,
-    row?.youtube_id,
-    row?.youtube_video_id,
-    ""
-  );
+    episode?.youtube_video_id,
+
+    episode?.youtube_url
+
+  ];
+
+  for(
+    const value of values
+  ){
+
+    const id =
+      getYoutubeId(value);
+
+    if(id)
+      return id;
+
+  }
+
+  return null;
 
 }
 
+function getEpisodeDuration(
+  episode
+){
 
-function episodeThumbnail(row){
-
-  return first(
-    row?.thumbnail_url,
-    row?.thumbnail,
-    row?.image_url,
-    row?.cover_url,
-    row?.poster_url,
-    ""
+  return integer(
+    episode?.duration_seconds
   );
 
 }
-
 
 /* =========================================================
    YOUTUBE ID
    ========================================================= */
 
-function getYouTubeId(value){
+function getYoutubeId(
+  value
+){
 
-  if(!value){
-    return "";
-  }
+  if(!value)
+    return null;
 
-  const s =
+  const input =
     String(value).trim();
 
   if(
-    /^[A-Za-z0-9_-]{11}$/.test(s)
+    /^[A-Za-z0-9_-]{11}$/.test(
+      input
+    )
   ){
-    return s;
+
+    return input;
+
   }
 
   try{
 
     const url =
-      new URL(s);
+      new URL(input);
 
     if(
       url.hostname.includes("youtu.be")
@@ -2573,1688 +2873,181 @@ function getYouTubeId(value){
         url.pathname
           .replace(/^\/+/,"")
           .split("/")[0]
+        || null
       );
 
     }
-
-    const v =
-      url.searchParams.get("v");
-
-    if(v){
-      return v;
-    }
-
-    const parts =
-      url.pathname
-        .split("/")
-        .filter(Boolean);
-
-    const index =
-      parts.findIndex(
-        part =>
-          [
-            "embed",
-            "live",
-            "shorts"
-          ].includes(
-            part
-          )
-      );
 
     if(
-      index >= 0 &&
-      parts[index + 1]
+      url.hostname.includes("youtube.com")
     ){
 
-      return parts[index + 1];
+      const v =
+        url.searchParams.get("v");
 
-    }
+      if(v)
+        return v;
 
-  }catch{
+      const parts =
+        url.pathname
+          .split("/")
+          .filter(Boolean);
 
-    const patterns = [
+      const index =
+        parts.findIndex(
+          part =>
+            [
+              "embed",
+              "live",
+              "shorts"
+            ].includes(part)
+        );
 
-      /youtu\.be\/([A-Za-z0-9_-]{11})/,
+      if(index >= 0){
 
-      /youtube\.com\/watch[^ ]*v=([A-Za-z0-9_-]{11})/,
+        return (
+          parts[index + 1]
+          || null
+        );
 
-      /youtube\.com\/embed\/([A-Za-z0-9_-]{11})/,
-
-      /youtube\.com\/shorts\/([A-Za-z0-9_-]{11})/,
-
-      /youtube\.com\/live\/([A-Za-z0-9_-]{11})/
-
-    ];
-
-    for(
-      const pattern of patterns
-    ){
-
-      const match =
-        s.match(pattern);
-
-      if(match){
-        return match[1];
       }
 
     }
 
-  }
+  }catch(error){
 
-  return "";
-}
-
-
-/* =========================================================
-   EPISODE YOUTUBE ID
-   ========================================================= */
-
-function episodeYouTubeId(row){
-
-  const direct =
-    getYouTubeId(
-      episodeYouTube(row)
+    console.warn(
+      "YouTube URL parse failed:",
+      error
     );
 
-  if(direct){
-    return direct;
   }
 
-  const video =
-    getYouTubeId(
-      episodeVideo(row)
-    );
+  return null;
 
-  return video || "";
 }
 
-
 /* =========================================================
-   PLAYABLE
+   PLAYABILITY
    ========================================================= */
 
-function isPlayable(row){
+function isPlayable(
+  episode
+){
 
   return Boolean(
-    episodeYouTubeId(row) ||
-    episodeVideo(row)
+    getEpisodeYoutubeId(episode) ||
+    first(
+      episode?.video_url,
+      episode?.video,
+      episode?.file_url,
+      episode?.media_url,
+      episode?.stream_url,
+      episode?.playback_url,
+      episode?.video_path
+    )
   );
 
 }
 
-
 /* =========================================================
-   THUMBNAIL
+   VIDEO URL
    ========================================================= */
 
-function getThumbnail(row){
+function getEpisodeVideo(
+  episode
+){
 
-  const direct =
-    episodeThumbnail(row);
-
-  if(direct){
-    return direct;
-  }
-
-  const youtubeId =
-    episodeYouTubeId(row);
-
-  if(youtubeId){
-
-    return (
-      "https://img.youtube.com/vi/" +
-      youtubeId +
-      "/maxresdefault.jpg"
-    );
-
-  }
-
-  return "";
+  return first(
+    episode?.video_url,
+    episode?.video,
+    episode?.file_url,
+    episode?.media_url,
+    episode?.stream_url,
+    episode?.playback_url,
+    episode?.video_path
+  );
 
 }
 
-
 /* =========================================================
-   DATE
+   SORT
    ========================================================= */
 
-function formatDate(value){
-
-  if(!value){
-    return "";
-  }
+function episodeSortValue(
+  episode
+){
 
   const date =
-    new Date(value);
+    new Date(
+      getEpisodeDate(
+        episode
+      )
+    ).getTime();
 
   if(
-    Number.isNaN(
-      date.getTime()
-    )
+    Number.isFinite(date)
   ){
 
-    return String(value);
+    return date;
 
   }
 
-  return date.toLocaleDateString(
-    undefined,
-    {
-      month:"short",
-      day:"numeric",
-      year:"numeric"
-    }
+  return getEpisodeNumber(
+    episode
   );
 
 }
 
+function compareEpisodes(
+  a,
+  b
+){
 
-/* =========================================================
-   TIME
-   ========================================================= */
-
-function formatTime(seconds){
-
-  const value =
-    Math.max(
-      0,
-      Math.floor(
-        Number(seconds) || 0
-      )
+  const seasonA =
+    integer(
+      a?.season_number
     );
 
-  const hours =
-    Math.floor(
-      value / 3600
+  const seasonB =
+    integer(
+      b?.season_number
     );
 
-  const minutes =
-    Math.floor(
-      (value % 3600) / 60
-    );
+  if(
+    seasonA !== seasonB
+  ){
 
-  const secs =
-    value % 60;
+    return seasonA - seasonB;
 
-  if(hours){
+  }
 
-    return (
-      hours +
-      ":" +
-      String(minutes).padStart(2,"0") +
-      ":" +
-      String(secs).padStart(2,"0")
-    );
+  const numberA =
+    getEpisodeNumber(a);
+
+  const numberB =
+    getEpisodeNumber(b);
+
+  if(
+    numberA !== numberB
+  ){
+
+    return numberA - numberB;
 
   }
 
   return (
-    minutes +
-    ":" +
-    String(secs).padStart(2,"0")
+    episodeSortValue(a) -
+    episodeSortValue(b)
   );
 
 }
 
-
 /* =========================================================
-   TOAST
+   YOUTUBE PLAYER
    ========================================================= */
 
-let toastTimer = null;
-
-function toastMessage(
-  message,
-  type=""
-){
-
-  toast.textContent =
-    message;
-
-  toast.className =
-    "toast show " +
-    type;
-
-  clearTimeout(
-    toastTimer
-  );
-
-  toastTimer =
-    setTimeout(
-      () => {
-
-        toast.classList.remove(
-          "show"
-        );
-
-      },
-      4500
-    );
-
-}
-
-
-/* =========================================================
-   SYNC STATUS
-   ========================================================= */
-
-function setSync(
-  type,
-  label
-){
-
-  syncDot.className =
-    "sync-dot";
-
-  if(type === "pending"){
-    syncDot.classList.add("pending");
-  }
-
-  if(type === "error"){
-    syncDot.classList.add("error");
-  }
-
-  syncLabel.textContent =
-    label;
-
-  syncRetry.classList.toggle(
-    "show",
-    type === "error"
-  );
-
-}
-
-
-function pendingSeconds(){
-
-  return state.watchSyncQueue
-    .reduce(
-      (
-        total,
-        job
-      ) =>
-        total +
-        integer(
-          job.seconds
-        ),
-      0
-    );
-
-}
-
-
-function updateSyncStatus(){
-
-  const pending =
-    pendingSeconds();
-
-  if(
-    state.watchSyncError
-  ){
-
-    setSync(
-      "error",
-      "WATCH SYNC ERROR"
-    );
-
-    return;
-  }
-
-  if(
-    state.watchSyncBusy ||
-    pending > 0
-  ){
-
-    setSync(
-      "pending",
-      pending > 0
-        ? `SYNC PENDING • ${formatTime(pending)}`
-        : "SYNCING WATCH TIME…"
-    );
-
-    return;
-  }
-
-  setSync(
-    "synced",
-    state.user
-      ? "WATCH SYNCED"
-      : "GUEST • WATCHING LOCALLY"
-  );
-
-}
-
-
-/* =========================================================
-   AUTH
-   ========================================================= */
-
-async function refreshUser(){
-
-  try{
-
-    const {
-      data,
-      error
-    } =
-      await db.auth.getUser();
-
-    if(error){
-      throw error;
-    }
-
-    state.user =
-      data?.user ||
-      null;
-
-  }catch(error){
-
-    console.debug(
-      "User lookup:",
-      error
-    );
-
-    state.user =
-      null;
-
-  }
-
-  updateMemberUI();
-
-}
-
-
-/* =========================================================
-   MEMBER UI
-   ========================================================= */
-
-function updateMemberUI(){
-
-  if(state.user){
-
-    memberStatus.textContent =
-      "MEMBER";
-
-    memberButton.textContent =
-      "MEMBER HUB";
-
-    memberMessage.textContent =
-      "You're signed in. Tacoma Nights playback position, watch history and eligible CrowPoints activity can synchronize with your CrowRules member account.";
-
-    memberAction.textContent =
-      "OPEN MEMBER HUB";
-
-    memberButton.onclick =
-      () => {
-        window.location.href =
-          "members.html";
-      };
-
-    memberAction.onclick =
-      () => {
-        window.location.href =
-          "members.html";
-      };
-
-  }else{
-
-    memberStatus.textContent =
-      "GUEST";
-
-    memberButton.textContent =
-      "MEMBER LOGIN";
-
-    memberMessage.textContent =
-      "Sign in to CrowRules to automatically save your Tacoma Nights watch history, resume episodes where you left off, earn eligible CrowPoints and build your viewing history.";
-
-    memberAction.textContent =
-      "SIGN IN TO CROWRULES";
-
-    memberButton.onclick =
-      () => {
-        window.location.href =
-          "members.html";
-      };
-
-    memberAction.onclick =
-      () => {
-        window.location.href =
-          "members.html";
-      };
-
-  }
-
-}
-
-
-/* =========================================================
-   WATCH HISTORY
-   ========================================================= */
-
-async function loadWatchHistory(){
-
-  if(!state.user){
-
-    state.history = [];
-
-    return;
-
-  }
-
-  try{
-
-    const {
-      data,
-      error
-    } =
-      await db
-        .from(
-          "cr_member_watch_history"
-        )
-        .select(
-          "id,content_id,content_type,title,watched_seconds,last_position_seconds,completed,watched_at"
-        )
-        .eq(
-          "user_id",
-          state.user.id
-        )
-        .eq(
-          "content_type",
-          "tacoma_nights"
-        )
-        .order(
-          "watched_at",
-          {
-            ascending:false
-          }
-        )
-        .limit(500);
-
-    if(error){
-      throw error;
-    }
-
-    state.history =
-      data || [];
-
-  }catch(error){
-
-    console.debug(
-      "Watch history load failed:",
-      error
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   HISTORY FOR EPISODE
-   ========================================================= */
-
-function historyFor(
-  episodeId
-){
-
-  return state.history.find(
-    row =>
-      String(row.content_id) ===
-      String(episodeId)
-  ) || null;
-
-}
-
-
-/* =========================================================
-   RESUME
-   ========================================================= */
-
-async function getResumePosition(
-  episode
-){
-
-  if(!state.user){
-    return 0;
-  }
-
-  const existing =
-    historyFor(
-      episode.id
-    );
-
-  if(existing){
-
-    if(
-      existing.completed
-    ){
-      return 0;
-    }
-
-    return Math.max(
-      0,
-      integer(
-        existing.last_position_seconds
-      )
-    );
-
-  }
-
-  try{
-
-    const {
-      data,
-      error
-    } =
-      await db
-        .from(
-          "cr_member_watch_history"
-        )
-        .select(
-          "last_position_seconds,watched_seconds,completed"
-        )
-        .eq(
-          "user_id",
-          state.user.id
-        )
-        .eq(
-          "content_id",
-          episode.id
-        )
-        .eq(
-          "content_type",
-          "tacoma_nights"
-        )
-        .order(
-          "watched_at",
-          {
-            ascending:false
-          }
-        )
-        .limit(1)
-        .maybeSingle();
-
-    if(error){
-      throw error;
-    }
-
-    if(
-      !data ||
-      data.completed
-    ){
-      return 0;
-    }
-
-    return Math.max(
-      0,
-      integer(
-        data.last_position_seconds
-      )
-    );
-
-  }catch(error){
-
-    console.debug(
-      "Resume lookup failed:",
-      error
-    );
-
-    return 0;
-
-  }
-
-}
-
-
-/* =========================================================
-   APPLY RPC TOTALS
-   ========================================================= */
-
-function applyRpcTotals(
-  result
-){
-
-  if(!result){
-    return;
-  }
-
-  const data =
-    Array.isArray(result)
-      ? result[0]
-      : result;
-
-  if(!data){
-    return;
-  }
-
-  if(
-    typeof data.total_watch_minutes !==
-    "undefined"
-  ){
-
-    window.dispatchEvent(
-      new CustomEvent(
-        "crowrules:watch-saved",
-        {
-          detail:data
-        }
-      )
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   QUEUE WATCH JOB
-   ========================================================= */
-
-function queueWatchJob({
-  episodeId,
-  title,
-  seconds,
-  positionSeconds,
-  completed
-}){
-
-  const safeSeconds =
-    Math.min(
-      300,
-      Math.max(
-        0,
-        integer(seconds)
-      )
-    );
-
-  const safePosition =
-    Math.max(
-      0,
-      integer(positionSeconds)
-    );
-
-  if(
-    safeSeconds <= 0 &&
-    !completed
-  ){
-
-    return;
-
-  }
-
-  state.watchSyncQueue.push({
-    episodeId,
-    title:
-      title ||
-      "Tacoma Nights",
-    contentType:
-      "tacoma_nights",
-    seconds:
-      safeSeconds,
-    positionSeconds:
-      safePosition,
-    completed:
-      Boolean(completed)
-  });
-
-  state.watchSyncError =
-    null;
-
-  updateSyncStatus();
-
-  processWatchQueue();
-
-}
-
-
-/* =========================================================
-   PROCESS WATCH QUEUE
-   ========================================================= */
-
-async function processWatchQueue(){
-
-  if(
-    state.watchSyncBusy
-  ){
-    return;
-  }
-
-  if(
-    !state.user
-  ){
-
-    updateSyncStatus();
-
-    return;
-
-  }
-
-  if(
-    !state.watchSyncQueue.length
-  ){
-
-    updateSyncStatus();
-
-    return;
-
-  }
-
-  state.watchSyncBusy =
-    true;
-
-  state.watchSyncError =
-    null;
-
-  updateSyncStatus();
-
-
-  try{
-
-    while(
-      state.watchSyncQueue.length
-    ){
-
-      const job =
-        state.watchSyncQueue[0];
-
-      const seconds =
-        Math.min(
-          300,
-          Math.max(
-            0,
-            integer(
-              job.seconds
-            )
-          )
-        );
-
-      const completed =
-        Boolean(
-          job.completed
-        );
-
-      const position =
-        Math.max(
-          0,
-          integer(
-            job.positionSeconds
-          )
-        );
-
-
-      /*
-         IMPORTANT:
-         Canonical six-argument RPC.
-         This avoids the old overloaded/ambiguous
-         record_member_watch signature.
-      */
-
-      const {
-        data,
-        error
-      } =
-        await db.rpc(
-          "record_member_watch",
-          {
-            p_content_id:
-              job.episodeId,
-
-            p_content_type:
-              "tacoma_nights",
-
-            p_title:
-              job.title ||
-              "Tacoma Nights",
-
-            p_seconds:
-              seconds,
-
-            p_position_seconds:
-              position,
-
-            p_completed:
-              completed
-          }
-        );
-
-
-      if(error){
-
-        throw error;
-
-      }
-
-
-      applyRpcTotals(
-        data
-      );
-
-
-      state.watchSyncQueue.shift();
-
-
-      /*
-         Refresh local history after
-         successful synchronization.
-      */
-
-      if(
-        state.watchSyncQueue.length === 0
-      ){
-
-        await loadWatchHistory();
-
-      }
-
-      updateSyncStatus();
-
-    }
-
-  }catch(error){
-
-    console.error(
-      "Watch sync failed:",
-      error
-    );
-
-    state.watchSyncError =
-      error;
-
-    setSync(
-      "error",
-      error?.code === "42702"
-        ? "DATABASE WATCH FUNCTION ERROR"
-        : "WATCH SYNC ERROR"
-    );
-
-    if(
-      error?.code === "42702"
-    ){
-
-      toastMessage(
-        "Watch time is safely queued. The database watch function still needs its ambiguous-column fix.",
-        "error"
-      );
-
-    }else{
-
-      toastMessage(
-        "Watch progress could not sync. Your watch time remains queued and will retry.",
-        "error"
-      );
-
-    }
-
-  }finally{
-
-    state.watchSyncBusy =
-      false;
-
-    updateSyncStatus();
-
-  }
-
-}
-
-
-/* =========================================================
-   RETRY
-   ========================================================= */
-
-syncRetry.addEventListener(
-  "click",
-  () => {
-
-    state.watchSyncError =
-      null;
-
-    updateSyncStatus();
-
-    processWatchQueue();
-
-  }
-);
-
-
-/* =========================================================
-   NATIVE TRACKER
-   ========================================================= */
-
-function startNativeTracker(
-  episode
-){
-
-  stopNativeTracker();
-
-  state.nativeTracker = {
-
-    episodeId:
-      episode.id,
-
-    title:
-      episodeTitle(episode),
-
-    accumulated:0,
-
-    lastTick:
-      performance.now(),
-
-    playing:false,
-
-    seeking:false,
-
-    timer:null
-
-  };
-
-  const tracker =
-    state.nativeTracker;
-
-  tracker.timer =
-    setInterval(
-      () => {
-
-        if(
-          !state.nativeTracker ||
-          state.nativeTracker !== tracker
-        ){
-          return;
-        }
-
-        const now =
-          performance.now();
-
-        const elapsed =
-          Math.max(
-            0,
-            (now - tracker.lastTick) / 1000
-          );
-
-        tracker.lastTick =
-          now;
-
-        if(
-          tracker.playing &&
-          !tracker.seeking &&
-          !document.hidden &&
-          !videoPlayer.paused &&
-          videoPlayer.readyState >= 2
-        ){
-
-          tracker.accumulated +=
-            elapsed;
-
-          if(
-            tracker.accumulated >= 15
-          ){
-
-            flushNativeWatch(
-              false
-            );
-
-          }
-
-        }
-
-      },
-      1000
-    );
-
-}
-
-
-/* =========================================================
-   STOP NATIVE TRACKER
-   ========================================================= */
-
-function stopNativeTracker(){
-
-  if(
-    state.nativeTracker?.timer
-  ){
-
-    clearInterval(
-      state.nativeTracker.timer
-    );
-
-  }
-
-  state.nativeTracker =
-    null;
-
-}
-
-
-/* =========================================================
-   FLUSH NATIVE WATCH
-   ========================================================= */
-
-function flushNativeWatch(
-  completed = false
-){
-
-  const tracker =
-    state.nativeTracker;
-
-  if(!tracker){
-    return;
-  }
-
-  const seconds =
-    Math.floor(
-      tracker.accumulated
-    );
-
-  const position =
-    integer(
-      videoPlayer.currentTime
-    );
-
-  /*
-     Reset immediately.
-     The queue now owns these seconds.
-     This prevents double-counting.
-  */
-
-  tracker.accumulated =
-    Math.max(
-      0,
-      tracker.accumulated -
-      seconds
-    );
-
-  if(
-    seconds <= 0 &&
-    !completed
-  ){
-    return;
-  }
-
-  queueWatchJob({
-
-    episodeId:
-      tracker.episodeId,
-
-    title:
-      tracker.title,
-
-    seconds,
-
-    positionSeconds:
-      position,
-
-    completed
-
-  });
-
-}
-
-
-/* =========================================================
-   NATIVE EVENTS
-   ========================================================= */
-
-videoPlayer.addEventListener(
-  "play",
-  () => {
-
-    if(
-      state.nativeTracker
-    ){
-
-      state.nativeTracker.playing =
-        true;
-
-      state.nativeTracker.lastTick =
-        performance.now();
-
-    }
-
-    autoplayBadge.textContent =
-      "● PLAYING";
-
-  }
-);
-
-
-videoPlayer.addEventListener(
-  "pause",
-  () => {
-
-    if(
-      state.nativeTracker
-    ){
-
-      state.nativeTracker.playing =
-        false;
-
-    }
-
-    flushNativeWatch(
-      false
-    );
-
-  }
-);
-
-
-videoPlayer.addEventListener(
-  "seeking",
-  () => {
-
-    if(
-      state.nativeTracker
-    ){
-
-      state.nativeTracker.seeking =
-        true;
-
-    }
-
-  }
-);
-
-
-videoPlayer.addEventListener(
-  "seeked",
-  () => {
-
-    if(
-      state.nativeTracker
-    ){
-
-      state.nativeTracker.seeking =
-        false;
-
-      state.nativeTracker.lastTick =
-        performance.now();
-
-    }
-
-  }
-);
-
-
-videoPlayer.addEventListener(
-  "ended",
-  () => {
-
-    if(
-      state.nativeTracker
-    ){
-
-      state.nativeTracker.playing =
-        false;
-
-    }
-
-    flushNativeWatch(
-      true
-    );
-
-    autoplayBadge.textContent =
-      "● COMPLETED";
-
-  }
-);
-
-
-videoPlayer.addEventListener(
-  "error",
-  () => {
-
-    autoplayBadge.textContent =
-      "VIDEO ERROR";
-
-  }
-);
-
-
-/* =========================================================
-   YOUTUBE TRACKER
-   ========================================================= */
-
-function startYouTubeTracker(
-  episode
-){
-
-  stopYouTubeTracker();
-
-  state.youtubeTracker = {
-
-    episodeId:
-      episode.id,
-
-    title:
-      episodeTitle(episode),
-
-    accumulated:0,
-
-    lastTick:
-      performance.now(),
-
-    playing:false,
-
-    seeking:false,
-
-    timer:null
-
-  };
-
-  const tracker =
-    state.youtubeTracker;
-
-  tracker.timer =
-    setInterval(
-      () => {
-
-        if(
-          !state.youtubeTracker ||
-          state.youtubeTracker !== tracker
-        ){
-          return;
-        }
-
-        const now =
-          performance.now();
-
-        const elapsed =
-          Math.max(
-            0,
-            (now - tracker.lastTick) / 1000
-          );
-
-        tracker.lastTick =
-          now;
-
-        if(
-          tracker.playing &&
-          !tracker.seeking &&
-          !document.hidden
-        ){
-
-          tracker.accumulated +=
-            elapsed;
-
-          if(
-            tracker.accumulated >= 15
-          ){
-
-            requestYouTubeTime();
-
-            flushYouTubeWatch(
-              false
-            );
-
-          }
-
-        }
-
-      },
-      1000
-    );
-
-}
-
-
-/* =========================================================
-   STOP YOUTUBE TRACKER
-   ========================================================= */
-
-function stopYouTubeTracker(){
-
-  if(
-    state.youtubeTracker?.timer
-  ){
-
-    clearInterval(
-      state.youtubeTracker.timer
-    );
-
-  }
-
-  state.youtubeTracker =
-    null;
-
-}
-
-
-/* =========================================================
-   FLUSH YOUTUBE
-   ========================================================= */
-
-function flushYouTubeWatch(
-  completed = false
-){
-
-  const tracker =
-    state.youtubeTracker;
-
-  if(!tracker){
-    return;
-  }
-
-  const seconds =
-    Math.floor(
-      tracker.accumulated
-    );
-
-  const position =
-    integer(
-      state.youtubeCurrentTime
-    );
-
-  tracker.accumulated =
-    Math.max(
-      0,
-      tracker.accumulated -
-      seconds
-    );
-
-  if(
-    seconds <= 0 &&
-    !completed
-  ){
-    return;
-  }
-
-  queueWatchJob({
-
-    episodeId:
-      tracker.episodeId,
-
-    title:
-      tracker.title,
-
-    seconds,
-
-    positionSeconds:
-      position,
-
-    completed
-
-  });
-
-}
-
-
-/* =========================================================
-   YOUTUBE COMMAND
-   ========================================================= */
-
-function youtubeCommand(
-  func,
-  args=[]
-){
-
-  if(
-    !youtubeFrame.contentWindow
-  ){
-    return;
-  }
-
-  try{
-
-    youtubeFrame.contentWindow.postMessage(
-      JSON.stringify({
-        event:"command",
-        func,
-        args
-      }),
-      "*"
-    );
-
-  }catch(error){
-
-    console.debug(
-      "YouTube command failed:",
-      error
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   REQUEST YOUTUBE TIME
-   ========================================================= */
-
-function requestYouTubeTime(){
-
-  youtubeCommand(
-    "getCurrentTime"
-  );
-
-  youtubeCommand(
-    "getDuration"
-  );
-
-}
-
-
-/* =========================================================
-   YOUTUBE MESSAGE
-   ========================================================= */
-
-window.addEventListener(
-  "message",
-  event => {
-
-    if(
-      event.source !==
-      youtubeFrame.contentWindow
-    ){
-      return;
-    }
-
-    let data;
-
-    try{
-
-      data =
-        typeof event.data === "string"
-          ? JSON.parse(event.data)
-          : event.data;
-
-    }catch{
-
-      return;
-
-    }
-
-    if(!data){
-      return;
-    }
-
-
-    if(
-      data.event ===
-      "onStateChange"
-    ){
-
-      const stateCode =
-        Number(data.info);
-
-      /*
-         1 = PLAYING
-         2 = PAUSED
-         0 = ENDED
-         3 = BUFFERING
-      */
-
-      if(
-        stateCode === 1
-      ){
-
-        if(
-          state.youtubeTracker
-        ){
-
-          state.youtubeTracker.playing =
-            true;
-
-          state.youtubeTracker.lastTick =
-            performance.now();
-
-        }
-
-        autoplayBadge.textContent =
-          "● PLAYING";
-
-        state.autoplayStarted =
-          true;
-
-      }
-
-
-      if(
-        stateCode === 2
-      ){
-
-        if(
-          state.youtubeTracker
-        ){
-
-          state.youtubeTracker.playing =
-            false;
-
-        }
-
-        requestYouTubeTime();
-
-        flushYouTubeWatch(
-          false
-        );
-
-        autoplayBadge.textContent =
-          "● PAUSED";
-
-      }
-
-
-      if(
-        stateCode === 0
-      ){
-
-        if(
-          state.youtubeTracker
-        ){
-
-          state.youtubeTracker.playing =
-            false;
-
-        }
-
-        requestYouTubeTime();
-
-        flushYouTubeWatch(
-          true
-        );
-
-        autoplayBadge.textContent =
-          "● COMPLETED";
-
-      }
-
-    }
-
-
-    if(
-      data.event ===
-      "infoDelivery"
-    ){
-
-      const info =
-        data.info || {};
-
-      if(
-        typeof info.currentTime ===
-        "number"
-      ){
-
-        state.youtubeCurrentTime =
-          Math.max(
-            0,
-            info.currentTime
-          );
-
-      }
-
-      if(
-        typeof info.duration ===
-        "number"
-      ){
-
-        state.youtubeDuration =
-          Math.max(
-            0,
-            info.duration
-          );
-
-      }
-
-    }
-
-  }
-);
-
-
-/* =========================================================
-   STOP CURRENT MEDIA
-   ========================================================= */
-
-function stopCurrentMedia(){
-
-  flushNativeWatch(
-    false
-  );
-
-  flushYouTubeWatch(
-    false
-  );
-
-  stopNativeTracker();
-
-  stopYouTubeTracker();
-
-  state.youtubeReady =
-    false;
-
-  state.youtubeCurrentTime =
-    0;
-
-  state.youtubeDuration =
-    0;
-
-  videoPlayer.pause();
-
-  videoPlayer.removeAttribute(
-    "src"
-  );
-
-  videoPlayer.load();
-
-  videoPlayer.style.display =
-    "none";
-
-  youtubeFrame.src =
-    "about:blank";
-
-  youtubeFrame.style.display =
-    "none";
-
-  state.currentMedia =
-    "none";
-
-}
-
-
-/* =========================================================
-   YOUTUBE PLAYER URL
-   ========================================================= */
-
-function youtubePlayerUrl(
+function buildYoutubePlayerUrl(
   id
 ){
 
@@ -4265,12 +3058,6 @@ function youtubePlayerUrl(
     "autoplay",
     "1"
   );
-
-  /*
-     Muted autoplay is intentionally used
-     because modern browsers may block
-     sound-on autoplay.
-  */
 
   params.set(
     "mute",
@@ -4318,47 +3105,1451 @@ function youtubePlayerUrl(
 
 }
 
-
 /* =========================================================
-   OPEN YOUTUBE
+   YOUTUBE CHAT
    ========================================================= */
 
-function openYouTube(
-  episode,
-  youtubeId
+function buildYoutubeChatUrl(
+  id
 ){
 
-  state.currentMedia =
-    "youtube";
+  const host =
+    location.hostname;
 
-  youtubeFrame.style.display =
-    "block";
+  if(
+    !host ||
+    location.protocol === "file:"
+  ){
 
-  videoPlayer.style.display =
-    "none";
+    return "";
 
-  autoplayBadge.textContent =
-    "● AUTOPLAYING";
+  }
 
-  youtubeFrame.onload =
-    () => {
+  return (
+    "https://www.youtube.com/live_chat" +
+    "?v=" +
+    encodeURIComponent(id) +
+    "&embed_domain=" +
+    encodeURIComponent(host) +
+    "&dark_theme=1" +
+    "&hl=en"
+  );
 
-      state.youtubeReady =
-        true;
+}
+
+/* =========================================================
+   SYNC STATUS
+   ========================================================= */
+
+function pendingWatchSeconds(){
+
+  return state.watchQueue.reduce(
+    (
+      total,
+      job
+    ) =>
+      total +
+      integer(job.seconds),
+    0
+  );
+
+}
+
+function setSyncStatus(
+  type,
+  message
+){
+
+  syncStatus.className =
+    "sync-status " + type;
+
+  syncText.textContent =
+    message;
+
+}
+
+function updateSyncStatus(){
+
+  if(state.watchError){
+
+    setSyncStatus(
+      "error",
+      "SYNC ERROR"
+    );
+
+    return;
+
+  }
+
+  const seconds =
+    pendingWatchSeconds();
+
+  if(seconds > 0){
+
+    setSyncStatus(
+      "pending",
+      `${seconds}s PENDING`
+    );
+
+    return;
+
+  }
+
+  if(state.watchWorkerRunning){
+
+    setSyncStatus(
+      "pending",
+      "SYNCING"
+    );
+
+    return;
+
+  }
+
+  setSyncStatus(
+    "synced",
+    "WATCH SYNCED"
+  );
+
+}
+
+/* =========================================================
+   MEMBER
+   ========================================================= */
+
+async function loadMember(){
+
+  if(!state.user){
+
+    state.member = null;
+
+    memberPoints.textContent = "—";
+    memberMinutes.textContent = "—";
+    memberStatus.textContent = "GUEST";
+
+    return;
+
+  }
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("cr_members")
+      .select("*")
+      .eq(
+        "user_id",
+        state.user.id
+      )
+      .maybeSingle();
+
+  if(error){
+
+    console.warn(
+      "cr_members:",
+      error
+    );
+
+    memberStatus.textContent =
+      "MEMBER";
+
+    return;
+
+  }
+
+  state.member =
+    data;
+
+  memberPoints.textContent =
+    integer(data?.points);
+
+  memberMinutes.textContent =
+    data?.total_watch_minutes !==
+    undefined &&
+    data?.total_watch_minutes !==
+    null
+
+      ? integer(
+          data.total_watch_minutes
+        )
+
+      : Math.floor(
+          integer(
+            data?.watch_seconds
+          ) / 60
+        );
+
+  memberStatus.textContent =
+    first(
+      data?.membership_tier,
+      data?.membership_status,
+      "MEMBER"
+    );
+
+}
+
+/* =========================================================
+   WATCH HISTORY
+   ========================================================= */
+
+async function loadWatchHistory(){
+
+  if(!state.user){
+
+    state.watchHistory = [];
+
+    return;
+
+  }
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("cr_member_watch_history")
+      .select("*")
+      .eq(
+        "user_id",
+        state.user.id
+      )
+      .eq(
+        "content_type",
+        "tacoma_nights"
+      )
+      .order(
+        "watched_at",
+        {
+          ascending:false
+        }
+      )
+      .limit(500);
+
+  if(error){
+
+    console.warn(
+      "Tacoma Nights watch history:",
+      error
+    );
+
+    return;
+
+  }
+
+  state.watchHistory =
+    data || [];
+
+}
+
+/* =========================================================
+   HISTORY
+   ========================================================= */
+
+function getHistory(
+  episodeId
+){
+
+  return state.watchHistory.find(
+    row =>
+      String(
+        row.content_id
+      ) ===
+      String(
+        episodeId
+      )
+  );
+
+}
+
+/* =========================================================
+   PROGRESS
+   ========================================================= */
+
+function getEpisodeProgress(
+  episode
+){
+
+  const history =
+    getHistory(
+      episode.id
+    );
+
+  if(!history)
+    return 0;
+
+  const position =
+    integer(
+      history.last_position_seconds
+    );
+
+  const duration =
+    getEpisodeDuration(
+      episode
+    );
+
+  if(duration > 0){
+
+    return Math.min(
+      100,
+      Math.max(
+        0,
+        position /
+        duration *
+        100
+      )
+    );
+
+  }
+
+  return 0;
+
+}
+
+/* =========================================================
+   RESUME
+   ========================================================= */
+
+function updateResume(){
+
+  if(!state.currentEpisode){
+
+    resumeText.textContent =
+      "Your Tacoma Nights playback progress will appear here.";
+
+    return;
+
+  }
+
+  const history =
+    getHistory(
+      state.currentEpisode.id
+    );
+
+  if(!history){
+
+    resumeText.textContent =
+      "New episode • playback time will be tracked.";
+
+    return;
+
+  }
+
+  const watched =
+    integer(
+      history.watched_seconds
+    );
+
+  const position =
+    integer(
+      history.last_position_seconds
+    );
+
+  if(position > 0){
+
+    resumeText.textContent =
+      `Resume at ${Math.floor(position / 60)}m ${position % 60}s • ${watched}s watched`;
+
+  }else{
+
+    resumeText.textContent =
+      `${watched}s watched`;
+
+  }
+
+}
+
+/* =========================================================
+   RPC TOTALS
+   ========================================================= */
+
+function applyRpcTotals(
+  result
+){
+
+  const row =
+    Array.isArray(result)
+      ? result[0]
+      : result;
+
+  if(!row)
+    return;
+
+  if(
+    row.total_points !==
+    undefined
+  ){
+
+    memberPoints.textContent =
+      integer(
+        row.total_points
+      );
+
+  }
+
+  if(
+    row.total_watch_minutes !==
+    undefined
+  ){
+
+    memberMinutes.textContent =
+      integer(
+        row.total_watch_minutes
+      );
+
+  }
+
+}
+
+/* =========================================================
+   WATCH QUEUE
+   ========================================================= */
+
+function enqueueWatchJob({
+  episode,
+  seconds=0,
+  position=0,
+  completed=false
+}){
+
+  if(
+    !state.user ||
+    !episode?.id
+  ){
+
+    return false;
+
+  }
+
+  const safeSeconds =
+    Math.min(
+      300,
+      integer(seconds)
+    );
+
+  const safePosition =
+    integer(position);
+
+  if(
+    safeSeconds <= 0
+  ){
+
+    return false;
+
+  }
+
+  state.watchQueue.push({
+
+    episodeId:
+      episode.id,
+
+    contentType:
+      "tacoma_nights",
+
+    title:
+      getEpisodeTitle(
+        episode
+      ),
+
+    seconds:
+      safeSeconds,
+
+    positionSeconds:
+      safePosition,
+
+    completed:
+      Boolean(completed)
+
+  });
+
+  state.watchError = null;
+
+  updateSyncStatus();
+
+  processWatchQueue();
+
+  return true;
+
+}
+
+/* =========================================================
+   WATCH QUEUE WORKER
+   ========================================================= */
+
+async function processWatchQueue(){
+
+  if(
+    state.watchWorkerRunning ||
+    !state.user ||
+    !state.watchQueue.length
+  ){
+
+    updateSyncStatus();
+
+    return;
+
+  }
+
+  state.watchWorkerRunning = true;
+  state.watchError = null;
+
+  try{
+
+    while(
+      state.watchQueue.length &&
+      state.user
+    ){
+
+      const job =
+        state.watchQueue[0];
+
+      const seconds =
+        integer(
+          job.seconds
+        );
+
+      if(seconds <= 0){
+
+        state.watchQueue.shift();
+
+        continue;
+
+      }
+
+      const chunk =
+        Math.min(
+          300,
+          seconds
+        );
+
+      const finalChunk =
+        seconds <= 300;
+
+      setSyncStatus(
+        "pending",
+        `${pendingWatchSeconds()}s SYNCING`
+      );
+
+      const {
+        data,
+        error
+      } =
+        await db.rpc(
+          "record_member_watch",
+          {
+
+            p_content_id:
+              job.episodeId,
+
+            p_content_type:
+              job.contentType,
+
+            p_title:
+              job.title,
+
+            p_seconds:
+              chunk,
+
+            p_position_seconds:
+              job.positionSeconds,
+
+            p_completed:
+              finalChunk
+                ? Boolean(
+                    job.completed
+                  )
+                : false
+
+          }
+        );
+
+      if(error){
+
+        console.error(
+          "record_member_watch:",
+          error
+        );
+
+        state.watchError =
+          error;
+
+        setSyncStatus(
+          "error",
+          `SYNC ERROR ${error.code || ""}`
+        );
+
+        showToast(
+          "Watch sync failed. Your Tacoma Nights watch time remains queued.",
+          "error"
+        );
+
+        return;
+
+      }
+
+      applyRpcTotals(data);
+
+      job.seconds =
+        Math.max(
+          0,
+          seconds - chunk
+        );
+
+      if(
+        job.seconds <= 0
+      ){
+
+        state.watchQueue.shift();
+
+      }
+
+    }
+
+    state.watchError = null;
+
+    setSyncStatus(
+      "synced",
+      "WATCH SYNCED"
+    );
+
+    await loadMember();
+    await loadWatchHistory();
+
+    updateResume();
+    renderEpisodes();
+
+  }catch(error){
+
+    console.error(
+      "Watch queue exception:",
+      error
+    );
+
+    state.watchError =
+      error;
+
+    setSyncStatus(
+      "error",
+      "SYNC ERROR"
+    );
+
+  }finally{
+
+    state.watchWorkerRunning = false;
+
+    updateSyncStatus();
+
+  }
+
+}
+
+/* =========================================================
+   RETRY
+   ========================================================= */
+
+retrySync.addEventListener(
+  "click",
+  ()=>{
+
+    if(!state.user){
+
+      showToast(
+        "Sign in to synchronize Tacoma Nights watch time.",
+        "error"
+      );
+
+      return;
+
+    }
+
+    state.watchError = null;
+
+    processWatchQueue();
+
+  }
+);
+
+/* =========================================================
+   NATIVE TRACKER
+   ========================================================= */
+
+function startNativeTracker(
+  episode
+){
+
+  stopNativeTracker();
+
+  const tracker = {
+
+    episode,
+
+    accumulated:0,
+
+    lastTick:
+      performance.now(),
+
+    playing:false,
+
+    seeking:false,
+
+    raf:0
+
+  };
+
+  state.nativeTracker =
+    tracker;
+
+  tracker.onPlay =
+    ()=>{
+
+      tracker.playing = true;
+
+      tracker.lastTick =
+        performance.now();
+
+    };
+
+  tracker.onPause =
+    ()=>{
+
+      tracker.playing = false;
+
+      tracker.lastTick =
+        performance.now();
+
+      flushNativeWatch(false);
+
+    };
+
+  tracker.onSeeking =
+    ()=>{
+
+      tracker.seeking = true;
+
+      tracker.lastTick =
+        performance.now();
+
+    };
+
+  tracker.onSeeked =
+    ()=>{
+
+      tracker.seeking = false;
+
+      tracker.lastTick =
+        performance.now();
+
+    };
+
+  tracker.onEnded =
+    ()=>{
+
+      tracker.playing = false;
+
+      flushNativeWatch(true);
+
+    };
+
+  tracker.onTimeupdate =
+    ()=>{
+
+      updateNativeProgress();
+
+    };
+
+  nativeVideo.addEventListener(
+    "play",
+    tracker.onPlay
+  );
+
+  nativeVideo.addEventListener(
+    "pause",
+    tracker.onPause
+  );
+
+  nativeVideo.addEventListener(
+    "seeking",
+    tracker.onSeeking
+  );
+
+  nativeVideo.addEventListener(
+    "seeked",
+    tracker.onSeeked
+  );
+
+  nativeVideo.addEventListener(
+    "ended",
+    tracker.onEnded
+  );
+
+  nativeVideo.addEventListener(
+    "timeupdate",
+    tracker.onTimeupdate
+  );
+
+  const tick =
+    ()=>{
+
+      if(
+        state.nativeTracker !==
+        tracker
+      ){
+
+        return;
+
+      }
+
+      const now =
+        performance.now();
+
+      const delta =
+        Math.max(
+          0,
+          Math.min(
+            5,
+            (
+              now -
+              tracker.lastTick
+            ) / 1000
+          )
+        );
+
+      tracker.lastTick =
+        now;
+
+      if(
+        tracker.playing &&
+        !tracker.seeking &&
+        !nativeVideo.paused &&
+        document.visibilityState ===
+        "visible"
+      ){
+
+        tracker.accumulated +=
+          delta;
+
+      }
+
+      if(
+        tracker.accumulated >=
+        15
+      ){
+
+        flushNativeWatch(false);
+
+      }
+
+      tracker.raf =
+        requestAnimationFrame(
+          tick
+        );
+
+    };
+
+  tracker.raf =
+    requestAnimationFrame(
+      tick
+    );
+
+}
+
+/* =========================================================
+   STOP NATIVE TRACKER
+   ========================================================= */
+
+function stopNativeTracker(){
+
+  const tracker =
+    state.nativeTracker;
+
+  if(!tracker)
+    return;
+
+  if(tracker.raf){
+
+    cancelAnimationFrame(
+      tracker.raf
+    );
+
+  }
+
+  nativeVideo.removeEventListener(
+    "play",
+    tracker.onPlay
+  );
+
+  nativeVideo.removeEventListener(
+    "pause",
+    tracker.onPause
+  );
+
+  nativeVideo.removeEventListener(
+    "seeking",
+    tracker.onSeeking
+  );
+
+  nativeVideo.removeEventListener(
+    "seeked",
+    tracker.onSeeked
+  );
+
+  nativeVideo.removeEventListener(
+    "ended",
+    tracker.onEnded
+  );
+
+  nativeVideo.removeEventListener(
+    "timeupdate",
+    tracker.onTimeupdate
+  );
+
+  state.nativeTracker = null;
+
+}
+
+/* =========================================================
+   FLUSH NATIVE
+   ========================================================= */
+
+function flushNativeWatch(
+  completed=false
+){
+
+  const tracker =
+    state.nativeTracker;
+
+  if(!tracker)
+    return;
+
+  const seconds =
+    Math.min(
+      300,
+      integer(
+        tracker.accumulated
+      )
+    );
+
+  tracker.accumulated =
+    Math.max(
+      0,
+      tracker.accumulated -
+      seconds
+    );
+
+  tracker.lastTick =
+    performance.now();
+
+  const position =
+    integer(
+      nativeVideo.currentTime
+    );
+
+  const duration =
+    number(
+      nativeVideo.duration
+    );
+
+  const complete =
+    Boolean(completed) ||
+    (
+      duration > 0 &&
+      position >=
+      duration * .97
+    );
+
+  if(seconds <= 0)
+    return;
+
+  enqueueWatchJob({
+
+    episode:
+      tracker.episode,
+
+    seconds,
+
+    position,
+
+    completed:
+      complete
+
+  });
+
+}
+
+/* =========================================================
+   NATIVE PROGRESS
+   ========================================================= */
+
+function updateNativeProgress(){
+
+  const duration =
+    number(
+      nativeVideo.duration
+    );
+
+  if(duration <= 0){
+
+    progressBar.style.width =
+      "0%";
+
+    return;
+
+  }
+
+  const percent =
+    Math.min(
+      100,
+      Math.max(
+        0,
+        nativeVideo.currentTime /
+        duration *
+        100
+      )
+    );
+
+  progressBar.style.width =
+    percent + "%";
+
+}
+
+/* =========================================================
+   YOUTUBE TRACKER
+   ========================================================= */
+
+function startYoutubeTracker(
+  episode
+){
+
+  stopYoutubeTracker();
+
+  const tracker = {
+
+    episode,
+
+    accumulated:0,
+
+    lastTick:
+      performance.now(),
+
+    playing:false,
+
+    lastPosition:0,
+
+    duration:0,
+
+    completedSent:false,
+
+    raf:0
+
+  };
+
+  state.youtubeTracker =
+    tracker;
+
+  const tick =
+    ()=>{
+
+      if(
+        state.youtubeTracker !==
+        tracker
+      ){
+
+        return;
+
+      }
+
+      const now =
+        performance.now();
+
+      const delta =
+        Math.max(
+          0,
+          Math.min(
+            5,
+            (
+              now -
+              tracker.lastTick
+            ) / 1000
+          )
+        );
+
+      tracker.lastTick =
+        now;
+
+      if(
+        tracker.playing &&
+        document.visibilityState ===
+        "visible"
+      ){
+
+        tracker.accumulated +=
+          delta;
+
+      }
+
+      if(
+        tracker.accumulated >=
+        15
+      ){
+
+        flushYoutubeWatch(false);
+
+      }
+
+      if(
+        Math.floor(
+          now / 1000
+        ) % 2 === 0
+      ){
+
+        youtubeCommand(
+          "getCurrentTime"
+        );
+
+        youtubeCommand(
+          "getDuration"
+        );
+
+      }
+
+      tracker.raf =
+        requestAnimationFrame(
+          tick
+        );
+
+    };
+
+  tracker.raf =
+    requestAnimationFrame(
+      tick
+    );
+
+}
+
+/* =========================================================
+   STOP YOUTUBE TRACKER
+   ========================================================= */
+
+function stopYoutubeTracker(){
+
+  const tracker =
+    state.youtubeTracker;
+
+  if(!tracker)
+    return;
+
+  if(tracker.raf){
+
+    cancelAnimationFrame(
+      tracker.raf
+    );
+
+  }
+
+  state.youtubeTracker = null;
+
+}
+
+/* =========================================================
+   FLUSH YOUTUBE
+   ========================================================= */
+
+function flushYoutubeWatch(
+  completed=false
+){
+
+  const tracker =
+    state.youtubeTracker;
+
+  if(!tracker)
+    return;
+
+  const seconds =
+    Math.min(
+      300,
+      integer(
+        tracker.accumulated
+      )
+    );
+
+  tracker.accumulated =
+    Math.max(
+      0,
+      tracker.accumulated -
+      seconds
+    );
+
+  tracker.lastTick =
+    performance.now();
+
+  let complete =
+    Boolean(completed);
+
+  if(
+    !complete &&
+    tracker.duration > 0 &&
+    tracker.lastPosition >=
+    tracker.duration * .97
+  ){
+
+    complete = true;
+
+  }
+
+  if(
+    seconds <= 0
+  ){
+
+    return;
+
+  }
+
+  if(
+    complete &&
+    tracker.completedSent
+  ){
+
+    return;
+
+  }
+
+  if(complete){
+
+    tracker.completedSent =
+      true;
+
+  }
+
+  enqueueWatchJob({
+
+    episode:
+      tracker.episode,
+
+    seconds,
+
+    position:
+      integer(
+        tracker.lastPosition
+      ),
+
+    completed:
+      complete
+
+  });
+
+}
+
+/* =========================================================
+   YOUTUBE COMMAND
+   ========================================================= */
+
+function youtubeCommand(
+  command,
+  args=[]
+){
+
+  if(
+    !youtubePlayer.contentWindow
+  ){
+
+    return;
+
+  }
+
+  youtubePlayer.contentWindow.postMessage(
+    JSON.stringify({
+
+      event:"command",
+
+      func:command,
+
+      args
+
+    }),
+    "*"
+  );
+
+}
+
+/* =========================================================
+   YOUTUBE MESSAGE
+   ========================================================= */
+
+window.addEventListener(
+  "message",
+  event => {
+
+    if(
+      event.source !==
+      youtubePlayer.contentWindow
+    ){
+
+      return;
+
+    }
+
+    if(
+      !String(
+        event.origin
+      ).includes(
+        "youtube.com"
+      ) &&
+      !String(
+        event.origin
+      ).includes(
+        "youtube-nocookie.com"
+      )
+    ){
+
+      return;
+
+    }
+
+    let message;
+
+    try{
+
+      message =
+        typeof event.data ===
+        "string"
+
+          ? JSON.parse(
+              event.data
+            )
+
+          : event.data;
+
+    }catch{
+
+      return;
+
+    }
+
+    const tracker =
+      state.youtubeTracker;
+
+    if(!tracker)
+      return;
+
+    if(
+      message?.event ===
+      "onStateChange"
+    ){
+
+      const value =
+        Number(
+          message.info
+        );
+
+      if(value === 1){
+
+        tracker.playing = true;
+
+        tracker.lastTick =
+          performance.now();
+
+        setSyncStatus(
+          "pending",
+          "PLAYBACK ACTIVE"
+        );
+
+      }
+
+      else if(value === 2){
+
+        tracker.playing = false;
+
+        tracker.lastTick =
+          performance.now();
+
+        flushYoutubeWatch(false);
+
+        updateSyncStatus();
+
+      }
+
+      else if(value === 3){
+
+        tracker.playing = false;
+
+      }
+
+      else if(value === 0){
+
+        tracker.playing = false;
+
+        flushYoutubeWatch(true);
+
+      }
+
+    }
+
+    if(
+      message?.event ===
+      "infoDelivery"
+    ){
+
+      const info =
+        message.info || {};
+
+      if(
+        info.currentTime !==
+        undefined
+      ){
+
+        tracker.lastPosition =
+          number(
+            info.currentTime
+          );
+
+      }
+
+      if(
+        info.duration !==
+        undefined
+      ){
+
+        tracker.duration =
+          number(
+            info.duration
+          );
+
+      }
+
+      if(
+        tracker.duration > 0
+      ){
+
+        const percent =
+          Math.min(
+            100,
+            tracker.lastPosition /
+            tracker.duration *
+            100
+          );
+
+        progressBar.style.width =
+          percent + "%";
+
+      }
+
+    }
+
+  }
+);
+
+/* =========================================================
+   YOUTUBE READY
+   ========================================================= */
+
+function setupYoutubePlayer(){
+
+  youtubePlayer.onload =
+    ()=>{
 
       youtubeCommand(
         "addEventListener",
         ["onStateChange"]
-      );
-
-      youtubeCommand(
-        "addEventListener",
-        ["onPlaybackQualityChange"]
-      );
-
-      youtubeCommand(
-        "addEventListener",
-        ["onPlaybackRateChange"]
       );
 
       youtubeCommand(
@@ -4369,44 +4560,87 @@ function openYouTube(
         "getDuration"
       );
 
+      setTimeout(
+        ()=>{
+          youtubeCommand(
+            "addEventListener",
+            ["onStateChange"]
+          );
+
+          youtubeCommand(
+            "playVideo"
+          );
+        },
+        350
+      );
+
     };
-
-
-  youtubeFrame.src =
-    youtubePlayerUrl(
-      youtubeId
-    );
-
-
-  startYouTubeTracker(
-    episode
-  );
-
-
-  showAutoplayNotice(
-    true
-  );
 
 }
 
-
 /* =========================================================
-   OPEN NATIVE VIDEO
+   STOP CURRENT MEDIA
    ========================================================= */
 
-async function openNative(
-  episode
+function stopCurrentMedia(){
+
+  flushNativeWatch(false);
+  flushYoutubeWatch(false);
+
+  stopNativeTracker();
+  stopYoutubeTracker();
+
+  nativeVideo.pause();
+
+  nativeVideo.removeAttribute(
+    "src"
+  );
+
+  nativeVideo.load();
+
+  youtubePlayer.onload = null;
+
+  youtubePlayer.src = "";
+
+  youtubePlayer.style.display =
+    "none";
+
+  youtubeChat.src = "";
+
+  youtubeChat.style.display =
+    "none";
+
+  chatEmpty.classList.remove(
+    "hidden"
+  );
+
+  playerBadge.classList.remove(
+    "show"
+  );
+
+  state.currentYoutubeId =
+    null;
+
+}
+
+/* =========================================================
+   OPEN NATIVE
+   ========================================================= */
+
+async function openNativeVideo(
+  episode,
+  autoplay=true
 ){
 
   const url =
-    episodeVideo(
+    getEpisodeVideo(
       episode
     );
 
   if(!url){
 
-    toastMessage(
-      "This episode does not have a playable video URL.",
+    showToast(
+      "This Tacoma Nights episode does not contain a playable video.",
       "error"
     );
 
@@ -4414,109 +4648,96 @@ async function openNative(
 
   }
 
-  state.currentMedia =
-    "native";
-
-  videoPlayer.style.display =
+  nativeVideo.style.display =
     "block";
 
-  youtubeFrame.style.display =
+  youtubePlayer.style.display =
     "none";
 
-  autoplayBadge.textContent =
-    "● AUTOPLAYING";
+  nativeVideo.muted =
+    true;
 
-  videoPlayer.src =
+  nativeVideo.autoplay =
+    Boolean(autoplay);
+
+  nativeVideo.src =
     url;
 
-  videoPlayer.load();
+  nativeVideo.load();
 
+  const history =
+    getHistory(
+      episode.id
+    );
 
   const restore =
-    async () => {
+    async ()=>{
 
-      const resume =
-        await getResumePosition(
-          episode
-        );
+      if(history){
 
-      if(
-        resume > 3 &&
-        Number.isFinite(
-          videoPlayer.duration
-        ) &&
-        resume <
-        videoPlayer.duration - 2
-      ){
+        const position =
+          integer(
+            history.last_position_seconds
+          );
 
-        try{
+        if(
+          position > 0 &&
+          Number.isFinite(
+            nativeVideo.duration
+          ) &&
+          position <
+          nativeVideo.duration - 2
+        ){
 
-          videoPlayer.currentTime =
-            resume;
+          try{
 
-          resumeNote.textContent =
-            `Resume available at ${formatTime(resume)}.`;
+            nativeVideo.currentTime =
+              position;
 
-        }catch{}
+          }catch{}
+
+        }
 
       }
 
+      updateNativeProgress();
 
-      /*
-         Muted autoplay gives browsers
-         the best chance of starting automatically.
-      */
+      if(autoplay){
 
-      videoPlayer.muted =
-        true;
+        try{
 
-      muteButton.textContent =
-        "🔊 UNMUTE";
+          await nativeVideo.play();
 
+        }catch(error){
 
-      try{
+          console.warn(
+            "Native autoplay blocked:",
+            error
+          );
 
-        await videoPlayer.play();
+          resumeText.textContent =
+            "Autoplay was blocked • press Play to start.";
 
-        state.autoplayStarted =
-          true;
+          showToast(
+            "Browser autoplay was blocked. Press Play to start Tacoma Nights.",
+            "error"
+          );
 
-        autoplayBadge.textContent =
-          "● PLAYING";
-
-        showAutoplayNotice(
-          true
-        );
-
-      }catch(error){
-
-        console.debug(
-          "Native autoplay blocked:",
-          error
-        );
-
-        autoplayBadge.textContent =
-          "▶ PRESS PLAY";
-
-        toastMessage(
-          "Autoplay was blocked by your browser. Press Play to start.",
-          "error"
-        );
+        }
 
       }
 
     };
 
-
   if(
-    videoPlayer.readyState >= 1
+    nativeVideo.readyState >= 1
   ){
 
     await restore();
 
   }else{
 
-    videoPlayer.addEventListener(
+    nativeVideo.addEventListener(
       "loadedmetadata",
       restore,
       {
@@ -4526,13 +4747,89 @@ async function openNative(
 
   }
 
-
   startNativeTracker(
     episode
   );
 
 }
 
+/* =========================================================
+   OPEN YOUTUBE
+   ========================================================= */
+
+function openYoutubeVideo(
+  episode,
+  id
+){
+
+  nativeVideo.pause();
+
+  nativeVideo.style.display =
+    "none";
+
+  youtubePlayer.style.display =
+    "block";
+
+  state.currentYoutubeId =
+    id;
+
+  state.youtubeMuted =
+    true;
+
+  setupYoutubePlayer();
+
+  youtubePlayer.src =
+    buildYoutubePlayerUrl(
+      id
+    );
+
+  playerBadge.classList.add(
+    "show"
+  );
+
+  const chatUrl =
+    buildYoutubeChatUrl(
+      id
+    );
+
+  if(chatUrl){
+
+    youtubeChat.src =
+      chatUrl;
+
+    youtubeChat.style.display =
+      "block";
+
+    chatEmpty.classList.add(
+      "hidden"
+    );
+
+  }else{
+
+    youtubeChat.style.display =
+      "none";
+
+    chatEmpty.classList.remove(
+      "hidden"
+    );
+
+    chatEmpty.querySelector(
+      "strong"
+    ).textContent =
+      "CHAT REQUIRES HOSTED PAGE";
+
+    chatEmpty.querySelector(
+      "span"
+    ).textContent =
+      "YouTube Live Chat requires Tacoma Nights to be served from a web domain.";
+
+  }
+
+  startYoutubeTracker(
+    episode
+  );
+
+}
 
 /* =========================================================
    OPEN EPISODE
@@ -4540,300 +4837,184 @@ async function openNative(
 
 async function openEpisode(
   episode,
-  autoplay = true
+  autoplay=true
 ){
 
   if(
-    !episode ||
-    !isPlayable(episode)
+    !episode?.id
   ){
 
     return;
 
   }
 
-  /*
-     Flush old media before switching.
-  */
-
   stopCurrentMedia();
-
 
   state.currentEpisode =
     episode;
 
   state.currentIndex =
     state.episodes.findIndex(
-      row =>
-        String(row.id) ===
+      item =>
+        String(item.id) ===
         String(episode.id)
     );
 
-
-  highlightEpisode(
-    episode.id
-  );
-
-
-  playerTitle.textContent =
-    episodeTitle(
+  nowTitle.textContent =
+    getEpisodeTitle(
       episode
     );
 
-
-  const season =
-    episodeSeason(
+  nowDescription.textContent =
+    getEpisodeDescription(
       episode
     );
 
-  const ep =
-    episodeNumber(
+  progressBar.style.width =
+    getEpisodeProgress(
       episode
-    );
+    ) + "%";
 
+  updateResume();
 
-  playerMeta.textContent =
-    [
-      season
-        ? `Season ${season}`
-        : "",
-
-      ep
-        ? `Episode ${ep}`
-        : "",
-
-      "Tacoma Nights"
-    ]
-      .filter(Boolean)
-      .join(" • ");
-
-
-  resumeNote.textContent =
-    "";
-
-
-  playerPlaceholder.classList.add(
-    "hidden"
-  );
-
+  renderEpisodes();
 
   const youtubeId =
-    episodeYouTubeId(
+    getEpisodeYoutubeId(
       episode
     );
-
 
   if(youtubeId){
 
-    openYouTube(
+    openYoutubeVideo(
       episode,
       youtubeId
     );
 
-  }else if(
-    episodeVideo(episode)
-  ){
+  }else{
 
-    await openNative(
-      episode
+    await openNativeVideo(
+      episode,
+      autoplay
     );
+
+  }
+
+}
+
+/* =========================================================
+   LATEST EPISODE
+   ========================================================= */
+
+function getLatestPlayableEpisode(){
+
+  const playable =
+    state.episodes
+      .filter(
+        isPlayable
+      )
+      .slice()
+      .sort(
+        (
+          a,
+          b
+        ) =>
+          episodeSortValue(b) -
+          episodeSortValue(a)
+      );
+
+  return playable[0] || null;
+
+}
+
+/* =========================================================
+   FEATURED
+   ========================================================= */
+
+function renderFeatured(){
+
+  const latest =
+    state.latestEpisode ||
+    getLatestPlayableEpisode();
+
+  state.latestEpisode =
+    latest;
+
+  if(!latest){
+
+    featuredTitle.textContent =
+      "No playable episodes";
+
+    featuredDescription.textContent =
+      "Tacoma Nights episodes will appear here when video becomes available.";
+
+    featuredButton.disabled =
+      true;
+
+    return;
+
+  }
+
+  featuredButton.disabled =
+    false;
+
+  featuredTitle.textContent =
+    getEpisodeTitle(
+      latest
+    );
+
+  featuredDescription.textContent =
+    getEpisodeDescription(
+      latest
+    );
+
+  const image =
+    getEpisodeThumbnail(
+      latest
+    );
+
+  if(image){
+
+    featuredImage.src =
+      image;
+
+    featuredImage.alt =
+      getEpisodeTitle(
+        latest
+      );
+
+    featuredImage.style.display =
+      "block";
 
   }else{
 
-    toastMessage(
-      "No playable video was found for this episode.",
-      "error"
-    );
+    featuredImage.style.display =
+      "none";
 
   }
 
+  featuredButton.onclick =
+    ()=>{
 
-  if(autoplay){
+      openEpisode(
+        latest,
+        true
+      );
 
-    document
-      .getElementById("watch")
-      .scrollIntoView({
-        behavior:"smooth",
-        block:"start"
-      });
+      document
+        .querySelector(".player-card")
+        ?.scrollIntoView({
+          behavior:"smooth",
+          block:"start"
+        });
 
-  }
+    };
 
 }
-
 
 /* =========================================================
-   HIGHLIGHT
+   EPISODE GRID
    ========================================================= */
-
-function highlightEpisode(
-  id
-){
-
-  episodeGrid
-    .querySelectorAll(
-      ".episode-card"
-    )
-    .forEach(
-      card => {
-
-        card.classList.toggle(
-          "active",
-          String(
-            card.dataset.cardId
-          ) ===
-          String(id)
-        );
-
-      }
-    );
-
-}
-
-
-/* =========================================================
-   RENDER EPISODES
-   ========================================================= */
-
-function renderEpisode(
-  row
-){
-
-  const playable =
-    isPlayable(row);
-
-  const thumbnail =
-    getThumbnail(row);
-
-  const season =
-    episodeSeason(row);
-
-  const ep =
-    episodeNumber(row);
-
-  const title =
-    episodeTitle(row);
-
-  const date =
-    episodeReleaseDate(row);
-
-  const imageStyle =
-    thumbnail
-      ? `style="background-image:url('${escapeHTML(thumbnail)}')"`
-      : "";
-
-  return `
-
-    <article
-      class="episode-card"
-      data-card-id="${escapeHTML(row.id)}"
-    >
-
-      <div
-        class="episode-thumb"
-        ${imageStyle}
-      >
-
-        <div class="episode-number">
-
-          ${
-            ep
-              ? "EPISODE " +
-                escapeHTML(ep)
-              : "TACOMA NIGHTS"
-          }
-
-        </div>
-
-
-        ${
-          playable
-            ? `
-              <div class="play-badge">
-                ▶
-              </div>
-            `
-            : ""
-        }
-
-      </div>
-
-
-      <div class="episode-body">
-
-        <div
-          class="episode-status ${
-            playable
-              ? ""
-              : "coming"
-          }"
-        >
-
-          ${
-            playable
-              ? "AVAILABLE NOW"
-              : "COMING SOON"
-          }
-
-        </div>
-
-
-        <div class="episode-title">
-          ${escapeHTML(title)}
-        </div>
-
-
-        <div class="episode-meta">
-
-          ${
-            season
-              ? "Season " +
-                escapeHTML(season)
-              : ""
-          }
-
-          ${
-            ep
-              ? " • Episode " +
-                escapeHTML(ep)
-              : ""
-          }
-
-          ${
-            date
-              ? " • " +
-                escapeHTML(
-                  formatDate(date)
-                )
-              : ""
-          }
-
-        </div>
-
-
-        <button
-          type="button"
-          class="watch-button"
-          data-episode-id="${escapeHTML(row.id)}"
-          ${playable ? "" : "disabled"}
-        >
-
-          ${
-            playable
-              ? "▶ WATCH EPISODE"
-              : "COMING SOON"
-          }
-
-        </button>
-
-      </div>
-
-    </article>
-
-  `;
-
-}
-
 
 function renderEpisodes(){
 
@@ -4841,57 +5022,227 @@ function renderEpisodes(){
     !state.episodes.length
   ){
 
-    episodeGrid.innerHTML =
-      `
-        <div class="empty">
-          No Tacoma Nights episodes
-          are currently available.
-        </div>
-      `;
+    episodeGrid.innerHTML = `
+      <div class="empty">
+        No published Tacoma Nights episodes are currently available.
+      </div>
+    `;
 
     return;
 
   }
 
+  const latest =
+    state.latestEpisode ||
+    getLatestPlayableEpisode();
 
   episodeGrid.innerHTML =
     state.episodes
       .map(
-        renderEpisode
+        episode => {
+
+          const title =
+            getEpisodeTitle(
+              episode
+            );
+
+          const description =
+            getEpisodeDescription(
+              episode
+            );
+
+          const image =
+            getEpisodeThumbnail(
+              episode
+            );
+
+          const youtube =
+            getEpisodeYoutubeId(
+              episode
+            );
+
+          const progress =
+            getEpisodeProgress(
+              episode
+            );
+
+          const active =
+            state.currentEpisode &&
+            String(
+              state.currentEpisode.id
+            ) ===
+            String(
+              episode.id
+            );
+
+          const isLatest =
+            latest &&
+            String(
+              latest.id
+            ) ===
+            String(
+              episode.id
+            );
+
+          const number =
+            getEpisodeNumber(
+              episode
+            );
+
+          const season =
+            getEpisodeSeason(
+              episode
+            );
+
+          const duration =
+            getEpisodeDuration(
+              episode
+            );
+
+          const durationText =
+            duration > 0
+              ? `${Math.floor(duration / 60)}m`
+              : "";
+
+          return `
+
+            <article
+              class="episode ${active ? "active" : ""}"
+              data-id="${escapeHtml(episode.id)}">
+
+              <div class="episode-thumb">
+
+                ${
+                  image
+                    ? `
+                      <img
+                        src="${escapeHtml(image)}"
+                        alt="${escapeHtml(title)}"
+                        loading="lazy">
+                    `
+                    : `
+                      <div class="thumbnail-placeholder">
+                        TACOMA NIGHTS
+                      </div>
+                    `
+                }
+
+                <div
+                  class="episode-badge ${youtube ? "youtube" : ""}">
+
+                  ${
+                    youtube
+                      ? "YOUTUBE"
+                      : "ON DEMAND"
+                  }
+
+                </div>
+
+                ${
+                  isLatest
+                    ? `
+                      <div class="episode-badge latest">
+                        LATEST
+                      </div>
+                    `
+                    : ""
+                }
+
+              </div>
+
+              <div class="episode-content">
+
+                <h3>
+                  ${
+                    number > 0
+                      ? `EPISODE ${number}: `
+                      : ""
+                  }
+                  ${escapeHtml(title)}
+                </h3>
+
+                <p>
+                  ${escapeHtml(
+                    description.length > 145
+                      ? description.slice(0,142) + "..."
+                      : description
+                  )}
+                </p>
+
+                <div class="episode-bottom">
+
+                  <span>
+                    ${escapeHtml(season)}
+                  </span>
+
+                  <span>
+                    ${
+                      progress > 0
+                        ? Math.round(progress) + "%"
+                        : durationText ||
+                          (
+                            youtube
+                              ? "WATCH"
+                              : "VIDEO"
+                          )
+                    }
+                  </span>
+
+                </div>
+
+                <div class="episode-progress">
+
+                  <span
+                    style="width:${progress}%;">
+                  </span>
+
+                </div>
+
+              </div>
+
+            </article>
+
+          `;
+
+        }
       )
       .join("");
 
-
   episodeGrid
     .querySelectorAll(
-      ".watch-button"
+      ".episode"
     )
     .forEach(
-      button => {
+      card => {
 
-        button.addEventListener(
+        card.addEventListener(
           "click",
-          event => {
+          ()=>{
 
-            event.stopPropagation();
+            const id =
+              card.dataset.id;
 
             const episode =
               state.episodes.find(
-                row =>
-                  String(row.id) ===
-                  String(
-                    button.dataset.episodeId
-                  )
+                item =>
+                  String(item.id) ===
+                  String(id)
               );
 
-            if(episode){
+            if(!episode)
+              return;
 
-              openEpisode(
-                episode,
-                true
-              );
+            openEpisode(
+              episode,
+              true
+            );
 
-            }
+            document
+              .querySelector(".player-card")
+              ?.scrollIntoView({
+                behavior:"smooth",
+                block:"start"
+              });
 
           }
         );
@@ -4901,105 +5252,39 @@ function renderEpisodes(){
 
 }
 
-
-/* =========================================================
-   SORT EPISODES
-   ========================================================= */
-
-function sortEpisodes(
-  episodes
-){
-
-  return [...episodes].sort(
-    (
-      a,
-      b
-    ) => {
-
-      const aEpisode =
-        number(
-          episodeNumber(a)
-        );
-
-      const bEpisode =
-        number(
-          episodeNumber(b)
-        );
-
-
-      const aDate =
-        new Date(
-          episodeReleaseDate(a)
-        ).getTime() || 0;
-
-      const bDate =
-        new Date(
-          episodeReleaseDate(b)
-        ).getTime() || 0;
-
-
-      /*
-         Primary:
-         release date when available.
-
-         Secondary:
-         episode number.
-
-         This makes the last array item
-         the newest episode.
-      */
-
-      if(
-        aDate !== bDate
-      ){
-
-        return (
-          aDate -
-          bDate
-        );
-
-      }
-
-
-      if(
-        aEpisode !== bEpisode
-      ){
-
-        return (
-          aEpisode -
-          bEpisode
-        );
-
-      }
-
-
-      return String(a.id)
-        .localeCompare(
-          String(b.id)
-        );
-
-    }
-  );
-
-}
-
-
 /* =========================================================
    LOAD EPISODES
    ========================================================= */
 
 async function loadEpisodes(){
 
-  episodeStatus.textContent =
-    "Loading Tacoma Nights episodes…";
+  episodeGrid.innerHTML = `
 
-  episodeGrid.innerHTML =
-    `
-      <div class="loading">
-        Loading episodes…
-      </div>
-    `;
+    <div class="empty">
 
+      <div class="spinner"></div>
+
+      Connecting to Tacoma Nights...
+
+    </div>
+
+  `;
+
+  /*
+   * Intentionally use select("*") without relying on
+   * a particular ordering column.
+   *
+   * The actual Tacoma Nights table contains:
+   *
+   * episode_number
+   * season
+   * status
+   * published_at
+   * display_order
+   * youtube_url
+   * youtube_video_id
+   * duration_seconds
+   */
 
   const {
     data,
@@ -5009,298 +5294,226 @@ async function loadEpisodes(){
       .from(
         "tacoma_nights_episodes"
       )
-      .select("*")
-      .in(
-        "status",
-        [
-          "available",
-          "published"
-        ]
-      );
-
+      .select("*");
 
   if(error){
 
     console.error(
-      "Tacoma Nights load failed:",
+      "tacoma_nights_episodes:",
       error
     );
 
-    episodeStatus.textContent =
-      "Unable to load episodes.";
+    episodeGrid.innerHTML = `
 
-    episodeGrid.innerHTML =
-      `
-        <div class="empty">
-          Tacoma Nights episodes could not
-          be loaded right now.
-        </div>
-      `;
+      <div class="empty">
 
-    return;
+        Unable to load Tacoma Nights.
+
+        <br><br>
+
+        ${escapeHtml(
+          error.message ||
+          "Unknown database error."
+        )}
+
+      </div>
+
+    `;
+
+    return false;
 
   }
 
+  /*
+   * Only display episodes intended to be public.
+   *
+   * If status is blank, we allow the record.
+   */
 
   state.episodes =
-    sortEpisodes(
-      data || []
-    );
+    (data || [])
+      .filter(
+        episode => {
 
+          const status =
+            String(
+              episode.status ||
+              ""
+            ).toLowerCase();
 
-  updateStats();
+          if(!status)
+            return true;
 
-  renderEpisodes();
-
-  await loadLatestEpisode();
-
-}
-
-
-/* =========================================================
-   LOAD LATEST EPISODE
-   ========================================================= */
-
-async function loadLatestEpisode(){
-
-  const playable =
-    state.episodes.filter(
-      isPlayable
-    );
-
-
-  if(
-    !playable.length
-  ){
-
-    playerPlaceholder.classList.remove(
-      "hidden"
-    );
-
-    autoplayBadge.textContent =
-      "NO VIDEO AVAILABLE";
-
-    return;
-
-  }
-
-
-  /*
-     Because state.episodes is sorted
-     oldest → newest, the last playable
-     episode is the latest playable episode.
-  */
-
-  const latest =
-    playable[
-      playable.length - 1
-    ];
-
-
-  /*
-     Set immediately so the player
-     does not appear empty.
-  */
-
-  state.currentEpisode =
-    latest;
-
-
-  state.currentIndex =
-    state.episodes.findIndex(
-      row =>
-        String(row.id) ===
-        String(latest.id)
-    );
-
-
-  /*
-     Small delay allows the cinematic
-     intro/player shell to finish mounting.
-  */
-
-  setTimeout(
-    () => {
-
-      openEpisode(
-        latest,
-        false
-      );
-
-    },
-    150
-  );
-
-}
-
-
-/* =========================================================
-   STATS
-   ========================================================= */
-
-function updateStats(){
-
-  const playable =
-    state.episodes.filter(
-      isPlayable
-    );
-
-
-  const seasons =
-    new Set(
-      state.episodes
-        .map(
-          row =>
-            episodeSeason(row)
-        )
-        .filter(Boolean)
-    );
-
-
-  episodeCount.textContent =
-    playable.length;
-
-
-  seasonCount.textContent =
-    seasons.size ||
-    "1";
-
-
-  episodeStatus.textContent =
-    state.episodes.length
-      ? `${state.episodes.length} episode${state.episodes.length === 1 ? "" : "s"} in the Tacoma Nights catalog`
-      : "No episodes are currently available.";
-
-}
-
-
-/* =========================================================
-   MUTE / UNMUTE
-   ========================================================= */
-
-muteButton.addEventListener(
-  "click",
-  () => {
-
-    if(
-      state.currentMedia ===
-      "native"
-    ){
-
-      videoPlayer.muted =
-        !videoPlayer.muted;
-
-      muteButton.textContent =
-        videoPlayer.muted
-          ? "🔊 UNMUTE"
-          : "🔇 MUTE";
-
-
-      if(
-        !videoPlayer.paused
-      ){
-
-        videoPlayer.play()
-          .catch(
-            () => {}
+          return [
+            "available",
+            "featured"
+          ].includes(
+            status
           );
 
-      }
-
-      return;
-
-    }
-
-
-    if(
-      state.currentMedia ===
-      "youtube"
-    ){
-
-      /*
-         YouTube's iframe owns the audio
-         controls. We can request unmute
-         after a user gesture.
-      */
-
-      youtubeCommand(
-        "unMute"
+        }
+      )
+      .sort(
+        compareEpisodes
       );
 
-      youtubeCommand(
-        "playVideo"
-      );
+  state.latestEpisode =
+    getLatestPlayableEpisode();
 
-      muteButton.textContent =
-        "🔇 MUTE";
+  renderFeatured();
+  renderEpisodes();
 
-      showAutoplayNotice(
-        false
-      );
+  return true;
 
-      return;
-
-    }
-
-
-  }
-);
-
+}
 
 /* =========================================================
-   NEXT EPISODE
+   LATEST BUTTON
    ========================================================= */
 
-nextButton.addEventListener(
+latestButton.addEventListener(
   "click",
-  () => {
+  ()=>{
 
-    const playable =
-      state.episodes.filter(
-        isPlayable
+    const latest =
+      getLatestPlayableEpisode();
+
+    if(!latest){
+
+      showToast(
+        "No playable Tacoma Nights episodes are available.",
+        "error"
       );
 
-
-    if(
-      !playable.length
-    ){
       return;
-    }
-
-
-    const currentIndex =
-      playable.findIndex(
-        episode =>
-          String(episode.id) ===
-          String(
-            state.currentEpisode?.id
-          )
-      );
-
-
-    let nextIndex =
-      currentIndex + 1;
-
-
-    if(
-      nextIndex >=
-      playable.length
-    ){
-
-      nextIndex =
-        0;
 
     }
-
 
     openEpisode(
-      playable[nextIndex],
+      latest,
       true
     );
 
+    document
+      .querySelector(".player-card")
+      ?.scrollIntoView({
+        behavior:"smooth",
+        block:"start"
+      });
+
   }
 );
 
+/* =========================================================
+   STOP
+   ========================================================= */
+
+stopButton.addEventListener(
+  "click",
+  ()=>{
+
+    stopCurrentMedia();
+
+    state.currentEpisode =
+      null;
+
+    state.currentIndex =
+      -1;
+
+    nowTitle.textContent =
+      "Select a Tacoma Nights episode";
+
+    nowDescription.textContent =
+      "Choose an episode from the Tacoma Nights archive.";
+
+    progressBar.style.width =
+      "0%";
+
+    resumeText.textContent =
+      "Your playback progress will appear here.";
+
+    renderEpisodes();
+
+    showToast(
+      "Tacoma Nights playback stopped."
+    );
+
+  }
+);
+
+/* =========================================================
+   CHAT REFRESH
+   ========================================================= */
+
+refreshChat.addEventListener(
+  "click",
+  ()=>{
+
+    const id =
+      state.currentYoutubeId;
+
+    if(!id){
+
+      showToast(
+        "Select a YouTube Tacoma Nights episode first.",
+        "error"
+      );
+
+      return;
+
+    }
+
+    const url =
+      buildYoutubeChatUrl(id);
+
+    if(!url){
+
+      showToast(
+        "YouTube Live Chat requires the hosted Tacoma Nights page.",
+        "error"
+      );
+
+      return;
+
+    }
+
+    youtubeChat.src =
+      url;
+
+  }
+);
+
+/* =========================================================
+   OPEN CHAT
+   ========================================================= */
+
+openChat.addEventListener(
+  "click",
+  ()=>{
+
+    const id =
+      state.currentYoutubeId;
+
+    if(!id){
+
+      showToast(
+        "Select a YouTube Tacoma Nights episode first.",
+        "error"
+      );
+
+      return;
+
+    }
+
+    window.open(
+      "https://www.youtube.com/watch?v=" +
+      encodeURIComponent(id),
+      "_blank",
+      "noopener,noreferrer"
+    );
+
+  }
+);
 
 /* =========================================================
    VISIBILITY
@@ -5308,18 +5521,25 @@ nextButton.addEventListener(
 
 document.addEventListener(
   "visibilitychange",
-  () => {
+  ()=>{
 
     if(
-      document.hidden
+      document.visibilityState ===
+      "hidden"
     ){
+
+      flushNativeWatch(false);
+
+      flushYoutubeWatch(false);
+
+    }else{
 
       if(
         state.nativeTracker
       ){
 
-        state.nativeTracker.playing =
-          false;
+        state.nativeTracker.lastTick =
+          performance.now();
 
       }
 
@@ -5327,118 +5547,129 @@ document.addEventListener(
         state.youtubeTracker
       ){
 
-        state.youtubeTracker.playing =
-          false;
+        state.youtubeTracker.lastTick =
+          performance.now();
 
       }
 
-      flushNativeWatch(
-        false
-      );
-
-      flushYouTubeWatch(
-        false
-      );
-
-      return;
-
-    }
-
-
-    if(
-      state.nativeTracker &&
-      !videoPlayer.paused
-    ){
-
-      state.nativeTracker.playing =
-        true;
-
-      state.nativeTracker.lastTick =
-        performance.now();
-
-    }
-
-    if(
-      state.youtubeTracker
-    ){
-
-      state.youtubeTracker.lastTick =
-        performance.now();
-
-      requestYouTubeTime();
+      processWatchQueue();
 
     }
 
   }
 );
 
-
 /* =========================================================
-   BEFORE UNLOAD
+   PAGE HIDE
    ========================================================= */
 
 window.addEventListener(
-  "beforeunload",
-  () => {
+  "pagehide",
+  ()=>{
 
-    /*
-       Best-effort only.
-       The persistent queue cannot reliably
-       perform an asynchronous network request
-       during unload, but the current tracker
-       is flushed into the in-memory queue.
-    */
-
-    flushNativeWatch(
-      false
-    );
-
-    flushYouTubeWatch(
-      false
-    );
+    flushNativeWatch(false);
+    flushYoutubeWatch(false);
 
   }
 );
 
+/* =========================================================
+   AUTH
+   ========================================================= */
+
+async function initializeAuth(){
+
+  const {
+    data,
+    error
+  } =
+    await db.auth.getSession();
+
+  if(error){
+
+    console.warn(
+      "getSession:",
+      error
+    );
+
+  }
+
+  state.user =
+    data?.session?.user ||
+    null;
+
+  if(state.user){
+
+    memberStatus.textContent =
+      "MEMBER";
+
+    await loadMember();
+    await loadWatchHistory();
+
+  }else{
+
+    memberStatus.textContent =
+      "GUEST";
+
+  }
+
+}
 
 /* =========================================================
-   AUTH STATE LISTENER
+   AUTH STATE
    ========================================================= */
 
 db.auth.onAuthStateChange(
   (
     event,
     session
-  ) => {
-
-    state.user =
-      session?.user ||
-      null;
-
+  )=>{
 
     setTimeout(
-      async () => {
+      async ()=>{
 
-        updateMemberUI();
+        state.user =
+          session?.user ||
+          null;
 
-        if(
-          state.user
-        ){
+        if(!state.user){
 
-          await loadWatchHistory();
+          state.member =
+            null;
 
-          updateSyncStatus();
-
-          processWatchQueue();
-
-        }else{
-
-          state.history =
+          state.watchQueue =
             [];
 
-          updateSyncStatus();
+          state.watchError =
+            null;
+
+          memberPoints.textContent =
+            "—";
+
+          memberMinutes.textContent =
+            "—";
+
+          memberStatus.textContent =
+            "GUEST";
+
+          setSyncStatus(
+            "synced",
+            "WATCH SYNC READY"
+          );
+
+          return;
 
         }
+
+        memberStatus.textContent =
+          "MEMBER";
+
+        await loadMember();
+        await loadWatchHistory();
+
+        updateResume();
+
+        processWatchQueue();
 
       },
       0
@@ -5447,74 +5678,79 @@ db.auth.onAuthStateChange(
   }
 );
 
-
-/* =========================================================
-   CINEMATIC INTRO
-   ========================================================= */
-
-function finishCinematicIntro(){
-
-  setTimeout(
-    () => {
-
-      cinematicIntro.classList.add(
-        "hide"
-      );
-
-    },
-    3100
-  );
-
-}
-
-
 /* =========================================================
    INITIALIZE
    ========================================================= */
 
-async function initialize(){
+async function init(){
 
-  if(
-    state.initialized
-  ){
-    return;
-  }
-
-  state.initialized =
-    true;
-
-
-  finishCinematicIntro();
-
-
-  setSync(
+  setSyncStatus(
     "synced",
     "WATCH SYNC READY"
   );
 
+  /*
+   * Authenticate before opening the latest episode
+   * so member resume data is available.
+   */
 
-  await refreshUser();
+  await initializeAuth();
 
+  const loaded =
+    await loadEpisodes();
 
   if(
-    state.user
+    !loaded ||
+    !state.episodes.length
   ){
 
-    await loadWatchHistory();
+    return;
 
   }
 
+  /*
+   * Automatically launch the newest playable
+   * Tacoma Nights episode.
+   */
 
-  await loadEpisodes();
+  const latest =
+    getLatestPlayableEpisode();
 
+  if(!latest){
 
-  updateSyncStatus();
+    nowTitle.textContent =
+      "Tacoma Nights is ready";
+
+    nowDescription.textContent =
+      "No playable video is currently attached to the published episodes.";
+
+    return;
+
+  }
+
+  state.latestEpisode =
+    latest;
+
+  /*
+   * Automatic YouTube playback is muted by design
+   * because browsers commonly block autoplay with sound.
+   */
+
+  await openEpisode(
+    latest,
+    true
+  );
 
 }
 
+/* =========================================================
+   START
+   ========================================================= */
+
+init();
 
 /* =========================================================
-   GLOBAL API
+   DEBUG API
    ========================================================= */
 
 window.CrowRulesTacomaNights = {
@@ -5527,29 +5763,25 @@ window.CrowRulesTacomaNights = {
 
   loadEpisodes,
 
+  loadMember,
+
   loadWatchHistory,
 
   processWatchQueue,
 
   flushNativeWatch,
 
-  flushYouTubeWatch,
+  flushYoutubeWatch,
 
-  retryWatchSync(){
-    state.watchSyncError =
-      null;
+  getLatestPlayableEpisode,
 
-    processWatchQueue();
-  }
+  retryWatchSync:
+    ()=>{
+      state.watchError = null;
+      processWatchQueue();
+    }
 
 };
-
-
-/* =========================================================
-   START
-   ========================================================= */
-
-initialize();
 
 </script>
 
