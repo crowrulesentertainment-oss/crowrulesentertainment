@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#05060a">
@@ -22,21 +23,28 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<!-- YouTube IFrame API -->
+<script src="https://www.youtube.com/iframe_api"></script>
+
 <style>
 
 :root{
   --bg:#05060a;
-  --bg2:#090b11;
-  --panel:#0d1017;
+  --bg2:#080a10;
+  --panel:#0c1017;
   --panel2:#11151e;
+  --panel3:#151a23;
   --text:#f4f6fb;
-  --muted:#9ba3b3;
+  --muted:#98a1b1;
+  --muted2:#687181;
   --line:rgba(255,255,255,.09);
+  --line2:rgba(255,255,255,.05);
   --red:#ff2929;
   --red2:#c91818;
   --gold:#f5bd42;
   --green:#2ee68a;
-  --shadow:0 25px 70px rgba(0,0,0,.5);
+  --blue:#4da3ff;
+  --shadow:0 25px 80px rgba(0,0,0,.48);
   --radius:22px;
 }
 
@@ -50,11 +58,17 @@ html{
 
 body{
   margin:0;
+  min-height:100vh;
   background:
     radial-gradient(
       circle at 50% -10%,
       rgba(255,35,35,.12),
-      transparent 35%
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at 90% 30%,
+      rgba(77,163,255,.04),
+      transparent 30%
     ),
     var(--bg);
   color:var(--text);
@@ -67,8 +81,8 @@ body:before{
   position:fixed;
   inset:0;
   pointer-events:none;
-  z-index:-1;
-  opacity:.16;
+  z-index:9999;
+  opacity:.11;
   background-image:
     linear-gradient(
       rgba(255,255,255,.025) 1px,
@@ -76,10 +90,26 @@ body:before{
     ),
     linear-gradient(
       90deg,
-      rgba(255,255,255,.025) 1px,
+      rgba(255,255,255,.018) 1px,
       transparent 1px
     );
   background-size:40px 40px;
+}
+
+body:after{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:9998;
+  opacity:.035;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent 2px,
+      #fff 3px
+    );
 }
 
 a{
@@ -109,15 +139,15 @@ img{
   position:sticky;
   top:0;
   z-index:1000;
-  background:rgba(5,6,10,.9);
-  backdrop-filter:blur(18px);
+  background:rgba(5,6,10,.91);
+  backdrop-filter:blur(20px);
   border-bottom:1px solid var(--line);
 }
 
 .header-inner{
-  width:min(1280px,calc(100% - 32px));
-  margin:auto;
+  width:min(1320px,calc(100% - 32px));
   min-height:76px;
+  margin:auto;
   display:flex;
   align-items:center;
   justify-content:space-between;
@@ -132,21 +162,17 @@ img{
 }
 
 .brand-mark{
-  width:43px;
-  height:43px;
-  border:1px solid rgba(255,41,41,.65);
-  border-radius:13px;
+  width:44px;
+  height:44px;
   display:grid;
   place-items:center;
+  border:1px solid rgba(255,41,41,.65);
+  border-radius:13px;
   color:var(--red);
   font-family:Orbitron,sans-serif;
+  font-size:.85rem;
   font-weight:900;
-  box-shadow:
-    0 0 25px rgba(255,41,41,.15);
-}
-
-.brand-copy{
-  min-width:0;
+  box-shadow:0 0 28px rgba(255,41,41,.14);
 }
 
 .brand-name{
@@ -158,22 +184,22 @@ img{
 
 .brand-sub{
   color:var(--muted);
-  font-size:.72rem;
+  font-size:.68rem;
   text-transform:uppercase;
-  letter-spacing:.14em;
+  letter-spacing:.15em;
 }
 
 .nav{
   display:flex;
   align-items:center;
-  gap:8px;
+  gap:5px;
 }
 
 .nav a{
-  color:#c9ced8;
   padding:9px 12px;
   border-radius:10px;
-  font-size:.84rem;
+  color:#c7ccd5;
+  font-size:.82rem;
   font-weight:700;
 }
 
@@ -189,6 +215,11 @@ img{
 
 .mobile-menu{
   display:none;
+  border:1px solid var(--line);
+  background:#0d1017;
+  color:#fff;
+  border-radius:10px;
+  padding:9px 12px;
 }
 
 /* =========================================================
@@ -196,7 +227,7 @@ img{
 ========================================================= */
 
 .intro{
-  min-height:440px;
+  min-height:430px;
   position:relative;
   display:grid;
   place-items:center;
@@ -204,9 +235,9 @@ img{
   border-bottom:1px solid var(--line);
   background:
     radial-gradient(
-      circle at 50% 50%,
-      rgba(255,38,38,.13),
-      transparent 35%
+      circle at center,
+      rgba(255,41,41,.14),
+      transparent 38%
     ),
     linear-gradient(
       180deg,
@@ -223,10 +254,23 @@ img{
     linear-gradient(
       90deg,
       transparent,
-      rgba(255,255,255,.025),
+      rgba(255,255,255,.035),
       transparent
     );
   animation:introScan 7s linear infinite;
+}
+
+.intro:after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  top:50%;
+  height:1px;
+  background:rgba(255,41,41,.3);
+  box-shadow:
+    0 0 30px rgba(255,41,41,.45);
+  animation:introLine 5s ease-in-out infinite;
 }
 
 @keyframes introScan{
@@ -238,27 +282,36 @@ img{
   }
 }
 
+@keyframes introLine{
+  0%,100%{
+    opacity:.2;
+  }
+  50%{
+    opacity:.7;
+  }
+}
+
 .intro-content{
-  width:min(1000px,calc(100% - 32px));
-  text-align:center;
   position:relative;
   z-index:2;
+  width:min(1050px,calc(100% - 32px));
+  text-align:center;
 }
 
 .intro-kicker{
-  font-family:Orbitron,sans-serif;
+  margin-bottom:22px;
   color:var(--red);
-  font-size:.8rem;
+  font-family:Orbitron,sans-serif;
+  font-size:.76rem;
   font-weight:800;
   letter-spacing:.22em;
   text-transform:uppercase;
-  margin-bottom:22px;
 }
 
 .intro h1{
   margin:0;
   font-family:Orbitron,sans-serif;
-  font-size:clamp(2.8rem,8vw,7.4rem);
+  font-size:clamp(2.8rem,8vw,7rem);
   line-height:.92;
   letter-spacing:-.06em;
   text-transform:uppercase;
@@ -275,15 +328,15 @@ img{
   height:2px;
   margin:30px auto;
   background:var(--red);
-  box-shadow:0 0 20px rgba(255,41,41,.7);
+  box-shadow:0 0 25px rgba(255,41,41,.7);
 }
 
 .intro p{
   margin:0;
-  color:#b6bdca;
-  font-size:1rem;
+  color:#aeb6c5;
+  font-size:.86rem;
+  letter-spacing:.17em;
   text-transform:uppercase;
-  letter-spacing:.16em;
 }
 
 /* =========================================================
@@ -292,10 +345,10 @@ img{
 
 .hero{
   position:relative;
-  overflow:hidden;
-  min-height:590px;
+  min-height:600px;
   display:flex;
   align-items:center;
+  overflow:hidden;
   border-bottom:1px solid var(--line);
 }
 
@@ -304,8 +357,9 @@ img{
   inset:0;
   background-position:center;
   background-size:cover;
-  opacity:.18;
+  opacity:.22;
   filter:grayscale(.35);
+  transform:scale(1.04);
 }
 
 .hero-overlay{
@@ -314,41 +368,41 @@ img{
   background:
     linear-gradient(
       90deg,
-      rgba(5,6,10,.98) 0%,
-      rgba(5,6,10,.85) 48%,
-      rgba(5,6,10,.48) 100%
+      rgba(5,6,10,.99) 0%,
+      rgba(5,6,10,.9) 45%,
+      rgba(5,6,10,.55) 100%
     ),
     linear-gradient(
       0deg,
       #05060a,
-      transparent 50%
+      transparent 55%
     );
 }
 
 .hero-inner{
   position:relative;
   z-index:2;
-  width:min(1280px,calc(100% - 32px));
+  width:min(1320px,calc(100% - 32px));
   margin:auto;
-  padding:80px 0;
+  padding:90px 0;
 }
 
 .hero-kicker{
   color:var(--red);
   font-family:Orbitron,sans-serif;
+  font-size:.75rem;
   font-weight:800;
-  font-size:.78rem;
   letter-spacing:.18em;
   text-transform:uppercase;
 }
 
 .hero h2{
-  max-width:850px;
+  max-width:900px;
   margin:15px 0 20px;
   font-family:Orbitron,sans-serif;
-  font-size:clamp(2.4rem,5vw,5rem);
-  line-height:1;
-  letter-spacing:-.04em;
+  font-size:clamp(2.4rem,5.4vw,5.6rem);
+  line-height:.98;
+  letter-spacing:-.05em;
 }
 
 .hero h2 span{
@@ -356,15 +410,15 @@ img{
 }
 
 .hero-description{
-  max-width:700px;
-  color:#b7becb;
-  font-size:1.05rem;
+  max-width:720px;
+  color:#b5bdcb;
+  font-size:1.04rem;
 }
 
 .hero-buttons{
   display:flex;
   flex-wrap:wrap;
-  gap:12px;
+  gap:11px;
   margin-top:30px;
 }
 
@@ -393,7 +447,7 @@ img{
 }
 
 /* =========================================================
-   CONTAINER
+   GENERAL
 ========================================================= */
 
 .section{
@@ -401,23 +455,23 @@ img{
 }
 
 .container{
-  width:min(1280px,calc(100% - 32px));
+  width:min(1320px,calc(100% - 32px));
   margin:auto;
 }
 
 .section-heading{
   display:flex;
-  justify-content:space-between;
   align-items:end;
-  gap:20px;
+  justify-content:space-between;
+  gap:25px;
   margin-bottom:30px;
 }
 
 .section-kicker{
   color:var(--red);
   font-family:Orbitron,sans-serif;
+  font-size:.68rem;
   font-weight:800;
-  font-size:.7rem;
   letter-spacing:.18em;
   text-transform:uppercase;
 }
@@ -425,13 +479,13 @@ img{
 .section-title{
   margin:7px 0 0;
   font-family:Orbitron,sans-serif;
-  font-size:clamp(1.7rem,3vw,2.6rem);
+  font-size:clamp(1.7rem,3vw,2.7rem);
   line-height:1.1;
 }
 
 .section-description{
-  color:var(--muted);
   max-width:650px;
+  color:var(--muted);
 }
 
 /* =========================================================
@@ -439,17 +493,17 @@ img{
 ========================================================= */
 
 .next-live{
+  overflow:hidden;
+  border:1px solid rgba(255,41,41,.2);
+  border-radius:var(--radius);
   background:
     linear-gradient(
       135deg,
-      rgba(255,41,41,.1),
+      rgba(255,41,41,.09),
       transparent 45%
     ),
     var(--panel);
-  border:1px solid rgba(255,41,41,.18);
-  border-radius:var(--radius);
   box-shadow:var(--shadow);
-  overflow:hidden;
 }
 
 .next-live-grid{
@@ -458,7 +512,7 @@ img{
 }
 
 .next-live-copy{
-  padding:40px;
+  padding:42px;
 }
 
 .live-label{
@@ -467,8 +521,8 @@ img{
   gap:8px;
   color:var(--red);
   font-family:Orbitron,sans-serif;
+  font-size:.7rem;
   font-weight:800;
-  font-size:.72rem;
   letter-spacing:.13em;
   text-transform:uppercase;
 }
@@ -484,14 +538,15 @@ img{
 
 @keyframes pulse{
   50%{
-    opacity:.35;
+    opacity:.3;
   }
 }
 
 .next-live h3{
   margin:18px 0 10px;
   font-family:Orbitron,sans-serif;
-  font-size:clamp(1.6rem,3vw,2.7rem);
+  font-size:clamp(1.6rem,3vw,2.8rem);
+  line-height:1.15;
 }
 
 .next-live p{
@@ -511,12 +566,12 @@ img{
   border:1px solid var(--line);
   border-radius:10px;
   color:#d8dce4;
-  font-size:.8rem;
+  font-size:.78rem;
   font-weight:700;
 }
 
 .countdown-panel{
-  min-height:280px;
+  min-height:300px;
   display:grid;
   place-items:center;
   padding:30px;
@@ -538,11 +593,11 @@ img{
 }
 
 .time-box{
-  text-align:center;
   padding:18px 8px;
-  background:rgba(255,255,255,.035);
+  text-align:center;
   border:1px solid var(--line);
   border-radius:13px;
+  background:rgba(255,255,255,.035);
 }
 
 .time-number{
@@ -553,7 +608,7 @@ img{
 
 .time-label{
   color:var(--muted);
-  font-size:.65rem;
+  font-size:.62rem;
   letter-spacing:.12em;
   text-transform:uppercase;
 }
@@ -570,14 +625,15 @@ img{
 
 .player-card,
 .chat-card{
-  background:var(--panel);
+  overflow:hidden;
   border:1px solid var(--line);
   border-radius:var(--radius);
-  overflow:hidden;
+  background:var(--panel);
   box-shadow:var(--shadow);
 }
 
 .player-wrap{
+  position:relative;
   aspect-ratio:16/9;
   background:#000;
 }
@@ -592,6 +648,26 @@ img{
   padding:24px;
 }
 
+.player-status{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:10px;
+  color:var(--green);
+  font-family:Orbitron,sans-serif;
+  font-size:.64rem;
+  font-weight:800;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
+.player-status-dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--green);
+}
+
 .player-info h3{
   margin:0 0 8px;
   font-family:Orbitron,sans-serif;
@@ -603,8 +679,19 @@ img{
   color:var(--muted);
 }
 
+.member-watch-status{
+  display:none;
+  margin-top:15px;
+  padding:10px 12px;
+  border:1px solid rgba(46,230,138,.14);
+  border-radius:10px;
+  color:#9eeac5;
+  background:rgba(46,230,138,.045);
+  font-size:.73rem;
+  font-weight:700;
+}
+
 .chat-card{
-  min-height:100%;
   display:flex;
   flex-direction:column;
 }
@@ -613,18 +700,22 @@ img{
   padding:18px 20px;
   border-bottom:1px solid var(--line);
   font-family:Orbitron,sans-serif;
-  font-size:.82rem;
+  font-size:.78rem;
   font-weight:800;
 }
 
 .chat-frame{
   flex:1;
-  min-height:440px;
+  min-height:430px;
   display:grid;
   place-items:center;
   padding:30px;
-  text-align:center;
   color:var(--muted);
+  text-align:center;
+}
+
+.chat-frame strong{
+  color:#fff;
 }
 
 /* =========================================================
@@ -634,44 +725,44 @@ img{
 .featured{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:25px;
-  background:var(--panel);
+  overflow:hidden;
   border:1px solid var(--line);
   border-radius:var(--radius);
-  overflow:hidden;
+  background:var(--panel);
 }
 
 .featured-image{
-  min-height:350px;
-  background-size:cover;
+  min-height:370px;
   background-position:center;
-  background-color:#0a0c11;
+  background-size:cover;
+  background-color:#090b10;
 }
 
 .featured-copy{
-  padding:42px;
+  padding:44px;
   display:flex;
   flex-direction:column;
   justify-content:center;
+}
+
+.featured-label{
+  color:var(--red);
+  font-family:Orbitron,sans-serif;
+  font-size:.68rem;
+  font-weight:800;
+  letter-spacing:.16em;
+  text-transform:uppercase;
 }
 
 .featured-copy h3{
   margin:12px 0;
   font-family:Orbitron,sans-serif;
   font-size:clamp(1.8rem,3vw,3rem);
+  line-height:1.1;
 }
 
 .featured-copy p{
   color:var(--muted);
-}
-
-.featured-label{
-  color:var(--red);
-  font-family:Orbitron,sans-serif;
-  font-size:.7rem;
-  font-weight:800;
-  letter-spacing:.16em;
-  text-transform:uppercase;
 }
 
 /* =========================================================
@@ -680,26 +771,26 @@ img{
 
 .archive-toolbar{
   display:flex;
-  justify-content:space-between;
   align-items:center;
+  justify-content:space-between;
   gap:15px;
   margin-bottom:25px;
 }
 
 .archive-count{
   color:var(--muted);
-  font-size:.85rem;
+  font-size:.84rem;
   font-weight:700;
 }
 
 .search{
-  width:min(360px,100%);
+  width:min(380px,100%);
   padding:13px 15px;
-  color:#fff;
-  background:#0c0f15;
+  outline:none;
   border:1px solid var(--line);
   border-radius:12px;
-  outline:none;
+  color:#fff;
+  background:#0c0f15;
 }
 
 .search:focus{
@@ -708,25 +799,23 @@ img{
 
 .episodes-grid{
   display:grid;
-  grid-template-columns:
-    repeat(3,minmax(0,1fr));
+  grid-template-columns:repeat(3,minmax(0,1fr));
   gap:18px;
 }
 
 .episode-card{
-  background:var(--panel);
+  overflow:hidden;
   border:1px solid var(--line);
   border-radius:18px;
-  overflow:hidden;
-  transition:.2s ease;
+  background:var(--panel);
   cursor:pointer;
+  transition:.2s ease;
 }
 
 .episode-card:hover{
   transform:translateY(-5px);
   border-color:rgba(255,41,41,.35);
-  box-shadow:
-    0 18px 50px rgba(0,0,0,.35);
+  box-shadow:0 18px 50px rgba(0,0,0,.35);
 }
 
 .episode-thumb{
@@ -752,23 +841,13 @@ img{
   top:12px;
   left:12px;
   padding:6px 9px;
+  border:1px solid rgba(255,255,255,.12);
   border-radius:8px;
   background:rgba(0,0,0,.8);
-  border:1px solid rgba(255,255,255,.12);
   font-family:Orbitron,sans-serif;
-  font-size:.58rem;
+  font-size:.56rem;
   font-weight:800;
   letter-spacing:.08em;
-}
-
-.episode-badge.live{
-  color:#fff;
-  background:var(--red);
-  border-color:var(--red);
-}
-
-.episode-badge.scheduled{
-  color:var(--gold);
 }
 
 .episode-body{
@@ -778,44 +857,44 @@ img{
 .episode-number{
   color:var(--red);
   font-family:Orbitron,sans-serif;
-  font-size:.62rem;
+  font-size:.6rem;
   font-weight:800;
   letter-spacing:.1em;
 }
 
 .episode-body h3{
-  margin:8px 0 8px;
+  margin:8px 0;
   font-family:Orbitron,sans-serif;
-  font-size:1.05rem;
+  font-size:1.02rem;
   line-height:1.3;
 }
 
 .episode-body p{
+  min-height:52px;
   margin:0;
   color:var(--muted);
-  font-size:.84rem;
-  min-height:52px;
+  font-size:.82rem;
 }
 
 .episode-meta{
-  margin-top:18px;
-  padding-top:14px;
-  border-top:1px solid var(--line);
   display:flex;
   justify-content:space-between;
   gap:10px;
-  color:#89919f;
-  font-size:.7rem;
+  margin-top:18px;
+  padding-top:14px;
+  border-top:1px solid var(--line);
+  color:#858e9d;
+  font-size:.68rem;
   font-weight:700;
 }
 
 .empty{
   grid-column:1/-1;
   padding:50px 25px;
-  text-align:center;
   border:1px dashed var(--line);
   border-radius:18px;
   color:var(--muted);
+  text-align:center;
 }
 
 /* =========================================================
@@ -824,9 +903,8 @@ img{
 
 .member-cta{
   padding:60px;
-  text-align:center;
-  border-radius:var(--radius);
   border:1px solid rgba(255,41,41,.2);
+  border-radius:var(--radius);
   background:
     radial-gradient(
       circle at center,
@@ -834,6 +912,7 @@ img{
       transparent 60%
     ),
     var(--panel);
+  text-align:center;
 }
 
 .member-cta h2{
@@ -842,9 +921,9 @@ img{
 }
 
 .member-cta p{
-  color:var(--muted);
   max-width:650px;
   margin:0 auto 25px;
+  color:var(--muted);
 }
 
 /* =========================================================
@@ -864,15 +943,15 @@ footer{
 }
 
 .footer-title{
+  margin-bottom:10px;
   font-family:Orbitron,sans-serif;
   font-weight:900;
-  margin-bottom:10px;
 }
 
 footer p,
 footer a{
   color:#858d9b;
-  font-size:.84rem;
+  font-size:.82rem;
 }
 
 .footer-links{
@@ -880,16 +959,49 @@ footer a{
   gap:7px;
 }
 
+.footer-links a:hover{
+  color:#fff;
+}
+
 .footer-bottom{
   margin-top:35px;
   padding-top:20px;
   border-top:1px solid var(--line);
   color:#606875;
-  font-size:.72rem;
+  font-size:.7rem;
 }
 
 /* =========================================================
-   RESPONSIVE
+   TOAST
+========================================================= */
+
+.toast{
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  z-index:10000;
+  max-width:360px;
+  padding:13px 16px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#10141c;
+  box-shadow:var(--shadow);
+  color:#fff;
+  font-size:.78rem;
+  font-weight:700;
+  opacity:0;
+  pointer-events:none;
+  transform:translateY(15px);
+  transition:.25s ease;
+}
+
+.toast.show{
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* =========================================================
+   MOBILE
 ========================================================= */
 
 @media(max-width:1000px){
@@ -900,11 +1012,6 @@ footer a{
 
   .mobile-menu{
     display:block;
-    border:1px solid var(--line);
-    background:#0d1016;
-    color:#fff;
-    border-radius:10px;
-    padding:9px 12px;
   }
 
   .next-live-grid,
@@ -919,8 +1026,7 @@ footer a{
   }
 
   .episodes-grid{
-    grid-template-columns:
-      repeat(2,minmax(0,1fr));
+    grid-template-columns:repeat(2,minmax(0,1fr));
   }
 
   .footer-grid{
@@ -939,12 +1045,21 @@ footer a{
     padding:55px 0;
   }
 
+  .intro{
+    min-height:380px;
+  }
+
   .hero{
     min-height:520px;
   }
 
   .hero-inner{
     padding:60px 0;
+  }
+
+  .section-heading{
+    align-items:flex-start;
+    flex-direction:column;
   }
 
   .next-live-copy,
@@ -954,8 +1069,7 @@ footer a{
   }
 
   .countdown{
-    grid-template-columns:
-      repeat(2,1fr);
+    grid-template-columns:repeat(2,1fr);
   }
 
   .episodes-grid{
@@ -977,7 +1091,24 @@ footer a{
 
 }
 
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media(prefers-reduced-motion:reduce){
+
+  *,
+  *:before,
+  *:after{
+    scroll-behavior:auto!important;
+    animation:none!important;
+    transition:none!important;
+  }
+
+}
+
 </style>
+
 </head>
 
 <body>
@@ -990,16 +1121,13 @@ footer a{
 
   <div class="header-inner">
 
-    <a
-      href="index.html"
-      class="brand"
-    >
+    <a href="index.html" class="brand">
 
       <div class="brand-mark">
         CR
       </div>
 
-      <div class="brand-copy">
+      <div>
 
         <div class="brand-name">
           CROWRULES
@@ -1013,7 +1141,7 @@ footer a{
 
     </a>
 
-    <nav class="nav">
+    <nav id="mainNav" class="nav">
 
       <a href="index.html">
         Home
@@ -1031,18 +1159,16 @@ footer a{
         Tacoma Nights
       </a>
 
-      <a
-        href="members.html"
-        class="nav-cta"
-      >
+      <a href="members.html" class="nav-cta">
         Members
       </a>
 
     </nav>
 
     <button
+      id="mobileMenuButton"
       class="mobile-menu"
-      onclick="toggleMobileNav()"
+      type="button"
       aria-label="Open navigation"
     >
       ☰
@@ -1110,17 +1236,11 @@ footer a{
 
     <div class="hero-buttons">
 
-      <a
-        href="#watch"
-        class="btn btn-primary"
-      >
+      <a href="#watch" class="btn btn-primary">
         Watch Back Deck Live
       </a>
 
-      <a
-        href="#archive"
-        class="btn"
-      >
+      <a href="#archive" class="btn">
         Episode Archive
       </a>
 
@@ -1153,7 +1273,7 @@ footer a{
       </div>
 
       <div class="section-description">
-        The next live Back Deck Live event.
+        The next scheduled Back Deck Live event.
       </div>
 
     </div>
@@ -1182,17 +1302,11 @@ footer a{
 
           <div class="event-meta">
 
-            <div
-              class="meta-pill"
-              id="nextLiveDate"
-            >
+            <div id="nextLiveDate" class="meta-pill">
               September 5, 2026
             </div>
 
-            <div
-              class="meta-pill"
-              id="nextLiveTime"
-            >
+            <div id="nextLiveTime" class="meta-pill">
               3:00 PM Pacific
             </div>
 
@@ -1216,69 +1330,26 @@ footer a{
 
         <div class="countdown-panel">
 
-          <div
-            id="countdown"
-            class="countdown"
-          >
+          <div id="countdown" class="countdown">
 
             <div class="time-box">
-
-              <div
-                id="days"
-                class="time-number"
-              >
-                00
-              </div>
-
-              <div class="time-label">
-                Days
-              </div>
-
+              <div id="days" class="time-number">00</div>
+              <div class="time-label">Days</div>
             </div>
 
             <div class="time-box">
-
-              <div
-                id="hours"
-                class="time-number"
-              >
-                00
-              </div>
-
-              <div class="time-label">
-                Hours
-              </div>
-
+              <div id="hours" class="time-number">00</div>
+              <div class="time-label">Hours</div>
             </div>
 
             <div class="time-box">
-
-              <div
-                id="minutes"
-                class="time-number"
-              >
-                00
-              </div>
-
-              <div class="time-label">
-                Minutes
-              </div>
-
+              <div id="minutes" class="time-number">00</div>
+              <div class="time-label">Minutes</div>
             </div>
 
             <div class="time-box">
-
-              <div
-                id="seconds"
-                class="time-number"
-              >
-                00
-              </div>
-
-              <div class="time-label">
-                Seconds
-              </div>
-
+              <div id="seconds" class="time-number">00</div>
+              <div class="time-label">Seconds</div>
             </div>
 
           </div>
@@ -1297,10 +1368,7 @@ footer a{
      WATCH
 ======================================================== -->
 
-<section
-  id="watch"
-  class="section"
->
+<section id="watch" class="section">
 
   <div class="container">
 
@@ -1319,8 +1387,9 @@ footer a{
       </div>
 
       <div class="section-description">
-        Watch the latest Back Deck Live episode
-        or select an episode from the archive.
+        Episodes automatically start muted when supported
+        by the browser. Members can have their actual
+        playback time recorded to CrowRules.
       </div>
 
     </div>
@@ -1331,33 +1400,34 @@ footer a{
 
         <div class="player-wrap">
 
-          <iframe
-            id="youtubePlayer"
-            src="https://www.youtube.com/embed/46Q-KGIPMQc?rel=0&modestbranding=1&playsinline=1"
-            title="Back Deck Live"
-            allow="
-              accelerometer;
-              autoplay;
-              clipboard-write;
-              encrypted-media;
-              gyroscope;
-              picture-in-picture;
-              web-share
-            "
-            allowfullscreen
-          ></iframe>
+          <div id="youtubePlayer"></div>
 
         </div>
 
         <div class="player-info">
 
+          <div class="player-status">
+
+            <span class="player-status-dot"></span>
+
+            CrowRules Player
+
+          </div>
+
           <h3 id="videoTitle">
-            Back Deck Live #003 — Dreams and Goals
+            Loading Back Deck Live...
           </h3>
 
           <p id="videoDescription">
-            Back Deck Live #003 — Dreams and Goals.
+            Loading the selected episode.
           </p>
+
+          <div
+            id="memberWatchStatus"
+            class="member-watch-status"
+          >
+            Member watch tracking is active.
+          </div>
 
         </div>
 
@@ -1472,10 +1542,7 @@ footer a{
      ARCHIVE
 ======================================================== -->
 
-<section
-  id="archive"
-  class="section"
->
+<section id="archive" class="section">
 
   <div class="container">
 
@@ -1494,19 +1561,16 @@ footer a{
       </div>
 
       <div class="section-description">
-        Every publicly available Back Deck Live episode
-        is loaded from the centralized CrowRules
-        <strong>cr_content</strong> system.
+        Public Back Deck Live episodes are loaded from
+        the centralized CrowRules <strong>cr_content</strong>
+        system.
       </div>
 
     </div>
 
     <div class="archive-toolbar">
 
-      <div
-        id="archiveCount"
-        class="archive-count"
-      >
+      <div id="archiveCount" class="archive-count">
         Loading episodes...
       </div>
 
@@ -1520,10 +1584,7 @@ footer a{
 
     </div>
 
-    <div
-      id="episodesGrid"
-      class="episodes-grid"
-    >
+    <div id="episodesGrid" class="episodes-grid">
 
       <div class="empty">
         Loading Back Deck Live archive...
@@ -1667,17 +1728,20 @@ footer a{
 
 </footer>
 
-<!-- =======================================================
-     JAVASCRIPT
-======================================================== -->
+<div id="toast" class="toast"></div>
 
 <script>
 
 /* =========================================================
-   CONFIGURATION
+   CROWRULES BACK DECK LIVE
+   FULL PLAYER + MEMBER WATCH TRACKING
 ========================================================= */
 
 "use strict";
+
+/* =========================================================
+   SUPABASE CONFIG
+========================================================= */
 
 const SUPABASE_URL =
   "https://zauxdqyssratvzmomozf.supabase.co";
@@ -1691,12 +1755,9 @@ const CONTENT_TABLE =
 const SHOW_NAME =
   "Back Deck Live";
 
-/*
-  Explicit next-live event.
-
-  This remains authoritative while #003 is
-  still a draft in cr_content.
-*/
+/* =========================================================
+   EXPLICIT NEXT LIVE EVENT
+========================================================= */
 
 const EXPLICIT_NEXT_LIVE_EVENT = {
 
@@ -1730,7 +1791,7 @@ const EXPLICIT_NEXT_LIVE_EVENT = {
 };
 
 /* =========================================================
-   SUPABASE
+   SUPABASE CLIENT
 ========================================================= */
 
 const supabaseClient =
@@ -1750,14 +1811,29 @@ const supabaseClient =
    STATE
 ========================================================= */
 
-let episodes = [];
+const state = {
 
-let selectedEpisode = null;
+  episodes:[],
 
-let archiveSearch = "";
+  selectedEpisode:null,
 
-let nextLiveEvent =
-  EXPLICIT_NEXT_LIVE_EVENT;
+  search:"",
+
+  user:null,
+
+  member:null,
+
+  youtubePlayer:null,
+
+  youtubeReady:false,
+
+  playerEpisodeId:null,
+
+  watchTracker:null,
+
+  initialized:false
+
+};
 
 /* =========================================================
    DOM
@@ -1768,7 +1844,7 @@ const $ =
     document.getElementById(id);
 
 /* =========================================================
-   SAFE TEXT
+   BASIC HELPERS
 ========================================================= */
 
 function text(value){
@@ -1778,10 +1854,6 @@ function text(value){
   ).trim();
 
 }
-
-/* =========================================================
-   ESCAPE HTML
-========================================================= */
 
 function escapeHTML(value){
 
@@ -1793,10 +1865,6 @@ function escapeHTML(value){
     .replaceAll("'","&#039;");
 
 }
-
-/* =========================================================
-   JSON METADATA
-========================================================= */
 
 function metadata(row){
 
@@ -1830,10 +1898,6 @@ function metadata(row){
     : {};
 
 }
-
-/* =========================================================
-   LEGACY METADATA
-========================================================= */
 
 function legacyMetadata(row){
 
@@ -1872,7 +1936,43 @@ function legacyMetadata(row){
 }
 
 /* =========================================================
-   BACK DECK FILTER
+   DEDUPE
+========================================================= */
+
+function uniqueById(list){
+
+  const map =
+    new Map();
+
+  for(
+    const item
+    of list || []
+  ){
+
+    const id =
+      text(
+        item?.id ||
+        item?.content_id ||
+        item?.source_id
+      );
+
+    if(!id)
+      continue;
+
+    if(!map.has(id)){
+      map.set(id,item);
+    }
+
+  }
+
+  return [
+    ...map.values()
+  ];
+
+}
+
+/* =========================================================
+   BACK DECK CONTENT FILTER
 ========================================================= */
 
 function isBackDeckContent(row){
@@ -1932,19 +2032,14 @@ function youtubeID(row){
   const candidates = [
 
     meta.youtube_video_id,
-
     meta.youtube_url,
-
     meta.video_url,
 
     legacy.youtube_video_id,
-
     legacy.youtube_url,
 
     row?.youtube_video_id,
-
     row?.youtube_url,
-
     row?.video_url
 
   ];
@@ -2042,17 +2137,14 @@ function episodeNumber(row){
   const candidates = [
 
     meta.episode_number,
-
     meta.episode,
 
     legacy.episode_number,
-
     legacy.episode,
 
     row?.episode_number,
 
     meta.episode_label,
-
     legacy.episode_label
 
   ];
@@ -2076,14 +2168,7 @@ function episodeNumber(row){
 
   }
 
-  const order =
-    Number(
-      row?.sort_order
-    );
-
-  return Number.isFinite(order)
-    ? order
-    : 0;
+  return 0;
 
 }
 
@@ -2102,11 +2187,9 @@ function seasonNumber(row){
   const candidates = [
 
     meta.season_number,
-
     meta.season,
 
     legacy.season_number,
-
     legacy.season,
 
     row?.season_number
@@ -2214,12 +2297,12 @@ function description(row){
    NORMALIZE CONTENT
 ========================================================= */
 
-function normalize(row){
+function normalizeContent(row){
 
   const meta =
     metadata(row);
 
-  const id =
+  const youtube =
     youtubeID(row);
 
   const ep =
@@ -2234,7 +2317,8 @@ function normalize(row){
       row.id,
 
     title:
-      text(row.title) ||
+      text(row.title)
+      ||
       `Back Deck Live #${
         String(ep)
           .padStart(3,"0")
@@ -2253,7 +2337,7 @@ function normalize(row){
       thumbnail(row),
 
     youtube_id:
-      id,
+      youtube,
 
     youtube_url:
       text(
@@ -2261,8 +2345,8 @@ function normalize(row){
       )
       ||
       (
-        id
-          ? `https://www.youtube.com/watch?v=${id}`
+        youtube
+          ? `https://www.youtube.com/watch?v=${youtube}`
           : ""
       ),
 
@@ -2287,7 +2371,7 @@ function normalize(row){
 }
 
 /* =========================================================
-   SORT
+   SORT EPISODES
 ========================================================= */
 
 function sortEpisodes(list){
@@ -2307,10 +2391,17 @@ function sortEpisodes(list){
 
       }
 
-      return (
-        b.sort_order -
-        a.sort_order
-      );
+      const ad =
+        new Date(
+          a.published_at || 0
+        ).getTime();
+
+      const bd =
+        new Date(
+          b.published_at || 0
+        ).getTime();
+
+      return bd - ad;
 
     }
   );
@@ -2318,40 +2409,7 @@ function sortEpisodes(list){
 }
 
 /* =========================================================
-   FORMAT DATE
-========================================================= */
-
-function formatDate(value){
-
-  if(!value)
-    return "Date TBA";
-
-  const date =
-    new Date(value);
-
-  if(
-    Number.isNaN(
-      date.getTime()
-    )
-  ){
-
-    return "Date TBA";
-
-  }
-
-  return date.toLocaleDateString(
-    "en-US",
-    {
-      month:"short",
-      day:"numeric",
-      year:"numeric"
-    }
-  );
-
-}
-
-/* =========================================================
-   LOAD CR_CONTENT
+   LOAD CONTENT
 ========================================================= */
 
 async function loadContent(){
@@ -2370,18 +2428,6 @@ async function loadContent(){
   }
 
   try{
-
-    /*
-      IMPORTANT:
-
-      We intentionally query cr_content,
-      NOT cr_episodes.
-
-      We then perform a second client-side
-      Back Deck filter to guarantee that
-      Tacoma Nights or other shows cannot
-      accidentally enter this archive.
-    */
 
     const {
       data,
@@ -2415,47 +2461,37 @@ async function loadContent(){
         )
 
         .eq(
-          "metadata->>show",
-          SHOW_NAME
-        )
-
-        .eq(
           "status",
           "published"
         )
 
         .order(
-          "sort_order",
+          "published_at",
           {
-            ascending:false
+            ascending:false,
+            nullsFirst:false
           }
         )
 
-        .order(
-          "created_at",
-          {
-            ascending:false
-          }
-        );
+        .limit(100);
 
-    if(error){
-
+    if(error)
       throw error;
 
-    }
-
-    episodes =
+    const filtered =
       (data || [])
         .filter(
           isBackDeckContent
         )
         .map(
-          normalize
+          normalizeContent
         );
 
-    episodes =
+    state.episodes =
       sortEpisodes(
-        episodes
+        uniqueById(
+          filtered
+        )
       );
 
     renderArchive();
@@ -2464,10 +2500,22 @@ async function loadContent(){
 
     updateHeroBackdrop();
 
-    console.info(
-      "Back Deck Live cr_content:",
-      episodes
-    );
+    /*
+      Only initialize the player after
+      content has been resolved.
+    */
+
+    if(
+      !state.selectedEpisode &&
+      state.episodes.length
+    ){
+
+      state.selectedEpisode =
+        state.episodes[0];
+
+    }
+
+    initializeYouTube();
 
   }catch(error){
 
@@ -2476,7 +2524,7 @@ async function loadContent(){
       error
     );
 
-    episodes = [];
+    state.episodes = [];
 
     if(grid){
 
@@ -2520,35 +2568,28 @@ function renderArchive(){
 
   const query =
     text(
-      archiveSearch
+      state.search
     ).toLowerCase();
 
   const filtered =
-    episodes.filter(
+    state.episodes.filter(
       ep => {
 
         if(!query)
           return true;
 
-        const searchable = [
+        return [
 
           ep.title,
-
           ep.description,
-
           `episode ${ep.episode_number}`,
-
           `#${ep.episode_number}`,
-
           SHOW_NAME
 
         ]
           .join(" ")
-          .toLowerCase();
-
-        return searchable.includes(
-          query
-        );
+          .toLowerCase()
+          .includes(query);
 
       }
     );
@@ -2589,45 +2630,10 @@ function renderArchive(){
       )
       .join("");
 
-  grid
-    .querySelectorAll(
-      ".episode-card"
-    )
-    .forEach(
-      card => {
-
-        card.addEventListener(
-          "click",
-          () => {
-
-            const id =
-              card.dataset.id;
-
-            const episode =
-              episodes.find(
-                ep =>
-                  String(ep.id) ===
-                  String(id)
-              );
-
-            if(episode){
-
-              playEpisode(
-                episode
-              );
-
-            }
-
-          }
-        );
-
-      }
-    );
-
 }
 
 /* =========================================================
-   EPISODE CARD
+   CREATE EPISODE CARD
 ========================================================= */
 
 function createEpisodeCard(ep){
@@ -2639,15 +2645,12 @@ function createEpisodeCard(ep){
 
   const image =
     ep.thumbnail_url
-
-      ||
-
+    ||
     (
       ep.youtube_id
         ? `https://i.ytimg.com/vi/${
             ep.youtube_id
           }/hqdefault.jpg`
-
         : ""
     );
 
@@ -2671,13 +2674,14 @@ function createEpisodeCard(ep){
         style="
           width:100%;
           height:100%;
+          min-height:180px;
           display:grid;
           place-items:center;
+          color:#ff2929;
           font-family:Orbitron,sans-serif;
-          font-size:.75rem;
+          font-size:.7rem;
           font-weight:900;
           letter-spacing:.12em;
-          color:#ff2929;
         "
       >
         BACK DECK LIVE
@@ -2750,6 +2754,45 @@ function createEpisodeCard(ep){
 }
 
 /* =========================================================
+   ARCHIVE CLICK DELEGATION
+   ONE LISTENER ONLY
+========================================================= */
+
+$("episodesGrid")
+  ?.addEventListener(
+    "click",
+    event => {
+
+      const card =
+        event.target.closest(
+          ".episode-card"
+        );
+
+      if(!card)
+        return;
+
+      const id =
+        card.dataset.id;
+
+      const episode =
+        state.episodes.find(
+          ep =>
+            String(ep.id) ===
+            String(id)
+        );
+
+      if(episode){
+
+        playEpisode(
+          episode
+        );
+
+      }
+
+    }
+  );
+
+/* =========================================================
    PLAY EPISODE
 ========================================================= */
 
@@ -2758,25 +2801,8 @@ function playEpisode(ep){
   if(!ep)
     return;
 
-  selectedEpisode =
+  state.selectedEpisode =
     ep;
-
-  const player =
-    $("youtubePlayer");
-
-  if(
-    player &&
-    ep.youtube_id
-  ){
-
-    player.src =
-      `https://www.youtube.com/embed/${
-        encodeURIComponent(
-          ep.youtube_id
-        )
-      }?rel=0&modestbranding=1&playsinline=1`;
-
-  }
 
   if($("videoTitle")){
 
@@ -2794,28 +2820,1470 @@ function playEpisode(ep){
 
   }
 
-  window.scrollTo({
-    top:
-      $("watch")
-        ?.getBoundingClientRect()
-        .top
-      +
-      window.scrollY
-      -
-      90,
+  /*
+    Stop previous tracking before
+    switching content.
+  */
 
-    behavior:"smooth"
-  });
+  stopWatchTracking(true);
+
+  /*
+    If YouTube API is ready,
+    load and autoplay the new video.
+  */
+
+  if(
+    state.youtubePlayer &&
+    state.youtubeReady &&
+    ep.youtube_id
+  ){
+
+    state.playerEpisodeId =
+      ep.id;
+
+    state.youtubePlayer
+      .loadVideoById(
+        {
+          videoId:
+            ep.youtube_id,
+          startSeconds:
+            0
+        }
+      );
+
+  }else{
+
+    initializeYouTube();
+
+  }
+
+  const watch =
+    $("watch");
+
+  if(watch){
+
+    window.scrollTo({
+
+      top:
+        watch.getBoundingClientRect().top +
+        window.scrollY -
+        90,
+
+      behavior:"smooth"
+
+    });
+
+  }
 
 }
 
 /* =========================================================
-   FEATURED EPISODE
+   YOUTUBE API READY
+========================================================= */
+
+window.onYouTubeIframeAPIReady =
+  function(){
+
+    state.youtubeReady =
+      true;
+
+    initializeYouTube();
+
+  };
+
+/* =========================================================
+   INITIALIZE YOUTUBE
+========================================================= */
+
+function initializeYouTube(){
+
+  if(
+    !state.youtubeReady ||
+    typeof YT ===
+      "undefined" ||
+    !YT.Player
+  ){
+
+    return;
+
+  }
+
+  const episode =
+    state.selectedEpisode;
+
+  if(
+    !episode ||
+    !episode.youtube_id
+  ){
+
+    return;
+
+  }
+
+  /*
+    Prevent duplicate player creation.
+  */
+
+  if(state.youtubePlayer){
+
+    if(
+      state.playerEpisodeId !==
+      episode.id
+    ){
+
+      state.playerEpisodeId =
+        episode.id;
+
+      try{
+
+        state.youtubePlayer
+          .loadVideoById(
+            episode.youtube_id
+          );
+
+      }catch(error){
+
+        console.warn(
+          "YouTube reload failed:",
+          error
+        );
+
+      }
+
+    }
+
+    return;
+
+  }
+
+  state.playerEpisodeId =
+    episode.id;
+
+  state.youtubePlayer =
+    new YT.Player(
+      "youtubePlayer",
+      {
+
+        width:"100%",
+        height:"100%",
+
+        videoId:
+          episode.youtube_id,
+
+        playerVars:{
+
+          autoplay:1,
+
+          mute:1,
+
+          controls:1,
+
+          rel:0,
+
+          modestbranding:1,
+
+          playsinline:1,
+
+          enablejsapi:1
+
+        },
+
+        events:{
+
+          onReady:
+            onYouTubeReady,
+
+          onStateChange:
+            onYouTubeStateChange,
+
+          onError:
+            onYouTubeError
+
+        }
+
+      }
+    );
+
+}
+
+/* =========================================================
+   YOUTUBE READY
+========================================================= */
+
+function onYouTubeReady(event){
+
+  state.youtubeReady =
+    true;
+
+  /*
+    Muted autoplay is permitted
+    by modern browsers more often
+    than autoplay with sound.
+  */
+
+  try{
+
+    event.target.mute();
+
+    event.target.playVideo();
+
+  }catch(error){
+
+    console.warn(
+      "Autoplay was blocked:",
+      error
+    );
+
+  }
+
+  updatePlayerUI();
+
+}
+
+/* =========================================================
+   YOUTUBE STATE
+========================================================= */
+
+function onYouTubeStateChange(event){
+
+  switch(
+    event.data
+  ){
+
+    case YT.PlayerState.PLAYING:
+
+      updatePlayerUI(
+        "playing"
+      );
+
+      startWatchTracking();
+
+      break;
+
+    case YT.PlayerState.PAUSED:
+
+      updatePlayerUI(
+        "paused"
+      );
+
+      stopWatchTracking(
+        true
+      );
+
+      break;
+
+    case YT.PlayerState.ENDED:
+
+      updatePlayerUI(
+        "ended"
+      );
+
+      stopWatchTracking(
+        true
+      );
+
+      break;
+
+    case YT.PlayerState.BUFFERING:
+
+      updatePlayerUI(
+        "buffering"
+      );
+
+      break;
+
+    default:
+
+      updatePlayerUI();
+
+  }
+
+}
+
+/* =========================================================
+   YOUTUBE ERROR
+========================================================= */
+
+function onYouTubeError(event){
+
+  console.warn(
+    "YouTube player error:",
+    event.data
+  );
+
+  showToast(
+    "This YouTube video is unavailable."
+  );
+
+}
+
+/* =========================================================
+   PLAYER UI
+========================================================= */
+
+function updatePlayerUI(status){
+
+  const label =
+    document.querySelector(
+      ".player-status"
+    );
+
+  if(!label)
+    return;
+
+  const names = {
+
+    playing:
+      "Watching",
+
+    paused:
+      "Paused",
+
+    buffering:
+      "Buffering",
+
+    ended:
+      "Completed"
+
+  };
+
+  const value =
+    names[status] ||
+    "CrowRules Player";
+
+  label.innerHTML = `
+
+    <span class="player-status-dot"></span>
+
+    ${escapeHTML(value)}
+
+  `;
+
+}
+
+/* =========================================================
+   WATCH TRACKER
+=========================================================
+
+   IMPORTANT:
+
+   We use ONE clock source:
+
+   performance.now()
+
+   We do NOT use timeupdate + heartbeat
+   simultaneously.
+
+   This prevents double counting.
+
+========================================================= */
+
+const WATCH_FLUSH_MS =
+  15000;
+
+const WATCH_MAX_DELTA =
+  20;
+
+function createWatchTracker(){
+
+  return {
+
+    active:false,
+
+    lastTick:0,
+
+    accumulated:0,
+
+    lastPosition:0,
+
+    duration:0,
+
+    timer:null,
+
+    contentId:null,
+
+    title:"",
+
+    contentType:
+      "episode",
+
+    completed:false
+
+  };
+
+}
+
+/* =========================================================
+   START TRACKING
+========================================================= */
+
+function startWatchTracking(){
+
+  if(!state.user)
+    return;
+
+  const ep =
+    state.selectedEpisode;
+
+  if(!ep)
+    return;
+
+  if(
+    !state.watchTracker
+  ){
+
+    state.watchTracker =
+      createWatchTracker();
+
+  }
+
+  const tracker =
+    state.watchTracker;
+
+  if(
+    tracker.contentId !==
+    ep.id
+  ){
+
+    tracker.contentId =
+      ep.id;
+
+    tracker.title =
+      ep.title;
+
+    tracker.contentType =
+      "episode";
+
+    tracker.accumulated =
+      0;
+
+    tracker.lastPosition =
+      0;
+
+    tracker.duration =
+      0;
+
+    tracker.completed =
+      false;
+
+  }
+
+  if(tracker.active)
+    return;
+
+  tracker.active =
+    true;
+
+  tracker.lastTick =
+    performance.now();
+
+  tracker.timer =
+    setInterval(
+      watchTrackerTick,
+      1000
+    );
+
+  updateMemberWatchStatus(
+    true
+  );
+
+}
+
+/* =========================================================
+   WATCH TICK
+========================================================= */
+
+function watchTrackerTick(){
+
+  const tracker =
+    state.watchTracker;
+
+  if(
+    !tracker ||
+    !tracker.active ||
+    !state.youtubePlayer
+  ){
+
+    return;
+
+  }
+
+  let playerState;
+
+  try{
+
+    playerState =
+      state.youtubePlayer
+        .getPlayerState();
+
+  }catch{
+
+    return;
+
+  }
+
+  if(
+    playerState !==
+    YT.PlayerState.PLAYING
+  ){
+
+    return;
+
+  }
+
+  const now =
+    performance.now();
+
+  let delta =
+    (
+      now -
+      tracker.lastTick
+    ) / 1000;
+
+  tracker.lastTick =
+    now;
+
+  /*
+    Ignore huge browser sleep,
+    tab suspension or timer jumps.
+  */
+
+  if(
+    !Number.isFinite(delta) ||
+    delta <= 0 ||
+    delta >
+      WATCH_MAX_DELTA
+  ){
+
+    return;
+
+  }
+
+  /*
+    Confirm playback position.
+    This helps avoid counting weird
+    player transitions/seeks.
+  */
+
+  let position = 0;
+  let duration = 0;
+
+  try{
+
+    position =
+      Number(
+        state.youtubePlayer
+          .getCurrentTime()
+      ) || 0;
+
+    duration =
+      Number(
+        state.youtubePlayer
+          .getDuration()
+      ) || 0;
+
+  }catch{
+
+    return;
+
+  }
+
+  tracker.duration =
+    duration;
+
+  /*
+    If position jumped forward by
+    more than the elapsed wall-clock
+    time, the viewer probably sought.
+
+    Count real playback elapsed time,
+    not the seek jump.
+  */
+
+  tracker.accumulated +=
+    delta;
+
+  tracker.lastPosition =
+    position;
+
+  if(
+    duration > 0 &&
+    position >=
+      duration - 3
+  ){
+
+    tracker.completed =
+      true;
+
+  }
+
+}
+
+/* =========================================================
+   STOP TRACKING
+========================================================= */
+
+async function stopWatchTracking(
+  flush
+){
+
+  const tracker =
+    state.watchTracker;
+
+  if(!tracker)
+    return;
+
+  tracker.active =
+    false;
+
+  if(tracker.timer){
+
+    clearInterval(
+      tracker.timer
+    );
+
+    tracker.timer =
+      null;
+
+  }
+
+  if(flush){
+
+    await flushWatchTracking();
+
+  }
+
+}
+
+/* =========================================================
+   FLUSH WATCH
+========================================================= */
+
+async function flushWatchTracking(){
+
+  const tracker =
+    state.watchTracker;
+
+  if(
+    !tracker ||
+    !state.user ||
+    !tracker.contentId
+  ){
+
+    return;
+
+  }
+
+  const seconds =
+    Math.floor(
+      tracker.accumulated
+    );
+
+  if(seconds < 1)
+    return;
+
+  let position =
+    tracker.lastPosition;
+
+  try{
+
+    position =
+      Number(
+        state.youtubePlayer
+          ?.getCurrentTime()
+      ) || position;
+
+  }catch{}
+
+  /*
+    Capture then reset immediately.
+
+    This prevents the same accumulated
+    seconds from being submitted twice.
+  */
+
+  tracker.accumulated =
+    0;
+
+  try{
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .rpc(
+          "record_member_watch",
+          {
+            p_content_id:
+              tracker.contentId,
+
+            p_content_type:
+              tracker.contentType,
+
+            p_title:
+              tracker.title,
+
+            p_seconds:
+              seconds,
+
+            p_position_seconds:
+              Math.floor(
+                position
+              ),
+
+            p_completed:
+              tracker.completed
+          }
+        );
+
+    if(error){
+
+      /*
+        Put the time back if the
+        server rejected the request.
+      */
+
+      tracker.accumulated +=
+        seconds;
+
+      console.error(
+        "record_member_watch failed:",
+        error
+      );
+
+      return;
+
+    }
+
+    updateMemberWatchStatus(
+      true,
+      data
+    );
+
+  }catch(error){
+
+    tracker.accumulated +=
+      seconds;
+
+    console.error(
+      "Watch flush failed:",
+      error
+    );
+
+  }
+
+}
+
+/* =========================================================
+   MEMBER WATCH STATUS
+========================================================= */
+
+function updateMemberWatchStatus(
+  active,
+  rpcData
+){
+
+  const el =
+    $("memberWatchStatus");
+
+  if(!el)
+    return;
+
+  if(!state.user){
+
+    el.style.display =
+      "none";
+
+    return;
+
+  }
+
+  el.style.display =
+    "block";
+
+  if(rpcData){
+
+    const row =
+      Array.isArray(
+        rpcData
+      )
+        ? rpcData[0]
+        : rpcData;
+
+    if(row){
+
+      const minutes =
+        Number(
+          row.total_watch_minutes
+        );
+
+      const points =
+        Number(
+          row.points ??
+          row.total_points
+        );
+
+      if(
+        Number.isFinite(minutes)
+      ){
+
+        el.textContent =
+          `Watch tracking active • ` +
+          `${minutes.toLocaleString()} ` +
+          `minutes recorded`;
+
+        if(
+          Number.isFinite(points)
+        ){
+
+          el.textContent +=
+            ` • ${points.toLocaleString()} points`;
+
+        }
+
+        return;
+
+      }
+
+    }
+
+  }
+
+  el.textContent =
+    active
+      ? "Member watch tracking is active."
+      : "Member watch tracking is paused.";
+
+}
+
+/* =========================================================
+   GLOBAL ATTACH VIDEO API
+=========================================================
+
+   This exposes the same public API used by
+   other CrowRules pages.
+
+   Native HTML5 video:
+
+     CrowRulesMember.attachVideo(
+       video,
+       {
+         contentId,
+         title,
+         contentType,
+         durationSeconds
+       }
+     );
+
+   YouTube iframe pages use the YouTube
+   implementation above.
+
+========================================================= */
+
+window.CrowRulesMember =
+  window.CrowRulesMember ||
+  {};
+
+window.CrowRulesMember.attachVideo =
+  function(
+    video,
+    options = {}
+  ){
+
+    if(
+      !video ||
+      typeof video.addEventListener !==
+        "function"
+    ){
+
+      return null;
+
+    }
+
+    const config = {
+
+      contentId:
+        options.contentId ||
+        null,
+
+      title:
+        options.title ||
+        video.dataset.title ||
+        document.title,
+
+      contentType:
+        options.contentType ||
+        "video",
+
+      durationSeconds:
+        Number(
+          options.durationSeconds ||
+          video.duration ||
+          0
+        )
+
+    };
+
+    let elapsed =
+      0;
+
+    let last =
+      0;
+
+    let active =
+      false;
+
+    let flushTimer =
+      null;
+
+    async function flush(){
+
+      if(
+        !window.CrowRulesMember
+          .recordWatch
+      ){
+
+        return;
+
+      }
+
+      const seconds =
+        Math.floor(
+          elapsed
+        );
+
+      if(seconds < 1)
+        return;
+
+      elapsed =
+        0;
+
+      await window.CrowRulesMember
+        .recordWatch(
+          {
+            contentId:
+              config.contentId,
+
+            title:
+              config.title,
+
+            contentType:
+              config.contentType,
+
+            seconds,
+
+            positionSeconds:
+              Number(
+                video.currentTime ||
+                0
+              ),
+
+            completed:
+              video.ended === true
+
+          }
+        );
+
+    }
+
+    function tick(){
+
+      if(!active)
+        return;
+
+      const now =
+        performance.now();
+
+      const delta =
+        (
+          now -
+          last
+        ) / 1000;
+
+      last =
+        now;
+
+      if(
+        Number.isFinite(delta) &&
+        delta > 0 &&
+        delta <= WATCH_MAX_DELTA
+      ){
+
+        elapsed +=
+          delta;
+
+      }
+
+    }
+
+    function onPlay(){
+
+      active =
+        true;
+
+      last =
+        performance.now();
+
+      if(!flushTimer){
+
+        flushTimer =
+          setInterval(
+            flush,
+            WATCH_FLUSH_MS
+          );
+
+      }
+
+    }
+
+    function onPause(){
+
+      tick();
+
+      active =
+        false;
+
+      flush();
+
+    }
+
+    function onEnded(){
+
+      tick();
+
+      active =
+        false;
+
+      flush();
+
+    }
+
+    video.addEventListener(
+      "play",
+      onPlay
+    );
+
+    video.addEventListener(
+      "pause",
+      onPause
+    );
+
+    video.addEventListener(
+      "ended",
+      onEnded
+    );
+
+    const tracker = {
+
+      flush,
+
+      detach(){
+
+        active =
+          false;
+
+        if(flushTimer){
+
+          clearInterval(
+            flushTimer
+          );
+
+          flushTimer =
+            null;
+
+        }
+
+        video.removeEventListener(
+          "play",
+          onPlay
+        );
+
+        video.removeEventListener(
+          "pause",
+          onPause
+        );
+
+        video.removeEventListener(
+          "ended",
+          onEnded
+        );
+
+        return flush();
+
+      }
+
+    };
+
+    return tracker;
+
+  };
+
+/* =========================================================
+   GENERIC WATCH RPC
+========================================================= */
+
+window.CrowRulesMember.recordWatch =
+  async function(options = {}){
+
+    if(!state.user)
+      return null;
+
+    const {
+      contentId,
+      title,
+      contentType =
+        "video",
+      seconds = 0,
+      positionSeconds = 0,
+      completed = false
+    } =
+      options;
+
+    if(!contentId)
+      return null;
+
+    const safeSeconds =
+      Math.floor(
+        Number(seconds)
+      );
+
+    if(
+      !Number.isFinite(
+        safeSeconds
+      ) ||
+      safeSeconds <= 0
+    ){
+
+      return null;
+
+    }
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .rpc(
+          "record_member_watch",
+          {
+
+            p_content_id:
+              contentId,
+
+            p_content_type:
+              contentType,
+
+            p_title:
+              title ||
+              document.title,
+
+            p_seconds:
+              safeSeconds,
+
+            p_position_seconds:
+              Math.floor(
+                Number(
+                  positionSeconds
+                ) || 0
+              ),
+
+            p_completed:
+              Boolean(
+                completed
+              )
+
+          }
+        );
+
+    if(error)
+      throw error;
+
+    return data;
+
+  };
+
+/* =========================================================
+   BACK DECK SHORTCUT
+========================================================= */
+
+window.CrowRulesMember
+  .recordBackDeckWatch =
+  function(options = {}){
+
+    return window.CrowRulesMember
+      .recordWatch({
+
+        ...options,
+
+        contentType:
+          "episode"
+
+      });
+
+  };
+
+/* =========================================================
+   MEMBER AUTH
+========================================================= */
+
+async function loadCurrentUser(){
+
+  try{
+
+    const {
+      data
+    } =
+      await supabaseClient
+        .auth
+        .getSession();
+
+    state.user =
+      data?.session?.user ||
+      null;
+
+    if(
+      state.user
+    ){
+
+      await ensureMember(
+        state.user
+      );
+
+      updateMemberWatchStatus(
+        false
+      );
+
+    }
+
+  }catch(error){
+
+    console.warn(
+      "Unable to load member session:",
+      error
+    );
+
+  }
+
+}
+
+/* =========================================================
+   ENSURE MEMBER
+========================================================= */
+
+async function ensureMember(user){
+
+  if(!user)
+    return null;
+
+  try{
+
+    const {
+      data:
+        existing,
+      error:
+        existingError
+    } =
+      await supabaseClient
+
+        .from(
+          "cr_members"
+        )
+
+        .select(
+          [
+            "id",
+            "user_id",
+            "username",
+            "display_name",
+            "email",
+            "avatar_url",
+            "bio",
+            "membership_tier",
+            "membership_status",
+            "points",
+            "total_watch_minutes",
+            "rank",
+            "is_public",
+            "is_active",
+            "joined_at",
+            "updated_at"
+          ].join(",")
+        )
+
+        .eq(
+          "user_id",
+          user.id
+        )
+
+        .maybeSingle();
+
+    if(existingError)
+      throw existingError;
+
+    if(existing){
+
+      state.member =
+        existing;
+
+      return existing;
+
+    }
+
+    const meta =
+      user.user_metadata ||
+      {};
+
+    const username =
+      text(
+        meta.username
+      )
+      ||
+      text(
+        user.email
+      )
+        .split("@")[0];
+
+    const displayName =
+      text(
+        meta.display_name
+      )
+      ||
+      username;
+
+    const {
+      data:
+        inserted,
+      error:
+        insertError
+    } =
+      await supabaseClient
+
+        .from(
+          "cr_members"
+        )
+
+        .insert({
+
+          user_id:
+            user.id,
+
+          username:
+            username,
+
+          display_name:
+            displayName,
+
+          email:
+            user.email || null,
+
+          membership_tier:
+            "free",
+
+          membership_status:
+            "active",
+
+          points:
+            0,
+
+          total_watch_minutes:
+            0,
+
+          is_public:
+            true,
+
+          is_active:
+            true
+
+        })
+
+        .select(
+          [
+            "id",
+            "user_id",
+            "username",
+            "display_name",
+            "email",
+            "avatar_url",
+            "bio",
+            "membership_tier",
+            "membership_status",
+            "points",
+            "total_watch_minutes",
+            "rank",
+            "is_public",
+            "is_active",
+            "joined_at",
+            "updated_at"
+          ].join(",")
+        )
+
+        .single();
+
+    if(insertError){
+
+      /*
+        Another browser/tab may have
+        created the member first.
+      */
+
+      const {
+        data:
+          raced
+      } =
+        await supabaseClient
+
+          .from(
+            "cr_members"
+          )
+
+          .select("*")
+
+          .eq(
+            "user_id",
+            user.id
+          )
+
+          .maybeSingle();
+
+      if(raced){
+
+        state.member =
+          raced;
+
+        return raced;
+
+      }
+
+      throw insertError;
+
+    }
+
+    state.member =
+      inserted;
+
+    return inserted;
+
+  }catch(error){
+
+    console.warn(
+      "Member initialization failed:",
+      error
+    );
+
+    return null;
+
+  }
+
+}
+
+/* =========================================================
+   FEATURED
 ========================================================= */
 
 function initializeFeatured(){
 
-  if(!episodes.length){
+  if(!state.episodes.length){
 
     $("featuredTitle")
       .textContent =
@@ -2829,20 +4297,14 @@ function initializeFeatured(){
 
   }
 
-  /*
-    Featured preference:
-    1. metadata.is_featured
-    2. highest episode number
-  */
-
   const featured =
-    episodes.find(
+    state.episodes.find(
       ep =>
         ep.metadata?.is_featured ===
         true
     )
     ||
-    episodes[0];
+    state.episodes[0];
 
   $("featuredTitle")
     .textContent =
@@ -2873,10 +4335,13 @@ function initializeFeatured(){
 
   $("featuredButton")
     .onclick =
-      () =>
+      function(){
+
         playEpisode(
           featured
         );
+
+      };
 
 }
 
@@ -2886,14 +4351,14 @@ function initializeFeatured(){
 
 function updateHeroBackdrop(){
 
-  if(!episodes.length)
+  const episode =
+    state.episodes[0];
+
+  if(!episode)
     return;
 
-  const featured =
-    episodes[0];
-
   const image =
-    featured.thumbnail_url;
+    episode.thumbnail_url;
 
   if(image){
 
@@ -2906,16 +4371,13 @@ function updateHeroBackdrop(){
 }
 
 /* =========================================================
-   EXPLICIT EVENT
+   NEXT LIVE
 ========================================================= */
 
 function updateNextLiveUI(){
 
   const event =
-    nextLiveEvent;
-
-  if(!event)
-    return;
+    EXPLICIT_NEXT_LIVE_EVENT;
 
   $("nextLiveTitle")
     .textContent =
@@ -2945,12 +4407,9 @@ function updateNextLiveUI(){
 
 function updateCountdown(){
 
-  if(!nextLiveEvent)
-    return;
-
   const target =
     new Date(
-      nextLiveEvent.date
+      EXPLICIT_NEXT_LIVE_EVENT.date
     ).getTime();
 
   const now =
@@ -3039,63 +4498,6 @@ function updateCountdown(){
 }
 
 /* =========================================================
-   MOBILE NAV
-========================================================= */
-
-function toggleMobileNav(){
-
-  const nav =
-    document.querySelector(".nav");
-
-  if(!nav)
-    return;
-
-  const visible =
-    nav.style.display ===
-    "flex";
-
-  nav.style.display =
-    visible
-      ? ""
-      : "flex";
-
-  if(!visible){
-
-    nav.style.position =
-      "absolute";
-
-    nav.style.top =
-      "68px";
-
-    nav.style.left =
-      "16px";
-
-    nav.style.right =
-      "16px";
-
-    nav.style.padding =
-      "15px";
-
-    nav.style.flexDirection =
-      "column";
-
-    nav.style.alignItems =
-      "stretch";
-
-    nav.style.background =
-      "rgba(5,6,10,.97)";
-
-    nav.style.border =
-      "1px solid rgba(255,255,255,.09)";
-
-    nav.style.borderRadius =
-      "14px";
-
-  }
-
-}
-
-/* =========================================================
    SEARCH
 ========================================================= */
 
@@ -3104,10 +4506,239 @@ $("episodeSearch")
     "input",
     event => {
 
-      archiveSearch =
+      state.search =
         event.target.value;
 
       renderArchive();
+
+    }
+  );
+
+/* =========================================================
+   MOBILE NAV
+========================================================= */
+
+$("mobileMenuButton")
+  ?.addEventListener(
+    "click",
+    () => {
+
+      const nav =
+        $("mainNav");
+
+      if(!nav)
+        return;
+
+      const open =
+        nav.dataset.open ===
+        "true";
+
+      if(open){
+
+        nav.style.display =
+          "";
+
+        nav.dataset.open =
+          "false";
+
+        return;
+
+      }
+
+      nav.style.display =
+        "flex";
+
+      nav.style.position =
+        "absolute";
+
+      nav.style.top =
+        "68px";
+
+      nav.style.left =
+        "16px";
+
+      nav.style.right =
+        "16px";
+
+      nav.style.padding =
+        "15px";
+
+      nav.style.flexDirection =
+        "column";
+
+      nav.style.alignItems =
+        "stretch";
+
+      nav.style.background =
+        "rgba(5,6,10,.98)";
+
+      nav.style.border =
+        "1px solid rgba(255,255,255,.09)";
+
+      nav.style.borderRadius =
+        "14px";
+
+      nav.dataset.open =
+        "true";
+
+    }
+  );
+
+/* =========================================================
+   FORMAT DATE
+========================================================= */
+
+function formatDate(value){
+
+  if(!value)
+    return "Date TBA";
+
+  const date =
+    new Date(value);
+
+  if(
+    Number.isNaN(
+      date.getTime()
+    )
+  ){
+
+    return "Date TBA";
+
+  }
+
+  return date.toLocaleDateString(
+    "en-US",
+    {
+      month:"short",
+      day:"numeric",
+      year:"numeric"
+    }
+  );
+
+}
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+let toastTimer =
+  null;
+
+function showToast(message){
+
+  const toast =
+    $("toast");
+
+  if(!toast)
+    return;
+
+  toast.textContent =
+    text(message);
+
+  toast.classList.add(
+    "show"
+  );
+
+  clearTimeout(
+    toastTimer
+  );
+
+  toastTimer =
+    setTimeout(
+      () => {
+
+        toast.classList.remove(
+          "show"
+        );
+
+      },
+      3500
+    );
+
+}
+
+/* =========================================================
+   PAGE LIFECYCLE
+========================================================= */
+
+document.addEventListener(
+  "visibilitychange",
+  () => {
+
+    if(
+      document.visibilityState ===
+      "hidden"
+    ){
+
+      flushWatchTracking();
+
+    }
+
+  }
+);
+
+window.addEventListener(
+  "pagehide",
+  () => {
+
+    flushWatchTracking();
+
+  }
+);
+
+window.addEventListener(
+  "beforeunload",
+  () => {
+
+    /*
+      Fire-and-forget final flush.
+      Supabase may not complete network
+      requests during unload, but periodic
+      flushing means most watch time is
+      already safely recorded.
+    */
+
+    flushWatchTracking();
+
+  }
+);
+
+/* =========================================================
+   AUTH STATE
+========================================================= */
+
+supabaseClient
+  .auth
+  .onAuthStateChange(
+    async (
+      event,
+      session
+    ) => {
+
+      state.user =
+        session?.user ||
+        null;
+
+      if(state.user){
+
+        await ensureMember(
+          state.user
+        );
+
+        updateMemberWatchStatus(
+          false
+        );
+
+      }else{
+
+        state.member =
+          null;
+
+        updateMemberWatchStatus(
+          false
+        );
+
+      }
 
     }
   );
@@ -3122,19 +4753,31 @@ $("year")
       .getFullYear();
 
 /* =========================================================
-   START
+   INITIAL START
 ========================================================= */
 
-updateNextLiveUI();
+async function start(){
 
-updateCountdown();
+  if(state.initialized)
+    return;
 
-setInterval(
-  updateCountdown,
-  1000
-);
+  state.initialized =
+    true;
 
-loadContent();
+  updateNextLiveUI();
+
+  updateCountdown();
+
+  setInterval(
+    updateCountdown,
+    1000
+  );
+
+  await loadCurrentUser();
+
+  await loadContent();
+
+}
 
 /* =========================================================
    REFRESH CONTENT
@@ -3148,6 +4791,12 @@ setInterval(
   },
   120000
 );
+
+/* =========================================================
+   START APP
+========================================================= */
+
+start();
 
 </script>
 
