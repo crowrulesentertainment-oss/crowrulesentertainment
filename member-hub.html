@@ -4,234 +4,585 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#05060a">
-<meta name="description" content="CrowRules Entertainment Member Hub">
-<title>CrowRules Entertainment — Member Hub</title>
+<meta name="description" content="CrowRules Entertainment Member Hub — profiles, CrowPoints, applications, suggestions and admin review.">
+<title>CrowRules Entertainment — Member Hub v1.0</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-:root{--bg:#05060a;--card:#0c1018;--card2:#101621;--line:#232b3a;--text:#f5f7fb;--muted:#8d98aa;--purple:#8b7cff;--cyan:#50e6ff;--green:#45dfa0;--red:#ff6678;--yellow:#ffd166;--shadow:0 18px 60px rgba(0,0,0,.3)}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 10% 0,#171331 0,transparent 30%),radial-gradient(circle at 100% 15%,#08202b 0,transparent 28%),var(--bg);color:var(--text);font-family:Montserrat,Arial,sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer}a{text-decoration:none;color:inherit}
-header{position:sticky;top:0;z-index:50;background:rgba(5,6,10,.9);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}.nav{max-width:1450px;margin:auto;padding:13px 20px;display:flex;align-items:center;gap:16px}.brand{font:800 17px Orbitron;letter-spacing:1px;white-space:nowrap}.brand b{color:var(--cyan)}.links{display:flex;gap:6px;flex-wrap:wrap}.links button,.btn.secondary{background:transparent;border:1px solid var(--line);color:#d7deea;border-radius:10px;padding:8px 11px}.links button:hover,.btn.secondary:hover{border-color:var(--purple);color:white}.grow{flex:1}
-main{max-width:1450px;margin:auto;padding:28px 20px 70px}.hero{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:20px}.eyebrow{font:700 11px Orbitron;letter-spacing:2px;color:var(--cyan);text-transform:uppercase}.hero h1{font:800 clamp(30px,5vw,56px) Orbitron;margin:7px 0}.hero p{color:var(--muted);line-height:1.65;max-width:850px}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:15px}.card{background:linear-gradient(180deg,rgba(16,21,31,.97),rgba(8,11,17,.97));border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow)}.s12{grid-column:span 12}.s8{grid-column:span 8}.s6{grid-column:span 6}.s4{grid-column:span 4}.s3{grid-column:span 3}.card h2{font:700 17px Orbitron;margin:0 0 14px}.muted,.sub{color:var(--muted);font-size:12px}.btn{border:0;border-radius:10px;padding:10px 14px;font-weight:700}.primary{background:linear-gradient(135deg,var(--purple),#6254d6);color:#fff}.approve{background:#123629;border:1px solid #246f51;color:var(--green);border-radius:9px;padding:8px 10px}.decline{background:#32151c;border:1px solid #77313e;color:#ff9ca7;border-radius:9px;padding:8px 10px}.review{background:#2c2611;border:1px solid #66521e;color:var(--yellow);border-radius:9px;padding:8px 10px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.stat{background:#080b11;border:1px solid var(--line);border-radius:14px;padding:14px}.stat small{color:var(--muted)}.stat strong{display:block;font:700 25px Orbitron;margin-top:5px}
-.profile{display:flex;gap:14px;align-items:center}.avatar{width:70px;height:70px;border-radius:50%;border:2px solid var(--purple);object-fit:cover;background:#151b28}.role{display:inline-block;margin-top:6px;padding:4px 8px;border-radius:999px;background:#1b1732;color:#c0b8ff;font-size:10px;font-weight:800}
-.list{display:flex;flex-direction:column;gap:9px}.item{border:1px solid var(--line);background:#090d14;border-radius:12px;padding:12px}.row{display:flex;gap:10px;align-items:center}.item .title{font-weight:700}.item p{font-size:12px;color:#b4bdcb;line-height:1.55;margin:7px 0}.pill{display:inline-block;padding:4px 7px;border-radius:999px;font-size:10px;font-weight:800;background:#171c27;color:#b7c0ce}.pending{color:var(--yellow)}.accepted,.approved{color:var(--green)}.declined,.rejected{color:var(--red)}.reviewing{color:var(--yellow)}
-.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.empty{padding:16px;text-align:center;border:1px dashed var(--line);border-radius:12px;color:var(--muted);font-size:12px}.hidden{display:none!important}
-.form{display:grid;gap:10px}.form input,.form textarea,.form select{width:100%;border:1px solid var(--line);background:#070a10;color:white;border-radius:10px;padding:11px}.form textarea{min-height:100px;resize:vertical}.auth{max-width:520px;margin:60px auto}.tabs{display:flex;gap:6px;margin:14px 0}.tabs>*{flex:1}.notice{padding:11px 13px;border-radius:10px;background:#111722;color:#b8c2d0;font-size:12px}.adminbar{border-color:#5c4fd2;background:linear-gradient(90deg,rgba(139,124,255,.12),rgba(80,230,255,.05))}
-.modal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:20px}.modalbox{width:min(700px,100%);max-height:90vh;overflow:auto;background:#0c111a;border:1px solid var(--line);border-radius:18px;padding:20px}.close{float:right;background:transparent;border:1px solid var(--line);color:white;border-radius:8px;padding:6px 9px}
-@media(max-width:1000px){.s8,.s6,.s4{grid-column:span 12}.s3{grid-column:span 6}.links{display:none}.hero{align-items:flex-start;flex-direction:column}}@media(max-width:600px){main{padding:18px 11px 50px}.s3{grid-column:span 12}.stats{grid-template-columns:1fr 1fr}.stat strong{font-size:20px}.nav{padding:11px}.brand{font-size:13px}}
+:root{
+  --bg:#05060a;--panel:#0c1018;--panel2:#111722;--line:#202938;
+  --text:#f3f6fb;--muted:#98a5b7;--accent:#8b5cf6;--accent2:#00e5ff;
+  --good:#34d399;--bad:#fb7185;--warn:#fbbf24;--shadow:0 20px 60px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:
+ radial-gradient(circle at 15% -10%,rgba(139,92,246,.18),transparent 30%),
+ radial-gradient(circle at 90% 5%,rgba(0,229,255,.10),transparent 25%),
+ var(--bg);color:var(--text);font-family:Montserrat,system-ui,sans-serif}
+a{color:inherit;text-decoration:none}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.container{width:min(1240px,calc(100% - 32px));margin:auto}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(5,6,10,.86);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.nav{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.brand{font:900 18px Orbitron;letter-spacing:1px}
+.brand span{color:var(--accent2)}
+.navlinks{display:flex;gap:8px;flex-wrap:wrap}
+.navlinks a,.navlinks button{border:1px solid transparent;background:transparent;color:var(--muted);padding:9px 11px;border-radius:10px}
+.navlinks a:hover,.navlinks button:hover{color:#fff;background:#101621;border-color:var(--line)}
+.hero{padding:58px 0 30px}
+.kicker{font:800 12px Orbitron;color:var(--accent2);letter-spacing:2px;text-transform:uppercase}
+h1,h2,h3{font-family:Orbitron;margin:0 0 12px}
+h1{font-size:clamp(30px,6vw,58px);line-height:1.02}
+h2{font-size:22px}
+h3{font-size:15px}
+.lead{color:var(--muted);max-width:760px;line-height:1.7}
+.grid{display:grid;gap:16px}
+.stats{grid-template-columns:repeat(4,minmax(0,1fr));margin:25px 0}
+.card{background:linear-gradient(180deg,rgba(17,23,34,.96),rgba(10,14,22,.96));border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow)}
+.stat .value{font:800 27px Orbitron;margin-top:7px}
+.stat .label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.section{padding:30px 0}
+.sectionhead{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:15px}
+.cards{grid-template-columns:repeat(3,minmax(0,1fr))}
+.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.btn{border:1px solid var(--line);background:#121925;color:#fff;padding:11px 15px;border-radius:10px;font-weight:700}
+.btn:hover{border-color:#46536a}
+.btn.primary{background:linear-gradient(135deg,#7c3aed,#2563eb);border-color:#7c3aed}
+.btn.good{background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.4);color:#8ff0c4}
+.btn.bad{background:rgba(251,113,133,.1);border-color:rgba(251,113,133,.35);color:#ff9aae}
+.btn.warn{background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.35);color:#ffd36b}
+.btn.small{padding:7px 10px;font-size:12px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.form{display:grid;gap:12px}
+label{font-size:12px;color:var(--muted);font-weight:700}
+input,textarea,select{width:100%;margin-top:6px;background:#080c13;border:1px solid var(--line);color:#fff;border-radius:10px;padding:12px;outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--accent)}
+textarea{min-height:110px;resize:vertical}
+.hidden{display:none!important}
+.badge{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;background:#182131;border:1px solid var(--line);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.7px}
+.badge.good{color:#79e9b5}.badge.bad{color:#ff8fa3}.badge.warn{color:#ffd36b}.badge.info{color:#72ddff}
+.list{display:grid;gap:10px}
+.item{padding:15px;border:1px solid var(--line);background:#0a0f17;border-radius:13px}
+.itemtop{display:flex;justify-content:space-between;gap:10px;align-items:start}
+.meta{color:var(--muted);font-size:12px;line-height:1.6}
+.empty{padding:28px;text-align:center;color:var(--muted);border:1px dashed #293445;border-radius:14px}
+.notice{padding:13px 15px;border:1px solid var(--line);border-radius:12px;color:var(--muted);background:#0a0f17}
+.notice.good{border-color:rgba(52,211,153,.35);color:#a4f3cb}
+.notice.bad{border-color:rgba(251,113,133,.35);color:#ffabb9}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:100;display:none;align-items:center;justify-content:center;padding:18px}
+.modal.show{display:flex}
+.modalbox{width:min(680px,100%);max-height:90vh;overflow:auto;background:#0b1018;border:1px solid #2a3547;border-radius:18px;padding:22px}
+footer{border-top:1px solid var(--line);margin-top:45px;padding:30px 0;color:var(--muted);font-size:12px}
+@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}.cards,.two{grid-template-columns:1fr}.nav{align-items:flex-start;padding:13px 0;flex-direction:column}}
+@media(max-width:520px){.container{width:min(100% - 20px,1240px)}.stats{grid-template-columns:1fr 1fr}.hero{padding-top:38px}.actions .btn{width:100%}}
 </style>
 </head>
+
 <body>
-<header><nav class="nav">
-<a href="#" class="brand"><b>CROW</b>RULES MEMBER HUB</a>
-<div class="links">
-<button data-scroll="dashboard">Dashboard</button><button data-scroll="tv">TV</button><button data-scroll="podcasts">Podcasts</button><button data-scroll="community">Community</button><button data-scroll="suggestions">Suggestions</button><button id="adminNav" class="hidden" data-scroll="admin">Admin Review</button>
-</div><div class="grow"></div><button id="topAuth" class="btn secondary">Login</button>
-</nav></header>
+<header class="topbar">
+  <div class="container nav">
+    <a class="brand" href="#"><span>CROW</span>RULES / MEMBER HUB</a>
+    <nav class="navlinks">
+      <a href="#home">Home</a>
+      <a href="#profile">Profile</a>
+      <a href="#applications">Applications</a>
+      <a href="#suggestions">Suggestions</a>
+      <a href="#admin" id="adminNav" class="hidden">Admin Review</a>
+      <button id="authNav" onclick="openAuth()">Login / Sign Up</button>
+      <button id="logoutBtn" class="hidden" onclick="logout()">Logout</button>
+    </nav>
+  </div>
+</header>
 
 <main>
-<section id="auth" class="card auth">
-<div class="eyebrow">CrowRules Entertainment</div><h1>Member Access</h1>
-<p class="muted">Guests can explore public content. Sign in for CrowPoints, watch history, profiles, favorites, applications and community features.</p>
-<div class="tabs"><button id="loginTab" class="btn primary">Login</button><button id="signupTab" class="btn secondary">Create Account</button></div>
-<form id="authForm" class="form"><input id="email" type="email" required placeholder="Email"><input id="password" type="password" minlength="6" required placeholder="Password"><input id="signupName" class="hidden" placeholder="Display name"><button id="authSubmit" class="btn primary">Login</button><div id="authMsg" class="notice"></div></form>
+<section id="home" class="hero">
+  <div class="container">
+    <div class="kicker">CrowRules Entertainment</div>
+    <h1>MEMBER HUB <span style="color:var(--accent2)">10.0</span></h1>
+    <p class="lead">Your CrowRules account center for CrowPoints, watch/listen stats, creator applications, member suggestions and secure administrator review. Guests can explore the hub and create an account.</p>
+    <div id="globalMessage" class="notice hidden"></div>
+
+    <div id="guestPanel" class="card" style="margin-top:20px">
+      <h2>Welcome, Guest</h2>
+      <p class="lead">You can view this page without an account. Create an account to track your CrowPoints, submit applications and suggestions, and build your member profile.</p>
+      <div class="actions">
+        <button class="btn primary" onclick="openAuth('signup')">Create Account</button>
+        <button class="btn" onclick="openAuth('login')">Member Login</button>
+      </div>
+    </div>
+
+    <div id="memberPanel" class="hidden">
+      <div class="grid stats">
+        <div class="card stat"><div class="label">Lifetime CrowPoints</div><div id="lifePoints" class="value">0</div></div>
+        <div class="card stat"><div class="label">Monthly CrowPoints</div><div id="monthPoints" class="value">0</div></div>
+        <div class="card stat"><div class="label">Watch Time</div><div id="watchHours" class="value">0h</div></div>
+        <div class="card stat"><div class="label">Listen Time</div><div id="listenHours" class="value">0h</div></div>
+      </div>
+      <div class="card">
+        <div class="sectionhead">
+          <div><div class="kicker">Member status</div><h2 id="welcomeName">Member</h2></div>
+          <span id="roleBadge" class="badge info">MEMBER</span>
+        </div>
+        <div id="memberMeta" class="meta"></div>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section id="guest" class="hidden">
-<div class="hero"><div><div class="eyebrow">Public Area</div><h1>Welcome to the Rookery.</h1><p>Browse public CrowRules programming and community information. Create an account to unlock the full Member Hub.</p></div><button id="joinBtn" class="btn primary">Join CrowRules</button></div>
-<div class="grid"><div class="card s4"><h2>Public Members</h2><div id="guestMembers"></div></div><div class="card s8"><h2>Latest Activity</h2><div id="guestActivity"></div></div><div class="card s6"><h2>Programming</h2><div id="guestSchedule"></div></div><div class="card s6"><h2>News</h2><div id="guestNews"></div></div></div>
-</section>
-
-<section id="member" class="hidden">
-<div class="hero" id="dashboard"><div><div class="eyebrow">Member Command Center</div><h1 id="welcome">Welcome back.</h1><p>Everything CrowRules: television, audio, points, community, applications and your member profile.</p></div><button id="logout" class="btn secondary">Logout</button></div>
-
-<div class="grid">
-<div class="card s8"><div class="profile"><img id="avatar" class="avatar"><div class="grow"><h2 id="memberName">Member</h2><div id="memberEmail" class="sub"></div><span id="memberRole" class="role">Member</span></div><button id="editBtn" class="btn secondary">Edit Profile</button></div><p id="bio" class="muted"></p></div>
-<div class="card s4"><h2>Notifications <span id="notificationCount" class="pill"></span></h2><div id="notifications"></div></div>
-
-<div class="card s12"><div class="stats"><div class="stat"><small>Lifetime CrowPoints</small><strong id="lifetime">0</strong></div><div class="stat"><small>Monthly CrowPoints</small><strong id="monthly">0</strong></div><div class="stat"><small>Total Watch Hours</small><strong id="watchHours">0</strong></div><div class="stat"><small>Leaderboard Rank</small><strong id="rank">—</strong></div></div></div>
-
-<div class="card s8" id="tv"><h2>Continue Watching</h2><div id="watchHistory"></div></div>
-<div class="card s4"><h2>My Favorites</h2><div id="favorites"></div></div>
-<div class="card s6"><h2>Monthly Leaderboard</h2><div id="leaderboard"></div></div>
-<div class="card s6"><h2>Newest Members</h2><div id="newMembers"></div></div>
-
-<div class="card s6" id="podcasts"><h2>Creator Applications</h2><div id="myApplications"></div><div class="actions"><button id="podcastApply" class="btn primary">Podcaster Application</button><button id="sportsApply" class="btn secondary">Sports Show Application</button></div></div>
-<div class="card s6" id="suggestions"><h2>My Suggestions</h2><div id="mySuggestions"></div><button id="suggestBtn" class="btn primary" style="margin-top:10px">Submit Suggestion</button></div>
-
-<div class="card s6" id="community"><h2>CrowSpace</h2><div id="crowspace"></div><button id="postBtn" class="btn primary" style="margin-top:10px">Create Post</button></div>
-<div class="card s6"><h2>Sports Center</h2><div id="sports"></div></div>
-
-<div id="admin" class="card s12 adminbar hidden"><h2>👑 Admin Review Center</h2><p class="muted">Owner/Admin/Administrator/Moderator accounts can approve or decline creator applications and review member suggestions. Decisions are performed through protected Supabase functions.</p>
-<div class="stats"><div class="stat"><small>Pending Podcasters</small><strong id="pendingPodcasters">0</strong></div><div class="stat"><small>Pending Sports</small><strong id="pendingSports">0</strong></div><div class="stat"><small>Pending Suggestions</small><strong id="pendingSuggestions">0</strong></div><div class="stat"><small>Admin Access</small><strong id="adminAccess">YES</strong></div></div>
-<div class="grid" style="margin-top:15px"><div class="card s4"><h2>Podcaster Applications</h2><div id="adminPodcasters"></div></div><div class="card s4"><h2>Sports Applications</h2><div id="adminSports"></div></div><div class="card s4"><h2>Member Suggestions</h2><div id="adminSuggestions"></div></div></div>
+<section id="profile" class="section">
+<div class="container">
+  <div class="sectionhead"><div><div class="kicker">Account</div><h2>Member Profile</h2></div></div>
+  <div id="profileGuest" class="card"><p class="lead">Log in to edit your member profile.</p><button class="btn primary" onclick="openAuth('login')">Login</button></div>
+  <div id="profileMember" class="hidden">
+    <div class="card">
+      <form id="profileForm" class="form">
+        <label>Username<input id="pUsername" required maxlength="40"></label>
+        <label>Display Name<input id="pDisplayName" maxlength="80"></label>
+        <label>Bio<textarea id="pBio" maxlength="1000"></textarea></label>
+        <label>Avatar URL<input id="pAvatar" type="url" placeholder="https://..."></label>
+        <label>Public Profile<select id="pPublic"><option value="true">Public</option><option value="false">Private</option></select></label>
+        <button class="btn primary" type="submit">Save Profile</button>
+      </form>
+    </div>
+  </div>
 </div>
+</section>
 
-<div class="card s12"><h2>Profile Settings</h2><form id="profileForm" class="form"><input id="pDisplay" placeholder="Display name"><input id="pUsername" placeholder="Username"><input id="pAvatar" placeholder="Avatar URL"><textarea id="pBio" placeholder="Bio"></textarea><select id="pPublic"><option value="true">Public profile</option><option value="false">Private profile</option></select><button class="btn primary">Save Profile</button><div id="profileMsg" class="notice"></div></form></div>
+<section id="applications" class="section">
+<div class="container">
+  <div class="sectionhead"><div><div class="kicker">Creators</div><h2>Applications</h2></div></div>
+  <div id="applicationGuest" class="card"><p class="lead">Log in to submit creator applications.</p><button class="btn primary" onclick="openAuth('login')">Login</button></div>
+  <div id="applicationMember" class="grid two hidden">
+    <div class="card">
+      <h3>Podcaster / Show Application</h3>
+      <form id="podcasterForm" class="form">
+        <label>Show Name<input id="podShow" required></label>
+        <label>Host Name<input id="podHost" required></label>
+        <label>Email<input id="podEmail" type="email" required></label>
+        <label>Genre<input id="podGenre" required></label>
+        <label>Show Description<textarea id="podDesc" required></textarea></label>
+        <label>Format<input id="podFormat" placeholder="Interview, talk, panel, storytelling..."></label>
+        <label>Episode Frequency<input id="podFreq" placeholder="Weekly, monthly..."></label>
+        <label>Experience<textarea id="podExperience"></textarea></label>
+        <label>Sample URL<input id="podSample" type="url"></label>
+        <label>Equipment<textarea id="podEquipment"></textarea></label>
+        <label>Social Links<textarea id="podSocial"></textarea></label>
+        <label>Goals<textarea id="podGoals"></textarea></label>
+        <label>Additional Info<textarea id="podAdditional"></textarea></label>
+        <button class="btn primary" type="submit">Submit Podcaster Application</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h3>Sports Show Creator Application</h3>
+      <form id="sportsForm" class="form">
+        <label>Show Name<input id="sportShow" required></label>
+        <label>Creator Name<input id="sportCreator" required></label>
+        <label>Email<input id="sportEmail" type="email" required></label>
+        <label>Sport<input id="sportSport" required></label>
+        <label>Coverage Type<input id="sportCoverage" required placeholder="News, analysis, interviews..."></label>
+        <label>Show Description<textarea id="sportDesc" required></textarea></label>
+        <label>Format<input id="sportFormat"></label>
+        <label>Episode Frequency<input id="sportFreq"></label>
+        <label>Experience<textarea id="sportExperience"></textarea></label>
+        <label>Sample URL<input id="sportSample" type="url"></label>
+        <label>Equipment<textarea id="sportEquipment"></textarea></label>
+        <label>Social Links<textarea id="sportSocial"></textarea></label>
+        <label>Team / League Focus<input id="sportFocus"></label>
+        <label>Goals<textarea id="sportGoals"></textarea></label>
+        <label>Additional Info<textarea id="sportAdditional"></textarea></label>
+        <button class="btn primary" type="submit">Submit Sports Application</button>
+      </form>
+    </div>
+  </div>
+  <div id="myApplications" class="card hidden" style="margin-top:16px">
+    <h3>My Applications</h3>
+    <div id="myApplicationsList" class="list"></div>
+  </div>
+</div>
+</section>
+
+<section id="suggestions" class="section">
+<div class="container">
+  <div class="sectionhead"><div><div class="kicker">Community</div><h2>Member Suggestions</h2></div></div>
+  <div id="suggestGuest" class="card"><p class="lead">Guests can view this area. Log in to submit a suggestion.</p><button class="btn primary" onclick="openAuth('login')">Login</button></div>
+  <div id="suggestMember" class="hidden">
+    <div class="card">
+      <form id="suggestForm" class="form">
+        <label>Title<input id="suggestTitle" required maxlength="120"></label>
+        <label>Category<select id="suggestCategory">
+          <option value="show">Show</option><option value="episode">Episode</option><option value="website">Website</option>
+          <option value="community">Community</option><option value="gaming">Gaming</option><option value="sports">Sports</option><option value="other">Other</option>
+        </select></label>
+        <label>Suggestion<textarea id="suggestText" required maxlength="3000"></textarea></label>
+        <button class="btn primary" type="submit">Submit Suggestion</button>
+      </form>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>My Suggestions</h3>
+      <div id="mySuggestions" class="list"></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<section id="admin" class="section hidden">
+<div class="container">
+  <div class="sectionhead">
+    <div><div class="kicker">Staff only</div><h2>Admin Review Center</h2></div>
+    <button class="btn" onclick="loadAdminQueues()">Refresh Queues</button>
+  </div>
+  <div class="notice">Authorized Owner, Admin, Administrator and Moderator accounts can accept or decline applications and suggestions. Review actions use protected Supabase RPC functions.</div>
+  <div class="grid stats">
+    <div class="card stat"><div class="label">Podcaster Queue</div><div id="podCount" class="value">0</div></div>
+    <div class="card stat"><div class="label">Sports Queue</div><div id="sportsCount" class="value">0</div></div>
+    <div class="card stat"><div class="label">Suggestion Queue</div><div id="suggestCount" class="value">0</div></div>
+    <div class="card stat"><div class="label">Admin Role</div><div id="adminRole" class="value" style="font-size:17px">—</div></div>
+  </div>
+
+  <div class="grid two">
+    <div class="card"><h3>Podcaster Applications</h3><div id="podQueue" class="list"></div></div>
+    <div class="card"><h3>Member Suggestions</h3><div id="suggestQueue" class="list"></div></div>
+  </div>
+  <div class="card" style="margin-top:16px"><h3>Sports Creator Applications</h3><div id="sportsQueue" class="list"></div></div>
 </div>
 </section>
 </main>
 
-<div id="modal" class="modal hidden"><div class="modalbox"><button class="close" id="closeModal">Close</button><div id="modalContent"></div></div></div>
-<footer style="text-align:center;color:#687286;padding:30px;font-size:11px">CrowRules Entertainment • Member Hub</footer>
+<footer><div class="container">CrowRules Entertainment · Member Hub v10.0 · Supabase-powered</div></footer>
+
+<div id="authModal" class="modal">
+ <div class="modalbox">
+  <div class="sectionhead"><div><div class="kicker">CrowRules account</div><h2 id="authTitle">Member Login</h2></div><button class="btn small" onclick="closeAuth()">Close</button></div>
+  <div id="authMessage" class="notice hidden"></div>
+  <form id="loginForm" class="form">
+    <label>Email<input id="loginEmail" type="email" required autocomplete="email"></label>
+    <label>Password<input id="loginPassword" type="password" required autocomplete="current-password"></label>
+    <button class="btn primary" type="submit">Login</button>
+    <button class="btn" type="button" onclick="switchAuth('signup')">Need an account? Sign Up</button>
+  </form>
+  <form id="signupForm" class="form hidden">
+    <label>Email<input id="signupEmail" type="email" required autocomplete="email"></label>
+    <label>Password<input id="signupPassword" type="password" minlength="6" required autocomplete="new-password"></label>
+    <label>Username<input id="signupUsername" maxlength="40" required></label>
+    <label>Display Name<input id="signupDisplayName" maxlength="80"></label>
+    <button class="btn primary" type="submit">Create Account</button>
+    <button class="btn" type="button" onclick="switchAuth('login')">Already a member? Login</button>
+  </form>
+ </div>
+</div>
+
+<div id="detailModal" class="modal">
+ <div class="modalbox">
+  <div class="sectionhead"><div><div class="kicker">Review details</div><h2 id="detailTitle">Details</h2></div><button class="btn small" onclick="closeDetail()">Close</button></div>
+  <div id="detailBody"></div>
+ </div>
+</div>
 
 <script>
-const SUPABASE_URL="https://zauxdqyssratvzmomozf.supabase.co";
-const SUPABASE_ANON_KEY="sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9";
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
-let session=null,member=null,isAdmin=false,signup=false;
+const SUPABASE_URL = "https://zauxdqyssratvzmomozf.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9";
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+});
 
-const $=id=>document.getElementById(id);
-const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const date=v=>v?new Date(v).toLocaleString():"";
-const secs=v=>{v=Number(v||0);return `${Math.floor(v/3600)}h ${Math.floor(v%3600/60)}m`};
-const list=(id,data,render,empty="Nothing here yet.")=>$(id).innerHTML=data?.length?`<div class="list">${data.map(render).join("")}</div>`:`<div class="empty">${empty}</div>`;
-const errText=e=>e?.message||"Unknown error";
-function authView(){ $("auth").classList.remove("hidden");$("guest").classList.add("hidden");$("member").classList.add("hidden") }
-function guestView(){ $("auth").classList.add("hidden");$("guest").classList.remove("hidden");$("member").classList.add("hidden") }
-function memberView(){ $("auth").classList.add("hidden");$("guest").classList.add("hidden");$("member").classList.remove("hidden") }
+let session=null, member=null, isAdmin=false;
+const ADMIN_ROLES = new Set(["owner","admin","administrator","moderator"]);
 
-async function table(name,opts={}){
- let q=sb.from(name).select(opts.select||"*");
- for(const [k,v] of Object.entries(opts.eq||{}))q=q.eq(k,v);
- if(opts.order)q=q.order(opts.order,{ascending:opts.asc??false});
- if(opts.limit)q=q.limit(opts.limit);
- return q;
+function esc(v){
+  return String(v ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
-async function rpc(name,args={}){return sb.rpc(name,args)}
-
-async function loadGuest(){
- const [m,a,s,n]=await Promise.all([
-  table("cr_public_members",{order:"points",limit:8}),
-  table("cr_activity_feed",{order:"created_at",limit:8}),
-  table("cr_schedule",{order:"start_at",limit:8}),
-  table("cr_news",{order:"published_at",limit:6})
- ]);
- list("guestMembers",m.data||[],x=>`<div class="item"><b>${esc(x.display_name||x.username||"Member")}</b><div class="sub">${Number(x.points||0).toLocaleString()} CrowPoints</div></div>`);
- list("guestActivity",a.data||[],x=>`<div class="item"><b>${esc(x.title||"CrowRules Activity")}</b><p>${esc(x.description||"")}</p><span class="sub">${date(x.created_at)}</span></div>`);
- list("guestSchedule",(s.data||[]).filter(x=>x.is_published!==false),x=>`<div class="item"><b>${esc(x.title||"Program")}</b><div class="sub">${date(x.start_at)} • ${esc(x.content_type||"")}</div></div>`);
- list("guestNews",(n.data||[]).filter(x=>x.status==="published"||x.status==null),x=>`<div class="item"><b>${esc(x.title)}</b><p>${esc(x.excerpt||"")}</p></div>`);
+function fmtDate(v){return v?new Date(v).toLocaleString(): "—";}
+function hours(sec){return ((Number(sec||0))/3600).toFixed(1)+"h";}
+function setMessage(text,type=""){
+  const el=document.getElementById("globalMessage");
+  el.textContent=text; el.className="notice"+(type?" "+type:"");
+  el.classList.remove("hidden");
+  setTimeout(()=>el.classList.add("hidden"),6000);
+}
+function openAuth(mode="login"){document.getElementById("authModal").classList.add("show");switchAuth(mode);}
+function closeAuth(){document.getElementById("authModal").classList.remove("show");}
+function switchAuth(mode){
+  document.getElementById("loginForm").classList.toggle("hidden",mode!=="login");
+  document.getElementById("signupForm").classList.toggle("hidden",mode!=="signup");
+  document.getElementById("authTitle").textContent=mode==="signup"?"Create Member Account":"Member Login";
+  document.getElementById("authMessage").classList.add("hidden");
+}
+function detail(title,html){document.getElementById("detailTitle").textContent=title;document.getElementById("detailBody").innerHTML=html;document.getElementById("detailModal").classList.add("show");}
+function closeDetail(){document.getElementById("detailModal").classList.remove("show");}
+function statusBadge(status){
+  const s=String(status||"").toLowerCase();
+  let c="info"; if(["approved","accepted","implemented"].includes(s))c="good"; else if(["declined","rejected"].includes(s))c="bad"; else if(["pending","reviewing","open"].includes(s))c="warn";
+  return `<span class="badge ${c}">${esc(status||"unknown")}</span>`;
 }
 
-async function ensureMember(){
- const r=await rpc("cr_member_ensure_profile");
- if(r.error)throw r.error;
- member=r.data;return member;
+async function init(){
+  const {data:{session:s}}=await db.auth.getSession();
+  session=s;
+  await renderAuthState();
+  db.auth.onAuthStateChange(async(_event,newSession)=>{
+    session=newSession;
+    await renderAuthState();
+  });
+}
+async function renderAuthState(){
+  const logged=!!session;
+  document.getElementById("guestPanel").classList.toggle("hidden",logged);
+  document.getElementById("memberPanel").classList.toggle("hidden",!logged);
+  document.getElementById("profileGuest").classList.toggle("hidden",logged);
+  document.getElementById("profileMember").classList.toggle("hidden",!logged);
+  document.getElementById("applicationGuest").classList.toggle("hidden",logged);
+  document.getElementById("applicationMember").classList.toggle("hidden",!logged);
+  document.getElementById("suggestGuest").classList.toggle("hidden",logged);
+  document.getElementById("suggestMember").classList.toggle("hidden",!logged);
+  document.getElementById("authNav").classList.toggle("hidden",logged);
+  document.getElementById("logoutBtn").classList.toggle("hidden",!logged);
+  if(!logged){
+    document.getElementById("admin").classList.add("hidden");
+    document.getElementById("adminNav").classList.add("hidden");
+    return;
+  }
+  await loadMember();
 }
 
 async function loadMember(){
- await ensureMember();
- isAdmin=["owner","admin","administrator","moderator"].includes(String(member.role||"").toLowerCase());
- $("adminNav").classList.toggle("hidden",!isAdmin);
- $("admin").classList.toggle("hidden",!isAdmin);
- renderMember();
+  const {data,error}=await db.from("cr_members").select("*").eq("user_id",session.user.id).maybeSingle();
+  if(error){setMessage("Member profile could not be loaded: "+error.message,"bad");return;}
+  member=data;
+  if(!member){
+    setMessage("Your account exists, but no cr_members profile was found yet.","warn");
+    return;
+  }
+  isAdmin=ADMIN_ROLES.has(String(member.role||"").toLowerCase());
+  document.getElementById("welcomeName").textContent=member.display_name||member.username||"Member";
+  document.getElementById("roleBadge").textContent=(member.role||"member").toUpperCase();
+  document.getElementById("adminRole").textContent=(member.role||"—").toUpperCase();
+  document.getElementById("memberMeta").innerHTML=
+    `@${esc(member.username||"member")} · ${esc(member.membership_tier||"member")} · Joined ${esc(fmtDate(member.joined_at||member.created_at))}`;
+  document.getElementById("lifePoints").textContent=Number(member.lifetime_points??member.points??0).toLocaleString();
+  document.getElementById("monthPoints").textContent=Number(member.monthly_points??0).toLocaleString();
+  document.getElementById("watchHours").textContent=hours(member.watch_seconds ?? Number(member.total_watch_minutes||0)*60);
+  document.getElementById("listenHours").textContent=hours(member.listen_seconds ?? Number(member.total_listen_minutes||0)*60);
 
- const uid=session.user.id;
- const results=await Promise.all([
-  table("cr_member_notifications",{eq:{user_id:uid},order:"created_at",limit:10}),
-  table("cr_member_favorites",{eq:{user_id:uid},order:"created_at",limit:10}),
-  table("cr_member_watch_history",{eq:{user_id:uid},order:"watched_at",limit:10}),
-  rpc("member_hub_top_members",{p_limit:10}),
-  rpc("member_hub_newest_members",{p_limit:10}),
-  table("cr_podcaster_applications",{eq:{user_id:uid},order:"created_at",limit:10}),
-  table("cr_sports_show_creator_applications",{eq:{user_id:uid},order:"created_at",limit:10}),
-  table("cr_member_suggestions",{eq:{user_id:uid},order:"created_at",limit:10}),
-  table("crowspace_posts",{order:"created_at",limit:8}),
-  table("sports_games",{order:"game_date",limit:8})
- ]);
- const [notifs,favs,history,lead,newest,pods,sportsApps,suggestions,posts,games]=results;
- list("notifications",notifs.data||[],x=>`<div class="item"><b>${esc(x.title||"Notification")}</b><p>${esc(x.message||"")}</p></div>`);
- $("notificationCount").textContent=(notifs.data||[]).filter(x=>!x.is_read).length;
- list("favorites",favs.data||[],x=>`<div class="item"><b>${esc(x.title||x.item_id||"Favorite")}</b><div class="sub">${esc(x.item_type||"")}</div></div>`);
- list("watchHistory",history.data||[],x=>`<div class="item"><b>${esc(x.title||x.content_id||"Media")}</b><div class="sub">${esc(x.content_type||"")} • ${secs(x.watched_seconds)} • ${x.completed?"Complete":"In progress"}</div></div>`);
- list("leaderboard",lead.data||[],x=>`<div class="item row"><b style="font:700 18px Orbitron;color:var(--cyan)">#${esc(x.rank)}</b><div><b>${esc(x.display_name||x.username||"Member")}</b><div class="sub">${Number(x.monthly_points||0).toLocaleString()} monthly points</div></div></div>`);
- list("newMembers",newest.data||[],x=>`<div class="item"><b>${esc(x.display_name||x.username||"Member")}</b><div class="sub">${esc(x.membership_tier||"Free")} • ${date(x.joined_at)}</div></div>`);
- list("myApplications",[...(pods.data||[]).map(x=>({...x,type:"Podcaster"})),...(sportsApps.data||[]).map(x=>({...x,type:"Sports"}))],x=>`<div class="item"><b>${esc(x.show_name||"Application")}</b><div class="sub">${esc(x.type)} • <span class="${String(x.status).toLowerCase()}">${esc(x.status)}</span></div>${x.admin_notes?`<p>Admin: ${esc(x.admin_notes)}</p>`:""}</div>`);
- list("mySuggestions",suggestions.data||[],x=>`<div class="item"><b>${esc(x.title)}</b><p>${esc(x.suggestion)}</p><span class="pill ${String(x.status).toLowerCase()}">${esc(x.status)}</span>${x.admin_response?`<p>Admin response: ${esc(x.admin_response)}</p>`:""}</div>`);
- list("crowspace",posts.data||[],x=>`<div class="item"><p>${esc(x.body||"")}</p><div class="sub">${date(x.created_at)}</div></div>`);
- list("sports",games.data||[],x=>`<div class="item"><b>${esc(x.sport||"Sports")} • ${date(x.game_date)}</b><div class="sub">${esc(x.status||"")} • ${esc(x.home_team||"Home")} ${esc(x.home_score??"")} — ${esc(x.away_score??"")} ${esc(x.away_team||"Away")}</div></div>`);
+  document.getElementById("pUsername").value=member.username||"";
+  document.getElementById("pDisplayName").value=member.display_name||"";
+  document.getElementById("pBio").value=member.bio||"";
+  document.getElementById("pAvatar").value=member.avatar_url||"";
+  document.getElementById("pPublic").value=String(member.is_public!==false);
 
- const rank=await rpc("member_hub_my_rank",{p_member_id:member.id});
- $("rank").textContent=rank.data??"—";
+  document.getElementById("admin").classList.toggle("hidden",!isAdmin);
+  document.getElementById("adminNav").classList.toggle("hidden",!isAdmin);
 
- if(isAdmin) await loadAdmin();
+  await Promise.all([loadMyApplications(),loadMySuggestions()]);
+  if(isAdmin) await loadAdminQueues();
 }
 
-function renderMember(){
- $("welcome").textContent=`Welcome back, ${member.display_name||member.username||"Member"}.`;
- $("memberName").textContent=member.display_name||member.username||"Member";
- $("memberEmail").textContent=member.email||session.user.email||"";
- $("memberRole").textContent=member.role||"Member";
- $("bio").textContent=member.bio||"Welcome to the CrowRules community.";
- $("avatar").src=member.avatar_url||`https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(member.display_name||"Crow")}`;
- $("lifetime").textContent=Number(member.lifetime_points??member.points??0).toLocaleString();
- $("monthly").textContent=Number(member.monthly_points??0).toLocaleString();
- $("watchHours").textContent=(Number(member.total_watch_minutes??0)/60).toFixed(1);
- $("pDisplay").value=member.display_name||"";$("pUsername").value=member.username||"";$("pAvatar").value=member.avatar_url||"";$("pBio").value=member.bio||"";$("pPublic").value=String(member.is_public!==false);
+async function logout(){
+  await db.auth.signOut();
+  setMessage("You have been logged out.","good");
+  location.hash="#home";
 }
 
-async function loadAdmin(){
- const [p,s,g]=await Promise.all([
-  table("cr_podcaster_applications",{order:"created_at",limit:100}),
-  table("cr_sports_show_creator_applications",{order:"created_at",limit:100}),
-  table("cr_member_suggestions",{order:"created_at",limit:100})
- ]);
- const pending=x=>["pending","open","reviewing"].includes(String(x.status||"").toLowerCase());
- const pp=(p.data||[]).filter(pending),ss=(s.data||[]).filter(pending),gg=(g.data||[]).filter(pending);
- $("pendingPodcasters").textContent=pp.length;$("pendingSports").textContent=ss.length;$("pendingSuggestions").textContent=gg.length;
- list("adminPodcasters",pp,x=>reviewCard(x,"podcaster"));
- list("adminSports",ss,x=>reviewCard(x,"sports"));
- list("adminSuggestions",gg,x=>reviewCard(x,"suggestion"));
-}
-function reviewCard(x,type){
- const title=x.show_name||x.title||"Untitled";
- const desc=x.show_description||x.suggestion||"";
- return `<div class="item"><div class="row"><div class="grow"><b>${esc(title)}</b><div class="sub">${esc(x.host_name||x.creator_name||x.email||"")}</div></div><span class="pill pending">${esc(x.status)}</span></div><p>${esc(desc)}</p><div class="actions"><button class="review" onclick="reviewItem('${type}','${x.id}','reviewing')">Review</button><button class="approve" onclick="reviewItem('${type}','${x.id}','approved')">${type==="suggestion"?"Accept":"Approve"}</button><button class="decline" onclick="reviewItem('${type}','${x.id}','declined')">Decline</button><button class="btn secondary" onclick="viewItem('${encodeURIComponent(JSON.stringify(x))}')">View</button></div></div>`;
-}
-async function reviewItem(type,id,status){
- if(!isAdmin)return alert("Admin access required.");
- const note=prompt(status==="declined"?"Reason / admin notes (optional):":"Admin notes (optional):")||null;
- let r;
- if(type==="suggestion")r=await rpc("cr_member_hub_review_suggestion",{p_id:id,p_status:status,p_response:note});
- else if(type==="podcaster")r=await rpc("cr_member_hub_review_podcaster",{p_id:id,p_status:status,p_notes:note});
- else r=await rpc("cr_member_hub_review_sports",{p_id:id,p_status:status,p_notes:note});
- if(r.error)return alert(r.error.message);
- await loadAdmin();
- alert(status==="approved"||status==="accepted"?"Approved successfully.":status==="declined"?"Declined successfully.":"Status updated.");
-}
-function viewItem(encoded){
- const x=JSON.parse(decodeURIComponent(encoded));
- $("modalContent").innerHTML=`<div class="eyebrow">Review Details</div><h2>${esc(x.show_name||x.title||"Application")}</h2><div class="list">${Object.entries(x).map(([k,v])=>`<div class="item"><b>${esc(k)}</b><div class="sub">${esc(typeof v==="object"?JSON.stringify(v):v)}</div></div>`).join("")}</div>`;
- $("modal").classList.remove("hidden");
-}
-
-$("authForm").onsubmit=async e=>{
- e.preventDefault();$("authMsg").textContent="Working…";
- const email=$("email").value.trim(),password=$("password").value;
- if(signup){const r=await sb.auth.signUp({email,password,options:{data:{display_name:$("signupName").value.trim()}}});if(r.error)$("authMsg").textContent=r.error.message;else $("authMsg").textContent=r.data.session?"Account created.":"Account created. Check your email if confirmation is required."}
- else{const r=await sb.auth.signInWithPassword({email,password});if(r.error)$("authMsg").textContent=r.error.message}
-};
-$("loginTab").onclick=()=>{signup=false;$("signupName").classList.add("hidden");$("authSubmit").textContent="Login";$("loginTab").className="btn primary";$("signupTab").className="btn secondary"};
-$("signupTab").onclick=()=>{signup=true;$("signupName").classList.remove("hidden");$("authSubmit").textContent="Create Account";$("signupTab").className="btn secondary";$("loginTab").className="btn primary"};
-$("topAuth").onclick=authView;$("joinBtn").onclick=authView;$("logout").onclick=()=>sb.auth.signOut();
-$("editBtn").onclick=()=>document.getElementById("profileForm").scrollIntoView({behavior:"smooth"});
-$("profileForm").onsubmit=async e=>{e.preventDefault();const payload={display_name:$("pDisplay").value.trim()||null,username:$("pUsername").value.trim()||null,avatar_url:$("pAvatar").value.trim()||null,bio:$("pBio").value,is_public:$("pPublic").value==="true"};const r=await sb.from("cr_members").update(payload).eq("id",member.id).eq("user_id",session.user.id);$("profileMsg").textContent=r.error?r.error.message:"Profile saved.";if(!r.error)await loadMember()};
-$("suggestBtn").onclick=async()=>{const title=prompt("Suggestion title:");if(!title)return;const suggestion=prompt("Suggestion:");if(!suggestion)return;const r=await sb.from("cr_member_suggestions").insert({user_id:session.user.id,member_id:member.id,title,suggestion,category:"general",status:"pending"});alert(r.error?r.error.message:"Suggestion submitted.");if(!r.error)loadMember()};
-$("podcastApply").onclick=async()=>{const show_name=prompt("Podcast/show name:");if(!show_name)return;const host_name=prompt("Host name:")||member.display_name||"Member";const genre=prompt("Genre:")||"General";const show_description=prompt("Show description:")||"";const r=await sb.from("cr_podcaster_applications").insert({user_id:session.user.id,member_id:member.id,show_name,host_name,email:session.user.email,genre,show_description,status:"pending"});alert(r.error?r.error.message:"Podcaster application submitted.");if(!r.error)loadMember()};
-$("sportsApply").onclick=async()=>{const show_name=prompt("Sports show name:");if(!show_name)return;const creator_name=member.display_name||"Member";const sport=prompt("Sport:")||"General";const coverage_type=prompt("Coverage type:")||"Commentary";const show_description=prompt("Show description:")||"";const r=await sb.from("cr_sports_show_creator_applications").insert({user_id:session.user.id,member_id:member.id,show_name,creator_name,email:session.user.email,sport,coverage_type,show_description,status:"pending"});alert(r.error?r.error.message:"Sports application submitted.");if(!r.error)loadMember()};
-$("postBtn").onclick=async()=>{const body=prompt("CrowSpace post:");if(!body)return;const r=await sb.from("crowspace_posts").insert({author_id:session.user.id,body,visibility:"public"});alert(r.error?r.error.message:"Post created.");if(!r.error)loadMember()};
-$("closeModal").onclick=()=>$("modal").classList.add("hidden");$("modal").onclick=e=>{if(e.target===$("modal"))$("modal").classList.add("hidden")};
-document.querySelectorAll("[data-scroll]").forEach(b=>b.onclick=()=>document.getElementById(b.dataset.scroll)?.scrollIntoView({behavior:"smooth"}));
-
-sb.auth.onAuthStateChange(async(_event,s)=>{
- session=s;
- if(!s){isAdmin=false;guestView();loadGuest();return}
- try{await loadMember();memberView();$("topAuth").textContent="Member"}catch(e){console.error(e);alert("Member Hub could not load: "+errText(e));guestView()}
+document.getElementById("loginForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const {error}=await db.auth.signInWithPassword({email:loginEmail.value.trim(),password:loginPassword.value});
+  if(error){showAuthError(error.message);return;}
+  closeAuth();setMessage("Welcome back.","good");
 });
-(async()=>{const r=await sb.auth.getSession();session=r.data.session;if(session){try{await loadMember();memberView();$("topAuth").textContent="Member"}catch(e){console.error(e);guestView()}}else{guestView();loadGuest()}})();
+document.getElementById("signupForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const email=signupEmail.value.trim(), password=signupPassword.value;
+  const {data,error}=await db.auth.signUp({email,password});
+  if(error){showAuthError(error.message);return;}
+  if(data.user){
+    const {error:profileError}=await db.from("cr_members").insert({
+      user_id:data.user.id,email,username:signupUsername.value.trim(),
+      display_name:signupDisplayName.value.trim()||signupUsername.value.trim(),
+      membership_tier:"member",membership_status:"active",is_public:true,is_active:true,
+      points:0,lifetime_points:0,monthly_points:0,points_month:new Date().toISOString().slice(0,10),
+      watch_seconds:0,listen_seconds:0,total_watch_minutes:0,total_listen_minutes:0,
+      monthly_watch_seconds:0,monthly_listen_seconds:0,monthly_points:0,role:"member"
+    });
+    if(profileError && !/duplicate|unique/i.test(profileError.message)){
+      showAuthError("Account created, but the member profile could not be created: "+profileError.message);
+      return;
+    }
+  }
+  closeAuth();setMessage(data.session?"Account created and logged in.":"Account created. Check your email if confirmation is required.","good");
+});
+function showAuthError(t){const el=document.getElementById("authMessage");el.textContent=t;el.className="notice bad";}
+
+document.getElementById("profileForm").addEventListener("submit",async e=>{
+  e.preventDefault();if(!member)return;
+  const {error}=await db.from("cr_members").update({
+    username:pUsername.value.trim(),display_name:pDisplayName.value.trim(),
+    bio:pBio.value.trim(),avatar_url:pAvatar.value.trim(),
+    is_public:pPublic.value==="true",updated_at:new Date().toISOString()
+  }).eq("user_id",session.user.id);
+  if(error){setMessage("Profile save failed: "+error.message,"bad");return;}
+  setMessage("Profile saved.","good");await loadMember();
+});
+
+document.getElementById("podcasterForm").addEventListener("submit",async e=>{
+  e.preventDefault();if(!session||!member)return;
+  const payload={
+    user_id:session.user.id,member_id:member.id,show_name:podShow.value.trim(),host_name:podHost.value.trim(),
+    email:podEmail.value.trim(),genre:podGenre.value.trim(),show_description:podDesc.value.trim(),
+    format:podFormat.value.trim()||null,episode_frequency:podFreq.value.trim()||null,experience:podExperience.value.trim()||null,
+    sample_url:podSample.value.trim()||null,equipment:podEquipment.value.trim()||null,social_links:podSocial.value.trim()||null,
+    goals:podGoals.value.trim()||null,additional_info:podAdditional.value.trim()||null,status:"pending"
+  };
+  const {error}=await db.from("cr_podcaster_applications").insert(payload);
+  if(error){setMessage("Podcaster application failed: "+error.message,"bad");return;}
+  e.target.reset();setMessage("Podcaster application submitted for review.","good");await loadMyApplications();if(isAdmin)await loadAdminQueues();
+});
+
+document.getElementById("sportsForm").addEventListener("submit",async e=>{
+  e.preventDefault();if(!session||!member)return;
+  const payload={
+    user_id:session.user.id,member_id:member.id,show_name:sportShow.value.trim(),creator_name:sportCreator.value.trim(),
+    email:sportEmail.value.trim(),sport:sportSport.value.trim(),coverage_type:sportCoverage.value.trim(),
+    show_description:sportDesc.value.trim(),format:sportFormat.value.trim()||null,episode_frequency:sportFreq.value.trim()||null,
+    experience:sportExperience.value.trim()||null,sample_url:sportSample.value.trim()||null,equipment:sportEquipment.value.trim()||null,
+    social_links:sportSocial.value.trim()||null,team_or_league_focus:sportFocus.value.trim()||null,
+    goals:sportGoals.value.trim()||null,additional_info:sportAdditional.value.trim()||null,status:"pending"
+  };
+  const {error}=await db.from("cr_sports_show_creator_applications").insert(payload);
+  if(error){setMessage("Sports application failed: "+error.message,"bad");return;}
+  e.target.reset();setMessage("Sports creator application submitted for review.","good");await loadMyApplications();if(isAdmin)await loadAdminQueues();
+});
+
+document.getElementById("suggestForm").addEventListener("submit",async e=>{
+  e.preventDefault();if(!session||!member)return;
+  const payload={user_id:session.user.id,member_id:member.id,title:suggestTitle.value.trim(),suggestion:suggestText.value.trim(),category:suggestCategory.value,status:"open"};
+  const {error}=await db.from("cr_member_suggestions").insert(payload);
+  if(error){setMessage("Suggestion failed: "+error.message,"bad");return;}
+  e.target.reset();setMessage("Suggestion submitted for review.","good");await loadMySuggestions();if(isAdmin)await loadAdminQueues();
+});
+
+async function loadMyApplications(){
+  if(!session)return;
+  const [p,s]=await Promise.all([
+    db.from("cr_podcaster_applications").select("*").eq("user_id",session.user.id).order("created_at",{ascending:false}),
+    db.from("cr_sports_show_creator_applications").select("*").eq("user_id",session.user.id).order("created_at",{ascending:false})
+  ]);
+  const list=document.getElementById("myApplicationsList");
+  const rows=[
+    ...(p.data||[]).map(x=>({type:"Podcaster",...x})),
+    ...(s.data||[]).map(x=>({type:"Sports Creator",...x}))
+  ].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  document.getElementById("myApplications").classList.remove("hidden");
+  list.innerHTML=rows.length?rows.map(x=>`
+    <div class="item"><div class="itemtop"><strong>${esc(x.show_name)}</strong>${statusBadge(x.status)}</div>
+    <div class="meta">${esc(x.type)} · ${esc(x.genre||x.sport||"")} · ${esc(fmtDate(x.created_at))}</div>
+    ${x.admin_notes?`<div class="notice" style="margin-top:9px">Admin notes: ${esc(x.admin_notes)}</div>`:""}</div>`).join(""):`<div class="empty">No applications submitted yet.</div>`;
+}
+
+async function loadMySuggestions(){
+  if(!session)return;
+  const {data,error}=await db.from("cr_member_suggestions").select("*").eq("user_id",session.user.id).order("created_at",{ascending:false});
+  if(error){document.getElementById("mySuggestions").innerHTML=`<div class="empty">Could not load suggestions.</div>`;return;}
+  document.getElementById("mySuggestions").innerHTML=(data||[]).length?(data||[]).map(x=>`
+    <div class="item"><div class="itemtop"><strong>${esc(x.title)}</strong>${statusBadge(x.status)}</div>
+    <div class="meta">${esc(x.category)} · ${esc(fmtDate(x.created_at))}</div>
+    <p>${esc(x.suggestion)}</p>
+    ${x.admin_response?`<div class="notice good">Admin response: ${esc(x.admin_response)}</div>`:""}</div>`).join(""):`<div class="empty">No suggestions submitted yet.</div>`;
+}
+
+async function loadAdminQueues(){
+  if(!isAdmin)return;
+  const [p,s,sp]=await Promise.all([
+    db.from("cr_podcaster_applications").select("*").in("status",["pending","reviewing"]).order("created_at",{ascending:true}),
+    db.from("cr_member_suggestions").select("*").in("status",["open","pending","reviewing"]).order("created_at",{ascending:true}),
+    db.from("cr_sports_show_creator_applications").select("*").in("status",["pending","reviewing"]).order("created_at",{ascending:true})
+  ]);
+  if(p.error||s.error||sp.error){
+    setMessage("One or more admin queues could not be loaded. Check Supabase RLS policies.","bad");
+  }
+  const pods=p.data||[], sugg=s.data||[], sports=sp.data||[];
+  document.getElementById("podCount").textContent=pods.length;
+  document.getElementById("suggestCount").textContent=sugg.length;
+  document.getElementById("sportsCount").textContent=sports.length;
+  document.getElementById("podQueue").innerHTML=pods.length?pods.map(renderPodcaster).join(""):`<div class="empty">No pending podcaster applications.</div>`;
+  document.getElementById("suggestQueue").innerHTML=sugg.length?sugg.map(renderSuggestion).join(""):`<div class="empty">No pending suggestions.</div>`;
+  document.getElementById("sportsQueue").innerHTML=sports.length?sports.map(renderSports).join(""):`<div class="empty">No pending sports creator applications.</div>`;
+}
+
+function renderPodcaster(x){
+ return `<div class="item">
+  <div class="itemtop"><div><strong>${esc(x.show_name)}</strong><div class="meta">${esc(x.host_name)} · ${esc(x.genre)}</div></div>${statusBadge(x.status)}</div>
+  <div class="meta">${esc(x.email)} · ${esc(fmtDate(x.created_at))}</div>
+  <div class="actions">
+   <button class="btn small" onclick='viewApplication(${JSON.stringify(x).replace(/'/g,"&#39;")},"podcaster")'>View Details</button>
+   <button class="btn small good" onclick="reviewItem('podcaster','${x.id}','approve')">✓ Accept</button>
+   <button class="btn small bad" onclick="reviewItem('podcaster','${x.id}','decline')">✕ Decline</button>
+  </div>
+ </div>`;
+}
+function renderSuggestion(x){
+ return `<div class="item">
+  <div class="itemtop"><div><strong>${esc(x.title)}</strong><div class="meta">${esc(x.category)}</div></div>${statusBadge(x.status)}</div>
+  <p>${esc(x.suggestion).slice(0,280)}${x.suggestion.length>280?"…":""}</p>
+  <div class="meta">${esc(fmtDate(x.created_at))}</div>
+  <div class="actions">
+   <button class="btn small" onclick='viewSuggestion(${JSON.stringify(x).replace(/'/g,"&#39;")})'>View Details</button>
+   <button class="btn small good" onclick="reviewItem('suggestion','${x.id}','accept')">✓ Accept</button>
+   <button class="btn small bad" onclick="reviewItem('suggestion','${x.id}','decline')">✕ Decline</button>
+  </div>
+ </div>`;
+}
+function renderSports(x){
+ return `<div class="item">
+  <div class="itemtop"><div><strong>${esc(x.show_name)}</strong><div class="meta">${esc(x.creator_name)} · ${esc(x.sport)} · ${esc(x.coverage_type)}</div></div>${statusBadge(x.status)}</div>
+  <div class="meta">${esc(x.email)} · ${esc(fmtDate(x.created_at))}</div>
+  <div class="actions">
+   <button class="btn small" onclick='viewApplication(${JSON.stringify(x).replace(/'/g,"&#39;")},"sports")'>View Details</button>
+   <button class="btn small good" onclick="reviewItem('sports','${x.id}','approve')">✓ Accept</button>
+   <button class="btn small bad" onclick="reviewItem('sports','${x.id}','decline')">✕ Decline</button>
+  </div>
+ </div>`;
+}
+
+function viewApplication(x,type){
+ const fields=type==="podcaster"
+ ? [["Show",x.show_name],["Host",x.host_name],["Email",x.email],["Genre",x.genre],["Format",x.format],["Frequency",x.episode_frequency],["Experience",x.experience],["Sample",x.sample_url],["Equipment",x.equipment],["Social Links",x.social_links],["Goals",x.goals],["Additional Info",x.additional_info],["Description",x.show_description]]
+ : [["Show",x.show_name],["Creator",x.creator_name],["Email",x.email],["Sport",x.sport],["Coverage",x.coverage_type],["Format",x.format],["Frequency",x.episode_frequency],["Experience",x.experience],["Sample",x.sample_url],["Equipment",x.equipment],["Social Links",x.social_links],["Team/League Focus",x.team_or_league_focus],["Goals",x.goals],["Additional Info",x.additional_info],["Description",x.show_description]];
+ detail(x.show_name,fields.map(([k,v])=>`<div class="item"><strong>${esc(k)}</strong><div class="meta">${esc(v||"—")}</div></div>`).join(""));
+}
+function viewSuggestion(x){
+ detail(x.title,`<div class="item"><strong>Category</strong><div class="meta">${esc(x.category)}</div></div>
+ <div class="item" style="margin-top:10px"><strong>Suggestion</strong><p>${esc(x.suggestion)}</p></div>
+ <div class="meta">Submitted ${esc(fmtDate(x.created_at))}</div>`);
+}
+
+async function reviewItem(type,id,action){
+ if(!isAdmin)return setMessage("You are not authorized to review submissions.","bad");
+ const accept=action==="approve"||action==="accept";
+ const notes=prompt(accept?"Optional approval notes:":"Optional decline reason:");
+ if(notes===null)return;
+ let result;
+ if(type==="podcaster"){
+   result=await db.rpc("cr_member_hub_review_podcaster",{p_id:id,p_status:accept?"approved":"declined",p_notes:notes||null});
+ }else if(type==="sports"){
+   result=await db.rpc("cr_member_hub_review_sports",{p_id:id,p_status:accept?"approved":"declined",p_notes:notes||null});
+ }else{
+   result=await db.rpc("cr_member_hub_review_suggestion",{p_id:id,p_status:accept?"accepted":"declined",p_response:notes||null});
+ }
+ if(result.error){setMessage("Review failed: "+result.error.message,"bad");return;}
+ setMessage(accept?"Item accepted.":"Item declined.","good");
+ await loadAdminQueues();
+ await loadMyApplications();
+ await loadMySuggestions();
+}
+
+init();
 </script>
 </body>
 </html>
