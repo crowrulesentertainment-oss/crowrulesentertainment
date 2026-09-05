@@ -2,15 +2,31 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#05060a">
-<meta name="description" content="CrowRules Entertainment Member Hub — profiles, CrowPoints, watch history, leaderboard, roles, community, notifications and CrowRules programming.">
 
-<title>CrowRules Member Hub</title>
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1,viewport-fit=cover"
+>
+
+<meta
+  name="theme-color"
+  content="#05060a"
+>
+
+<meta
+  name="description"
+  content="CrowRules Member Hub 4.0 — Your personal CrowRules Entertainment command center."
+>
+
+<title>CrowRules Member Hub 4.0</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
+<link
+  href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap"
+  rel="stylesheet"
+>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -18,20 +34,28 @@
 :root{
   --bg:#05060a;
   --bg2:#090b12;
-  --panel:rgba(14,16,25,.88);
-  --panel2:rgba(20,22,34,.94);
+  --panel:#0d1018;
+  --panel2:#111521;
+  --panel3:#151a27;
   --line:rgba(255,255,255,.09);
-  --text:#f5f7ff;
-  --muted:#8d94a8;
-  --purple:#8b5cf6;
-  --purple2:#a855f7;
-  --cyan:#22d3ee;
-  --pink:#ec4899;
-  --green:#22c55e;
-  --yellow:#facc15;
-  --red:#ef4444;
-  --shadow:0 25px 80px rgba(0,0,0,.42);
+  --line2:rgba(255,255,255,.14);
+  --text:#f5f7fb;
+  --muted:#8d96aa;
+  --muted2:#697286;
+
+  --purple:#9b5cff;
+  --purple2:#6f35ff;
+  --cyan:#00e5ff;
+  --pink:#ff3ca6;
+  --green:#32e875;
+  --yellow:#ffd166;
+  --red:#ff5577;
+
+  --shadow:0 20px 60px rgba(0,0,0,.45);
   --radius:20px;
+  --radius2:14px;
+
+  --max:1500px;
 }
 
 *{
@@ -47,21 +71,23 @@ body{
   min-height:100vh;
   color:var(--text);
   background:
-    radial-gradient(circle at 10% 0%,rgba(139,92,246,.18),transparent 32%),
-    radial-gradient(circle at 90% 10%,rgba(34,211,238,.10),transparent 28%),
-    radial-gradient(circle at 50% 100%,rgba(236,72,153,.08),transparent 30%),
+    radial-gradient(circle at 10% 0%,rgba(155,92,255,.13),transparent 28%),
+    radial-gradient(circle at 90% 10%,rgba(0,229,255,.08),transparent 25%),
+    radial-gradient(circle at 50% 100%,rgba(255,60,166,.06),transparent 30%),
     var(--bg);
   font-family:Montserrat,Arial,sans-serif;
+  overflow-x:hidden;
 }
 
-body:before{
+body::before{
   content:"";
   position:fixed;
   inset:0;
   pointer-events:none;
+  opacity:.18;
   background-image:
-    linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);
+    linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
   background-size:40px 40px;
   mask-image:linear-gradient(to bottom,black,transparent);
 }
@@ -82,31 +108,41 @@ button{
   cursor:pointer;
 }
 
+img{
+  max-width:100%;
+  display:block;
+}
+
 .hidden{
   display:none!important;
 }
 
-.container{
-  width:min(1450px,calc(100% - 32px));
-  margin:auto;
+.app{
+  width:100%;
+  min-height:100vh;
 }
 
-/* HEADER */
+/* =========================================================
+   HEADER
+========================================================= */
 
-.header{
+.topbar{
   position:sticky;
   top:0;
-  z-index:1000;
-  backdrop-filter:blur(22px);
-  background:rgba(5,6,10,.78);
+  z-index:100;
+  height:76px;
   border-bottom:1px solid var(--line);
+  background:rgba(5,6,10,.88);
+  backdrop-filter:blur(20px);
 }
 
-.header-inner{
-  min-height:76px;
+.topbar-inner{
+  max-width:var(--max);
+  height:100%;
+  margin:auto;
+  padding:0 22px;
   display:flex;
   align-items:center;
-  justify-content:space-between;
   gap:20px;
 }
 
@@ -117,146 +153,222 @@ button{
   min-width:max-content;
 }
 
-.logo{
+.brand-mark{
   width:44px;
   height:44px;
+  border-radius:14px;
   display:grid;
   place-items:center;
-  border-radius:13px;
   font-size:22px;
-  background:linear-gradient(135deg,var(--purple),var(--pink));
-  box-shadow:0 0 35px rgba(139,92,246,.35);
+  background:
+    linear-gradient(135deg,rgba(155,92,255,.28),rgba(0,229,255,.12)),
+    #10131d;
+  border:1px solid rgba(155,92,255,.45);
+  box-shadow:
+    0 0 30px rgba(155,92,255,.12),
+    inset 0 0 20px rgba(0,229,255,.05);
 }
 
 .brand-title{
   font-family:Orbitron,sans-serif;
-  font-size:16px;
   font-weight:800;
-  letter-spacing:1px;
+  font-size:16px;
+  letter-spacing:.06em;
 }
 
 .brand-sub{
-  color:var(--muted);
   font-size:10px;
-  letter-spacing:2px;
+  color:var(--muted);
+  letter-spacing:.16em;
   text-transform:uppercase;
+  margin-top:3px;
 }
 
-.nav{
+.main-nav{
   display:flex;
   align-items:center;
-  gap:5px;
-  flex-wrap:wrap;
-  justify-content:center;
+  gap:4px;
+  margin-left:auto;
 }
 
-.nav a{
+.nav-link{
   padding:10px 12px;
   border-radius:10px;
   color:var(--muted);
-  font-size:13px;
+  font-size:12px;
   font-weight:700;
   transition:.2s;
 }
 
-.nav a:hover,
-.nav a.active{
-  color:#fff;
-  background:rgba(139,92,246,.12);
+.nav-link:hover{
+  color:var(--text);
+  background:rgba(255,255,255,.05);
 }
 
-.auth-area{
+.header-actions{
   display:flex;
   align-items:center;
-  gap:10px;
+  gap:8px;
 }
 
-.btn{
+.status-pill{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:8px 10px;
+  border-radius:999px;
+  background:rgba(255,255,255,.04);
   border:1px solid var(--line);
-  background:rgba(255,255,255,.045);
-  color:#fff;
-  padding:11px 16px;
-  border-radius:12px;
+  color:var(--muted);
+  font-size:10px;
   font-weight:800;
+  white-space:nowrap;
+}
+
+.status-dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--yellow);
+  box-shadow:0 0 12px currentColor;
+}
+
+.status-pill.connected .status-dot{
+  background:var(--green);
+}
+
+.status-pill.offline .status-dot{
+  background:var(--red);
+}
+
+.icon-btn{
+  width:40px;
+  height:40px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  display:grid;
+  place-items:center;
   transition:.2s;
 }
 
-.btn:hover{
-  transform:translateY(-1px);
-  border-color:rgba(139,92,246,.55);
-  background:rgba(139,92,246,.12);
+.icon-btn:hover{
+  border-color:rgba(155,92,255,.45);
+  background:rgba(155,92,255,.08);
 }
 
-.btn-primary{
-  border:none;
-  background:linear-gradient(135deg,var(--purple),var(--pink));
-  box-shadow:0 8px 30px rgba(139,92,246,.22);
+.user-chip{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:5px 10px 5px 5px;
+  border-radius:999px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--line);
 }
 
-.btn-danger{
-  color:#fecaca;
-}
-
-.btn-small{
-  padding:8px 11px;
+.avatar{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  object-fit:cover;
+  background:
+    linear-gradient(135deg,var(--purple),var(--cyan));
+  display:grid;
+  place-items:center;
+  color:#fff;
+  font-weight:800;
   font-size:12px;
+  overflow:hidden;
 }
 
-/* HERO */
+.user-chip-name{
+  max-width:130px;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  font-size:11px;
+  font-weight:800;
+}
+
+.user-chip-role{
+  color:var(--purple);
+  font-size:9px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.main{
+  max-width:var(--max);
+  margin:auto;
+  padding:28px 22px 80px;
+}
 
 .hero{
-  padding:55px 0 30px;
-}
-
-.hero-grid{
-  display:grid;
-  grid-template-columns:1.5fr .7fr;
-  gap:24px;
-}
-
-.hero-card{
   position:relative;
   overflow:hidden;
-  padding:34px;
   min-height:270px;
+  padding:38px;
   border:1px solid var(--line);
   border-radius:28px;
   background:
-    radial-gradient(circle at 90% 0%,rgba(139,92,246,.22),transparent 35%),
-    linear-gradient(135deg,rgba(20,21,34,.95),rgba(9,10,16,.92));
+    radial-gradient(circle at 85% 20%,rgba(0,229,255,.1),transparent 28%),
+    radial-gradient(circle at 20% 0%,rgba(155,92,255,.16),transparent 35%),
+    linear-gradient(135deg,#0b0e16,#101421);
   box-shadow:var(--shadow);
 }
 
-.hero-card:after{
+.hero::after{
   content:"";
   position:absolute;
-  width:280px;
-  height:280px;
-  right:-100px;
-  bottom:-130px;
+  width:500px;
+  height:500px;
+  right:-220px;
+  bottom:-280px;
   border-radius:50%;
-  background:rgba(34,211,238,.07);
-  filter:blur(10px);
+  border:1px solid rgba(0,229,255,.08);
+  box-shadow:
+    0 0 0 70px rgba(0,229,255,.02),
+    0 0 0 140px rgba(0,229,255,.015);
 }
 
-.kicker{
+.hero-kicker{
   color:var(--cyan);
+  font-family:Orbitron,sans-serif;
   font-size:11px;
-  letter-spacing:3px;
-  font-weight:900;
+  font-weight:800;
+  letter-spacing:.2em;
   text-transform:uppercase;
+  margin-bottom:12px;
 }
 
 .hero h1{
-  margin:12px 0 10px;
+  margin:0;
+  max-width:800px;
   font-family:Orbitron,sans-serif;
-  font-size:clamp(28px,4vw,52px);
+  font-size:clamp(28px,4vw,50px);
   line-height:1.05;
+  letter-spacing:-.04em;
+}
+
+.hero h1 span{
+  background:linear-gradient(90deg,var(--purple),var(--cyan));
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
 }
 
 .hero p{
-  max-width:760px;
-  color:#aab0c0;
+  max-width:750px;
+  margin:15px 0 0;
+  color:var(--muted);
+  font-size:14px;
   line-height:1.7;
 }
 
@@ -264,747 +376,1176 @@ button{
   display:flex;
   flex-wrap:wrap;
   gap:10px;
-  margin-top:24px;
+  margin-top:22px;
 }
 
-.member-summary{
-  display:flex;
-  align-items:center;
-  gap:16px;
-  padding:24px;
+.btn{
   border:1px solid var(--line);
-  border-radius:24px;
-  background:var(--panel);
-  box-shadow:var(--shadow);
-}
-
-.avatar{
-  width:76px;
-  height:76px;
-  flex:0 0 76px;
-  border-radius:22px;
-  display:grid;
-  place-items:center;
-  overflow:hidden;
-  background:linear-gradient(135deg,#171927,#29223e);
-  border:1px solid rgba(255,255,255,.1);
-  font-family:Orbitron,sans-serif;
-  font-size:26px;
-}
-
-.avatar img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-
-.member-name{
-  font-family:Orbitron,sans-serif;
-  font-size:17px;
-  font-weight:800;
-}
-
-.member-email{
-  color:var(--muted);
-  font-size:12px;
-  margin-top:5px;
-  word-break:break-all;
-}
-
-/* STATS */
-
-.stats{
-  display:grid;
-  grid-template-columns:repeat(6,1fr);
-  gap:14px;
-  margin:20px 0 30px;
-}
-
-.stat{
-  padding:20px;
-  border:1px solid var(--line);
-  border-radius:18px;
-  background:var(--panel);
-  box-shadow:0 15px 50px rgba(0,0,0,.2);
-}
-
-.stat-label{
-  color:var(--muted);
-  font-size:10px;
-  letter-spacing:1.6px;
-  text-transform:uppercase;
-  font-weight:800;
-}
-
-.stat-value{
-  margin-top:9px;
-  font-family:Orbitron,sans-serif;
-  font-size:23px;
-  font-weight:800;
-}
-
-.stat-value.purple{color:#c4b5fd}
-.stat-value.cyan{color:#67e8f9}
-.stat-value.pink{color:#f9a8d4}
-.stat-value.green{color:#86efac}
-.stat-value.yellow{color:#fde68a}
-
-/* SECTION */
-
-.section{
-  margin:35px 0;
-}
-
-.section-head{
-  display:flex;
-  align-items:end;
-  justify-content:space-between;
-  gap:20px;
-  margin-bottom:15px;
-}
-
-.section-title{
-  font-family:Orbitron,sans-serif;
-  font-size:20px;
-  font-weight:800;
-}
-
-.section-sub{
-  color:var(--muted);
-  font-size:12px;
-  margin-top:5px;
-}
-
-/* GRID */
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:16px;
-}
-
-.grid-2{
-  grid-template-columns:repeat(2,1fr);
-}
-
-.grid-4{
-  grid-template-columns:repeat(4,1fr);
-}
-
-/* CARDS */
-
-.card{
-  border:1px solid var(--line);
-  border-radius:18px;
-  background:var(--panel);
-  overflow:hidden;
-}
-
-.card-body{
-  padding:19px;
-}
-
-.card-title{
-  font-weight:800;
-  font-size:14px;
-}
-
-.card-text{
-  color:var(--muted);
-  font-size:12px;
-  line-height:1.6;
-  margin-top:7px;
-}
-
-.meta{
-  display:flex;
-  flex-wrap:wrap;
-  gap:7px;
-  margin-top:12px;
-}
-
-.pill{
-  display:inline-flex;
-  align-items:center;
-  gap:5px;
-  padding:6px 9px;
-  border-radius:999px;
-  border:1px solid var(--line);
-  background:rgba(255,255,255,.04);
-  color:#c6cad5;
-  font-size:10px;
-  font-weight:800;
-}
-
-.pill.purple{
-  color:#ddd6fe;
-  border-color:rgba(139,92,246,.25);
-  background:rgba(139,92,246,.1);
-}
-
-.pill.cyan{
-  color:#cffafe;
-  border-color:rgba(34,211,238,.25);
-  background:rgba(34,211,238,.08);
-}
-
-.pill.green{
-  color:#dcfce7;
-  border-color:rgba(34,197,94,.25);
-  background:rgba(34,197,94,.08);
-}
-
-.pill.pink{
-  color:#fce7f3;
-  border-color:rgba(236,72,153,.25);
-  background:rgba(236,72,153,.08);
-}
-
-.pill.yellow{
-  color:#fef9c3;
-  border-color:rgba(250,204,21,.25);
-  background:rgba(250,204,21,.08);
-}
-
-/* LEADERBOARD */
-
-.leader{
-  display:flex;
-  align-items:center;
-  gap:13px;
-  padding:14px;
-  border-bottom:1px solid rgba(255,255,255,.06);
-}
-
-.leader:last-child{
-  border-bottom:0;
-}
-
-.rank{
-  width:32px;
-  height:32px;
-  display:grid;
-  place-items:center;
-  border-radius:10px;
   background:rgba(255,255,255,.05);
-  color:#fff;
-  font-family:Orbitron,sans-serif;
+  color:var(--text);
+  border-radius:12px;
+  padding:11px 16px;
   font-size:11px;
   font-weight:800;
+  transition:.2s;
 }
 
-.leader-avatar{
-  width:42px;
-  height:42px;
-  border-radius:13px;
-  overflow:hidden;
+.btn:hover{
+  transform:translateY(-1px);
+  border-color:rgba(255,255,255,.2);
+}
+
+.btn-primary{
+  background:linear-gradient(135deg,var(--purple2),#914dff);
+  border-color:rgba(155,92,255,.6);
+  box-shadow:0 8px 28px rgba(111,53,255,.25);
+}
+
+.btn-cyan{
+  background:rgba(0,229,255,.08);
+  border-color:rgba(0,229,255,.28);
+  color:var(--cyan);
+}
+
+.btn-danger{
+  background:rgba(255,85,119,.08);
+  border-color:rgba(255,85,119,.25);
+  color:#ff8ba3;
+}
+
+.btn-small{
+  padding:8px 11px;
+  font-size:10px;
+}
+
+/* =========================================================
+   AUTH WALL
+========================================================= */
+
+.auth-wall{
+  display:none;
+  margin-top:20px;
+  padding:38px;
+  border-radius:22px;
+  border:1px solid rgba(155,92,255,.25);
+  background:
+    radial-gradient(circle at 50% 0%,rgba(155,92,255,.12),transparent 40%),
+    var(--panel);
+  text-align:center;
+}
+
+.auth-wall.show{
+  display:block;
+}
+
+.auth-icon{
+  width:70px;
+  height:70px;
+  margin:0 auto 18px;
+  border-radius:20px;
   display:grid;
   place-items:center;
-  background:#171927;
-  font-weight:900;
+  font-size:30px;
+  background:rgba(155,92,255,.1);
+  border:1px solid rgba(155,92,255,.25);
 }
 
-.leader-avatar img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
+.auth-wall h2{
+  margin:0;
+  font-family:Orbitron,sans-serif;
+  font-size:23px;
 }
 
-.leader-info{
-  flex:1;
-  min-width:0;
-}
-
-.leader-name{
-  font-weight:800;
+.auth-wall p{
+  max-width:600px;
+  margin:12px auto 22px;
+  color:var(--muted);
+  line-height:1.6;
   font-size:13px;
 }
 
-.leader-points{
-  color:var(--cyan);
-  font-size:11px;
-  margin-top:4px;
+/* =========================================================
+   DASHBOARD GRID
+========================================================= */
+
+.dashboard{
+  display:grid;
+  grid-template-columns:minmax(0,1.65fr) minmax(300px,.85fr);
+  gap:20px;
+  margin-top:20px;
 }
 
-.leader-me{
-  border-color:rgba(139,92,246,.4);
-  background:rgba(139,92,246,.08);
+.left-column,
+.right-column{
+  display:grid;
+  gap:20px;
+  align-content:start;
 }
 
-/* ROLE */
+.panel{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.025),transparent),
+    var(--panel);
+  box-shadow:0 12px 40px rgba(0,0,0,.2);
+  overflow:hidden;
+}
+
+.panel-header{
+  min-height:66px;
+  padding:17px 19px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  border-bottom:1px solid var(--line);
+}
+
+.panel-title{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.panel-title-icon{
+  width:32px;
+  height:32px;
+  border-radius:10px;
+  display:grid;
+  place-items:center;
+  background:rgba(155,92,255,.09);
+  border:1px solid rgba(155,92,255,.18);
+}
+
+.panel-title h2{
+  margin:0;
+  font-family:Orbitron,sans-serif;
+  font-size:13px;
+  letter-spacing:.03em;
+}
+
+.panel-title p{
+  margin:3px 0 0;
+  color:var(--muted);
+  font-size:9px;
+}
+
+.panel-body{
+  padding:18px;
+}
+
+/* =========================================================
+   PROFILE
+========================================================= */
+
+.profile-card{
+  position:relative;
+}
+
+.profile-cover{
+  height:110px;
+  background:
+    radial-gradient(circle at 80% 30%,rgba(0,229,255,.18),transparent 30%),
+    radial-gradient(circle at 20% 0%,rgba(155,92,255,.25),transparent 35%),
+    linear-gradient(135deg,#121627,#0b0e16);
+  border-bottom:1px solid var(--line);
+}
+
+.profile-main{
+  position:relative;
+  padding:0 20px 20px;
+}
+
+.profile-avatar{
+  width:86px;
+  height:86px;
+  margin-top:-43px;
+  border:4px solid var(--panel);
+  border-radius:24px;
+  object-fit:cover;
+  background:linear-gradient(135deg,var(--purple),var(--cyan));
+  display:grid;
+  place-items:center;
+  font-family:Orbitron,sans-serif;
+  font-size:25px;
+  font-weight:800;
+}
+
+.profile-name-row{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:12px;
+}
+
+.profile-name{
+  font-family:Orbitron,sans-serif;
+  font-size:21px;
+  font-weight:800;
+}
 
 .role-badge{
   display:inline-flex;
   align-items:center;
-  padding:5px 8px;
+  gap:6px;
+  padding:5px 9px;
   border-radius:999px;
+  background:rgba(155,92,255,.1);
+  border:1px solid rgba(155,92,255,.25);
+  color:#c9b1ff;
   font-size:9px;
-  font-weight:900;
-  letter-spacing:.5px;
-  text-transform:uppercase;
-  margin-left:5px;
-}
-
-.role-member{background:rgba(148,163,184,.12);color:#cbd5e1}
-.role-supporter{background:rgba(34,211,238,.12);color:#67e8f9}
-.role-creator{background:rgba(236,72,153,.12);color:#f9a8d4}
-.role-moderator{background:rgba(34,197,94,.12);color:#86efac}
-.role-producer{background:rgba(250,204,21,.12);color:#fde68a}
-.role-staff{background:rgba(168,85,247,.15);color:#d8b4fe}
-.role-admin{background:rgba(239,68,68,.15);color:#fca5a5}
-.role-owner{background:linear-gradient(135deg,rgba(139,92,246,.3),rgba(236,72,153,.25));color:#fff}
-
-/* WATCH */
-
-.watch-item{
-  display:flex;
-  gap:13px;
-  padding:13px;
-  border-bottom:1px solid rgba(255,255,255,.06);
-}
-
-.watch-item:last-child{
-  border-bottom:0;
-}
-
-.watch-icon{
-  width:52px;
-  height:52px;
-  flex:0 0 52px;
-  border-radius:13px;
-  display:grid;
-  place-items:center;
-  background:linear-gradient(135deg,rgba(139,92,246,.2),rgba(34,211,238,.12));
-  font-size:20px;
-}
-
-.watch-content{
-  flex:1;
-}
-
-.watch-title{
-  font-size:13px;
   font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+
+.profile-username{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:11px;
+}
+
+.profile-bio{
+  margin:14px 0 0;
+  color:#aeb6c7;
+  font-size:12px;
+  line-height:1.65;
+}
+
+.profile-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:15px;
+}
+
+.meta-chip{
+  padding:7px 9px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.025);
+  border-radius:9px;
+  color:var(--muted);
+  font-size:9px;
+}
+
+/* =========================================================
+   STATS
+========================================================= */
+
+.stats-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+
+.stat{
+  min-width:0;
+  padding:16px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:rgba(255,255,255,.025);
+}
+
+.stat-label{
+  color:var(--muted);
+  font-size:9px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+
+.stat-value{
+  margin-top:7px;
+  font-family:Orbitron,sans-serif;
+  font-size:20px;
+  font-weight:800;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.stat-sub{
+  margin-top:4px;
+  color:var(--muted2);
+  font-size:8px;
+}
+
+/* =========================================================
+   PROGRESS
+========================================================= */
+
+.progress-wrap{
+  margin-top:17px;
+}
+
+.progress-label{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:7px;
+  color:var(--muted);
+  font-size:9px;
+  font-weight:700;
 }
 
 .progress{
-  height:5px;
-  margin-top:9px;
-  border-radius:99px;
+  height:9px;
   overflow:hidden;
-  background:rgba(255,255,255,.08);
+  border-radius:999px;
+  background:#1b2030;
 }
 
-.progress span{
+.progress-bar{
+  height:100%;
+  width:0;
+  border-radius:inherit;
+  background:linear-gradient(90deg,var(--purple),var(--cyan));
+  box-shadow:0 0 18px rgba(0,229,255,.22);
+  transition:width .5s ease;
+}
+
+/* =========================================================
+   LEADERBOARD
+========================================================= */
+
+.leaderboard-list{
+  display:grid;
+  gap:8px;
+}
+
+.rank-row{
+  display:grid;
+  grid-template-columns:34px 1fr auto;
+  align-items:center;
+  gap:10px;
+  padding:10px;
+  border:1px solid transparent;
+  border-radius:12px;
+  background:rgba(255,255,255,.025);
+}
+
+.rank-row.me{
+  border-color:rgba(155,92,255,.25);
+  background:rgba(155,92,255,.06);
+}
+
+.rank-number{
+  width:30px;
+  height:30px;
+  display:grid;
+  place-items:center;
+  border-radius:9px;
+  background:#161a25;
+  font-family:Orbitron,sans-serif;
+  font-size:10px;
+  font-weight:800;
+  color:var(--muted);
+}
+
+.rank-row:nth-child(1) .rank-number{
+  color:var(--yellow);
+}
+
+.rank-row:nth-child(2) .rank-number{
+  color:#c7d1df;
+}
+
+.rank-row:nth-child(3) .rank-number{
+  color:#d98b5f;
+}
+
+.rank-person{
+  min-width:0;
+}
+
+.rank-name{
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  font-size:11px;
+  font-weight:800;
+}
+
+.rank-role{
+  margin-top:3px;
+  color:var(--muted);
+  font-size:8px;
+}
+
+.rank-points{
+  font-family:Orbitron,sans-serif;
+  font-size:10px;
+  font-weight:800;
+  color:var(--cyan);
+}
+
+/* =========================================================
+   MEMBERS
+========================================================= */
+
+.member-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:9px;
+}
+
+.member-mini{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:10px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:rgba(255,255,255,.025);
+}
+
+.member-mini .avatar{
+  width:38px;
+  height:38px;
+  flex:none;
+}
+
+.member-mini-info{
+  min-width:0;
+}
+
+.member-mini-name{
+  font-size:10px;
+  font-weight:800;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.member-mini-date{
+  margin-top:3px;
+  color:var(--muted);
+  font-size:8px;
+}
+
+/* =========================================================
+   CONTENT LIST
+========================================================= */
+
+.content-list{
+  display:grid;
+  gap:9px;
+}
+
+.content-item{
+  display:grid;
+  grid-template-columns:82px 1fr auto;
+  gap:12px;
+  align-items:center;
+  padding:10px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:rgba(255,255,255,.025);
+  transition:.2s;
+}
+
+.content-item:hover{
+  border-color:rgba(155,92,255,.28);
+  transform:translateY(-1px);
+}
+
+.content-thumb{
+  width:82px;
+  height:52px;
+  border-radius:9px;
+  object-fit:cover;
+  background:
+    linear-gradient(135deg,#1a1d2b,#0b0d13);
+  border:1px solid var(--line);
+}
+
+.content-info{
+  min-width:0;
+}
+
+.content-title{
+  font-size:11px;
+  font-weight:800;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.content-meta{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:8px;
+}
+
+.content-progress{
+  margin-top:7px;
+  height:4px;
+  border-radius:999px;
+  overflow:hidden;
+  background:#202535;
+}
+
+.content-progress span{
   display:block;
   height:100%;
   background:linear-gradient(90deg,var(--purple),var(--cyan));
 }
 
-/* PROGRAMMING */
+/* =========================================================
+   CHAT
+========================================================= */
 
-.program{
-  min-height:170px;
-  position:relative;
-  overflow:hidden;
+.chat-status{
+  color:var(--muted);
+  font-size:9px;
 }
 
-.program-image{
-  height:100px;
-  background:
-    linear-gradient(135deg,rgba(139,92,246,.5),rgba(34,211,238,.18)),
-    #11131d;
-  display:grid;
-  place-items:center;
-  font-family:Orbitron,sans-serif;
-  font-size:11px;
-  letter-spacing:2px;
-}
-
-.program-image img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-
-/* FORMS */
-
-.form-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:13px;
-}
-
-.field{
-  display:flex;
-  flex-direction:column;
-  gap:7px;
-}
-
-.field.full{
-  grid-column:1/-1;
-}
-
-.field label{
-  color:#aeb4c4;
-  font-size:11px;
-  font-weight:800;
-}
-
-.field input,
-.field textarea,
-.field select{
-  width:100%;
-  border:1px solid var(--line);
-  outline:none;
-  color:#fff;
-  background:#0b0d14;
-  border-radius:11px;
-  padding:12px 13px;
-}
-
-.field textarea{
-  min-height:110px;
-  resize:vertical;
-}
-
-.field input:focus,
-.field textarea:focus,
-.field select:focus{
-  border-color:rgba(139,92,246,.6);
-  box-shadow:0 0 0 3px rgba(139,92,246,.08);
-}
-
-/* CHAT */
-
-.chat{
-  height:420px;
-  display:flex;
-  flex-direction:column;
-}
-
-.chat-messages{
-  flex:1;
+.chat-box{
+  height:340px;
   overflow:auto;
-  padding:14px;
+  padding:15px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  background:
+    radial-gradient(circle at 50% 0%,rgba(155,92,255,.04),transparent 35%),
+    #080a10;
 }
 
 .chat-message{
-  margin-bottom:13px;
+  max-width:82%;
+  padding:9px 11px;
+  border-radius:13px;
+  background:#111522;
+  border:1px solid var(--line);
+}
+
+.chat-message.mine{
+  align-self:flex-end;
+  background:rgba(155,92,255,.09);
+  border-color:rgba(155,92,255,.22);
 }
 
 .chat-author{
-  font-size:11px;
-  font-weight:900;
+  color:var(--cyan);
+  font-size:8px;
+  font-weight:800;
+}
+
+.chat-text{
+  margin-top:4px;
+  color:#dce1eb;
+  font-size:10px;
+  line-height:1.5;
+  word-break:break-word;
 }
 
 .chat-time{
-  color:var(--muted);
-  font-size:9px;
-  margin-left:6px;
-}
-
-.chat-body{
   margin-top:4px;
-  display:inline-block;
-  max-width:90%;
-  padding:9px 11px;
-  border-radius:11px;
-  background:rgba(255,255,255,.045);
-  color:#d9dce5;
-  font-size:12px;
-  line-height:1.5;
+  color:var(--muted2);
+  font-size:7px;
 }
 
-.chat-composer{
-  display:flex;
-  gap:8px;
+.chat-compose{
   padding:12px;
   border-top:1px solid var(--line);
+  display:flex;
+  gap:8px;
 }
 
-.chat-composer input{
+.chat-compose input{
   flex:1;
-  border:1px solid var(--line);
-  border-radius:10px;
-  background:#0a0c12;
-  color:#fff;
-  padding:11px;
-  outline:none;
+  min-width:0;
 }
 
-/* NOTIFICATIONS */
+/* =========================================================
+   FORMS
+========================================================= */
+
+.field{
+  display:grid;
+  gap:6px;
+}
+
+.field label{
+  color:var(--muted);
+  font-size:9px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+
+input,
+textarea,
+select{
+  width:100%;
+  border:1px solid var(--line);
+  outline:none;
+  color:var(--text);
+  background:#0a0d14;
+  border-radius:11px;
+  padding:11px 12px;
+  font-size:11px;
+  transition:.2s;
+}
+
+input:focus,
+textarea:focus,
+select:focus{
+  border-color:rgba(155,92,255,.55);
+  box-shadow:0 0 0 3px rgba(155,92,255,.08);
+}
+
+textarea{
+  min-height:120px;
+  resize:vertical;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.form-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  margin-top:13px;
+}
+
+/* =========================================================
+   SUGGESTIONS
+========================================================= */
+
+.suggestion-list{
+  display:grid;
+  gap:10px;
+}
+
+.suggestion{
+  padding:13px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:rgba(255,255,255,.025);
+}
+
+.suggestion-top{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+}
+
+.suggestion-title{
+  font-size:11px;
+  font-weight:800;
+}
+
+.suggestion-status{
+  padding:4px 7px;
+  border-radius:999px;
+  background:rgba(255,255,255,.05);
+  color:var(--muted);
+  font-size:7px;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.suggestion-body{
+  margin-top:7px;
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.6;
+}
+
+.suggestion-footer{
+  margin-top:9px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+
+.vote-count{
+  color:var(--cyan);
+  font-size:8px;
+  font-weight:800;
+}
+
+/* =========================================================
+   ACHIEVEMENTS
+========================================================= */
+
+.achievement-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:9px;
+}
+
+.achievement{
+  min-height:105px;
+  padding:12px;
+  text-align:center;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:rgba(255,255,255,.025);
+}
+
+.achievement-icon{
+  font-size:24px;
+}
+
+.achievement-name{
+  margin-top:7px;
+  font-size:9px;
+  font-weight:800;
+}
+
+.achievement-desc{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:7px;
+  line-height:1.4;
+}
+
+/* =========================================================
+   NOTIFICATIONS
+========================================================= */
+
+.notification-list{
+  display:grid;
+  gap:8px;
+}
 
 .notification{
-  display:flex;
-  gap:12px;
-  padding:14px;
-  border-bottom:1px solid rgba(255,255,255,.06);
+  padding:10px 11px;
+  border-radius:12px;
+  background:rgba(255,255,255,.025);
+  border:1px solid var(--line);
 }
 
 .notification.unread{
-  background:rgba(139,92,246,.06);
-}
-
-.notification-icon{
-  width:35px;
-  height:35px;
-  border-radius:10px;
-  display:grid;
-  place-items:center;
-  background:rgba(139,92,246,.12);
-}
-
-.notification-content{
-  flex:1;
+  border-color:rgba(0,229,255,.2);
+  background:rgba(0,229,255,.035);
 }
 
 .notification-title{
+  font-size:10px;
   font-weight:800;
-  font-size:12px;
 }
 
 .notification-message{
+  margin-top:4px;
   color:var(--muted);
-  font-size:11px;
+  font-size:8px;
   line-height:1.5;
-  margin-top:3px;
 }
 
-/* ROLE PANELS */
+.notification-time{
+  margin-top:5px;
+  color:var(--muted2);
+  font-size:7px;
+}
 
-.role-panel{
-  border:1px solid rgba(139,92,246,.22);
+/* =========================================================
+   ROLE / STAFF
+========================================================= */
+
+.role-card{
+  padding:15px;
+  border-radius:15px;
+  border:1px solid rgba(155,92,255,.2);
   background:
-    linear-gradient(135deg,rgba(139,92,246,.07),rgba(236,72,153,.025)),
-    var(--panel);
+    radial-gradient(circle at 100% 0%,rgba(155,92,255,.1),transparent 40%),
+    rgba(155,92,255,.035);
 }
 
-.role-panel-head{
-  padding:17px;
-  border-bottom:1px solid var(--line);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
+.role-card-name{
+  font-family:Orbitron,sans-serif;
+  font-size:14px;
+  font-weight:800;
 }
 
-.role-panel-body{
-  padding:17px;
+.role-card-description{
+  margin-top:6px;
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.6;
 }
 
 .permission-list{
+  margin:12px 0 0;
+  padding:0;
+  list-style:none;
   display:grid;
-  grid-template-columns:repeat(2,1fr);
+  gap:5px;
+}
+
+.permission-list li{
+  color:#aeb6c7;
+  font-size:8px;
+}
+
+.permission-list li::before{
+  content:"✓";
+  margin-right:6px;
+  color:var(--green);
+}
+
+/* =========================================================
+   COMMUNITY FALLBACK
+========================================================= */
+
+.community-disabled{
+  padding:18px;
+  border:1px dashed rgba(255,255,255,.12);
+  border-radius:14px;
+  background:rgba(255,255,255,.02);
+}
+
+.community-disabled strong{
+  display:block;
+  font-size:11px;
+}
+
+.community-disabled span{
+  display:block;
+  margin-top:6px;
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.6;
+}
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+.search-bar{
+  display:flex;
+  gap:8px;
+  margin-bottom:12px;
+}
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+.modal-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:500;
+  display:none;
+  place-items:center;
+  padding:20px;
+  background:rgba(0,0,0,.72);
+  backdrop-filter:blur(10px);
+}
+
+.modal-backdrop.show{
+  display:grid;
+}
+
+.modal{
+  width:min(500px,100%);
+  max-height:min(800px,90vh);
+  overflow:auto;
+  border:1px solid var(--line2);
+  border-radius:22px;
+  background:#0c0f17;
+  box-shadow:0 30px 100px rgba(0,0,0,.7);
+}
+
+.modal-header{
+  padding:18px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid var(--line);
+}
+
+.modal-header h2{
+  margin:0;
+  font-family:Orbitron,sans-serif;
+  font-size:14px;
+}
+
+.modal-body{
+  padding:20px;
+}
+
+.auth-tabs{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:5px;
+  margin-bottom:16px;
+  padding:4px;
+  border-radius:12px;
+  background:#080a10;
+}
+
+.auth-tab{
+  padding:10px;
+  border:0;
+  border-radius:9px;
+  background:transparent;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:800;
+}
+
+.auth-tab.active{
+  color:#fff;
+  background:rgba(155,92,255,.13);
+}
+
+.auth-form{
+  display:grid;
+  gap:12px;
+}
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+.toast-stack{
+  position:fixed;
+  right:18px;
+  bottom:18px;
+  z-index:900;
+  display:grid;
+  gap:8px;
+  width:min(360px,calc(100vw - 36px));
+}
+
+.toast{
+  padding:12px 14px;
+  border-radius:13px;
+  border:1px solid var(--line2);
+  background:#111520;
+  box-shadow:var(--shadow);
+  animation:toastIn .25s ease;
+}
+
+.toast-title{
+  font-size:10px;
+  font-weight:800;
+}
+
+.toast-message{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:8px;
+  line-height:1.5;
+}
+
+@keyframes toastIn{
+  from{
+    opacity:0;
+    transform:translateY(10px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.skeleton{
+  position:relative;
+  overflow:hidden;
+  background:#151923;
+}
+
+.skeleton::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  transform:translateX(-100%);
+  background:linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,.05),
+    transparent
+  );
+  animation:skeleton 1.2s infinite;
+}
+
+@keyframes skeleton{
+  100%{
+    transform:translateX(100%);
+  }
+}
+
+.loading-state{
+  padding:30px;
+  text-align:center;
+  color:var(--muted);
+  font-size:10px;
+}
+
+/* =========================================================
+   DEBUG
+========================================================= */
+
+.debug-panel{
+  margin-top:20px;
+}
+
+.debug-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
   gap:8px;
 }
 
-.permission{
+.debug-item{
   padding:10px;
-  border-radius:10px;
-  background:rgba(255,255,255,.035);
-  color:#c8cdd9;
-  font-size:11px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:rgba(255,255,255,.02);
 }
 
-/* EMPTY */
+.debug-label{
+  color:var(--muted2);
+  font-size:7px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  font-weight:800;
+}
+
+.debug-value{
+  margin-top:4px;
+  font-size:9px;
+  font-weight:800;
+}
+
+.debug-value.ok{
+  color:var(--green);
+}
+
+.debug-value.warn{
+  color:var(--yellow);
+}
+
+.debug-value.bad{
+  color:var(--red);
+}
+
+/* =========================================================
+   EMPTY
+========================================================= */
 
 .empty{
-  padding:30px 20px;
+  padding:24px;
   text-align:center;
   color:var(--muted);
-  font-size:12px;
-}
-
-.empty strong{
-  display:block;
-  color:#fff;
-  font-size:14px;
-  margin-bottom:7px;
-}
-
-/* LOADING */
-
-.loading{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  min-height:100px;
-  color:var(--muted);
-  font-size:12px;
-}
-
-.spinner{
-  width:17px;
-  height:17px;
-  margin-right:9px;
-  border:2px solid rgba(255,255,255,.12);
-  border-top-color:var(--purple);
-  border-radius:50%;
-  animation:spin .8s linear infinite;
-}
-
-@keyframes spin{
-  to{transform:rotate(360deg)}
-}
-
-/* TOAST */
-
-#toast{
-  position:fixed;
-  right:20px;
-  bottom:20px;
-  z-index:5000;
-  max-width:380px;
-  padding:13px 16px;
-  border:1px solid var(--line);
+  font-size:9px;
+  border:1px dashed rgba(255,255,255,.09);
   border-radius:13px;
-  background:#10131d;
-  box-shadow:var(--shadow);
-  transform:translateY(120px);
-  opacity:0;
-  transition:.25s;
-  font-size:12px;
 }
 
-#toast.show{
-  transform:translateY(0);
-  opacity:1;
-}
+/* =========================================================
+   RESPONSIVE
+========================================================= */
 
-#toast.success{
-  border-color:rgba(34,197,94,.35);
-}
-
-#toast.error{
-  border-color:rgba(239,68,68,.35);
-}
-
-/* DEBUG */
-
-#debug{
-  position:fixed;
-  left:14px;
-  bottom:14px;
-  z-index:4000;
-  width:min(520px,calc(100% - 28px));
-  max-height:260px;
-  overflow:auto;
-  padding:12px;
-  border:1px solid rgba(239,68,68,.25);
-  border-radius:12px;
-  background:rgba(10,11,17,.97);
-  color:#fca5a5;
-  font:11px/1.5 monospace;
-  display:none;
-}
-
-.debug-on #debug{
-  display:block;
-}
-
-/* FOOTER */
-
-.footer{
-  margin-top:70px;
-  padding:40px 0;
-  border-top:1px solid var(--line);
-  color:var(--muted);
-  font-size:11px;
-}
-
-.footer-grid{
-  display:grid;
-  grid-template-columns:1fr auto;
-  gap:20px;
-}
-
-/* RESPONSIVE */
-
-@media(max-width:1150px){
-  .stats{
-    grid-template-columns:repeat(3,1fr);
-  }
-
-  .hero-grid{
+@media(max-width:1100px){
+  .dashboard{
     grid-template-columns:1fr;
   }
 
-  .grid-4{
-    grid-template-columns:repeat(2,1fr);
+  .right-column{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .main-nav{
+    display:none;
   }
 }
 
-@media(max-width:850px){
-  .nav{
+@media(max-width:800px){
+  .topbar{
+    height:68px;
+  }
+
+  .topbar-inner{
+    padding:0 14px;
+  }
+
+  .brand-sub{
     display:none;
   }
 
-  .header-inner{
-    min-height:66px;
+  .status-pill{
+    display:none;
   }
 
-  .grid,
-  .grid-2{
+  .user-chip-name{
+    display:none;
+  }
+
+  .main{
+    padding:18px 14px 60px;
+  }
+
+  .hero{
+    padding:25px 20px;
+    border-radius:20px;
+  }
+
+  .stats-grid{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .right-column{
     grid-template-columns:1fr;
-  }
-
-  .stats{
-    grid-template-columns:repeat(2,1fr);
   }
 
   .form-grid{
     grid-template-columns:1fr;
   }
 
-  .field.full{
-    grid-column:auto;
-  }
-
-  .permission-list{
-    grid-template-columns:1fr;
-  }
-
-  .footer-grid{
-    grid-template-columns:1fr;
+  .achievement-grid{
+    grid-template-columns:1fr 1fr;
   }
 }
 
 @media(max-width:520px){
-  .container{
-    width:min(100% - 20px,1450px);
+  .brand-title{
+    font-size:13px;
   }
 
-  .hero{
-    padding-top:30px;
+  .brand-mark{
+    width:38px;
+    height:38px;
   }
 
-  .hero-card{
-    padding:23px;
+  .hero h1{
+    font-size:28px;
   }
 
-  .stats{
-    grid-template-columns:1fr 1fr;
-    gap:9px;
-  }
-
-  .stat{
-    padding:14px;
-  }
-
-  .stat-value{
-    font-size:17px;
-  }
-
-  .grid-4{
+  .member-grid{
     grid-template-columns:1fr;
   }
 
-  .member-summary{
-    padding:17px;
+  .content-item{
+    grid-template-columns:65px 1fr;
   }
 
-  .auth-area .btn:first-child{
+  .content-thumb{
+    width:65px;
+    height:45px;
+  }
+
+  .content-item .btn{
     display:none;
+  }
+
+  .debug-grid{
+    grid-template-columns:1fr 1fr;
   }
 }
 </style>
@@ -1012,1108 +1553,1826 @@ button{
 
 <body>
 
-<header class="header">
-  <div class="container header-inner">
+<div class="app">
+
+<!-- =======================================================
+     TOP BAR
+======================================================= -->
+
+<header class="topbar">
+
+  <div class="topbar-inner">
 
     <a href="index.html" class="brand">
-      <div class="logo">🐦‍⬛</div>
-      <div>
-        <div class="brand-title">CROWRULES</div>
-        <div class="brand-sub">Entertainment</div>
+
+      <div class="brand-mark">
+        🐦‍⬛
       </div>
+
+      <div>
+        <div class="brand-title">
+          CROWRULES
+        </div>
+
+        <div class="brand-sub">
+          Member Hub 4.0
+        </div>
+      </div>
+
     </a>
 
-    <nav class="nav">
-      <a href="index.html">Home</a>
-      <a href="crowrules-tv.html">CrowRules TV</a>
-      <a href="shows.html">Shows</a>
-      <a href="member-hub.html" class="active">Member Hub</a>
-      <a href="crowspace.html">CrowSpace</a>
+    <nav class="main-nav">
+
+      <a href="index.html" class="nav-link">
+        Home
+      </a>
+
+      <a href="crowrules-tv.html" class="nav-link">
+        CrowRules TV
+      </a>
+
+      <a href="shows.html" class="nav-link">
+        Shows
+      </a>
+
+      <a href="crowspace.html" class="nav-link">
+        CrowSpace
+      </a>
+
+      <a href="sports.html" class="nav-link">
+        Sports
+      </a>
+
     </nav>
 
-    <div class="auth-area">
-      <a href="login.html" class="btn btn-small" id="loginBtn">Login</a>
-      <button class="btn btn-small btn-primary hidden" id="logoutBtn">Logout</button>
+    <div class="header-actions">
+
+      <div
+        id="connectionStatus"
+        class="status-pill"
+      >
+        <span class="status-dot"></span>
+        <span id="connectionText">
+          Connecting
+        </span>
+      </div>
+
+      <button
+        id="notificationButton"
+        class="icon-btn"
+        title="Notifications"
+      >
+        🔔
+      </button>
+
+      <button
+        id="authButton"
+        class="btn btn-primary btn-small"
+      >
+        Login
+      </button>
+
+      <div
+        id="userChip"
+        class="user-chip hidden"
+      >
+
+        <div
+          id="headerAvatar"
+          class="avatar"
+        >
+          CR
+        </div>
+
+        <div>
+          <div
+            id="headerUserName"
+            class="user-chip-name"
+          >
+            Member
+          </div>
+
+          <div
+            id="headerUserRole"
+            class="user-chip-role"
+          >
+            Member
+          </div>
+        </div>
+
+      </div>
+
     </div>
 
   </div>
+
 </header>
 
 
-<main>
+<!-- =======================================================
+     MAIN
+======================================================= -->
 
-<section class="hero">
-  <div class="container hero-grid">
+<main class="main">
 
-    <div class="hero-card">
-      <div class="kicker">CrowRules Member Network</div>
+  <!-- HERO -->
 
-      <h1>YOUR CROWRULES<br>COMMAND CENTER.</h1>
+  <section class="hero">
 
-      <p>
-        Watch. Listen. Participate. Earn CrowPoints.
-        Track your progress, discover programming, connect with the
-        CrowRules community and see where you stand on the leaderboard.
-      </p>
-
-      <div class="hero-actions">
-        <a href="crowrules-tv.html" class="btn btn-primary">▶ Watch CrowRules TV</a>
-        <a href="crowspace.html" class="btn">◎ Open CrowSpace</a>
-        <button class="btn" id="editProfileBtn">✎ Edit Profile</button>
-      </div>
+    <div class="hero-kicker">
+      CROWRULES ENTERTAINMENT
     </div>
 
-
-    <div class="member-summary">
-
-      <div class="avatar" id="heroAvatar">CR</div>
-
-      <div>
-        <div class="member-name" id="heroName">Guest Member</div>
-        <div id="heroRole"></div>
-        <div class="member-email" id="heroEmail">
-          Sign in to access your member dashboard.
-        </div>
-
-        <div class="meta">
-          <span class="pill purple" id="memberTier">FREE</span>
-          <span class="pill" id="memberStatus">Guest</span>
-        </div>
-      </div>
-
-    </div>
-
-  </div>
-</section>
-
-
-<section>
-  <div class="container">
-
-    <div class="stats">
-
-      <div class="stat">
-        <div class="stat-label">Lifetime CrowPoints</div>
-        <div class="stat-value purple" id="lifetimePoints">0</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-label">Monthly Points</div>
-        <div class="stat-value pink" id="monthlyPoints">0</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-label">Watch Time</div>
-        <div class="stat-value cyan" id="watchTime">0h</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-label">Listen Time</div>
-        <div class="stat-value green" id="listenTime">0h</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-label">Watch Sessions</div>
-        <div class="stat-value yellow" id="sessionCount">0</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-label">Rank</div>
-        <div class="stat-value purple" id="memberRank">—</div>
-      </div>
-
-    </div>
-
-  </div>
-</section>
-
-
-<!-- PROFILE -->
-
-<section class="section">
-  <div class="container">
-
-    <div class="section-head">
-      <div>
-        <div class="section-title">Member Profile</div>
-        <div class="section-sub">
-          Your CrowRules identity and membership information.
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-
-      <div class="card-body">
-
-        <div class="form-grid">
-
-          <div class="field">
-            <label>Display Name</label>
-            <input id="profileDisplayName" placeholder="Your display name">
-          </div>
-
-          <div class="field">
-            <label>Username</label>
-            <input id="profileUsername" placeholder="@username">
-          </div>
-
-          <div class="field">
-            <label>Avatar URL</label>
-            <input id="profileAvatar" placeholder="https://...">
-          </div>
-
-          <div class="field">
-            <label>Membership Tier</label>
-            <input id="profileTier" disabled>
-          </div>
-
-          <div class="field full">
-            <label>Bio</label>
-            <textarea id="profileBio" placeholder="Tell the CrowRules community about yourself..."></textarea>
-          </div>
-
-        </div>
-
-        <div style="margin-top:14px">
-          <button class="btn btn-primary" id="saveProfileBtn">
-            Save Profile
-          </button>
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
-</section>
-
-
-<!-- LEADERBOARD + NEW MEMBERS -->
-
-<section class="section">
-  <div class="container">
-
-    <div class="section-head">
-      <div>
-        <div class="section-title">Community Leaderboard</div>
-        <div class="section-sub">
-          CrowPoints rankings powered by <code>cr_public_members</code>.
-        </div>
-      </div>
-    </div>
-
-    <div class="grid grid-2">
-
-      <div class="card">
-
-        <div class="card-body">
-          <div class="card-title">🏆 Top CrowPoints Members</div>
-        </div>
-
-        <div id="leaderboard">
-          <div class="loading">
-            <span class="spinner"></span>
-            Loading leaderboard...
-          </div>
-        </div>
-
-      </div>
-
-
-      <div class="card">
-
-        <div class="card-body">
-          <div class="card-title">🆕 Newest Members</div>
-        </div>
-
-        <div id="newestMembers">
-          <div class="loading">
-            <span class="spinner"></span>
-            Loading members...
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
-</section>
-
-
-<!-- WATCH HISTORY -->
-
-<section class="section">
-  <div class="container">
-
-    <div class="section-head">
-      <div>
-        <div class="section-title">Recently Watched</div>
-        <div class="section-sub">
-          Your recent CrowRules viewing activity.
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-
-      <div id="watchHistory">
-        <div class="loading">
-          <span class="spinner"></span>
-          Loading watch history...
-        </div>
-      </div>
-
-    </div>
-
-  </div>
-</section>
-
-
-<!-- FAVORITES -->
-
-<section class="section">
-  <div class="container">
-
-    <div class="section-head">
-      <div>
-        <div class="section-title">My Favorites</div>
-        <div class="section-sub">
-          Saved shows, episodes and other CrowRules content.
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-
-      <div id="favorites">
-        <div class="loading">
-          <span class="spinner"></span>
-          Loading favorites...
-        </div>
-      </div>
-
-    </div>
-
-  </div>
-</section>
-
-
-<!-- CROWPOINT ACTIVITY -->
-
-<section class="section">
-  <div class="container">
-
-    <div class="section-head">
-      <div>
-        <div class="section-title">CrowPoints Activity</div>
-        <div class="section-sub">
-          Points earned from watch and engagement activity.
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-
-      <div id="pointsActivity">
-        <div class="loading">
-          <span class="spinner"></span>
-          Loading points...
-        </div>
-      </div>
-
-    </div>
-
-  </div>
-</section>
-
-
-<!-- NOTIFICATIONS -->
-
-<section class="section">
-  <div class="container">
-
-    <div class="section-head">
-      <div>
-        <div class="section-title">Notifications</div>
-        <div class="section-sub">
-          Your CrowRules member notifications.
-        </div>
-      </div>
-
-      <button class="btn btn-small" id="markNotificationsRead">
-        Mark All Read
-      </button>
-    </div>
-
-    <div class="card">
-
-      <div id="notifications">
-        <div class="loading">
-          <span class="spinner"></span>
-          Loading notifications...
-        </div>
-      </div>
-
-    </div>
-
-  </div>
-</section>
-
-
-<!-- CROWSPACE -->
-
-<section class="section">
-  <div class="container">
-
-    <div class="section-head">
-      <div>
-        <div class="section-title">CrowSpace</div>
-        <div class="section-sub">
-          Your social network connection to the CrowRules community.
-        </div>
-      </div>
-
-      <a href="crowspace.html" class="btn btn-small btn-primary">
-        Open CrowSpace
+    <h1>
+      Welcome to your
+      <span>Member Hub.</span>
+    </h1>
+
+    <p>
+      Your personal CrowRules command center for watching,
+      listening, earning CrowPoints, tracking your progress,
+      connecting with the community, and discovering what's next.
+    </p>
+
+    <div class="hero-actions">
+
+      <a
+        href="crowrules-tv.html"
+        class="btn btn-primary"
+      >
+        ▶ Watch CrowRules TV
       </a>
-    </div>
 
-    <div class="grid grid-3">
+      <a
+        href="shows.html"
+        class="btn"
+      >
+        Browse Shows
+      </a>
 
-      <div class="card">
-        <div class="card-body">
-          <div class="card-title">👤 Social Profile</div>
-          <div class="card-text">
-            Your CrowSpace profile, bio and public identity.
-          </div>
-          <div style="margin-top:13px">
-            <a href="crowspace-profile.html" class="btn btn-small">
-              View Profile
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-body">
-          <div class="card-title">👥 Groups</div>
-          <div class="card-text">
-            Discover CrowSpace groups and communities.
-          </div>
-          <div style="margin-top:13px">
-            <a href="crowspace-groups.html" class="btn btn-small">
-              Browse Groups
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-body">
-          <div class="card-title">🤝 Friends</div>
-          <div class="card-text">
-            Manage your CrowSpace friendships and requests.
-          </div>
-          <div style="margin-top:13px">
-            <a href="crowspace.html" class="btn btn-small">
-              Manage Friends
-            </a>
-          </div>
-        </div>
-      </div>
+      <button
+        id="openAuthHero"
+        class="btn btn-cyan"
+      >
+        Login / Sign Up
+      </button>
 
     </div>
 
-  </div>
-</section>
+  </section>
 
 
-<!-- CHAT -->
+  <!-- AUTH WALL -->
 
-<section class="section">
-  <div class="container">
+  <section
+    id="authWall"
+    class="auth-wall"
+  >
 
-    <div class="section-head">
-      <div>
-        <div class="section-title">Community Chat</div>
-        <div class="section-sub">
-          Live CrowRules community conversation.
-        </div>
-      </div>
+    <div class="auth-icon">
+      🔐
     </div>
 
-    <div class="card chat">
+    <h2>
+      Your Member Hub starts here.
+    </h2>
 
-      <div class="chat-messages" id="chatMessages">
+    <p>
+      Sign in or create your CrowRules account to access
+      your profile, CrowPoints, watch history, leaderboard
+      position, notifications, favorites, and community features.
+    </p>
 
-        <div class="empty">
-          <strong>CrowRules Community Chat</strong>
-          Chat infrastructure is ready to connect to a dedicated
-          community chat table when enabled.
+    <button
+      id="openAuthWall"
+      class="btn btn-primary"
+    >
+      Login / Create Account
+    </button>
+
+  </section>
+
+
+  <!-- DASHBOARD -->
+
+  <section
+    id="dashboard"
+    class="dashboard hidden"
+  >
+
+    <!-- ===================================================
+         LEFT
+    ==================================================== -->
+
+    <div class="left-column">
+
+
+      <!-- PROFILE -->
+
+      <section class="panel profile-card">
+
+        <div class="profile-cover"></div>
+
+        <div class="profile-main">
+
+          <div
+            id="profileAvatar"
+            class="profile-avatar"
+          >
+            CR
+          </div>
+
+          <div class="profile-name-row">
+
+            <div
+              id="profileName"
+              class="profile-name"
+            >
+              CrowRules Member
+            </div>
+
+            <div
+              id="profileRoleBadge"
+              class="role-badge"
+            >
+              MEMBER
+            </div>
+
+          </div>
+
+          <div
+            id="profileUsername"
+            class="profile-username"
+          >
+            @member
+          </div>
+
+          <div
+            id="profileBio"
+            class="profile-bio"
+          >
+            Welcome to CrowRules Entertainment.
+          </div>
+
+          <div class="profile-meta">
+
+            <div
+              id="profileJoined"
+              class="meta-chip"
+            >
+              Joined ——
+            </div>
+
+            <div
+              id="profileTier"
+              class="meta-chip"
+            >
+              Free Member
+            </div>
+
+            <div
+              id="profileStatus"
+              class="meta-chip"
+            >
+              Active
+            </div>
+
+          </div>
+
         </div>
 
-      </div>
+      </section>
 
-      <div class="chat-composer">
 
-        <input
-          id="chatInput"
-          placeholder="Chat infrastructure awaiting community chat table..."
-          disabled
+      <!-- STATS -->
+
+      <section class="panel">
+
+        <div class="panel-header">
+
+          <div class="panel-title">
+
+            <div class="panel-title-icon">
+              📊
+            </div>
+
+            <div>
+              <h2>
+                Your CrowRules Stats
+              </h2>
+
+              <p>
+                Engagement across the network
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="panel-body">
+
+          <div class="stats-grid">
+
+            <div class="stat">
+
+              <div class="stat-label">
+                Lifetime Points
+              </div>
+
+              <div
+                id="lifetimePoints"
+                class="stat-value"
+              >
+                0
+              </div>
+
+              <div class="stat-sub">
+                CrowPoints
+              </div>
+
+            </div>
+
+            <div class="stat">
+
+              <div class="stat-label">
+                Monthly Points
+              </div>
+
+              <div
+                id="monthlyPoints"
+                class="stat-value"
+              >
+                0
+              </div>
+
+              <div class="stat-sub">
+                Current month
+              </div>
+
+            </div>
+
+            <div class="stat">
+
+              <div class="stat-label">
+                Watch Time
+              </div>
+
+              <div
+                id="watchTime"
+                class="stat-value"
+              >
+                0h
+              </div>
+
+              <div class="stat-sub">
+                Video
+              </div>
+
+            </div>
+
+            <div class="stat">
+
+              <div class="stat-label">
+                Listen Time
+              </div>
+
+              <div
+                id="listenTime"
+                class="stat-value"
+              >
+                0h
+              </div>
+
+              <div class="stat-sub">
+                Audio
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="progress-wrap">
+
+            <div class="progress-label">
+
+              <span>
+                Monthly competition progress
+              </span>
+
+              <span id="monthlyProgressText">
+                0 pts
+              </span>
+
+            </div>
+
+            <div class="progress">
+
+              <div
+                id="monthlyProgressBar"
+                class="progress-bar"
+              ></div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- CONTINUE WATCHING -->
+
+      <section class="panel">
+
+        <div class="panel-header">
+
+          <div class="panel-title">
+
+            <div class="panel-title-icon">
+              ▶
+            </div>
+
+            <div>
+
+              <h2>
+                Continue Watching
+              </h2>
+
+              <p>
+                Pick up where you left off
+              </p>
+
+            </div>
+
+          </div>
+
+          <a
+            href="crowrules-tv.html"
+            class="btn btn-small"
+          >
+            Browse TV
+          </a>
+
+        </div>
+
+        <div
+          id="continueWatching"
+          class="panel-body"
         >
 
-        <button class="btn btn-primary" disabled>
-          Send
+          <div class="loading-state">
+            Loading your watch history…
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- RECENTLY WATCHED -->
+
+      <section class="panel">
+
+        <div class="panel-header">
+
+          <div class="panel-title">
+
+            <div class="panel-title-icon">
+              🕘
+            </div>
+
+            <div>
+
+              <h2>
+                Recently Watched
+              </h2>
+
+              <p>
+                Your latest CrowRules activity
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div
+          id="recentlyWatched"
+          class="panel-body"
+        >
+
+          <div class="loading-state">
+            Loading history…
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- MY LIST -->
+
+      <section class="panel">
+
+        <div class="panel-header">
+
+          <div class="panel-title">
+
+            <div class="panel-title-icon">
+              ★
+            </div>
+
+            <div>
+
+              <h2>
+                My List
+              </h2>
+
+              <p>
+                Saved CrowRules content
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div
+          id="myList"
+          class="panel-body"
+        >
+
+          <div class="empty">
+            Your list is empty. Save shows and episodes from
+            CrowRules pages to build your personal watchlist.
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- SUGGESTIONS -->
+
+      <section class="panel">
+
+        <div class="panel-header">
+
+          <div class="panel-title">
+
+            <div class="panel-title-icon">
+              💡
+            </div>
+
+            <div>
+
+              <h2>
+                Suggestions & Advice
+              </h2>
+
+              <p>
+                Help shape the future of CrowRules
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="panel-body">
+
+          <form
+            id="suggestionForm"
+          >
+
+            <div class="form-grid">
+
+              <div class="field">
+
+                <label>
+                  Suggestion Title
+                </label>
+
+                <input
+                  id="suggestionTitle"
+                  maxlength="120"
+                  placeholder="What should CrowRules add?"
+                  required
+                >
+
+              </div>
+
+              <div class="field">
+
+                <label>
+                  Category
+                </label>
+
+                <select id="suggestionCategory">
+
+                  <option value="show">
+                    Show
+                  </option>
+
+                  <option value="website">
+                    Website
+                  </option>
+
+                  <option value="community">
+                    Community
+                  </option>
+
+                  <option value="feature">
+                    Feature
+                  </option>
+
+                  <option value="business">
+                    Business
+                  </option>
+
+                  <option value="other">
+                    Other
+                  </option>
+
+                </select>
+
+              </div>
+
+            </div>
+
+            <div
+              class="field"
+              style="margin-top:12px"
+            >
+
+              <label>
+                Your Idea
+              </label>
+
+              <textarea
+                id="suggestionBody"
+                maxlength="2000"
+                placeholder="Tell CrowRules what you would like to see..."
+                required
+              ></textarea>
+
+            </div>
+
+            <div class="form-actions">
+
+              <button
+                type="submit"
+                class="btn btn-primary"
+              >
+                Submit Suggestion
+              </button>
+
+            </div>
+
+          </form>
+
+          <div
+            id="suggestionList"
+            class="suggestion-list"
+            style="margin-top:18px"
+          >
+
+            <div class="empty">
+              Loading community suggestions…
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+
+    <!-- ===================================================
+         RIGHT
+    ==================================================== -->
+
+    <div class="right-column">
+
+
+      <!-- LEADERBOARD -->
+
+      <section class="panel">
+
+        <div class="panel-header">
+
+          <div class="panel-title">
+
+            <div class="panel-title-icon">
+              🏆
+            </div>
+
+            <div>
+
+              <h2>
+                CrowPoints Leaderboard
+              </h2>
+
+              <p>
+                Top members
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div
+          id="leaderboard"
+          class="panel-body"
+        >
+
+          <div class="loading-state">
+            Loading leaderboard…
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- NEW MEMBERS -->
+
+      <section class="panel">
+
+        <div class="panel-header">
+
+          <div class="panel-title">
+
+            <div class="panel-title-icon">
+              ✨
+            </div>
+
+            <div>
+
+              <h2>
+                Newest Members
+              </h2>
+
+              <p>
+                Welcome to the flock
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div
+          id="newestMembers"
+          class="panel-body"
+        >
+
+          <div class="loading-state">
+            Loading members…
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ROLE -->
+
+      <section class="panel">
+
+        <div class="panel-header">
+
+          <div class="panel-title">
+
+            <div class="panel-title-icon">
+              🛡️
+            </div>
+
+            <div>
+
+              <h2>
+                Your CrowRules Role
+              </h2>
+
+              <p>
+                Account permissions
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="panel-body">
+
+          <div
+            id="roleCard"
+            class="role-card"
+          >
+
+            <div
+              id="roleCardName"
+              class="role-card-name"
+            >
+              Member
+            </div>
+
+            <div
+              id="roleCardDescription"
+              class="role-card-description"
+            >
+              Standard CrowRules member.
+            </div>
+
+            <ul
+              id="permissionList"
+              class="permission-list"
+            ></ul>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- NOTIFICATIONS -->
+
+      <section class="panel">
+
+        <div class="panel-header">
+
+          <div class="panel-title">
+
+            <div class="panel-title-icon">
+              🔔
+            </div>
+
+            <div>
+
+              <h2>
+                Notifications
+              </h2>
+
+              <p>
+                Your latest updates
+              </p>
+
+            </div>
+
+          </div>
+
+          <button
+            id="markNotificationsRead"
+            class="btn btn-small"
+          >
+            Mark Read
+          </button>
+
+        </div>
+
+        <div
+          id="notifications"
+          class="panel-body"
+        >
+
+          <div class="empty">
+            No notifications.
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ACHIEVEMENTS -->
+
+      <section class="panel">
+
+        <div class="panel-header">
+
+          <div class="panel-title">
+
+            <div class="panel-title-icon">
+              🎖️
+            </div>
+
+            <div>
+
+              <h2>
+                Achievements
+              </h2>
+
+              <p>
+                Your CrowRules milestones
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div
+          id="achievements"
+          class="panel-body"
+        >
+
+          <div class="achievement-grid">
+
+            <div class="achievement">
+
+              <div class="achievement-icon">
+                🐦‍⬛
+              </div>
+
+              <div class="achievement-name">
+                First Flight
+              </div>
+
+              <div class="achievement-desc">
+                Join the CrowRules flock.
+              </div>
+
+            </div>
+
+            <div class="achievement">
+
+              <div class="achievement-icon">
+                📺
+              </div>
+
+              <div class="achievement-name">
+                First Watch
+              </div>
+
+              <div class="achievement-desc">
+                Watch your first CrowRules program.
+              </div>
+
+            </div>
+
+            <div class="achievement">
+
+              <div class="achievement-icon">
+                ⭐
+              </div>
+
+              <div class="achievement-name">
+                Point Hunter
+              </div>
+
+              <div class="achievement-desc">
+                Start earning CrowPoints.
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- COMMUNITY CHAT -->
+
+      <section class="panel">
+
+        <div class="panel-header">
+
+          <div class="panel-title">
+
+            <div class="panel-title-icon">
+              💬
+            </div>
+
+            <div>
+
+              <h2>
+                Member Chat Room
+              </h2>
+
+              <p>
+                Talk with the flock
+              </p>
+
+            </div>
+
+          </div>
+
+          <div
+            id="chatStatus"
+            class="chat-status"
+          >
+            Checking…
+          </div>
+
+        </div>
+
+        <div
+          id="chatContainer"
+        >
+
+          <div
+            id="chatMessages"
+            class="chat-box"
+          >
+
+            <div class="empty">
+              Loading chat…
+            </div>
+
+          </div>
+
+          <form
+            id="chatForm"
+            class="chat-compose"
+          >
+
+            <input
+              id="chatInput"
+              maxlength="500"
+              placeholder="Write a message…"
+              autocomplete="off"
+            >
+
+            <button
+              class="btn btn-primary btn-small"
+              type="submit"
+            >
+              Send
+            </button>
+
+          </form>
+
+        </div>
+
+      </section>
+
+
+      <!-- MEMBER SEARCH -->
+
+      <section class="panel">
+
+        <div class="panel-header">
+
+          <div class="panel-title">
+
+            <div class="panel-title-icon">
+              🔎
+            </div>
+
+            <div>
+
+              <h2>
+                Find Members
+              </h2>
+
+              <p>
+                Discover the CrowRules community
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="panel-body">
+
+          <div class="search-bar">
+
+            <input
+              id="memberSearch"
+              placeholder="Search username or display name…"
+            >
+
+          </div>
+
+          <div
+            id="memberSearchResults"
+          >
+
+            <div class="empty">
+              Search the member directory.
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- STAFF PANEL -->
+
+      <section
+        id="staffPanel"
+        class="panel hidden"
+      >
+
+        <div class="panel-header">
+
+          <div class="panel-title">
+
+            <div class="panel-title-icon">
+              ⚙️
+            </div>
+
+            <div>
+
+              <h2>
+                Staff Command
+              </h2>
+
+              <p>
+                Role-controlled tools
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="panel-body">
+
+          <div class="role-card">
+
+            <div class="role-card-name">
+              Staff Access Enabled
+            </div>
+
+            <div class="role-card-description">
+              Your account has elevated CrowRules permissions.
+              Administrative enforcement still occurs through
+              Supabase security policies.
+            </div>
+
+            <div
+              class="hero-actions"
+              style="margin-top:13px"
+            >
+
+              <a
+                href="admin.html"
+                class="btn btn-primary"
+              >
+                Open Admin Dashboard
+              </a>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+  </section>
+
+
+  <!-- DEBUG / SYSTEM STATUS -->
+
+  <section
+    id="debugPanel"
+    class="panel debug-panel"
+  >
+
+    <div class="panel-header">
+
+      <div class="panel-title">
+
+        <div class="panel-title-icon">
+          ⚡
+        </div>
+
+        <div>
+
+          <h2>
+            Member Hub System Status
+          </h2>
+
+          <p>
+            Connection and module diagnostics
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="panel-body">
+
+      <div class="debug-grid">
+
+        <div class="debug-item">
+
+          <div class="debug-label">
+            Supabase
+          </div>
+
+          <div
+            id="debugSupabase"
+            class="debug-value warn"
+          >
+            Connecting
+          </div>
+
+        </div>
+
+        <div class="debug-item">
+
+          <div class="debug-label">
+            Authentication
+          </div>
+
+          <div
+            id="debugAuth"
+            class="debug-value warn"
+          >
+            Checking
+          </div>
+
+        </div>
+
+        <div class="debug-item">
+
+          <div class="debug-label">
+            Member Data
+          </div>
+
+          <div
+            id="debugMember"
+            class="debug-value warn"
+          >
+            Waiting
+          </div>
+
+        </div>
+
+        <div class="debug-item">
+
+          <div class="debug-label">
+            Chat
+          </div>
+
+          <div
+            id="debugChat"
+            class="debug-value warn"
+          >
+            Checking
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</main>
+
+</div>
+
+
+<!-- =======================================================
+     AUTH MODAL
+======================================================= -->
+
+<div
+  id="authModal"
+  class="modal-backdrop"
+>
+
+  <div class="modal">
+
+    <div class="modal-header">
+
+      <h2>
+        CrowRules Account
+      </h2>
+
+      <button
+        id="closeAuth"
+        class="icon-btn"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <div class="modal-body">
+
+      <div class="auth-tabs">
+
+        <button
+          id="loginTab"
+          class="auth-tab active"
+        >
+          Login
+        </button>
+
+        <button
+          id="signupTab"
+          class="auth-tab"
+        >
+          Create Account
         </button>
 
       </div>
 
-    </div>
 
-  </div>
-</section>
+      <!-- LOGIN -->
 
+      <form
+        id="loginForm"
+        class="auth-form"
+      >
 
-<!-- SUGGESTIONS -->
+        <div class="field">
 
-<section class="section">
-  <div class="container">
+          <label>
+            Email
+          </label>
 
-    <div class="section-head">
-      <div>
-        <div class="section-title">Suggestions & Advice</div>
-        <div class="section-sub">
-          Help shape the future of CrowRules Entertainment.
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-
-      <div class="card-body">
-
-        <div class="form-grid">
-
-          <div class="field">
-            <label>Suggestion Category</label>
-
-            <select id="suggestionCategory">
-              <option>Show Idea</option>
-              <option>CrowRules TV</option>
-              <option>CrowSpace</option>
-              <option>Website</option>
-              <option>Community</option>
-              <option>Events</option>
-              <option>Other</option>
-            </select>
-
-          </div>
-
-          <div class="field">
-            <label>Title</label>
-            <input id="suggestionTitle" placeholder="Your idea...">
-          </div>
-
-          <div class="field full">
-            <label>Suggestion</label>
-            <textarea id="suggestionBody" placeholder="Tell us what you think CrowRules should build next..."></textarea>
-          </div>
+          <input
+            id="loginEmail"
+            type="email"
+            autocomplete="email"
+            required
+          >
 
         </div>
 
-        <div style="margin-top:14px">
-          <button class="btn btn-primary" id="submitSuggestion">
-            Submit Suggestion
-          </button>
+        <div class="field">
+
+          <label>
+            Password
+          </label>
+
+          <input
+            id="loginPassword"
+            type="password"
+            autocomplete="current-password"
+            required
+          >
+
         </div>
 
-        <div class="card-text" style="margin-top:12px">
-          Suggestions currently use the existing <code>cr_topics</code>
-          table. A dedicated suggestion/voting system can be added later
-          without breaking this page.
+        <button
+          type="submit"
+          class="btn btn-primary"
+        >
+          Login
+        </button>
+
+      </form>
+
+
+      <!-- SIGNUP -->
+
+      <form
+        id="signupForm"
+        class="auth-form hidden"
+      >
+
+        <div class="field">
+
+          <label>
+            Email
+          </label>
+
+          <input
+            id="signupEmail"
+            type="email"
+            autocomplete="email"
+            required
+          >
+
         </div>
 
-      </div>
+        <div class="field">
 
-    </div>
+          <label>
+            Password
+          </label>
 
-  </div>
-</section>
+          <input
+            id="signupPassword"
+            type="password"
+            minlength="6"
+            autocomplete="new-password"
+            required
+          >
 
-
-<!-- PROGRAMMING -->
-
-<section class="section">
-  <div class="container">
-
-    <div class="section-head">
-      <div>
-        <div class="section-title">CrowRules Programming</div>
-        <div class="section-sub">
-          Live and on-demand programming pulled directly from Supabase.
         </div>
-      </div>
-    </div>
 
-    <div class="grid grid-4" id="programming">
+        <div class="field">
 
-      <div class="loading">
-        <span class="spinner"></span>
-        Loading programming...
-      </div>
+          <label>
+            Display Name
+          </label>
 
-    </div>
+          <input
+            id="signupDisplayName"
+            maxlength="80"
+            required
+          >
 
-  </div>
-</section>
-
-
-<!-- ANNOUNCEMENTS -->
-
-<section class="section">
-  <div class="container">
-
-    <div class="section-head">
-      <div>
-        <div class="section-title">Announcements</div>
-        <div class="section-sub">
-          Current CrowRules updates and announcements.
         </div>
-      </div>
-    </div>
 
-    <div id="announcements" class="grid">
+        <div class="field">
 
-      <div class="loading">
-        <span class="spinner"></span>
-        Loading announcements...
-      </div>
+          <label>
+            Username
+          </label>
 
-    </div>
+          <input
+            id="signupUsername"
+            maxlength="40"
+            pattern="[A-Za-z0-9_]+"
+            placeholder="crowmember"
+            required
+          >
 
-  </div>
-</section>
-
-
-<!-- NEWS -->
-
-<section class="section">
-  <div class="container">
-
-    <div class="section-head">
-      <div>
-        <div class="section-title">CrowRules News</div>
-        <div class="section-sub">
-          Latest published news from the CrowRules network.
         </div>
-      </div>
-    </div>
 
-    <div id="news" class="grid">
+        <button
+          type="submit"
+          class="btn btn-primary"
+        >
+          Create CrowRules Account
+        </button>
 
-      <div class="loading">
-        <span class="spinner"></span>
-        Loading news...
-      </div>
+      </form>
+
+
+      <div
+        id="authMessage"
+        style="
+          margin-top:12px;
+          color:var(--muted);
+          font-size:9px;
+          line-height:1.6;
+        "
+      ></div>
 
     </div>
 
   </div>
-</section>
 
+</div>
 
-<!-- EVENTS -->
 
-<section class="section">
-  <div class="container">
+<!-- =======================================================
+     TOASTS
+======================================================= -->
 
-    <div class="section-head">
-      <div>
-        <div class="section-title">Community Events</div>
-        <div class="section-sub">
-          Upcoming CrowRules events.
-        </div>
-      </div>
-    </div>
-
-    <div id="events" class="grid">
-
-      <div class="loading">
-        <span class="spinner"></span>
-        Loading events...
-      </div>
-
-    </div>
-
-  </div>
-</section>
-
-
-<!-- ROLE CENTER -->
-
-<section class="section">
-  <div class="container">
-
-    <div class="section-head">
-      <div>
-        <div class="section-title">Member Role Center</div>
-        <div class="section-sub">
-          Your CrowRules permissions and role information.
-        </div>
-      </div>
-    </div>
-
-
-    <div class="card role-panel">
-
-      <div class="role-panel-head">
-
-        <div>
-          <div class="card-title">Current Role</div>
-          <div class="card-text">
-            Your role is controlled through the CrowRules role system.
-          </div>
-        </div>
-
-        <div id="roleCenterBadge"></div>
-
-      </div>
-
-
-      <div class="role-panel-body">
-
-        <div id="roleDescription" class="card-text">
-          Loading role...
-        </div>
-
-        <div style="margin-top:15px">
-
-          <div class="card-title" style="margin-bottom:10px">
-            Permissions
-          </div>
-
-          <div class="permission-list" id="permissions">
-            <div class="permission">Loading permissions...</div>
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
-</section>
-
-
-<!-- MODERATOR -->
-
-<section class="section role-restricted hidden" data-min-role="moderator">
-  <div class="container">
-
-    <div class="card role-panel">
-
-      <div class="role-panel-head">
-        <div>
-          <div class="card-title">🛡 Moderator Center</div>
-          <div class="card-text">
-            Tools available to CrowRules moderators.
-          </div>
-        </div>
-        <span class="pill green">MODERATOR</span>
-      </div>
-
-      <div class="role-panel-body">
-
-        <div class="grid">
-
-          <div class="card">
-            <div class="card-body">
-              <div class="card-title">Community Moderation</div>
-              <div class="card-text">
-                Review community activity and moderation queues.
-              </div>
-              <a href="admin.html" class="btn btn-small" style="margin-top:12px">
-                Open Tools
-              </a>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-body">
-              <div class="card-title">Topics</div>
-              <div class="card-text">
-                Review member-submitted CrowRules topics.
-              </div>
-              <a href="admin.html" class="btn btn-small" style="margin-top:12px">
-                Review Topics
-              </a>
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
-</section>
-
-
-<!-- STAFF -->
-
-<section class="section role-restricted hidden" data-min-role="staff">
-  <div class="container">
-
-    <div class="card role-panel">
-
-      <div class="role-panel-head">
-        <div>
-          <div class="card-title">🎬 Staff Center</div>
-          <div class="card-text">
-            CrowRules staff and production tools.
-          </div>
-        </div>
-        <span class="pill purple">STAFF</span>
-      </div>
-
-      <div class="role-panel-body">
-
-        <div class="grid grid-4">
-
-          <a href="admin.html" class="card">
-            <div class="card-body">
-              <div class="card-title">Admin Dashboard</div>
-              <div class="card-text">Manage CrowRules systems.</div>
-            </div>
-          </a>
-
-          <a href="shows.html" class="card">
-            <div class="card-body">
-              <div class="card-title">Shows</div>
-              <div class="card-text">Manage productions.</div>
-            </div>
-          </a>
-
-          <a href="crowrules-tv.html" class="card">
-            <div class="card-body">
-              <div class="card-title">CrowRules TV</div>
-              <div class="card-text">Programming and channels.</div>
-            </div>
-          </a>
-
-          <a href="admin.html" class="card">
-            <div class="card-body">
-              <div class="card-title">Content</div>
-              <div class="card-text">Manage media and episodes.</div>
-            </div>
-          </a>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
-</section>
-
-
-<!-- ADMIN -->
-
-<section class="section role-restricted hidden" data-min-role="admin">
-  <div class="container">
-
-    <div class="card role-panel">
-
-      <div class="role-panel-head">
-        <div>
-          <div class="card-title">⚙ Admin Center</div>
-          <div class="card-text">
-            Administrative tools for CrowRules.
-          </div>
-        </div>
-        <span class="pill pink">ADMIN</span>
-      </div>
-
-      <div class="role-panel-body">
-
-        <div class="grid grid-4">
-
-          <a href="admin.html" class="card">
-            <div class="card-body">
-              <div class="card-title">Members</div>
-              <div class="card-text">Member administration.</div>
-            </div>
-          </a>
-
-          <a href="admin.html" class="card">
-            <div class="card-body">
-              <div class="card-title">Roles</div>
-              <div class="card-text">Role and permission management.</div>
-            </div>
-          </a>
-
-          <a href="admin.html" class="card">
-            <div class="card-body">
-              <div class="card-title">Analytics</div>
-              <div class="card-text">CrowRules engagement data.</div>
-            </div>
-          </a>
-
-          <a href="admin.html" class="card">
-            <div class="card-body">
-              <div class="card-title">Audit Log</div>
-              <div class="card-text">Administrative activity.</div>
-            </div>
-          </a>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
-</section>
-
-
-<!-- OWNER -->
-
-<section class="section role-restricted hidden" data-min-role="owner">
-  <div class="container">
-
-    <div class="card role-panel">
-
-      <div class="role-panel-head">
-        <div>
-          <div class="card-title">👑 Owner Command Center</div>
-          <div class="card-text">
-            Full CrowRules system access.
-          </div>
-        </div>
-        <span class="pill purple">OWNER</span>
-      </div>
-
-      <div class="role-panel-body">
-
-        <div class="grid">
-
-          <div class="card">
-            <div class="card-body">
-              <div class="card-title">Platform Control</div>
-              <div class="card-text">
-                Full control of CrowRules Entertainment systems,
-                programming, members and business operations.
-              </div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-body">
-              <div class="card-title">Database</div>
-              <div class="card-text">
-                Supabase administration, policies, roles and data.
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
-</section>
-
-
-<!-- SUPABASE SYSTEM STATUS -->
-
-<section class="section">
-  <div class="container">
-
-    <div class="section-head">
-      <div>
-        <div class="section-title">CrowRules System Status</div>
-        <div class="section-sub">
-          Live frontend connection diagnostics.
-        </div>
-      </div>
-    </div>
-
-    <div class="grid grid-4" id="systemStatus">
-
-      <div class="card">
-        <div class="card-body">
-          <div class="card-title">Supabase</div>
-          <div class="meta">
-            <span class="pill yellow" id="supabaseStatus">
-              Checking...
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-body">
-          <div class="card-title">Authentication</div>
-          <div class="meta">
-            <span class="pill yellow" id="authStatus">
-              Checking...
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-body">
-          <div class="card-title">Member Database</div>
-          <div class="meta">
-            <span class="pill yellow" id="memberDbStatus">
-              Checking...
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-body">
-          <div class="card-title">Realtime</div>
-          <div class="meta">
-            <span class="pill cyan" id="realtimeStatus">
-              Ready
-            </span>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-  </div>
-</section>
-
-</main>
-
-
-<footer class="footer">
-  <div class="container footer-grid">
-
-    <div>
-      <strong style="color:#fff;font-family:Orbitron">
-        CROWRULES ENTERTAINMENT
-      </strong>
-      <div style="margin-top:7px">
-        Independent entertainment. Original programming. Community.
-      </div>
-    </div>
-
-    <div>
-      © <span id="year"></span> CrowRules Entertainment
-    </div>
-
-  </div>
-</footer>
-
-
-<div id="toast"></div>
-<div id="debug"></div>
+<div
+  id="toastStack"
+  class="toast-stack"
+></div>
 
 
 <script>
-/* ============================================================
-   CROWRULES MEMBER HUB
-   SUPABASE INTEGRATED ENGINE
-   ============================================================ */
+/* =========================================================
+   CROWRULES MEMBER HUB 4.0
+   =========================================================
+
+   Supabase project:
+   https://zauxdqyssratvzmomozf.supabase.co
+
+   This frontend intentionally uses only the publishable key.
+
+   IMPORTANT:
+   Frontend role visibility is UX only.
+   Supabase RLS / database policies remain the real security
+   boundary.
+========================================================= */
+
+
+/* =========================================================
+   CONFIG
+========================================================= */
 
 const SUPABASE_URL =
-  'https://zauxdqyssratvzmomozf.supabase.co';
+  "https://zauxdqyssratvzmomozf.supabase.co";
 
 const SUPABASE_KEY =
-  'sb_publishable_-m6NuVfbrcs84OH7aGPrDw_AuLfXo8J';
+  "sb_publishable_-m6NuVfbrcs84OH7aGPrDw_AuLfXo8J";
+
+const supabase =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 
 
-const { createClient } =
-  window.supabase || {};
-
-
-if(!createClient){
-  document.body.innerHTML =
-    '<div style="padding:40px;color:white;font-family:Arial">Supabase client failed to load.</div>';
-  throw new Error('Supabase JS client unavailable');
-}
-
-
-const db = createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY,
-  {
-    auth:{
-      persistSession:true,
-      autoRefreshToken:true,
-      detectSessionInUrl:true
-    }
-  }
-);
-
-
-/* ============================================================
+/* =========================================================
    GLOBAL STATE
-   ============================================================ */
+========================================================= */
 
-const CR = {
+const STATE = {
 
   user:null,
 
+  session:null,
+
   member:null,
 
-  profile:null,
+  publicMember:null,
 
-  role:'member',
+  role:"member",
 
   permissions:[],
 
   leaderboard:[],
 
-  errors:[]
+  newestMembers:[],
+
+  watchHistory:[],
+
+  notifications:[],
+
+  favorites:[],
+
+  achievements:[],
+
+  suggestions:[],
+
+  chat:[],
+
+  chatAvailable:false,
+
+  optionalTables:{
+    chat:false,
+    suggestions:false,
+    suggestionVotes:false,
+    achievements:false
+  },
+
+  realtimeChannel:null,
+
+  loading:false
 
 };
 
 
-/* ============================================================
-   UTILITIES
-   ============================================================ */
+/* =========================================================
+   ROLE ENGINE
+========================================================= */
 
-const $ = id => document.getElementById(id);
+const ROLE_LEVELS = {
+
+  member:1,
+  supporter:2,
+  creator:3,
+  moderator:4,
+  producer:5,
+  staff:6,
+  admin:7,
+  owner:8
+
+};
+
+const ROLE_META = {
+
+  member:{
+    name:"Member",
+    badge:"Member",
+    description:
+      "Standard CrowRules community member.",
+    permissions:[
+      "Watch CrowRules content",
+      "Earn CrowPoints",
+      "Maintain a member profile",
+      "Use community features"
+    ]
+  },
+
+  supporter:{
+    name:"Supporter",
+    badge:"Supporter",
+    description:
+      "A member supporting the continued growth of CrowRules Entertainment.",
+    permissions:[
+      "Everything in Member",
+      "Supporter recognition",
+      "Support CrowRules projects"
+    ]
+  },
+
+  creator:{
+    name:"Creator",
+    badge:"Creator",
+    description:
+      "A CrowRules creator or participating creative contributor.",
+    permissions:[
+      "Everything in Member",
+      "Creator features",
+      "Participate in productions",
+      "Creator profile visibility"
+    ]
+  },
+
+  moderator:{
+    name:"Moderator",
+    badge:"Moderator",
+    description:
+      "Community moderation role.",
+    permissions:[
+      "Everything in Member",
+      "Moderate community areas",
+      "Review community activity",
+      "Assist members"
+    ]
+  },
+
+  producer:{
+    name:"Producer",
+    badge:"Producer",
+    description:
+      "Production-level CrowRules role.",
+    permissions:[
+      "Production tools",
+      "Content coordination",
+      "Creator collaboration",
+      "Production visibility"
+    ]
+  },
+
+  staff:{
+    name:"Staff",
+    badge:"Staff",
+    description:
+      "CrowRules Entertainment staff access.",
+    permissions:[
+      "Staff tools",
+      "Operational tools",
+      "Content management",
+      "Community management"
+    ]
+  },
+
+  admin:{
+    name:"Administrator",
+    badge:"Admin",
+    description:
+      "Administrative CrowRules access.",
+    permissions:[
+      "Administrative tools",
+      "Member management",
+      "Content management",
+      "System administration"
+    ]
+  },
+
+  owner:{
+    name:"Owner",
+    badge:"Owner",
+    description:
+      "Full CrowRules Entertainment ownership role.",
+    permissions:[
+      "Full platform access",
+      "System administration",
+      "Business administration",
+      "Security administration"
+    ]
+  }
+
+};
 
 
-function esc(value){
+function normalizeRole(value){
 
-  return String(value ?? '')
-    .replaceAll('&','&amp;')
-    .replaceAll('<','&lt;')
-    .replaceAll('>','&gt;')
-    .replaceAll('"','&quot;')
-    .replaceAll("'","&#039;");
+  const role =
+    String(value || "member")
+      .trim()
+      .toLowerCase();
+
+  return ROLE_LEVELS[role]
+    ? role
+    : "member";
+
+}
+
+
+function setRole(role){
+
+  STATE.role =
+    normalizeRole(role);
+
+}
+
+
+function getRole(){
+
+  return STATE.role;
+
+}
+
+
+function getLevel(){
+
+  return ROLE_LEVELS[
+    getRole()
+  ] || 1;
+
+}
+
+
+function hasRole(role){
+
+  return getLevel() >=
+    (ROLE_LEVELS[
+      normalizeRole(role)
+    ] || 1);
+
+}
+
+
+function isModerator(){
+
+  return hasRole("moderator");
+
+}
+
+
+function isStaff(){
+
+  return hasRole("staff");
+
+}
+
+
+function isAdmin(){
+
+  return hasRole("admin");
+
+}
+
+
+function isOwner(){
+
+  return hasRole("owner");
+
+}
+
+
+/* =========================================================
+   DOM HELPERS
+========================================================= */
+
+function $(id){
+
+  return document.getElementById(id);
+
+}
+
+
+function escapeHTML(value){
+
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
 
 }
 
 
 function initials(name){
 
-  const s =
-    String(name || 'CR')
-      .trim()
-      .split(/\s+/)
-      .slice(0,2)
-      .map(x => x[0])
-      .join('')
-      .toUpperCase();
+  const clean =
+    String(name || "CR")
+      .trim();
 
-  return s || 'CR';
+  if(!clean) return "CR";
+
+  return clean
+    .split(/\s+/)
+    .slice(0,2)
+    .map(x => x[0])
+    .join("")
+    .toUpperCase();
 
 }
 
@@ -2128,147 +3387,197 @@ function formatNumber(value){
 
 function formatHours(seconds){
 
-  const h =
-    Number(seconds || 0) / 3600;
+  const total =
+    Math.max(0,Number(seconds || 0));
 
-  if(h < 1)
-    return `${Math.round(h * 60)}m`;
+  const hours =
+    Math.floor(total / 3600);
 
-  return `${h.toFixed(1)}h`;
+  const minutes =
+    Math.floor((total % 3600) / 60);
+
+  if(hours > 0){
+
+    return `${hours}h ${minutes}m`;
+
+  }
+
+  if(minutes > 0){
+
+    return `${minutes}m`;
+
+  }
+
+  return `${Math.floor(total)}s`;
 
 }
 
 
 function formatDate(value){
 
-  if(!value) return '—';
+  if(!value) return "—";
 
-  const d = new Date(value);
+  const date =
+    new Date(value);
 
-  if(Number.isNaN(d.getTime()))
-    return '—';
+  if(Number.isNaN(date.getTime())){
 
-  return d.toLocaleDateString(
+    return "—";
+
+  }
+
+  return date.toLocaleDateString(
     undefined,
     {
-      month:'short',
-      day:'numeric',
-      year:'numeric'
+      month:"short",
+      day:"numeric",
+      year:"numeric"
     }
   );
 
 }
 
 
-function formatTime(value){
+function formatRelative(value){
 
-  if(!value) return '';
+  if(!value) return "";
 
-  const d = new Date(value);
+  const date =
+    new Date(value);
 
-  if(Number.isNaN(d.getTime()))
-    return '';
+  const diff =
+    Date.now() -
+    date.getTime();
 
-  return d.toLocaleString(
-    undefined,
-    {
-      month:'short',
-      day:'numeric',
-      hour:'numeric',
-      minute:'2-digit'
+  const seconds =
+    Math.max(0,Math.floor(diff / 1000));
+
+  if(seconds < 60){
+
+    return "just now";
+
+  }
+
+  const minutes =
+    Math.floor(seconds / 60);
+
+  if(minutes < 60){
+
+    return `${minutes}m ago`;
+
+  }
+
+  const hours =
+    Math.floor(minutes / 60);
+
+  if(hours < 24){
+
+    return `${hours}h ago`;
+
+  }
+
+  const days =
+    Math.floor(hours / 24);
+
+  if(days < 30){
+
+    return `${days}d ago`;
+
+  }
+
+  return formatDate(value);
+
+}
+
+
+function safeImage(url){
+
+  if(!url) return "";
+
+  try{
+
+    const parsed =
+      new URL(url);
+
+    if(
+      parsed.protocol !== "http:" &&
+      parsed.protocol !== "https:"
+    ){
+
+      return "";
+
     }
-  );
 
-}
+    return url;
 
+  }catch{
 
-function toast(message,type='success'){
-
-  const el = $('toast');
-
-  if(!el) return;
-
-  el.textContent = message;
-
-  el.className = '';
-
-  el.id = 'toast';
-
-  el.classList.add('show',type);
-
-  clearTimeout(window.__toastTimer);
-
-  window.__toastTimer =
-    setTimeout(
-      () => el.classList.remove('show'),
-      3500
-    );
-
-}
-
-
-function debugError(label,error){
-
-  console.error(
-    '[CrowRules]',
-    label,
-    error
-  );
-
-  CR.errors.push({
-    label,
-    error:String(error?.message || error)
-  });
-
-  const panel = $('debug');
-
-  if(panel){
-
-    panel.innerHTML =
-      CR.errors
-        .slice(-12)
-        .map(x =>
-          `<div><strong>${esc(x.label)}</strong>: ${esc(x.error)}</div>`
-        )
-        .join('');
+    return "";
 
   }
 
 }
 
 
-function safeText(value,fallback='—'){
+function showToast(
+  title,
+  message
+){
 
-  return value === null ||
-         value === undefined ||
-         value === ''
-    ? fallback
-    : String(value);
+  const stack =
+    $("toastStack");
+
+  const item =
+    document.createElement("div");
+
+  item.className =
+    "toast";
+
+  item.innerHTML = `
+    <div class="toast-title">
+      ${escapeHTML(title)}
+    </div>
+
+    <div class="toast-message">
+      ${escapeHTML(message)}
+    </div>
+  `;
+
+  stack.appendChild(item);
+
+  setTimeout(
+    () => item.remove(),
+    5000
+  );
 
 }
 
 
-/* ============================================================
-   SUPABASE SAFE QUERY
-   ============================================================ */
+/* =========================================================
+   SUPABASE SAFE QUERY LAYER
+========================================================= */
 
-async function safeQuery(
+async function safeSelect(
   table,
-  columns='*',
-  options={}
+  select = "*",
+  options = {}
 ){
 
   try{
 
     let query =
-      db
+      supabase
         .from(table)
-        .select(columns);
+        .select(select);
 
     if(options.eq){
 
-      for(const [key,value] of Object.entries(options.eq)){
-        query = query.eq(key,value);
+      for(const [key,value]
+          of Object.entries(options.eq)){
+
+        query =
+          query.eq(key,value);
+
       }
 
     }
@@ -2280,46 +3589,58 @@ async function safeQuery(
           options.order.column,
           {
             ascending:
-              options.order.ascending ?? false
+              options.order.ascending ??
+              false
           }
         );
 
     }
 
-    if(options.limit){
+    if(
+      Number.isFinite(
+        options.limit
+      )
+    ){
 
       query =
-        query.limit(options.limit);
+        query.limit(
+          options.limit
+        );
 
     }
 
-    const result =
-      await query;
+    if(options.single){
 
-    if(result.error){
+      query =
+        query.single();
 
-      debugError(
-        `${table} query`,
-        result.error
-      );
+    }
+
+    const {
+      data,
+      error
+    } = await query;
+
+    if(error){
 
       return {
+        ok:false,
         data:null,
-        error:result.error
+        error
       };
 
     }
 
-    return result;
+    return {
+      ok:true,
+      data,
+      error:null
+    };
 
   }catch(error){
 
-    debugError(
-      `${table} exception`,
-      error
-    );
-
     return {
+      ok:false,
       data:null,
       error
     };
@@ -2329,11 +3650,10 @@ async function safeQuery(
 }
 
 
-/* ============================================================
-   AUTH
-   ============================================================ */
-
-async function loadAuth(){
+async function safeInsert(
+  table,
+  payload
+){
 
   try{
 
@@ -2341,2135 +3661,3465 @@ async function loadAuth(){
       data,
       error
     } =
-      await db.auth.getSession();
+      await supabase
+        .from(table)
+        .insert(payload)
+        .select()
+        .maybeSingle();
 
-    if(error)
-      throw error;
-
-    CR.user =
-      data?.session?.user || null;
-
-    $('authStatus').textContent =
-      CR.user ? 'SIGNED IN' : 'GUEST';
-
-    $('authStatus').className =
-      `pill ${CR.user ? 'green' : 'yellow'}`;
-
-    if(CR.user){
-
-      $('loginBtn')
-        .classList.add('hidden');
-
-      $('logoutBtn')
-        .classList.remove('hidden');
-
-      $('heroEmail').textContent =
-        CR.user.email || '';
-
-    }else{
-
-      $('loginBtn')
-        .classList.remove('hidden');
-
-      $('logoutBtn')
-        .classList.add('hidden');
-
-    }
+    return {
+      ok:!error,
+      data,
+      error
+    };
 
   }catch(error){
 
-    debugError(
-      'Authentication',
+    return {
+      ok:false,
+      data:null,
       error
-    );
+    };
 
   }
 
 }
 
 
-db.auth.onAuthStateChange(
-  async (_event,session) => {
+async function safeUpdate(
+  table,
+  payload,
+  filter
+){
 
-    CR.user =
-      session?.user || null;
+  try{
 
-    await refreshAuthUI();
+    let query =
+      supabase
+        .from(table)
+        .update(payload);
 
-  }
-);
+    for(
+      const [key,value]
+      of Object.entries(filter || {})
+    ){
 
-
-async function refreshAuthUI(){
-
-  if(CR.user){
-
-    $('loginBtn')
-      .classList.add('hidden');
-
-    $('logoutBtn')
-      .classList.remove('hidden');
-
-    $('authStatus').textContent =
-      'SIGNED IN';
-
-    $('authStatus').className =
-      'pill green';
-
-    await loadMember();
-
-  }else{
-
-    $('loginBtn')
-      .classList.remove('hidden');
-
-    $('logoutBtn')
-      .classList.add('hidden');
-
-    $('authStatus').textContent =
-      'GUEST';
-
-    $('authStatus').className =
-      'pill yellow';
-
-    renderGuest();
-
-  }
-
-}
-
-
-$('logoutBtn').onclick =
-  async () => {
-
-    const {error} =
-      await db.auth.signOut();
-
-    if(error){
-
-      toast(
-        error.message,
-        'error'
-      );
-
-      return;
+      query =
+        query.eq(key,value);
 
     }
 
-    toast(
-      'You have been signed out.'
+    const {
+      data,
+      error
+    } =
+      await query
+        .select()
+        .maybeSingle();
+
+    return {
+      ok:!error,
+      data,
+      error
+    };
+
+  }catch(error){
+
+    return {
+      ok:false,
+      data:null,
+      error
+    };
+
+  }
+
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+function setConnectionStatus(
+  state,
+  text
+){
+
+  const pill =
+    $("connectionStatus");
+
+  const label =
+    $("connectionText");
+
+  pill.classList.remove(
+    "connected",
+    "offline"
+  );
+
+  if(state === "connected"){
+
+    pill.classList.add(
+      "connected"
     );
 
-    setTimeout(
-      () => location.reload(),
-      500
+  }
+
+  if(state === "offline"){
+
+    pill.classList.add(
+      "offline"
     );
 
-  };
+  }
+
+  label.textContent =
+    text;
+
+  $("debugSupabase").textContent =
+    text;
+
+  $("debugSupabase").className =
+    `debug-value ${
+      state === "connected"
+        ? "ok"
+        : state === "offline"
+          ? "bad"
+          : "warn"
+    }`;
+
+}
 
 
-/* ============================================================
-   MEMBER
-   ============================================================ */
+/* =========================================================
+   AUTH MODAL
+========================================================= */
 
-async function loadMember(){
+function openAuth(){
 
-  if(!CR.user)
+  $("authModal")
+    .classList.add("show");
+
+}
+
+
+function closeAuth(){
+
+  $("authModal")
+    .classList.remove("show");
+
+}
+
+
+function switchAuthTab(
+  mode
+){
+
+  const login =
+    mode === "login";
+
+  $("loginTab")
+    .classList.toggle(
+      "active",
+      login
+    );
+
+  $("signupTab")
+    .classList.toggle(
+      "active",
+      !login
+    );
+
+  $("loginForm")
+    .classList.toggle(
+      "hidden",
+      !login
+    );
+
+  $("signupForm")
+    .classList.toggle(
+      "hidden",
+      login
+    );
+
+  $("authMessage")
+    .textContent = "";
+
+}
+
+
+/* =========================================================
+   AUTH ACTIONS
+========================================================= */
+
+async function login(){
+
+  const email =
+    $("loginEmail")
+      .value
+      .trim();
+
+  const password =
+    $("loginPassword")
+      .value;
+
+  $("authMessage")
+    .textContent =
+      "Signing you in…";
+
+  const {
+    error
+  } =
+    await supabase.auth
+      .signInWithPassword({
+        email,
+        password
+      });
+
+  if(error){
+
+    $("authMessage")
+      .textContent =
+      error.message;
+
     return;
 
-  const result =
-    await safeQuery(
-      'cr_members',
-      '*',
+  }
+
+  $("authMessage")
+    .textContent =
+    "Login successful.";
+
+  closeAuth();
+
+  await loadSession();
+
+}
+
+
+async function signup(){
+
+  const email =
+    $("signupEmail")
+      .value
+      .trim();
+
+  const password =
+    $("signupPassword")
+      .value;
+
+  const displayName =
+    $("signupDisplayName")
+      .value
+      .trim();
+
+  const username =
+    $("signupUsername")
+      .value
+      .trim()
+      .toLowerCase();
+
+  $("authMessage")
+    .textContent =
+    "Creating your CrowRules account…";
+
+  const {
+    data,
+    error
+  } =
+    await supabase.auth
+      .signUp({
+
+        email,
+
+        password,
+
+        options:{
+          data:{
+            display_name:
+              displayName,
+
+            username
+          }
+        }
+
+      });
+
+  if(error){
+
+    $("authMessage")
+      .textContent =
+      error.message;
+
+    return;
+
+  }
+
+  /*
+   * If email confirmation is disabled,
+   * the session may be available immediately.
+   */
+
+  if(data.session){
+
+    await ensureMemberProfile(
+      data.user,
       {
-        eq:{
-          user_id:CR.user.id
-        },
-        limit:1
+        displayName,
+        username
       }
     );
 
-  if(result.data?.length){
+    closeAuth();
 
-    CR.member =
-      result.data[0];
+    await loadSession();
 
   }else{
 
-    CR.member = null;
+    $("authMessage")
+      .textContent =
+      "Account created. Check your email if confirmation is required, then log in.";
 
   }
 
-  await loadProfile();
+}
 
-  await loadRole();
 
-  renderMember();
+async function logout(){
 
-  await Promise.allSettled([
-    loadEngagement(),
-    loadLeaderboard(),
-    loadNewestMembers(),
-    loadWatchHistory(),
-    loadFavorites(),
-    loadPoints(),
-    loadNotifications(),
-    loadProgramming(),
-    loadAnnouncements(),
-    loadNews(),
-    loadEvents()
-  ]);
-
-  updateRank();
+  await supabase.auth.signOut();
 
 }
 
 
-async function loadProfile(){
+/* =========================================================
+   MEMBER PROFILE CREATION / LOADING
+========================================================= */
 
-  if(!CR.user)
-    return;
+async function ensureMemberProfile(
+  user,
+  supplied = {}
+){
 
-  const result =
-    await safeQuery(
-      'cr_profiles',
-      '*',
-      {
-        eq:{
-          id:CR.user.id
-        },
-        limit:1
-      }
-    );
-
-  CR.profile =
-    result.data?.[0] || null;
-
-}
-
-
-async function loadRole(){
-
-  CR.role =
-    String(
-      CR.member?.role ||
-      'member'
-    ).toLowerCase();
-
+  if(!user) return null;
 
   /*
-    cr_member_roles only supports:
-    member, creator, moderator, admin.
+   * Try existing cr_members row.
+   */
 
-    cr_members.role is the broader CrowRules role catalog.
-  */
-
-  if(
-    !CR.member?.role &&
-    CR.user
-  ){
-
-    const result =
-      await safeQuery(
-        'cr_member_roles',
-        'role',
-        {
-          eq:{
-            user_id:CR.user.id
-          },
-          limit:1
-        }
-      );
-
-    if(result.data?.[0]?.role)
-      CR.role =
-        String(
-          result.data[0].role
-        ).toLowerCase();
-
-  }
-
-
-  const roleResult =
-    await safeQuery(
-      'cr_role_catalog',
-      '*',
+  const existing =
+    await safeSelect(
+      "cr_members",
+      "*",
       {
         eq:{
-          role_key:CR.role
+          user_id:user.id
         },
-        limit:1
+        single:true
       }
     );
 
+  if(existing.ok && existing.data){
 
-  const roleMeta =
-    roleResult.data?.[0];
-
-
-  $('roleCenterBadge').innerHTML =
-    roleBadge(CR.role);
-
-
-  $('roleDescription').textContent =
-    roleMeta?.description ||
-    `${CR.role} member`;
-
-  await loadPermissions();
-
-  applyRoleVisibility();
-
-}
-
-
-async function loadPermissions(){
-
-  const result =
-    await safeQuery(
-      'cr_role_permissions',
-      'permission_key',
-      {
-        eq:{
-          role_key:CR.role
-        }
-      }
-    );
-
-  CR.permissions =
-    result.data ||
-    [];
-
-  const box =
-    $('permissions');
-
-  if(!box)
-    return;
-
-  if(!CR.permissions.length){
-
-    box.innerHTML =
-      `<div class="permission">
-        Standard member access
-      </div>`;
-
-    return;
+    return existing.data;
 
   }
 
-  box.innerHTML =
-    CR.permissions
-      .map(
-        p =>
-          `<div class="permission">
-             ✓ ${esc(p.permission_key)}
-           </div>`
-      )
-      .join('');
+  /*
+   * Attempt to create the member row.
+   *
+   * If RLS prevents creation, we simply
+   * continue and use public/auth metadata.
+   */
 
-}
+  const payload = {
 
+    user_id:user.id,
 
-const ROLE_LEVELS = {
+    username:
+      supplied.username ||
+      user.user_metadata?.username ||
+      null,
 
-  member:10,
-  supporter:20,
-  creator:30,
-  moderator:40,
-  producer:50,
-  staff:60,
-  admin:80,
-  owner:100
+    display_name:
+      supplied.displayName ||
+      user.user_metadata?.display_name ||
+      user.email?.split("@")[0] ||
+      "CrowRules Member",
 
-};
+    email:
+      user.email ||
+      null,
 
+    membership_tier:"free",
 
-function roleLevel(role){
+    membership_status:"active",
 
-  return ROLE_LEVELS[
-    String(role || 'member').toLowerCase()
-  ] || 10;
+    points:0,
 
-}
+    total_watch_minutes:0,
 
+    watch_seconds:0,
 
-function roleBadge(role){
+    lifetime_points:0,
 
-  const key =
-    String(role || 'member')
-      .toLowerCase();
+    monthly_points:0,
 
-  const labels = {
+    listen_seconds:0,
 
-    member:'Member',
-    supporter:'Supporter',
-    creator:'Creator',
-    moderator:'Moderator',
-    producer:'Producer',
-    staff:'Staff',
-    admin:'Admin',
-    owner:'Owner'
+    total_listen_minutes:0,
+
+    monthly_watch_seconds:0,
+
+    monthly_listen_seconds:0,
+
+    role:"member",
+
+    is_public:true,
+
+    is_active:true
 
   };
 
-  return `
-    <span class="role-badge role-${esc(key)}">
-      ${esc(labels[key] || key)}
-    </span>
+  const inserted =
+    await safeInsert(
+      "cr_members",
+      payload
+    );
+
+  if(inserted.ok){
+
+    return inserted.data;
+
+  }
+
+  return null;
+
+}
+
+
+async function loadMember(){
+
+  if(!STATE.user) return;
+
+  /*
+   * First try cr_members with the exact
+   * schema currently confirmed.
+   */
+
+  const result =
+    await safeSelect(
+      "cr_members",
+      [
+        "id",
+        "user_id",
+        "username",
+        "display_name",
+        "email",
+        "avatar_url",
+        "bio",
+        "membership_tier",
+        "membership_status",
+        "points",
+        "total_watch_minutes",
+        "watch_seconds",
+        "lifetime_points",
+        "monthly_points",
+        "listen_seconds",
+        "total_listen_minutes",
+        "monthly_watch_seconds",
+        "monthly_listen_seconds",
+        "role",
+        "is_public",
+        "is_active",
+        "joined_at",
+        "last_seen_at",
+        "created_at",
+        "updated_at"
+      ].join(","),
+      {
+        eq:{
+          user_id:
+            STATE.user.id
+        },
+        single:true
+      }
+    );
+
+  if(result.ok && result.data){
+
+    STATE.member =
+      result.data;
+
+  }else{
+
+    /*
+     * Try to create a member if one does
+     * not yet exist.
+     */
+
+    STATE.member =
+      await ensureMemberProfile(
+        STATE.user
+      );
+
+  }
+
+
+  /*
+   * Public profile fallback.
+   */
+
+  const publicResult =
+    await safeSelect(
+      "cr_public_members",
+      "*",
+      {
+        eq:{
+          member_id:
+            STATE.member?.id
+        },
+        single:true
+      }
+    );
+
+  if(
+    publicResult.ok &&
+    publicResult.data
+  ){
+
+    STATE.publicMember =
+      publicResult.data;
+
+  }
+
+
+  /*
+   * Role fallback from cr_member_roles.
+   */
+
+  let role =
+    STATE.member?.role ||
+    "member";
+
+  const roleResult =
+    await safeSelect(
+      "cr_member_roles",
+      "role",
+      {
+        eq:{
+          user_id:
+            STATE.user.id
+        },
+        single:true
+      }
+    );
+
+  if(
+    roleResult.ok &&
+    roleResult.data?.role
+  ){
+
+    role =
+      roleResult.data.role;
+
+  }
+
+  setRole(role);
+
+  $("debugMember")
+    .textContent =
+    STATE.member
+      ? "Loaded"
+      : "Fallback";
+
+  $("debugMember").className =
+    `debug-value ${
+      STATE.member
+        ? "ok"
+        : "warn"
+    }`;
+
+  renderProfile();
+
+}
+
+
+/* =========================================================
+   PROFILE RENDER
+========================================================= */
+
+function renderProfile(){
+
+  const member =
+    STATE.member || {};
+
+  const meta =
+    STATE.user?.user_metadata || {};
+
+  const name =
+    member.display_name ||
+    STATE.publicMember?.display_name ||
+    meta.display_name ||
+    STATE.user?.email?.split("@")[0] ||
+    "CrowRules Member";
+
+  const username =
+    member.username ||
+    STATE.publicMember?.username ||
+    meta.username ||
+    "member";
+
+  const avatar =
+    safeImage(
+      member.avatar_url ||
+      STATE.publicMember?.avatar_url ||
+      meta.avatar_url
+    );
+
+  const bio =
+    member.bio ||
+    "Welcome to CrowRules Entertainment.";
+
+  $("profileName")
+    .textContent =
+    name;
+
+  $("profileUsername")
+    .textContent =
+    "@" + username;
+
+  $("profileBio")
+    .textContent =
+    bio;
+
+  $("headerUserName")
+    .textContent =
+    name;
+
+  $("headerUserRole")
+    .textContent =
+    ROLE_META[
+      STATE.role
+    ]?.badge ||
+    STATE.role;
+
+  $("profileRoleBadge")
+    .textContent =
+    ROLE_META[
+      STATE.role
+    ]?.badge ||
+    STATE.role;
+
+  $("profileJoined")
+    .textContent =
+    "Joined " +
+    formatDate(
+      member.joined_at ||
+      member.created_at ||
+      STATE.user?.created_at
+    );
+
+  $("profileTier")
+    .textContent =
+    String(
+      member.membership_tier ||
+      "free"
+    )
+      .replaceAll("_"," ")
+      .replace(
+        /\b\w/g,
+        x => x.toUpperCase()
+      );
+
+  $("profileStatus")
+    .textContent =
+    member.membership_status ||
+    "Active";
+
+  if(avatar){
+
+    $("profileAvatar").innerHTML = `
+      <img
+        src="${escapeHTML(avatar)}"
+        alt=""
+        style="
+          width:100%;
+          height:100%;
+          object-fit:cover;
+        "
+      >
+    `;
+
+    $("headerAvatar").innerHTML = `
+      <img
+        src="${escapeHTML(avatar)}"
+        alt=""
+        style="
+          width:100%;
+          height:100%;
+          object-fit:cover;
+        "
+      >
+    `;
+
+  }else{
+
+    const init =
+      initials(name);
+
+    $("profileAvatar")
+      .textContent =
+      init;
+
+    $("headerAvatar")
+      .textContent =
+      init;
+
+  }
+
+  renderStats();
+
+  renderRole();
+
+}
+
+
+/* =========================================================
+   STATS
+========================================================= */
+
+function renderStats(){
+
+  const member =
+    STATE.member || {};
+
+  const lifetime =
+    Number(
+      member.lifetime_points ??
+      member.points ??
+      0
+    );
+
+  const monthly =
+    Number(
+      member.monthly_points ??
+      0
+    );
+
+  const watch =
+    Number(
+      member.watch_seconds ??
+      (Number(member.total_watch_minutes || 0) * 60)
+    );
+
+  const listen =
+    Number(
+      member.listen_seconds ??
+      (Number(member.total_listen_minutes || 0) * 60)
+    );
+
+  $("lifetimePoints")
+    .textContent =
+    formatNumber(lifetime);
+
+  $("monthlyPoints")
+    .textContent =
+    formatNumber(monthly);
+
+  $("watchTime")
+    .textContent =
+    formatHours(watch);
+
+  $("listenTime")
+    .textContent =
+    formatHours(listen);
+
+  $("monthlyProgressText")
+    .textContent =
+    `${formatNumber(monthly)} pts`;
+
+  /*
+   * Visual competition target.
+   * This is a progress visualization, not
+   * a security/eligibility calculation.
+   */
+
+  const target = 1000;
+
+  const percent =
+    Math.min(
+      100,
+      Math.round(
+        (monthly / target) * 100
+      )
+    );
+
+  $("monthlyProgressBar")
+    .style.width =
+    percent + "%";
+
+}
+
+
+/* =========================================================
+   ROLE RENDER
+========================================================= */
+
+function renderRole(){
+
+  const meta =
+    ROLE_META[
+      STATE.role
+    ] ||
+    ROLE_META.member;
+
+  $("roleCardName")
+    .textContent =
+    meta.name;
+
+  $("roleCardDescription")
+    .textContent =
+    meta.description;
+
+  $("permissionList")
+    .innerHTML =
+    meta.permissions
+      .map(
+        permission => `
+          <li>
+            ${escapeHTML(permission)}
+          </li>
+        `
+      )
+      .join("");
+
+  $("staffPanel")
+    .classList.toggle(
+      "hidden",
+      !isStaff()
+    );
+
+}
+
+
+/* =========================================================
+   LEADERBOARD
+========================================================= */
+
+async function loadLeaderboard(){
+
+  const container =
+    $("leaderboard");
+
+  /*
+   * Prefer public members because the table
+   * is specifically designed for public data.
+   */
+
+  const result =
+    await safeSelect(
+      "cr_public_members",
+      [
+        "member_id",
+        "username",
+        "display_name",
+        "avatar_url",
+        "membership_tier",
+        "points",
+        "total_watch_minutes",
+        "joined_at"
+      ].join(","),
+      {
+        order:{
+          column:"points",
+          ascending:false
+        },
+        limit:10
+      }
+    );
+
+  if(
+    !result.ok ||
+    !Array.isArray(result.data)
+  ){
+
+    container.innerHTML = `
+      <div class="empty">
+        Leaderboard data is not available
+        through the current member permissions.
+      </div>
+    `;
+
+    return;
+
+  }
+
+  STATE.leaderboard =
+    result.data;
+
+  if(!STATE.leaderboard.length){
+
+    container.innerHTML = `
+      <div class="empty">
+        The leaderboard is waiting for more members.
+      </div>
+    `;
+
+    return;
+
+  }
+
+  container.innerHTML = `
+    <div class="leaderboard-list">
+
+      ${
+        STATE.leaderboard
+          .map(
+            (member,index) => {
+
+              const me =
+                member.member_id ===
+                STATE.member?.id;
+
+              const name =
+                member.display_name ||
+                member.username ||
+                "Member";
+
+              return `
+                <div
+                  class="rank-row ${
+                    me ? "me" : ""
+                  }"
+                >
+
+                  <div class="rank-number">
+                    ${index + 1}
+                  </div>
+
+                  <div class="rank-person">
+
+                    <div class="rank-name">
+                      ${escapeHTML(name)}
+                    </div>
+
+                    <div class="rank-role">
+                      ${
+                        escapeHTML(
+                          member.membership_tier ||
+                          "member"
+                        )
+                      }
+                    </div>
+
+                  </div>
+
+                  <div class="rank-points">
+                    ${formatNumber(member.points)}
+                  </div>
+
+                </div>
+              `;
+
+            }
+          )
+          .join("")
+      }
+
+    </div>
   `;
 
 }
 
 
-function applyRoleVisibility(){
-
-  const current =
-    roleLevel(CR.role);
-
-  document
-    .querySelectorAll(
-      '[data-min-role]'
-    )
-    .forEach(el => {
-
-      const required =
-        roleLevel(
-          el.dataset.minRole
-        );
-
-      el.classList.toggle(
-        'hidden',
-        current < required
-      );
-
-    });
-
-}
-
-
-/* ============================================================
-   RENDER MEMBER
-   ============================================================ */
-
-function renderMember(){
-
-  if(!CR.member){
-
-    renderGuest();
-
-    return;
-
-  }
-
-
-  const displayName =
-    CR.member.display_name ||
-    CR.member.username ||
-    CR.user?.email?.split('@')[0] ||
-    'CrowRules Member';
-
-
-  $('heroName').textContent =
-    displayName;
-
-  $('heroRole').innerHTML =
-    roleBadge(CR.role);
-
-  $('heroEmail').textContent =
-    CR.member.email ||
-    CR.user?.email ||
-    '';
-
-  $('memberTier').textContent =
-    String(
-      CR.member.membership_tier ||
-      'free'
-    ).toUpperCase();
-
-  $('memberStatus').textContent =
-    CR.member.membership_status ||
-    'active';
-
-
-  const avatar =
-    CR.member.avatar_url ||
-    CR.profile?.avatar_url;
-
-
-  if(avatar){
-
-    $('heroAvatar').innerHTML =
-      `<img src="${esc(avatar)}" alt="">`;
-
-  }else{
-
-    $('heroAvatar').textContent =
-      initials(displayName);
-
-  }
-
-
-  $('profileDisplayName').value =
-    CR.member.display_name ||
-    CR.profile?.display_name ||
-    '';
-
-  $('profileUsername').value =
-    CR.member.username ||
-    CR.profile?.username ||
-    '';
-
-  $('profileAvatar').value =
-    CR.member.avatar_url ||
-    CR.profile?.avatar_url ||
-    '';
-
-  $('profileBio').value =
-    CR.member.bio ||
-    CR.profile?.bio ||
-    '';
-
-  $('profileTier').value =
-    CR.member.membership_tier ||
-    'free';
-
-}
-
-
-function renderGuest(){
-
-  $('heroName').textContent =
-    'Guest Member';
-
-  $('heroRole').innerHTML =
-    roleBadge('member');
-
-  $('heroEmail').textContent =
-    'Sign in to access your member dashboard.';
-
-  $('memberTier').textContent =
-    'FREE';
-
-  $('memberStatus').textContent =
-    'Guest';
-
-  $('heroAvatar').textContent =
-    'CR';
-
-  [
-    'lifetimePoints',
-    'monthlyPoints',
-    'sessionCount',
-    'memberRank'
-  ].forEach(id => {
-
-    $(id).textContent =
-      '0';
-
-  });
-
-  $('watchTime').textContent =
-    '0h';
-
-  $('listenTime').textContent =
-    '0h';
-
-}
-
-
-/* ============================================================
-   PROFILE SAVE
-   ============================================================ */
-
-$('saveProfileBtn').onclick =
-  async () => {
-
-    if(!CR.user || !CR.member){
-
-      toast(
-        'Please log in first.',
-        'error'
-      );
-
-      return;
-
-    }
-
-
-    const display_name =
-      $('profileDisplayName').value.trim();
-
-    const username =
-      $('profileUsername').value.trim();
-
-    const avatar_url =
-      $('profileAvatar').value.trim();
-
-    const bio =
-      $('profileBio').value.trim();
-
-
-    const memberUpdate = {
-
-      display_name,
-      username,
-      avatar_url,
-      bio,
-      updated_at:new Date().toISOString()
-
-    };
-
-
-    const result =
-      await db
-        .from('cr_members')
-        .update(memberUpdate)
-        .eq('user_id',CR.user.id);
-
-
-    if(result.error){
-
-      toast(
-        result.error.message,
-        'error'
-      );
-
-      debugError(
-        'Save cr_members profile',
-        result.error
-      );
-
-      return;
-
-    }
-
-
-    /*
-      cr_profiles is keyed directly by auth.users.id.
-    */
-
-    const profileResult =
-      await db
-        .from('cr_profiles')
-        .upsert(
-          {
-            id:CR.user.id,
-            display_name,
-            username,
-            avatar_url,
-            bio,
-            updated_at:new Date().toISOString()
-          },
-          {
-            onConflict:'id'
-          }
-        );
-
-
-    if(profileResult.error){
-
-      debugError(
-        'Save cr_profiles',
-        profileResult.error
-      );
-
-    }
-
-
-    toast(
-      'Profile saved successfully.'
-    );
-
-    await loadMember();
-
-  };
-
-
-$('editProfileBtn').onclick =
-  () => {
-
-    document
-      .getElementById('profileDisplayName')
-      ?.scrollIntoView({
-        behavior:'smooth',
-        block:'center'
-      });
-
-  };
-
-
-/* ============================================================
-   ENGAGEMENT
-   ============================================================ */
-
-async function loadEngagement(){
-
-  if(!CR.user)
-    return;
-
-
-  /*
-    Primary source: cr_members.
-    This avoids depending on an unknown RPC signature.
-  */
-
-  const member =
-    CR.member;
-
-
-  if(member){
-
-    $('lifetimePoints').textContent =
-      formatNumber(
-        member.lifetime_points ??
-        member.points ??
-        0
-      );
-
-    $('monthlyPoints').textContent =
-      formatNumber(
-        member.monthly_points ??
-        0
-      );
-
-    $('watchTime').textContent =
-      formatHours(
-        member.watch_seconds ??
-        Number(member.total_watch_minutes || 0) * 60
-      );
-
-    $('listenTime').textContent =
-      formatHours(
-        member.listen_seconds ??
-        Number(member.total_listen_minutes || 0) * 60
-      );
-
-  }
-
-
-  const sessions =
-    await safeQuery(
-      'cr_media_sessions',
-      'id',
-      {
-        eq:{
-          user_id:CR.user.id
-        }
-      }
-    );
-
-
-  $('sessionCount').textContent =
-    formatNumber(
-      sessions.data?.length || 0
-    );
-
-
-  $('memberDbStatus').textContent =
-    'CONNECTED';
-
-  $('memberDbStatus').className =
-    'pill green';
-
-}
-
-
-/* ============================================================
-   LEADERBOARD
-   ============================================================ */
-
-async function loadLeaderboard(){
-
-  const result =
-    await safeQuery(
-      'cr_public_members',
-      '*',
-      {
-        order:{
-          column:'points',
-          ascending:false
-        },
-        limit:10
-      }
-    );
-
-
-  const list =
-    result.data || [];
-
-  CR.leaderboard =
-    list;
-
-
-  const box =
-    $('leaderboard');
-
-
-  if(!list.length){
-
-    box.innerHTML =
-      `<div class="empty">
-         <strong>No leaderboard data yet</strong>
-         Start watching CrowRules content to begin earning points.
-       </div>`;
-
-    return;
-
-  }
-
-
-  box.innerHTML =
-    list
-      .map(
-        (member,index) => {
-
-          const isMe =
-            CR.member &&
-            member.member_id ===
-            CR.member.id;
-
-          const name =
-            member.display_name ||
-            member.username ||
-            'CrowRules Member';
-
-          return `
-            <div class="leader ${isMe ? 'leader-me':''}">
-
-              <div class="rank">
-                ${index + 1}
-              </div>
-
-              <div class="leader-avatar">
-                ${
-                  member.avatar_url
-                    ? `<img src="${esc(member.avatar_url)}" alt="">`
-                    : esc(initials(name))
-                }
-              </div>
-
-              <div class="leader-info">
-
-                <div class="leader-name">
-                  ${esc(name)}
-                  ${
-                    isMe
-                      ? `<span class="pill purple">YOU</span>`
-                      : ''
-                  }
-                </div>
-
-                <div class="leader-points">
-                  ${formatNumber(member.points)} CrowPoints
-                </div>
-
-              </div>
-
-            </div>
-          `;
-
-        }
-      )
-      .join('');
-
-}
-
-
-function updateRank(){
-
-  if(!CR.member){
-
-    $('memberRank').textContent =
-      '—';
-
-    return;
-
-  }
-
-
-  const index =
-    CR.leaderboard.findIndex(
-      x =>
-        x.member_id === CR.member.id
-    );
-
-
-  if(index >= 0){
-
-    $('memberRank').textContent =
-      `#${index + 1}`;
-
-  }else{
-
-    $('memberRank').textContent =
-      '—';
-
-  }
-
-}
-
-
-/* ============================================================
+/* =========================================================
    NEWEST MEMBERS
-   ============================================================ */
+========================================================= */
 
 async function loadNewestMembers(){
 
+  const container =
+    $("newestMembers");
+
   const result =
-    await safeQuery(
-      'cr_public_members',
-      '*',
+    await safeSelect(
+      "cr_public_members",
+      [
+        "member_id",
+        "username",
+        "display_name",
+        "avatar_url",
+        "membership_tier",
+        "joined_at"
+      ].join(","),
       {
         order:{
-          column:'joined_at',
+          column:"joined_at",
           ascending:false
         },
-        limit:8
+        limit:6
       }
     );
 
+  if(
+    !result.ok ||
+    !Array.isArray(result.data)
+  ){
 
-  const list =
-    result.data || [];
-
-  const box =
-    $('newestMembers');
-
-
-  if(!list.length){
-
-    box.innerHTML =
-      `<div class="empty">
-        <strong>No public members yet</strong>
-        New member profiles will appear here.
-      </div>`;
+    container.innerHTML = `
+      <div class="empty">
+        New member directory unavailable.
+      </div>
+    `;
 
     return;
 
   }
 
+  STATE.newestMembers =
+    result.data;
 
-  box.innerHTML =
-    list
-      .map(
-        member => {
+  if(!STATE.newestMembers.length){
 
-          const name =
-            member.display_name ||
-            member.username ||
-            'CrowRules Member';
+    container.innerHTML = `
+      <div class="empty">
+        No public members found yet.
+      </div>
+    `;
 
-          return `
-            <div class="leader">
+    return;
 
-              <div class="leader-avatar">
-                ${
-                  member.avatar_url
-                    ? `<img src="${esc(member.avatar_url)}" alt="">`
-                    : esc(initials(name))
-                }
-              </div>
+  }
 
-              <div class="leader-info">
+  container.innerHTML = `
+    <div class="member-grid">
 
-                <div class="leader-name">
-                  ${esc(name)}
+      ${
+        STATE.newestMembers
+          .map(member => {
+
+            const name =
+              member.display_name ||
+              member.username ||
+              "Member";
+
+            const avatar =
+              safeImage(
+                member.avatar_url
+              );
+
+            return `
+              <div class="member-mini">
+
+                <div class="avatar">
+
+                  ${
+                    avatar
+                      ? `
+                        <img
+                          src="${escapeHTML(avatar)}"
+                          alt=""
+                          style="
+                            width:100%;
+                            height:100%;
+                            object-fit:cover;
+                          "
+                        >
+                      `
+                      : initials(name)
+                  }
+
                 </div>
 
-                <div class="leader-points">
-                  Joined ${esc(formatDate(member.joined_at))}
+                <div class="member-mini-info">
+
+                  <div class="member-mini-name">
+                    ${escapeHTML(name)}
+                  </div>
+
+                  <div class="member-mini-date">
+                    Joined ${
+                      escapeHTML(
+                        formatDate(
+                          member.joined_at
+                        )
+                      )
+                    }
+                  </div>
+
                 </div>
 
               </div>
+            `;
 
-            </div>
-          `;
+          })
+          .join("")
+      }
 
-        }
-      )
-      .join('');
+    </div>
+  `;
 
 }
 
 
-/* ============================================================
+/* =========================================================
    WATCH HISTORY
-   ============================================================ */
+========================================================= */
 
 async function loadWatchHistory(){
 
-  if(!CR.member){
+  if(!STATE.member){
 
-    $('watchHistory').innerHTML =
-      `<div class="empty">
-        <strong>Log in to see your history</strong>
-      </div>`;
+    renderEmptyWatchHistory();
 
     return;
 
   }
 
-
   const result =
-    await safeQuery(
-      'cr_member_watch_history',
-      '*',
+    await safeSelect(
+      "cr_member_watch_history",
+      [
+        "id",
+        "member_id",
+        "user_id",
+        "content_type",
+        "content_id",
+        "title",
+        "watched_seconds",
+        "completed",
+        "last_position_seconds",
+        "watched_at",
+        "created_at"
+      ].join(","),
       {
         eq:{
-          member_id:CR.member.id
+          member_id:
+            STATE.member.id
         },
         order:{
-          column:'watched_at',
+          column:"watched_at",
           ascending:false
         },
-        limit:10
+        limit:20
       }
     );
 
+  if(
+    !result.ok ||
+    !Array.isArray(result.data)
+  ){
 
-  const list =
-    result.data || [];
-
-
-  if(!list.length){
-
-    $('watchHistory').innerHTML =
-      `<div class="empty">
-        <strong>No watch activity yet</strong>
-        Watch CrowRules content to build your history.
-      </div>`;
+    renderEmptyWatchHistory();
 
     return;
 
   }
 
+  STATE.watchHistory =
+    result.data;
 
-  $('watchHistory').innerHTML =
-    list
-      .map(
-        item => {
+  renderContinueWatching();
 
-          const seconds =
-            Number(
-              item.watched_seconds || 0
-            );
-
-          const position =
-            Number(
-              item.last_position_seconds || 0
-            );
-
-          return `
-            <div class="watch-item">
-
-              <div class="watch-icon">
-                ▶
-              </div>
-
-              <div class="watch-content">
-
-                <div class="watch-title">
-                  ${esc(item.title || 'CrowRules Content')}
-                </div>
-
-                <div class="card-text">
-                  ${esc(item.content_type || 'episode')}
-                  · ${formatHours(seconds)}
-                  watched
-                  · ${esc(formatDate(item.watched_at))}
-                </div>
-
-                <div class="progress">
-                  <span style="width:${Math.min(
-                    100,
-                    Math.max(
-                      0,
-                      position > 0 && seconds > 0
-                        ? (position / Math.max(position,seconds)) * 100
-                        : 0
-                    )
-                  )}%"></span>
-                </div>
-
-              </div>
-
-            </div>
-          `;
-
-        }
-      )
-      .join('');
+  renderRecentlyWatched();
 
 }
 
 
-/* ============================================================
-   FAVORITES
-   ============================================================ */
+function renderEmptyWatchHistory(){
 
-async function loadFavorites(){
+  $("continueWatching").innerHTML = `
+    <div class="empty">
+      No watch history has been recorded yet.
+      Watch CrowRules content to build your history.
+    </div>
+  `;
 
-  if(!CR.member){
+  $("recentlyWatched").innerHTML = `
+    <div class="empty">
+      No recent watch activity yet.
+    </div>
+  `;
 
-    $('favorites').innerHTML =
-      `<div class="empty">
-        <strong>Log in to see favorites</strong>
-      </div>`;
+}
+
+
+function renderContinueWatching(){
+
+  const items =
+    STATE.watchHistory
+      .filter(
+        item =>
+          !item.completed &&
+          Number(
+            item.last_position_seconds ||
+            0
+          ) > 0
+      )
+      .slice(0,6);
+
+  if(!items.length){
+
+    $("continueWatching").innerHTML = `
+      <div class="empty">
+        You're all caught up.
+        Start watching a CrowRules program and
+        your unfinished episodes will appear here.
+      </div>
+    `;
 
     return;
 
   }
 
+  $("continueWatching").innerHTML = `
+    <div class="content-list">
+
+      ${
+        items.map(
+          item =>
+            renderHistoryItem(
+              item,
+              true
+            )
+        ).join("")
+      }
+
+    </div>
+  `;
+
+}
+
+
+function renderRecentlyWatched(){
+
+  const items =
+    STATE.watchHistory
+      .slice(0,8);
+
+  if(!items.length){
+
+    $("recentlyWatched").innerHTML = `
+      <div class="empty">
+        No recent watch activity yet.
+      </div>
+    `;
+
+    return;
+
+  }
+
+  $("recentlyWatched").innerHTML = `
+    <div class="content-list">
+
+      ${
+        items.map(
+          item =>
+            renderHistoryItem(
+              item,
+              false
+            )
+        ).join("")
+      }
+
+    </div>
+  `;
+
+}
+
+
+function renderHistoryItem(
+  item,
+  continueMode
+){
+
+  const watched =
+    Number(
+      item.watched_seconds ||
+      0
+    );
+
+  const position =
+    Number(
+      item.last_position_seconds ||
+      0
+    );
+
+  const percent =
+    Math.max(
+      0,
+      Math.min(
+        100,
+        position > 0 && watched > 0
+          ? Math.round(
+              (position / Math.max(
+                watched,
+                position
+              )) * 100
+            )
+          : 0
+      )
+    );
+
+  return `
+    <div class="content-item">
+
+      <div class="content-thumb">
+      </div>
+
+      <div class="content-info">
+
+        <div class="content-title">
+          ${escapeHTML(
+            item.title ||
+            "CrowRules Content"
+          )}
+        </div>
+
+        <div class="content-meta">
+          ${
+            continueMode
+              ? "Continue watching"
+              : formatRelative(
+                  item.watched_at
+                )
+          }
+          ${
+            item.completed
+              ? " • Completed"
+              : ""
+          }
+        </div>
+
+        ${
+          !item.completed
+            ? `
+              <div class="content-progress">
+                <span
+                  style="width:${percent}%"
+                ></span>
+              </div>
+            `
+            : ""
+        }
+
+      </div>
+
+      <a
+        class="btn btn-small"
+        href="crowrules-tv.html"
+      >
+        ${
+          continueMode
+            ? "Continue"
+            : "Watch"
+        }
+      </a>
+
+    </div>
+  `;
+
+}
+
+
+/* =========================================================
+   FAVORITES / MY LIST
+========================================================= */
+
+function localFavorites(){
+
+  try{
+
+    const raw =
+      localStorage.getItem(
+        "crowrules_my_list"
+      );
+
+    return raw
+      ? JSON.parse(raw)
+      : [];
+
+  }catch{
+
+    return [];
+
+  }
+
+}
+
+
+function saveLocalFavorites(
+  items
+){
+
+  try{
+
+    localStorage.setItem(
+      "crowrules_my_list",
+      JSON.stringify(items)
+    );
+
+  }catch{}
+
+}
+
+
+async function loadFavorites(){
+
+  const local =
+    localFavorites();
+
+  /*
+   * Also attempt Supabase favorites.
+   */
+
+  if(STATE.member){
+
+    const result =
+      await safeSelect(
+        "cr_member_favorites",
+        [
+          "id",
+          "member_id",
+          "user_id",
+          "item_type",
+          "item_id",
+          "created_at"
+        ].join(","),
+        {
+          eq:{
+            member_id:
+              STATE.member.id
+          },
+          order:{
+            column:"created_at",
+            ascending:false
+          },
+          limit:30
+        }
+      );
+
+    if(
+      result.ok &&
+      Array.isArray(result.data)
+    ){
+
+      STATE.favorites =
+        result.data;
+
+    }
+
+  }
+
+  renderFavorites(
+    local
+  );
+
+}
+
+
+function renderFavorites(
+  local
+){
+
+  const items =
+    Array.isArray(local)
+      ? local
+      : [];
+
+  if(!items.length){
+
+    $("myList").innerHTML = `
+      <div class="empty">
+        Your list is empty. Save shows and episodes
+        from CrowRules pages to build your watchlist.
+      </div>
+    `;
+
+    return;
+
+  }
+
+  $("myList").innerHTML = `
+    <div class="content-list">
+
+      ${
+        items
+          .slice(0,10)
+          .map(item => `
+            <div class="content-item">
+
+              <div class="content-thumb"></div>
+
+              <div class="content-info">
+
+                <div class="content-title">
+                  ${escapeHTML(
+                    item.title ||
+                    "Saved Content"
+                  )}
+                </div>
+
+                <div class="content-meta">
+                  ${escapeHTML(
+                    item.type ||
+                    "content"
+                  )}
+                </div>
+
+              </div>
+
+              <button
+                class="btn btn-small"
+                onclick="removeLocalFavorite('${escapeHTML(
+                  item.id || ""
+                )}')"
+              >
+                Remove
+              </button>
+
+            </div>
+          `)
+          .join("")
+      }
+
+    </div>
+  `;
+
+}
+
+
+window.removeLocalFavorite =
+function(id){
+
+  const list =
+    localFavorites()
+      .filter(
+        item =>
+          String(item.id) !==
+          String(id)
+      );
+
+  saveLocalFavorites(
+    list
+  );
+
+  renderFavorites(
+    list
+  );
+
+};
+
+
+/* =========================================================
+   NOTIFICATIONS
+========================================================= */
+
+async function loadNotifications(){
+
+  if(!STATE.member){
+
+    renderNotifications();
+
+    return;
+
+  }
 
   const result =
-    await safeQuery(
-      'cr_member_favorites',
-      '*',
+    await safeSelect(
+      "cr_member_notifications",
+      [
+        "id",
+        "member_id",
+        "user_id",
+        "title",
+        "message",
+        "notification_type",
+        "is_read",
+        "action_url",
+        "created_at",
+        "read_at"
+      ].join(","),
       {
         eq:{
-          member_id:CR.member.id
+          member_id:
+            STATE.member.id
         },
         order:{
-          column:'created_at',
+          column:"created_at",
           ascending:false
         },
         limit:12
       }
     );
 
+  if(
+    result.ok &&
+    Array.isArray(result.data)
+  ){
 
-  const list =
-    result.data || [];
+    STATE.notifications =
+      result.data;
 
+  }else{
 
-  if(!list.length){
-
-    $('favorites').innerHTML =
-      `<div class="empty">
-        <strong>Your favorites are empty</strong>
-        Add shows and episodes to your favorites.
-      </div>`;
-
-    return;
+    STATE.notifications = [];
 
   }
 
-
-  $('favorites').innerHTML =
-    `<div class="grid grid-4" style="padding:15px">
-      ${
-        list
-          .map(
-            item =>
-              `<div class="card">
-                 <div class="card-body">
-                   <div class="card-title">
-                     ${esc(item.item_type || 'Content')}
-                   </div>
-                   <div class="card-text">
-                     ${esc(item.item_id)}
-                   </div>
-                 </div>
-               </div>`
-          )
-          .join('')
-      }
-    </div>`;
+  renderNotifications();
 
 }
 
 
-/* ============================================================
-   POINTS
-   ============================================================ */
+function renderNotifications(){
 
-async function loadPoints(){
+  const container =
+    $("notifications");
 
-  if(!CR.user){
+  if(!STATE.notifications.length){
 
-    $('pointsActivity').innerHTML =
-      `<div class="empty">
-        <strong>Log in to see CrowPoints</strong>
-      </div>`;
-
-    return;
-
-  }
-
-
-  const result =
-    await safeQuery(
-      'cr_member_watch_points',
-      '*',
-      {
-        eq:{
-          user_id:CR.user.id
-        },
-        order:{
-          column:'created_at',
-          ascending:false
-        },
-        limit:20
-      }
-    );
-
-
-  const list =
-    result.data || [];
-
-
-  if(!list.length){
-
-    $('pointsActivity').innerHTML =
-      `<div class="empty">
-        <strong>No point transactions yet</strong>
-        Watch CrowRules videos to start earning CrowPoints.
-      </div>`;
-
-    return;
-
-  }
-
-
-  $('pointsActivity').innerHTML =
-    list
-      .map(
-        item =>
-          `<div class="notification">
-
-            <div class="notification-icon">
-              ★
-            </div>
-
-            <div class="notification-content">
-
-              <div class="notification-title">
-                +${formatNumber(item.points)} CrowPoints
-              </div>
-
-              <div class="notification-message">
-                ${esc(item.reason || 'Watch activity')}
-                · ${esc(formatDate(item.created_at))}
-              </div>
-
-            </div>
-
-          </div>`
-      )
-      .join('');
-
-}
-
-
-/* ============================================================
-   NOTIFICATIONS
-   ============================================================ */
-
-async function loadNotifications(){
-
-  if(!CR.member){
-
-    $('notifications').innerHTML =
-      `<div class="empty">
-        <strong>Log in to see notifications</strong>
-      </div>`;
-
-    return;
-
-  }
-
-
-  const result =
-    await safeQuery(
-      'cr_member_notifications',
-      '*',
-      {
-        eq:{
-          member_id:CR.member.id
-        },
-        order:{
-          column:'created_at',
-          ascending:false
-        },
-        limit:15
-      }
-    );
-
-
-  const list =
-    result.data || [];
-
-
-  if(!list.length){
-
-    $('notifications').innerHTML =
-      `<div class="empty">
-        <strong>No notifications</strong>
+    container.innerHTML = `
+      <div class="empty">
         You're all caught up.
-      </div>`;
+      </div>
+    `;
 
     return;
 
   }
 
+  container.innerHTML = `
+    <div class="notification-list">
 
-  $('notifications').innerHTML =
-    list
-      .map(
-        item =>
-          `<div class="notification ${
-            item.is_read ? '' : 'unread'
-          }">
+      ${
+        STATE.notifications
+          .map(
+            notification => `
 
-            <div class="notification-icon">
-              🔔
-            </div>
+              <div
+                class="notification ${
+                  notification.is_read
+                    ? ""
+                    : "unread"
+                }"
+              >
 
-            <div class="notification-content">
+                <div class="notification-title">
+                  ${escapeHTML(
+                    notification.title ||
+                    "CrowRules Update"
+                  )}
+                </div>
 
-              <div class="notification-title">
-                ${esc(item.title)}
+                <div class="notification-message">
+                  ${escapeHTML(
+                    notification.message ||
+                    ""
+                  )}
+                </div>
+
+                <div class="notification-time">
+                  ${formatRelative(
+                    notification.created_at
+                  )}
+                </div>
+
               </div>
 
-              <div class="notification-message">
-                ${esc(item.message || '')}
-              </div>
+            `
+          )
+          .join("")
+      }
 
-              <div class="meta">
-                <span class="pill">
-                  ${esc(formatTime(item.created_at))}
-                </span>
-              </div>
-
-            </div>
-
-          </div>`
-      )
-      .join('');
+    </div>
+  `;
 
 }
 
 
-$('markNotificationsRead').onclick =
-  async () => {
+async function markNotificationsRead(){
 
-    if(!CR.member)
-      return;
+  if(!STATE.member) return;
 
-    const result =
-      await db
-        .from('cr_member_notifications')
-        .update({
-          is_read:true,
-          read_at:new Date().toISOString()
-        })
-        .eq('member_id',CR.member.id)
-        .eq('is_read',false);
-
-
-    if(result.error){
-
-      toast(
-        result.error.message,
-        'error'
+  const unread =
+    STATE.notifications
+      .filter(
+        n => !n.is_read
       );
 
-      return;
+  for(
+    const notification
+    of unread
+  ){
 
-    }
-
-
-    toast(
-      'Notifications marked as read.'
-    );
-
-    await loadNotifications();
-
-  };
-
-
-/* ============================================================
-   PROGRAMMING
-   ============================================================ */
-
-async function loadProgramming(){
-
-  const items = [];
-
-
-  /*
-    cr_schedule
-  */
-
-  const schedule =
-    await safeQuery(
-      'cr_schedule',
-      '*',
+    await safeUpdate(
+      "cr_member_notifications",
       {
-        order:{
-          column:'start_at',
-          ascending:true
-        },
-        limit:8
+        is_read:true,
+        read_at:new Date()
+          .toISOString()
+      },
+      {
+        id:notification.id,
+        member_id:
+          STATE.member.id
       }
     );
 
+  }
 
-  (schedule.data || [])
-    .forEach(
-      item =>
-        items.push({
-          title:item.title,
-          description:item.description,
-          type:'Schedule',
-          image:item.thumbnail_url,
-          time:item.start_at
-        })
-    );
+  await loadNotifications();
 
+  showToast(
+    "Notifications",
+    "Your notifications have been marked as read."
+  );
+
+}
+
+
+/* =========================================================
+   ACHIEVEMENTS
+========================================================= */
+
+async function loadAchievements(){
 
   /*
-    Tacoma Nights
-  */
+   * This table is optional because it was not present
+   * in the confirmed current schema.
+   */
 
-  const tn =
-    await safeQuery(
-      'tacoma_nights_episodes',
-      '*',
+  const result =
+    await safeSelect(
+      "cr_member_achievements",
+      "*",
       {
-        order:{
-          column:'display_order',
-          ascending:true
+        eq:{
+          member_id:
+            STATE.member?.id
         },
-        limit:4
-      }
-    );
-
-
-  (tn.data || [])
-    .forEach(
-      item =>
-        items.push({
-          title:`Tacoma Nights — ${item.title}`,
-          description:item.description,
-          type:'Tacoma Nights',
-          image:item.thumbnail_url,
-          time:item.published_at
-        })
-    );
-
-
-  /*
-    Back Deck Live
-  */
-
-  const bd =
-    await safeQuery(
-      'back_deck_episodes',
-      '*',
-      {
         order:{
-          column:'episode_number',
+          column:"created_at",
           ascending:false
         },
-        limit:4
+        limit:12
       }
     );
 
+  if(
+    !result.ok
+  ){
 
-  (bd.data || [])
-    .forEach(
-      item =>
-        items.push({
-          title:`Back Deck Live — ${item.title}`,
-          description:item.description,
-          type:'Back Deck Live',
-          image:item.thumbnail_url,
-          time:item.release_date
-        })
-    );
-
-
-  const box =
-    $('programming');
-
-
-  if(!items.length){
-
-    box.innerHTML =
-      `<div class="empty">
-        <strong>No programming available</strong>
-        CrowRules programming will appear here.
-      </div>`;
+    STATE.optionalTables
+      .achievements = false;
 
     return;
 
   }
 
+  STATE.optionalTables
+    .achievements = true;
 
-  box.innerHTML =
-    items
-      .slice(0,12)
-      .map(
-        item =>
-          `<div class="card program">
+  STATE.achievements =
+    result.data || [];
 
-            <div class="program-image">
-              ${
-                item.image
-                  ? `<img src="${esc(item.image)}" alt="">`
-                  : 'CROWRULES TV'
-              }
-            </div>
-
-            <div class="card-body">
-
-              <div class="card-title">
-                ${esc(item.title || 'CrowRules Program')}
-              </div>
-
-              <div class="card-text">
-                ${esc(
-                  item.description ||
-                  item.type ||
-                  'CrowRules programming'
-                )}
-              </div>
-
-              <div class="meta">
-
-                <span class="pill purple">
-                  ${esc(item.type || 'Program')}
-                </span>
-
-                ${
-                  item.time
-                    ? `<span class="pill">
-                         ${esc(formatDate(item.time))}
-                       </span>`
-                    : ''
-                }
-
-              </div>
-
-            </div>
-
-          </div>`
-      )
-      .join('');
+  renderAchievements();
 
 }
 
 
-/* ============================================================
-   ANNOUNCEMENTS
-   ============================================================ */
+function renderAchievements(){
 
-async function loadAnnouncements(){
-
-  const result =
-    await safeQuery(
-      'cr_announcements',
-      '*',
-      {
-        eq:{
-          active:true
-        },
-        order:{
-          column:'created_at',
-          ascending:false
-        },
-        limit:6
-      }
-    );
-
-
-  const list =
-    result.data || [];
-
-
-  const box =
-    $('announcements');
-
-
-  if(!list.length){
-
-    box.innerHTML =
-      `<div class="empty">
-        <strong>No active announcements</strong>
-      </div>`;
+  if(!STATE.achievements.length){
 
     return;
 
   }
 
+  $("achievements")
+    .innerHTML = `
 
-  box.innerHTML =
-    list
-      .map(
-        item =>
-          `<div class="card">
+      <div class="achievement-grid">
 
-            <div class="card-body">
+        ${
+          STATE.achievements
+            .map(
+              achievement => `
 
-              <div class="meta">
-                <span class="pill ${
-                  item.severity === 'danger'
-                    ? 'pink'
-                    : item.severity === 'success'
-                      ? 'green'
-                      : 'purple'
-                }">
-                  ${esc(item.severity || 'info')}
-                </span>
-              </div>
+                <div class="achievement">
 
-              <div class="card-title" style="margin-top:9px">
-                ${esc(item.title)}
-              </div>
+                  <div class="achievement-icon">
+                    ${
+                      escapeHTML(
+                        achievement.icon ||
+                        "🏆"
+                      )
+                    }
+                  </div>
 
-              <div class="card-text">
-                ${esc(item.message || '')}
-              </div>
+                  <div class="achievement-name">
+                    ${
+                      escapeHTML(
+                        achievement.name ||
+                        achievement.title ||
+                        "Achievement"
+                      )
+                    }
+                  </div>
 
-            </div>
+                  <div class="achievement-desc">
+                    ${
+                      escapeHTML(
+                        achievement.description ||
+                        ""
+                      )
+                    }
+                  </div>
 
-          </div>`
-      )
-      .join('');
+                </div>
+
+              `
+            )
+            .join("")
+        }
+
+      </div>
+
+    `;
 
 }
 
 
-/* ============================================================
-   NEWS
-   ============================================================ */
+/* =========================================================
+   SUGGESTIONS
+========================================================= */
 
-async function loadNews(){
+async function loadSuggestions(){
 
-  const result =
-    await safeQuery(
-      'cr_news',
-      '*',
+  /*
+   * Optional new community table.
+   *
+   * If unavailable, fall back to cr_topics,
+   * which already exists in the project.
+   */
+
+  let result =
+    await safeSelect(
+      "cr_member_suggestions",
+      "*",
       {
-        eq:{
-          status:'published',
-          featured:true
-        },
         order:{
-          column:'published_at',
+          column:"created_at",
           ascending:false
         },
-        limit:6
+        limit:12
       }
     );
 
+  if(result.ok){
 
-  let list =
-    result.data || [];
+    STATE.optionalTables
+      .suggestions = true;
 
+    STATE.suggestions =
+      result.data || [];
 
-  /*
-    If no featured stories, get normal published news.
-  */
+  }else{
 
-  if(!list.length){
+    STATE.optionalTables
+      .suggestions = false;
 
-    const fallback =
-      await safeQuery(
-        'cr_news',
-        '*',
+    /*
+     * Existing CrowRules topic system.
+     */
+
+    const topicResult =
+      await safeSelect(
+        "cr_topics",
+        [
+          "id",
+          "title",
+          "description",
+          "category",
+          "submitted_by",
+          "status",
+          "priority",
+          "created_at"
+        ].join(","),
         {
-          eq:{
-            status:'published'
-          },
           order:{
-            column:'published_at',
+            column:"created_at",
             ascending:false
           },
-          limit:6
+          limit:12
         }
       );
 
-    list =
-      fallback.data || [];
+    if(
+      topicResult.ok
+    ){
+
+      STATE.suggestions =
+        (topicResult.data || [])
+          .map(topic => ({
+            id:topic.id,
+            title:topic.title,
+            body:topic.description,
+            category:topic.category,
+            status:topic.status,
+            created_at:topic.created_at,
+            votes:0
+          }));
+
+    }else{
+
+      STATE.suggestions = [];
+
+    }
 
   }
 
+  renderSuggestions();
 
-  const box =
-    $('news');
+}
 
 
-  if(!list.length){
+function renderSuggestions(){
 
-    box.innerHTML =
-      `<div class="empty">
-        <strong>No news published yet</strong>
-      </div>`;
+  const container =
+    $("suggestionList");
+
+  if(!STATE.suggestions.length){
+
+    container.innerHTML = `
+      <div class="empty">
+        No community suggestions yet.
+        Be the first to submit one.
+      </div>
+    `;
 
     return;
 
   }
 
+  container.innerHTML = `
+    <div class="suggestion-list">
 
-  box.innerHTML =
-    list
-      .map(
-        item =>
-          `<div class="card">
+      ${
+        STATE.suggestions
+          .map(
+            suggestion => `
 
-            ${
-              item.image_url
-                ? `<div class="program-image">
-                     <img src="${esc(item.image_url)}" alt="">
-                   </div>`
-                : ''
-            }
+              <article class="suggestion">
 
-            <div class="card-body">
+                <div class="suggestion-top">
 
-              <div class="meta">
-                <span class="pill cyan">
-                  ${esc(item.category || 'News')}
-                </span>
-              </div>
+                  <div class="suggestion-title">
+                    ${escapeHTML(
+                      suggestion.title ||
+                      "Suggestion"
+                    )}
+                  </div>
 
-              <div class="card-title" style="margin-top:8px">
-                ${esc(item.title)}
-              </div>
+                  <div class="suggestion-status">
+                    ${escapeHTML(
+                      suggestion.status ||
+                      "open"
+                    )}
+                  </div>
 
-              <div class="card-text">
-                ${esc(item.excerpt || '')}
-              </div>
+                </div>
 
-              <div class="meta">
-                ${
-                  item.published_at
-                    ? `<span class="pill">
-                         ${esc(formatDate(item.published_at))}
-                       </span>`
-                    : ''
-                }
-              </div>
+                <div class="suggestion-body">
+                  ${escapeHTML(
+                    suggestion.body ||
+                    suggestion.description ||
+                    ""
+                  )}
+                </div>
 
-            </div>
+                <div class="suggestion-footer">
 
-          </div>`
-      )
-      .join('');
+                  <span class="vote-count">
+                    👍 ${
+                      formatNumber(
+                        suggestion.votes ||
+                        suggestion.vote_count ||
+                        0
+                      )
+                    }
+                  </span>
+
+                  ${
+                    STATE.optionalTables
+                      .suggestions
+                      ? `
+                        <button
+                          class="btn btn-small"
+                          onclick="voteSuggestion('${escapeHTML(
+                            suggestion.id
+                          )}')"
+                        >
+                          Vote
+                        </button>
+                      `
+                      : ""
+                  }
+
+                </div>
+
+              </article>
+
+            `
+          )
+          .join("")
+      }
+
+    </div>
+  `;
 
 }
 
 
-/* ============================================================
-   EVENTS
-   ============================================================ */
+async function submitSuggestion(){
 
-async function loadEvents(){
+  if(!STATE.user){
 
-  const result =
-    await safeQuery(
-      'cr_events',
-      '*',
-      {
-        eq:{
-          is_published:true
-        },
-        order:{
-          column:'start_at',
-          ascending:true
-        },
-        limit:6
-      }
+    openAuth();
+
+    return;
+
+  }
+
+  const title =
+    $("suggestionTitle")
+      .value
+      .trim();
+
+  const body =
+    $("suggestionBody")
+      .value
+      .trim();
+
+  const category =
+    $("suggestionCategory")
+      .value;
+
+  if(!title || !body){
+
+    showToast(
+      "Suggestion",
+      "Please provide a title and idea."
     );
 
-
-  const list =
-    result.data || [];
-
-
-  const box =
-    $('events');
-
-
-  if(!list.length){
-
-    box.innerHTML =
-      `<div class="empty">
-        <strong>No upcoming events</strong>
-        CrowRules community events will appear here.
-      </div>`;
-
     return;
 
   }
 
+  /*
+   * If cr_member_suggestions exists,
+   * use it.
+   */
 
-  box.innerHTML =
-    list
-      .map(
-        item =>
-          `<div class="card">
-
-            <div class="card-body">
-
-              <div class="meta">
-                <span class="pill pink">
-                  ${esc(item.event_type || 'Community')}
-                </span>
-              </div>
-
-              <div class="card-title" style="margin-top:9px">
-                ${esc(item.name)}
-              </div>
-
-              <div class="card-text">
-                ${esc(item.description || '')}
-              </div>
-
-              <div class="meta">
-
-                ${
-                  item.start_at
-                    ? `<span class="pill">
-                         ${esc(formatTime(item.start_at))}
-                       </span>`
-                    : ''
-                }
-
-                ${
-                  item.location_name
-                    ? `<span class="pill">
-                         ${esc(item.location_name)}
-                       </span>`
-                    : ''
-                }
-
-              </div>
-
-            </div>
-
-          </div>`
-      )
-      .join('');
-
-}
-
-
-/* ============================================================
-   SUGGESTIONS
-   ============================================================ */
-
-$('submitSuggestion').onclick =
-  async () => {
-
-    if(!CR.user){
-
-      toast(
-        'Please log in before submitting a suggestion.',
-        'error'
-      );
-
-      return;
-
-    }
-
-
-    const title =
-      $('suggestionTitle').value.trim();
-
-    const body =
-      $('suggestionBody').value.trim();
-
-    const category =
-      $('suggestionCategory').value;
-
-
-    if(!title || !body){
-
-      toast(
-        'Please enter a title and suggestion.',
-        'error'
-      );
-
-      return;
-
-    }
-
-
-    /*
-      Existing table:
-      cr_topics
-    */
+  if(
+    STATE.optionalTables
+      .suggestions
+  ){
 
     const result =
-      await db
-        .from('cr_topics')
-        .insert({
+      await safeInsert(
+        "cr_member_suggestions",
+        {
+          member_id:
+            STATE.member?.id,
 
+          user_id:
+            STATE.user.id,
+
+          title,
+
+          body,
+
+          category,
+
+          status:"open"
+
+        }
+      );
+
+    if(!result.ok){
+
+      showToast(
+        "Suggestion Error",
+        result.error?.message ||
+        "Could not save suggestion."
+      );
+
+      return;
+
+    }
+
+  }else{
+
+    /*
+     * Existing cr_topics fallback.
+     */
+
+    const result =
+      await safeInsert(
+        "cr_topics",
+        {
           title,
           description:body,
           category,
           submitted_by:
-            CR.member?.display_name ||
-            CR.member?.username ||
-            CR.user.email,
-
+            STATE.member?.display_name ||
+            STATE.user.email ||
+            "Member",
           email:
-            CR.user.email,
-
-          status:'new',
-          priority:'normal'
-
-        });
-
-
-    if(result.error){
-
-      toast(
-        result.error.message,
-        'error'
+            STATE.user.email ||
+            null,
+          status:"new",
+          priority:"normal"
+        }
       );
 
-      debugError(
-        'Submit suggestion',
-        result.error
+    if(!result.ok){
+
+      showToast(
+        "Suggestion Error",
+        result.error?.message ||
+        "Could not submit suggestion."
       );
 
       return;
 
     }
 
+  }
 
-    $('suggestionTitle').value = '';
-    $('suggestionBody').value = '';
+  $("suggestionForm")
+    .reset();
 
-    toast(
-      'Your suggestion has been submitted.'
+  showToast(
+    "Suggestion Submitted",
+    "Thanks for helping shape CrowRules."
+  );
+
+  await loadSuggestions();
+
+}
+
+
+async function voteSuggestion(
+  suggestionId
+){
+
+  if(!STATE.user){
+
+    openAuth();
+
+    return;
+
+  }
+
+  if(
+    !STATE.optionalTables
+      .suggestionVotes
+  ){
+
+    showToast(
+      "Voting",
+      "Suggestion voting is not enabled on the current database schema yet."
     );
 
-  };
+    return;
+
+  }
+
+  const result =
+    await safeInsert(
+      "cr_member_suggestion_votes",
+      {
+        suggestion_id:
+          suggestionId,
+
+        member_id:
+          STATE.member?.id,
+
+        user_id:
+          STATE.user.id
+      }
+    );
+
+  if(!result.ok){
+
+    showToast(
+      "Vote",
+      "You may have already voted, or voting is unavailable."
+    );
+
+    return;
+
+  }
+
+  await loadSuggestions();
+
+}
 
 
-/* ============================================================
-   REALTIME
-   ============================================================ */
+/* =========================================================
+   COMMUNITY CHAT
+========================================================= */
 
-function setupRealtime(){
+async function detectChatTable(){
+
+  const result =
+    await safeSelect(
+      "cr_member_chat",
+      "id",
+      {
+        limit:1
+      }
+    );
+
+  STATE.chatAvailable =
+    result.ok;
+
+  STATE.optionalTables
+    .chat =
+    result.ok;
+
+  $("debugChat")
+    .textContent =
+    result.ok
+      ? "Available"
+      : "Not enabled";
+
+  $("debugChat").className =
+    `debug-value ${
+      result.ok
+        ? "ok"
+        : "warn"
+    }`;
+
+  $("chatStatus")
+    .textContent =
+    result.ok
+      ? "Online"
+      : "Table not enabled";
+
+}
+
+
+async function loadChat(){
+
+  if(!STATE.chatAvailable){
+
+    $("chatMessages")
+      .innerHTML = `
+        <div class="community-disabled">
+          <strong>
+            Member Chat is not enabled yet.
+          </strong>
+
+          <span>
+            The Member Hub is ready for
+            <code>cr_member_chat</code>.
+            Once the community table and its
+            RLS policies are enabled, this room
+            will automatically become active.
+          </span>
+        </div>
+      `;
+
+    return;
+
+  }
+
+  const result =
+    await safeSelect(
+      "cr_member_chat",
+      "*",
+      {
+        order:{
+          column:"created_at",
+          ascending:true
+        },
+        limit:100
+      }
+    );
+
+  if(
+    !result.ok
+  ){
+
+    $("chatMessages")
+      .innerHTML = `
+        <div class="empty">
+          Chat could not be loaded.
+        </div>
+      `;
+
+    return;
+
+  }
+
+  STATE.chat =
+    result.data || [];
+
+  renderChat();
+
+}
+
+
+function renderChat(){
+
+  const container =
+    $("chatMessages");
+
+  if(!STATE.chat.length){
+
+    container.innerHTML = `
+      <div class="empty">
+        The room is quiet.
+        Start the conversation.
+      </div>
+    `;
+
+    return;
+
+  }
+
+  container.innerHTML =
+    STATE.chat
+      .map(message => {
+
+        const author =
+          message.display_name ||
+          message.username ||
+          message.author_name ||
+          "Member";
+
+        const body =
+          message.message ||
+          message.body ||
+          "";
+
+        const mine =
+          message.user_id ===
+          STATE.user?.id;
+
+        return `
+
+          <div
+            class="chat-message ${
+              mine ? "mine" : ""
+            }"
+          >
+
+            <div class="chat-author">
+              ${escapeHTML(author)}
+            </div>
+
+            <div class="chat-text">
+              ${escapeHTML(body)}
+            </div>
+
+            <div class="chat-time">
+              ${formatRelative(
+                message.created_at
+              )}
+            </div>
+
+          </div>
+
+        `;
+
+      })
+      .join("");
+
+  container.scrollTop =
+    container.scrollHeight;
+
+}
+
+
+async function sendChatMessage(){
+
+  if(!STATE.user){
+
+    openAuth();
+
+    return;
+
+  }
+
+  if(!STATE.chatAvailable){
+
+    showToast(
+      "Chat",
+      "Member chat is not enabled yet."
+    );
+
+    return;
+
+  }
+
+  const input =
+    $("chatInput");
+
+  const message =
+    input.value.trim();
+
+  if(!message) return;
+
+  const result =
+    await safeInsert(
+      "cr_member_chat",
+      {
+        user_id:
+          STATE.user.id,
+
+        member_id:
+          STATE.member?.id,
+
+        message
+
+      }
+    );
+
+  if(!result.ok){
+
+    showToast(
+      "Chat Error",
+      result.error?.message ||
+      "Message could not be sent."
+    );
+
+    return;
+
+  }
+
+  input.value = "";
+
+  await loadChat();
+
+}
+
+
+async function subscribeToChat(){
+
+  if(
+    !STATE.chatAvailable
+  ){
+
+    return;
+
+  }
+
+  if(
+    STATE.realtimeChannel
+  ){
+
+    try{
+
+      await supabase
+        .removeChannel(
+          STATE.realtimeChannel
+        );
+
+    }catch{}
+
+  }
 
   /*
-    We intentionally do NOT subscribe to cr_member_chat because
-    that table does not currently exist in this Supabase project.
-  */
+   * Postgres Changes is used as the
+   * compatibility path for the current
+   * optional chat table.
+   *
+   * The table must be added to the
+   * supabase_realtime publication for
+   * database change events to arrive.
+   */
 
-  try{
-
-    db
-      .channel('cr-member-notifications')
+  STATE.realtimeChannel =
+    supabase
+      .channel(
+        "crowrules-member-chat"
+      )
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event:'*',
-          schema:'public',
-          table:'cr_member_notifications'
+          event:"INSERT",
+          schema:"public",
+          table:"cr_member_chat"
         },
-        payload => {
+        () => {
 
-          if(
-            CR.member &&
-            payload.new?.member_id ===
-              CR.member.id
-          ){
-
-            loadNotifications();
-
-            toast(
-              'New CrowRules notification.'
-            );
-
-          }
+          loadChat();
 
         }
       )
-      .subscribe(
-        status => {
-
-          $('realtimeStatus').textContent =
-            status === 'SUBSCRIBED'
-              ? 'CONNECTED'
-              : status;
-
-        }
-      );
-
-  }catch(error){
-
-    debugError(
-      'Realtime',
-      error
-    );
-
-  }
+      .subscribe();
 
 }
 
 
-/* ============================================================
-   SUPABASE CONNECTION
-   ============================================================ */
+/* =========================================================
+   MEMBER SEARCH
+========================================================= */
 
-async function testSupabase(){
-
-  try{
-
-    const result =
-      await db
-        .from('cr_site_settings')
-        .select('id')
-        .limit(1);
+let memberSearchTimer = null;
 
 
-    if(result.error)
-      throw result.error;
+function setupMemberSearch(){
 
+  $("memberSearch")
+    .addEventListener(
+      "input",
+      () => {
 
-    $('supabaseStatus').textContent =
-      'CONNECTED';
+        clearTimeout(
+          memberSearchTimer
+        );
 
-    $('supabaseStatus').className =
-      'pill green';
+        memberSearchTimer =
+          setTimeout(
+            searchMembers,
+            350
+          );
 
-  }catch(error){
-
-    $('supabaseStatus').textContent =
-      'ERROR';
-
-    $('supabaseStatus').className =
-      'pill pink';
-
-    debugError(
-      'Supabase connection',
-      error
+      }
     );
-
-  }
 
 }
 
 
-/* ============================================================
-   NAV LINKS
-   ============================================================ */
+async function searchMembers(){
 
-async function loadNavigation(){
+  const term =
+    $("memberSearch")
+      .value
+      .trim();
+
+  if(term.length < 2){
+
+    $("memberSearchResults")
+      .innerHTML = `
+        <div class="empty">
+          Search the member directory.
+        </div>
+      `;
+
+    return;
+
+  }
 
   /*
-    The page keeps its known navigation as a safe fallback.
-    cr_nav_links can optionally power future dynamic navigation.
-  */
+   * Use separate OR clauses against
+   * the public member directory.
+   */
 
-  await safeQuery(
-    'cr_nav_links',
-    'label,href,section,is_external,is_published',
+  const result =
+    await supabase
+      .from("cr_public_members")
+      .select(
+        [
+          "member_id",
+          "username",
+          "display_name",
+          "avatar_url",
+          "membership_tier",
+          "points",
+          "joined_at"
+        ].join(",")
+      )
+      .or(
+        `username.ilike.%${term}%,display_name.ilike.%${term}%`
+      )
+      .limit(12);
+
+  if(result.error){
+
+    $("memberSearchResults")
+      .innerHTML = `
+        <div class="empty">
+          Member search is not available
+          through the current public policy.
+        </div>
+      `;
+
+    return;
+
+  }
+
+  const members =
+    result.data || [];
+
+  if(!members.length){
+
+    $("memberSearchResults")
+      .innerHTML = `
+        <div class="empty">
+          No members found.
+        </div>
+      `;
+
+    return;
+
+  }
+
+  $("memberSearchResults")
+    .innerHTML = `
+
+      <div class="member-grid">
+
+        ${
+          members
+            .map(member => {
+
+              const name =
+                member.display_name ||
+                member.username ||
+                "Member";
+
+              const avatar =
+                safeImage(
+                  member.avatar_url
+                );
+
+              return `
+
+                <div class="member-mini">
+
+                  <div class="avatar">
+
+                    ${
+                      avatar
+                        ? `
+                          <img
+                            src="${escapeHTML(avatar)}"
+                            alt=""
+                            style="
+                              width:100%;
+                              height:100%;
+                              object-fit:cover;
+                            "
+                          >
+                        `
+                        : initials(name)
+                    }
+
+                  </div>
+
+                  <div class="member-mini-info">
+
+                    <div class="member-mini-name">
+                      ${escapeHTML(name)}
+                    </div>
+
+                    <div class="member-mini-date">
+                      @${escapeHTML(
+                        member.username ||
+                        "member"
+                      )}
+                    </div>
+
+                  </div>
+
+                </div>
+
+              `;
+
+            })
+            .join("")
+        }
+
+      </div>
+
+    `;
+
+}
+
+
+/* =========================================================
+   ENGAGEMENT
+========================================================= */
+
+async function loadEngagementFallback(){
+
+  if(!STATE.user) return;
+
+  /*
+   * Do not assume the RPC parameter name.
+   * Instead use the confirmed tables as the
+   * compatibility source.
+   */
+
+  const sessions =
+    await safeSelect(
+      "cr_media_sessions",
+      [
+        "id",
+        "user_id",
+        "media_type",
+        "content_id",
+        "content_key",
+        "content_title",
+        "total_seconds",
+        "last_position_seconds",
+        "completed",
+        "created_at",
+        "updated_at"
+      ].join(","),
+      {
+        eq:{
+          user_id:
+            STATE.user.id
+        },
+        order:{
+          column:"updated_at",
+          ascending:false
+        },
+        limit:50
+      }
+    );
+
+  if(
+    sessions.ok &&
+    Array.isArray(sessions.data)
+  ){
+
+    /*
+     * If cr_members has not yet been updated,
+     * calculate a display fallback from sessions.
+     */
+
+    const videoSeconds =
+      sessions.data
+        .filter(
+          s =>
+            s.media_type === "video"
+        )
+        .reduce(
+          (sum,row) =>
+            sum +
+            Number(
+              row.total_seconds || 0
+            ),
+          0
+        );
+
+    const audioSeconds =
+      sessions.data
+        .filter(
+          s =>
+            s.media_type === "audio"
+        )
+        .reduce(
+          (sum,row) =>
+            sum +
+            Number(
+              row.total_seconds || 0
+            ),
+          0
+        );
+
+    const member =
+      STATE.member || {};
+
+    if(
+      !Number(member.watch_seconds)
+    ){
+
+      member.watch_seconds =
+        videoSeconds;
+
+    }
+
+    if(
+      !Number(member.listen_seconds)
+    ){
+
+      member.listen_seconds =
+        audioSeconds;
+
+    }
+
+    STATE.member =
+      member;
+
+    renderStats();
+
+  }
+
+}
+
+
+/* =========================================================
+   MEDIA CONTENT DISCOVERY
+========================================================= */
+
+async function loadLatestCrowRulesContent(){
+
+  /*
+   * The Member Hub does not require content discovery
+   * to function, but this allows future cards to pull
+   * directly from the current content registry.
+   */
+
+  const content =
+    await safeSelect(
+      "cr_content",
+      [
+        "id",
+        "title",
+        "slug",
+        "content_type",
+        "excerpt",
+        "featured_image_url",
+        "status",
+        "published_at"
+      ].join(","),
+      {
+        order:{
+          column:"published_at",
+          ascending:false
+        },
+        limit:12
+      }
+    );
+
+  /*
+   * We intentionally do not render this into a dedicated
+   * panel yet because watch history is the primary member
+   * experience.
+   */
+
+  return content;
+
+}
+
+
+/* =========================================================
+   MEMBER ACTIVITY
+========================================================= */
+
+async function recordMemberActivity(
+  activityType,
+  metadata = {}
+){
+
+  if(
+    !STATE.user ||
+    !STATE.member
+  ){
+
+    return;
+
+  }
+
+  await safeInsert(
+    "cr_member_activity",
     {
-      eq:{
-        is_published:true
-      },
-      order:{
-        column:'sort_order',
-        ascending:true
-      },
-      limit:30
+      member_id:
+        STATE.member.id,
+
+      user_id:
+        STATE.user.id,
+
+      activity_type:
+        activityType,
+
+      metadata
+
     }
   );
 
 }
 
 
-/* ============================================================
-   SITE SETTINGS
-   ============================================================ */
+/* =========================================================
+   ADMIN / ROLE PERMISSIONS
+========================================================= */
 
-async function loadSiteSettings(){
+async function loadRolePermissions(){
+
+  if(!STATE.role){
+
+    return;
+
+  }
 
   const result =
-    await safeQuery(
-      'cr_site_settings',
-      '*',
+    await safeSelect(
+      "cr_role_permissions",
+      [
+        "role_key",
+        "permission_key"
+      ].join(","),
       {
         eq:{
-          is_public:true
+          role_key:
+            STATE.role
         },
-        limit:20
+        limit:100
       }
     );
 
+  if(
+    result.ok &&
+    Array.isArray(result.data)
+  ){
 
-  /*
-    Settings are intentionally read-only here.
-    The admin system remains responsible for changing them.
-  */
+    STATE.permissions =
+      result.data
+        .map(
+          row =>
+            row.permission_key
+        );
 
-  window.CrowRulesSiteSettings =
-    result.data || [];
+  }
 
 }
 
 
-/* ============================================================
-   SOCIAL LINKS
-   ============================================================ */
+/* =========================================================
+   ADMIN CHECK
+========================================================= */
 
-async function loadSocialLinks(){
+async function checkAdminRecord(){
+
+  if(!STATE.user) return;
 
   const result =
-    await safeQuery(
-      'cr_social_links',
-      '*',
+    await safeSelect(
+      "cr_admins",
+      [
+        "user_id",
+        "display_name",
+        "role",
+        "is_active"
+      ].join(","),
       {
         eq:{
-          is_published:true
+          user_id:
+            STATE.user.id
         },
-        order:{
-          column:'sort_order',
-          ascending:true
-        },
-        limit:20
+        single:true
       }
     );
 
+  if(
+    result.ok &&
+    result.data?.is_active
+  ){
 
-  window.CrowRulesSocialLinks =
-    result.data || [];
-
-}
-
-
-/* ============================================================
-   YEAR
-   ============================================================ */
-
-$('year').textContent =
-  new Date().getFullYear();
-
-
-/* ============================================================
-   DEBUG HOTKEY
-   ============================================================ */
-
-window.addEventListener(
-  'keydown',
-  event => {
+    /*
+     * Admin table is additional evidence,
+     * but role enforcement remains database-side.
+     */
 
     if(
-      event.ctrlKey &&
-      event.shiftKey &&
-      event.key.toLowerCase() === 'd'
+      ROLE_LEVELS[
+        normalizeRole(
+          result.data.role
+        )
+      ] >
+      getLevel()
     ){
 
-      document.body.classList.toggle(
-        'debug-on'
+      setRole(
+        result.data.role
       );
+
+      renderProfile();
+
+    }
+
+  }
+
+}
+
+
+/* =========================================================
+   SESSION
+========================================================= */
+
+async function loadSession(){
+
+  try{
+
+    const {
+      data,
+      error
+    } =
+      await supabase.auth
+        .getSession();
+
+    if(error){
+
+      throw error;
+
+    }
+
+    STATE.session =
+      data.session;
+
+    STATE.user =
+      data.session?.user ||
+      null;
+
+    if(STATE.user){
+
+      setConnectionStatus(
+        "connected",
+        "Supabase • Signed In"
+      );
+
+      $("debugAuth")
+        .textContent =
+        "Authenticated";
+
+      $("debugAuth").className =
+        "debug-value ok";
+
+      $("authButton")
+        .textContent =
+        "Logout";
+
+      $("userChip")
+        .classList.remove(
+          "hidden"
+        );
+
+      $("authWall")
+        .classList.remove(
+          "show"
+        );
+
+      $("dashboard")
+        .classList.remove(
+          "hidden"
+        );
+
+      await initializeMemberHub();
+
+    }else{
+
+      setConnectionStatus(
+        "connected",
+        "Supabase • Ready"
+      );
+
+      $("debugAuth")
+        .textContent =
+        "Signed Out";
+
+      $("debugAuth").className =
+        "debug-value warn";
+
+      $("authButton")
+        .textContent =
+        "Login";
+
+      $("userChip")
+        .classList.add(
+          "hidden"
+        );
+
+      $("authWall")
+        .classList.add(
+          "show"
+        );
+
+      $("dashboard")
+        .classList.add(
+          "hidden"
+        );
+
+      $("debugMember")
+        .textContent =
+        "Waiting";
+
+    }
+
+  }catch(error){
+
+    console.error(
+      "Session error:",
+      error
+    );
+
+    setConnectionStatus(
+      "offline",
+      "Supabase Error"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   INITIALIZE MEMBER HUB
+========================================================= */
+
+async function initializeMemberHub(){
+
+  if(
+    STATE.loading
+  ){
+
+    return;
+
+  }
+
+  STATE.loading = true;
+
+  try{
+
+    await loadMember();
+
+    await Promise.allSettled([
+
+      loadRolePermissions(),
+
+      checkAdminRecord(),
+
+      loadLeaderboard(),
+
+      loadNewestMembers(),
+
+      loadWatchHistory(),
+
+      loadFavorites(),
+
+      loadNotifications(),
+
+      loadAchievements(),
+
+      loadSuggestions(),
+
+      detectChatTable(),
+
+      loadEngagementFallback(),
+
+      loadLatestCrowRulesContent()
+
+    ]);
+
+    await loadChat();
+
+    await subscribeToChat();
+
+    await recordMemberActivity(
+      "member_hub_view",
+      {
+        version:"4.0"
+      }
+    );
+
+  }catch(error){
+
+    console.error(
+      "Member Hub initialization error:",
+      error
+    );
+
+    showToast(
+      "Member Hub",
+      "Some modules could not load, but the rest of the hub remains available."
+    );
+
+  }finally{
+
+    STATE.loading = false;
+
+  }
+
+}
+
+
+/* =========================================================
+   AUTH STATE LISTENER
+========================================================= */
+
+supabase.auth
+  .onAuthStateChange(
+    async (
+      event,
+      session
+    ) => {
+
+      STATE.session =
+        session;
+
+      STATE.user =
+        session?.user ||
+        null;
+
+      /*
+       * Avoid performing excessive work directly
+       * inside the auth callback.
+       */
+
+      setTimeout(
+        () => loadSession(),
+        0
+      );
+
+    }
+  );
+
+
+/* =========================================================
+   UI EVENTS
+========================================================= */
+
+$("authButton")
+  .addEventListener(
+    "click",
+    async () => {
+
+      if(STATE.user){
+
+        await logout();
+
+      }else{
+
+        switchAuthTab(
+          "login"
+        );
+
+        openAuth();
+
+      }
+
+    }
+  );
+
+
+$("openAuthHero")
+  .addEventListener(
+    "click",
+    () => {
+
+      switchAuthTab(
+        "login"
+      );
+
+      openAuth();
+
+    }
+  );
+
+
+$("openAuthWall")
+  .addEventListener(
+    "click",
+    () => {
+
+      switchAuthTab(
+        "login"
+      );
+
+      openAuth();
+
+    }
+  );
+
+
+$("closeAuth")
+  .addEventListener(
+    "click",
+    closeAuth
+  );
+
+
+$("loginTab")
+  .addEventListener(
+    "click",
+    () =>
+      switchAuthTab(
+        "login"
+      )
+  );
+
+
+$("signupTab")
+  .addEventListener(
+    "click",
+    () =>
+      switchAuthTab(
+        "signup"
+      )
+  );
+
+
+$("loginForm")
+  .addEventListener(
+    "submit",
+    event => {
+
+      event.preventDefault();
+
+      login();
+
+    }
+  );
+
+
+$("signupForm")
+  .addEventListener(
+    "submit",
+    event => {
+
+      event.preventDefault();
+
+      signup();
+
+    }
+  );
+
+
+$("suggestionForm")
+  .addEventListener(
+    "submit",
+    event => {
+
+      event.preventDefault();
+
+      submitSuggestion();
+
+    }
+  );
+
+
+$("chatForm")
+  .addEventListener(
+    "submit",
+    event => {
+
+      event.preventDefault();
+
+      sendChatMessage();
+
+    }
+  );
+
+
+$("markNotificationsRead")
+  .addEventListener(
+    "click",
+    markNotificationsRead
+  );
+
+
+$("notificationButton")
+  .addEventListener(
+    "click",
+    () => {
+
+      document
+        .getElementById(
+          "notifications"
+        )
+        ?.scrollIntoView({
+          behavior:"smooth",
+          block:"center"
+        });
+
+    }
+  );
+
+
+$("authModal")
+  .addEventListener(
+    "click",
+    event => {
+
+      if(
+        event.target ===
+        $("authModal")
+      ){
+
+        closeAuth();
+
+      }
+
+    }
+  );
+
+
+setupMemberSearch();
+
+
+/* =========================================================
+   BOOT
+========================================================= */
+
+(async function boot(){
+
+  try{
+
+    setConnectionStatus(
+      "connecting",
+      "Connecting"
+    );
+
+    await loadSession();
+
+  }catch(error){
+
+    console.error(
+      "Member Hub boot failure:",
+      error
+    );
+
+    setConnectionStatus(
+      "offline",
+      "Connection Failed"
+    );
+
+  }
+
+})();
+
+
+/* =========================================================
+   PAGE VISIBILITY / SESSION REFRESH
+========================================================= */
+
+document.addEventListener(
+  "visibilitychange",
+  async () => {
+
+    if(
+      document.visibilityState ===
+      "visible"
+    ){
+
+      try{
+
+        const {
+          data
+        } =
+          await supabase.auth
+            .getSession();
+
+        if(
+          data.session?.user?.id !==
+          STATE.user?.id
+        ){
+
+          await loadSession();
+
+        }
+
+      }catch{}
 
     }
 
@@ -4477,73 +7127,73 @@ window.addEventListener(
 );
 
 
-/* ============================================================
-   INITIALIZE
-   ============================================================ */
+/* =========================================================
+   PERIODIC MEMBER REFRESH
+========================================================= */
 
-async function init(){
+setInterval(
+  async () => {
 
-  try{
+    if(
+      STATE.user &&
+      !STATE.loading
+    ){
 
-    await testSupabase();
+      await loadMember();
 
-    await loadAuth();
+      await Promise.allSettled([
 
-    await loadNavigation();
+        loadLeaderboard(),
 
-    await loadSiteSettings();
+        loadWatchHistory(),
 
-    await loadSocialLinks();
+        loadNotifications()
 
-    await refreshAuthUI();
+      ]);
 
-    setupRealtime();
+    }
 
-  }catch(error){
-
-    debugError(
-      'Member Hub initialization',
-      error
-    );
-
-    toast(
-      'Member Hub loaded with limited functionality. Check the browser console for details.',
-      'error'
-    );
-
-  }
-
-}
+  },
+  120000
+);
 
 
-/* ============================================================
-   GLOBAL DEBUG API
-   ============================================================ */
+/* =========================================================
+   GLOBAL DEBUG OBJECT
+   Helpful while developing the site.
+========================================================= */
 
 window.CrowRulesMemberHub = {
 
-  state:CR,
+  version:"4.0",
 
-  supabase:db,
+  state:STATE,
 
-  reload:loadMember,
+  supabase,
 
-  reloadLeaderboard:loadLeaderboard,
+  reload:loadSession,
 
-  reloadHistory:loadWatchHistory,
+  refresh:initializeMemberHub,
 
-  reloadNotifications:loadNotifications,
+  role:{
 
-  reloadProgramming:loadProgramming,
+    get:getRole,
 
-  role:() => CR.role,
+    level:getLevel,
 
-  permissions:() => CR.permissions
+    has:hasRole,
+
+    moderator:isModerator,
+
+    staff:isStaff,
+
+    admin:isAdmin,
+
+    owner:isOwner
+
+  }
 
 };
-
-
-init();
 
 </script>
 
