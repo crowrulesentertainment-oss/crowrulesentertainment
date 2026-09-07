@@ -1,1174 +1,547 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#05060a">
-  <meta name="description" content="CrowRules TV — Show Player">
-  <title>CrowRules TV — Show</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet">
-
-  <style>
-    :root{
-      --bg:#05060a;
-      --panel:#0b0e15;
-      --panel2:#101521;
-      --text:#f5f7fb;
-      --muted:#9aa4b5;
-      --line:rgba(255,255,255,.09);
-      --accent:#00eaff;
-      --accent2:#9d5cff;
-      --danger:#ff4d6d;
-      --good:#65ff9a;
-      --shadow:0 24px 70px rgba(0,0,0,.45);
-      --radius:22px;
-    }
-
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{
-      margin:0;
-      min-height:100vh;
-      color:var(--text);
-      background:
-        radial-gradient(circle at 15% 0%,rgba(0,234,255,.12),transparent 28%),
-        radial-gradient(circle at 90% 10%,rgba(157,92,255,.13),transparent 28%),
-        var(--bg);
-      font-family:Montserrat,system-ui,sans-serif;
-    }
-
-    body[data-show="tacoma"]{--accent:#00eaff;--accent2:#9d5cff}
-    body[data-show="backdeck"]{--accent:#ff9d3d;--accent2:#ffd166}
-    body[data-show="bird"]{--accent:#b65cff;--accent2:#6dff7a}
-    body[data-show="dj"]{--accent:#ff3dbd;--accent2:#00eaff}
-
-    a{color:inherit;text-decoration:none}
-    button,input{font:inherit}
-
-    .shell{width:min(1400px,calc(100% - 32px));margin:auto}
-
-    header{
-      position:sticky;top:0;z-index:50;
-      backdrop-filter:blur(18px);
-      background:rgba(5,6,10,.78);
-      border-bottom:1px solid var(--line);
-    }
-
-    .nav{
-      min-height:72px;display:flex;align-items:center;gap:18px;
-    }
-
-    .brand{
-      display:flex;align-items:center;gap:12px;
-      font-family:Orbitron,sans-serif;font-weight:800;letter-spacing:.08em;
-      margin-right:auto;
-    }
-
-    .brand-mark{
-      width:38px;height:38px;border-radius:12px;
-      display:grid;place-items:center;
-      background:linear-gradient(135deg,var(--accent),var(--accent2));
-      color:#05060a;font-weight:900;
-      box-shadow:0 0 28px color-mix(in srgb,var(--accent) 45%,transparent);
-    }
-
-    nav{display:flex;gap:8px;flex-wrap:wrap}
-    nav a,.nav-btn{
-      border:1px solid transparent;
-      padding:10px 13px;border-radius:12px;color:var(--muted);
-      background:transparent;cursor:pointer;
-    }
-    nav a:hover,.nav-btn:hover{
-      color:var(--text);border-color:var(--line);background:rgba(255,255,255,.04)
-    }
-
-    main{padding:34px 0 70px}
-
-    .hero{
-      display:grid;grid-template-columns:minmax(0,1.7fr) minmax(300px,.8fr);
-      gap:22px;align-items:stretch;
-    }
-
-    .player-card,.info-card,.schedule-card,.chat-card,.episodes-card{
-      border:1px solid var(--line);
-      background:linear-gradient(180deg,rgba(18,22,33,.94),rgba(9,11,17,.94));
-      box-shadow:var(--shadow);
-      border-radius:var(--radius);
-    }
-
-    .player-card{overflow:hidden}
-    .player-wrap{
-      position:relative;aspect-ratio:16/9;background:#000;
-      display:grid;place-items:center;
-    }
-
-    video,#youtubePlayer{width:100%;height:100%;display:block;background:#000}
-    #youtubePlayer iframe{width:100%!important;height:100%!important}
-
-    .player-overlay{
-      position:absolute;inset:0;pointer-events:none;
-      display:flex;align-items:flex-start;justify-content:space-between;
-      padding:18px;
-    }
-
-    .badge{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:8px 11px;border-radius:999px;
-      background:rgba(0,0,0,.62);border:1px solid rgba(255,255,255,.12);
-      backdrop-filter:blur(10px);
-      font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
-    }
-
-    .dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 14px var(--good)}
-    .dot.off{background:#777;box-shadow:none}
-
-    .player-message{
-      position:absolute;inset:auto 18px 18px 18px;
-      display:none;padding:13px 15px;border-radius:14px;
-      background:rgba(0,0,0,.78);border:1px solid var(--line);
-      color:#fff;font-size:13px;
-    }
-    .player-message.show{display:block}
-
-    .player-controls{
-      display:flex;align-items:center;gap:10px;padding:14px 16px;
-      border-top:1px solid var(--line);flex-wrap:wrap;
-    }
-
-    .control{
-      border:1px solid var(--line);background:#0c111a;color:var(--text);
-      padding:9px 12px;border-radius:11px;cursor:pointer;
-    }
-    .control:hover{border-color:var(--accent);box-shadow:0 0 18px rgba(0,234,255,.12)}
-    .control.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#05060a;border:0;font-weight:800}
-    .spacer{flex:1}
-
-    .info-card{padding:26px}
-    .eyebrow{
-      color:var(--accent);font-size:11px;font-weight:900;letter-spacing:.18em;
-      text-transform:uppercase;margin-bottom:10px;
-    }
-    h1,h2,h3{font-family:Orbitron,sans-serif;margin:0 0 12px}
-    h1{font-size:clamp(28px,4vw,54px);line-height:1.04}
-    h2{font-size:24px}
-    h3{font-size:16px}
-    p{line-height:1.65;color:var(--muted)}
-
-    .show-art{
-      min-height:170px;border-radius:18px;margin-bottom:20px;
-      background:
-        linear-gradient(135deg,rgba(0,234,255,.22),rgba(157,92,255,.12)),
-        radial-gradient(circle at 70% 30%,var(--accent2),transparent 38%),
-        #0a0d14;
-      border:1px solid var(--line);
-      display:flex;align-items:flex-end;padding:18px;
-      overflow:hidden;position:relative;
-    }
-    .show-art:after{
-      content:"";position:absolute;inset:0;
-      background:repeating-linear-gradient(135deg,transparent 0 14px,rgba(255,255,255,.025) 15px 16px);
-    }
-    .art-title{position:relative;z-index:1;font-family:Orbitron;font-weight:900;font-size:24px}
-
-    .meta{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}
-    .meta div{padding:12px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.025)}
-    .meta small{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
-    .meta strong{font-size:13px}
-
-    .countdown{
-      padding:16px;border-radius:16px;
-      background:rgba(0,0,0,.28);border:1px solid var(--line);
-      margin-top:18px;
-    }
-    .countdown-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
-    .countdown-time{font-family:Orbitron;font-size:24px;color:var(--accent);margin-top:5px}
-
-    .grid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(320px,.7fr);gap:22px;margin-top:22px}
-
-    .section-head{padding:20px 22px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center}
-    .section-head .spacer{flex:1}
-    .section-body{padding:20px}
-
-    .episodes{display:grid;gap:12px}
-    .episode{
-      display:grid;grid-template-columns:110px 1fr auto;gap:14px;align-items:center;
-      padding:13px;border:1px solid var(--line);border-radius:16px;
-      background:rgba(255,255,255,.025);cursor:pointer;
-      transition:.18s ease;
-    }
-    .episode:hover,.episode.active{
-      transform:translateY(-1px);border-color:var(--accent);
-      box-shadow:0 0 24px rgba(0,234,255,.08)
-    }
-    .thumb{
-      aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:#05070b;
-      display:grid;place-items:center;color:var(--muted);font-size:11px;
-    }
-    .thumb img{width:100%;height:100%;object-fit:cover}
-    .episode-title{font-weight:800}
-    .episode-meta{color:var(--muted);font-size:11px;margin-top:5px}
-    .pill{
-      border:1px solid var(--line);border-radius:999px;padding:6px 8px;
-      font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)
-    }
-
-    .schedule{display:grid;gap:10px}
-    .schedule-item{
-      padding:14px;border-radius:14px;border:1px solid var(--line);
-      background:rgba(255,255,255,.025)
-    }
-    .schedule-time{font-family:Orbitron;color:var(--accent);font-size:12px}
-    .schedule-title{font-weight:700;margin-top:4px}
-
-    .chat-messages{
-      height:300px;overflow:auto;display:flex;flex-direction:column;gap:10px;
-      margin-bottom:12px;padding-right:3px
-    }
-    .chat-msg{padding:10px 12px;border-radius:13px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
-    .chat-msg strong{font-size:12px}
-    .chat-msg p{margin:4px 0 0;font-size:12px;color:#dbe0e9;line-height:1.45}
-    .chat-form{display:flex;gap:8px}
-    .chat-form input{
-      flex:1;min-width:0;border:1px solid var(--line);background:#080b11;color:#fff;
-      padding:11px 12px;border-radius:12px;outline:none
-    }
-    .chat-form input:focus{border-color:var(--accent)}
-
-    .statusbar{
-      margin-top:22px;padding:13px 16px;border:1px solid var(--line);border-radius:14px;
-      color:var(--muted);font-size:12px;background:rgba(255,255,255,.025)
-    }
-
-    .empty{padding:30px;text-align:center;color:var(--muted)}
-    .error{color:#ff91a5}
-
-    footer{border-top:1px solid var(--line);padding:25px 0;color:var(--muted);font-size:12px}
-
-    @media(max-width:1000px){
-      .hero,.grid{grid-template-columns:1fr}
-    }
-    @media(max-width:700px){
-      .shell{width:min(100% - 20px,1400px)}
-      nav{display:none}
-      .episode{grid-template-columns:90px 1fr}
-      .episode .pill{display:none}
-      .player-controls{padding:11px}
-      .info-card{padding:20px}
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#05060a">
+<meta name="description" content="CrowRules TV — show player, episodes, schedule and community chat.">
+<title>CrowRules TV — Show</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#05060a;--panel:#0b0f17;--panel2:#101621;--text:#f5f7fb;--muted:#98a3b5;
+  --line:rgba(255,255,255,.09);--accent:#00eaff;--accent2:#9d5cff;
+  --good:#64ff9a;--bad:#ff5577;--radius:22px;--shadow:0 25px 80px rgba(0,0,0,.48);
+}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;color:var(--text);font-family:Montserrat,system-ui,sans-serif;background:
+radial-gradient(circle at 10% 0%,color-mix(in srgb,var(--accent) 13%,transparent),transparent 30%),
+radial-gradient(circle at 90% 10%,color-mix(in srgb,var(--accent2) 13%,transparent),transparent 30%),var(--bg);min-height:100vh}
+body[data-show="tacoma"]{--accent:#00eaff;--accent2:#9d5cff}
+body[data-show="backdeck"]{--accent:#ff9d3d;--accent2:#ffd166}
+body[data-show="bird"]{--accent:#b65cff;--accent2:#6dff7a}
+body[data-show="dj"]{--accent:#ff3dbd;--accent2:#00eaff}
+a{color:inherit;text-decoration:none}button,input{font:inherit}
+.shell{width:min(1400px,calc(100% - 32px));margin:auto}
+header{position:sticky;top:0;z-index:100;background:rgba(5,6,10,.78);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}
+.nav{min-height:72px;display:flex;align-items:center;gap:16px}.brand{display:flex;align-items:center;gap:11px;margin-right:auto;font:800 15px Orbitron;letter-spacing:.1em}
+.mark{width:39px;height:39px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#05060a;font-weight:900}
+nav{display:flex;gap:6px}nav a,.nav-btn{padding:10px 12px;border:1px solid transparent;border-radius:11px;color:var(--muted);background:transparent;cursor:pointer}
+nav a:hover,.nav-btn:hover{color:var(--text);border-color:var(--line);background:rgba(255,255,255,.04)}
+main{padding:34px 0 70px}.hero{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(300px,.8fr);gap:22px}
+.card{background:linear-gradient(180deg,rgba(16,21,32,.95),rgba(8,10,16,.96));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.player{overflow:hidden}.screen{position:relative;aspect-ratio:16/9;background:#000}
+video,#youtubePlayer{width:100%;height:100%;display:block;background:#000}#youtubePlayer iframe{width:100%!important;height:100%!important}
+.overlay{position:absolute;inset:0;padding:17px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none}
+.badge,.pill{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(0,0,0,.6);padding:8px 11px;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 13px var(--good)}.dot.off{background:#777;box-shadow:none}
+.message{display:none;position:absolute;left:17px;right:17px;bottom:17px;padding:13px 15px;border-radius:13px;background:rgba(0,0,0,.82);border:1px solid var(--line);font-size:12px;font-weight:700}.message.show{display:block}
+.controls{display:flex;align-items:center;gap:8px;padding:13px;border-top:1px solid var(--line);flex-wrap:wrap}.spacer{flex:1}
+.btn{padding:9px 12px;border-radius:11px;border:1px solid var(--line);background:#0b1018;color:var(--text);cursor:pointer}.btn:hover{border-color:var(--accent)}.btn.primary{border:0;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#05060a;font-weight:900}
+.info{padding:24px}.art{min-height:180px;border-radius:17px;border:1px solid var(--line);margin-bottom:20px;display:flex;align-items:flex-end;padding:17px;position:relative;overflow:hidden;background:
+radial-gradient(circle at 75% 25%,var(--accent2),transparent 38%),linear-gradient(135deg,color-mix(in srgb,var(--accent) 25%,transparent),transparent),#080c13}
+.art:after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,transparent 0 14px,rgba(255,255,255,.025) 15px 16px)}
+.art-title{z-index:1;font:900 24px Orbitron}
+.eyebrow{font-size:10px;color:var(--accent);font-weight:900;letter-spacing:.17em;text-transform:uppercase;margin-bottom:9px}
+h1,h2,h3{font-family:Orbitron;margin:0 0 10px}h1{font-size:clamp(28px,4vw,52px);line-height:1.03}h2{font-size:22px}p{color:var(--muted);line-height:1.65}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:18px 0}.meta div{padding:11px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.025)}.meta small{display:block;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
+.meta strong{font-size:12px}.count{padding:15px;border:1px solid var(--line);border-radius:15px;background:rgba(0,0,0,.25)}.count-label{font-size:9px;color:var(--muted);letter-spacing:.13em;text-transform:uppercase}.count-time{margin-top:5px;color:var(--accent);font:700 23px Orbitron}
+.grid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(300px,.7fr);gap:22px;margin-top:22px}.head{display:flex;align-items:center;gap:10px;padding:19px 21px;border-bottom:1px solid var(--line)}.body{padding:19px}
+.episodes{display:grid;gap:10px}.episode{display:grid;grid-template-columns:112px 1fr auto;gap:13px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.025);cursor:pointer;transition:.16s}
+.episode:hover,.episode.active{border-color:var(--accent);box-shadow:0 0 22px color-mix(in srgb,var(--accent) 12%,transparent)}
+.thumb{aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:#05070b;display:grid;place-items:center;color:var(--muted);font-size:9px}.thumb img{width:100%;height:100%;object-fit:cover}.ep-title{font-weight:800;font-size:13px}.ep-meta{color:var(--muted);font-size:10px;margin-top:5px}
+.schedule{display:grid;gap:9px}.sched{padding:12px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.025)}.sched-time{color:var(--accent);font:700 11px Orbitron}.sched-title{font-weight:700;font-size:12px;margin-top:4px}
+.chat{margin-top:22px}.messages{height:300px;overflow:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:11px}.msg{padding:9px 11px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.035)}.msg strong{font-size:11px}.msg p{margin:4px 0 0;color:#dce1e9;font-size:11px;line-height:1.45}.chat-form{display:flex;gap:8px}.chat-form input{min-width:0;flex:1;padding:11px;border-radius:11px;border:1px solid var(--line);background:#080b11;color:#fff;outline:0}.chat-form input:focus{border-color:var(--accent)}
+.status{margin-top:22px;padding:12px 15px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.025);font-size:11px;color:var(--muted)}.error{color:#ff91a5}.empty{text-align:center;color:var(--muted);padding:25px;font-size:12px}
+footer{border-top:1px solid var(--line);padding:25px 0;color:var(--muted);font-size:11px}
+#crThemeBanner{margin:0 auto 20px!important}
+@media(max-width:980px){.hero,.grid{grid-template-columns:1fr}}
+@media(max-width:700px){.shell{width:calc(100% - 20px)}nav{display:none}.episode{grid-template-columns:88px 1fr}.episode .pill{display:none}.info{padding:19px}}
+</style>
 </head>
-
 <body data-show="tacoma">
+
 <header>
   <div class="shell nav">
-    <a class="brand" href="./index.html">
-      <span class="brand-mark">CR</span>
-      <span>CROWRULES TV</span>
-    </a>
+    <a class="brand" href="./index.html"><span class="mark">CR</span><span>CROWRULES TV</span></a>
     <nav>
-      <a href="./index.html">Home</a>
-      <a href="./shows.html">Shows</a>
-      <a href="./schedule.html">TV Guide</a>
-      <a href="./members.html">Members</a>
+      <a href="./index.html">Home</a><a href="./shows.html">Shows</a><a href="./schedule.html">TV Guide</a><a href="./members.html">Members</a>
     </nav>
     <button class="nav-btn" id="authBtn">Sign In</button>
   </div>
 </header>
 
 <main>
-  <div class="shell">
-    <section class="hero">
-      <div class="player-card">
-        <div class="player-wrap">
-          <video id="nativeVideo" controls playsinline preload="metadata"></video>
-          <div id="youtubePlayer" style="display:none"></div>
-
-          <div class="player-overlay">
-            <div class="badge"><span class="dot" id="liveDot"></span><span id="statusLabel">CROW RULES TV</span></div>
-            <div class="badge" id="sourceBadge">ON DEMAND</div>
-          </div>
-
-          <div class="player-message" id="playerMessage"></div>
+<div class="shell">
+  <section class="hero">
+    <div class="card player">
+      <div class="screen">
+        <video id="nativeVideo" controls playsinline preload="metadata"></video>
+        <div id="youtubePlayer" style="display:none"></div>
+        <div class="overlay">
+          <div class="badge"><span class="dot" id="liveDot"></span><span id="statusLabel">CROWRULES TV</span></div>
+          <div class="badge" id="sourceBadge">ON DEMAND</div>
         </div>
-
-        <div class="player-controls">
-          <button class="control primary" id="playBtn">▶ Play</button>
-          <button class="control" id="muteBtn">🔊 Mute</button>
-          <button class="control" id="pipBtn">▣ PIP</button>
-          <button class="control" id="popoutBtn">↗ Popout</button>
-          <button class="control" id="retryBtn">↻ Retry</button>
-          <span class="spacer"></span>
-          <span class="pill" id="playerType">READY</span>
-        </div>
+        <div class="message" id="playerMessage"></div>
       </div>
-
-      <aside class="info-card">
-        <div class="show-art">
-          <div class="art-title" id="artTitle">CrowRules TV</div>
-        </div>
-
-        <div class="eyebrow" id="eyebrow">CROWRULES TV</div>
-        <h1 id="showTitle">Loading Show…</h1>
-        <p id="showTagline">Loading your CrowRules TV show.</p>
-
-        <div class="meta">
-          <div><small>Episodes</small><strong id="episodeCount">—</strong></div>
-          <div><small>Current</small><strong id="currentEpisodeLabel">—</strong></div>
-          <div><small>Status</small><strong id="showStatus">Loading</strong></div>
-          <div><small>Viewer</small><strong id="viewerCount">—</strong></div>
-        </div>
-
-        <div class="countdown">
-          <div class="countdown-label" id="countdownLabel">NEXT BROADCAST</div>
-          <div class="countdown-time" id="countdownTime">--:--:--</div>
-        </div>
-      </aside>
-    </section>
-
-    <div class="grid">
-      <section class="episodes-card">
-        <div class="section-head">
-          <h2>Episodes</h2>
-          <span class="spacer"></span>
-          <span class="pill" id="episodeFilter">PUBLISHED</span>
-        </div>
-        <div class="section-body">
-          <div class="episodes" id="episodes"></div>
-        </div>
-      </section>
-
-      <aside class="schedule-card">
-        <div class="section-head">
-          <h2>Schedule</h2>
-        </div>
-        <div class="section-body">
-          <div class="schedule" id="schedule"></div>
-        </div>
-      </aside>
+      <div class="controls">
+        <button class="btn primary" id="playBtn">▶ Play</button>
+        <button class="btn" id="muteBtn">🔊 Mute</button>
+        <button class="btn" id="pipBtn">▣ PIP</button>
+        <button class="btn" id="popoutBtn">↗ Popout</button>
+        <button class="btn" id="retryBtn">↻ Retry</button>
+        <span class="spacer"></span><span class="pill" id="playerType">READY</span>
+      </div>
     </div>
 
-    <section class="chat-card" style="margin-top:22px">
-      <div class="section-head">
-        <h2>Community Chat</h2>
-        <span class="spacer"></span>
-        <span class="pill" id="chatStatus">CONNECTING</span>
+    <aside class="card info">
+      <div class="art"><div class="art-title" id="artTitle">CrowRules TV</div></div>
+      <div class="eyebrow" id="eyebrow">CROWRULES TV</div>
+      <h1 id="showTitle">Loading…</h1>
+      <p id="showTagline">Loading show information.</p>
+      <div class="meta">
+        <div><small>Episodes</small><strong id="episodeCount">—</strong></div>
+        <div><small>Current</small><strong id="currentEpisodeLabel">—</strong></div>
+        <div><small>Status</small><strong id="showStatus">Loading</strong></div>
+        <div><small>Viewer</small><strong id="viewerCount">—</strong></div>
       </div>
-      <div class="section-body">
-        <div class="chat-messages" id="chatMessages"></div>
-        <form class="chat-form" id="chatForm">
-          <input id="chatInput" maxlength="280" placeholder="Say something to the community…" autocomplete="off">
-          <button class="control primary" type="submit">Send</button>
-        </form>
+      <div class="count">
+        <div class="count-label" id="countdownLabel">NEXT BROADCAST</div>
+        <div class="count-time" id="countdownTime">--:--:--</div>
       </div>
+    </aside>
+  </section>
+
+  <div class="grid">
+    <section class="card">
+      <div class="head"><h2>Episodes</h2><span class="spacer"></span><span class="pill">PUBLISHED</span></div>
+      <div class="body"><div class="episodes" id="episodes"></div></div>
     </section>
 
-    <div class="statusbar" id="statusBar">Connecting to CrowRules TV…</div>
+    <aside class="card">
+      <div class="head"><h2>Schedule</h2></div>
+      <div class="body"><div class="schedule" id="schedule"></div></div>
+    </aside>
   </div>
+
+  <section class="card chat">
+    <div class="head"><h2>Community Chat</h2><span class="spacer"></span><span class="pill" id="chatStatus">CONNECTING</span></div>
+    <div class="body">
+      <div class="messages" id="chatMessages"></div>
+      <form class="chat-form" id="chatForm">
+        <input id="chatInput" maxlength="280" autocomplete="off" placeholder="Say something to the community…">
+        <button class="btn primary" type="submit">Send</button>
+      </form>
+    </div>
+  </section>
+
+  <div class="status" id="statusBar">Connecting to CrowRules TV…</div>
+</div>
 </main>
 
-<footer>
-  <div class="shell">© 2026 CrowRules Entertainment · CrowRules TV</div>
-</footer>
+<footer><div class="shell">© 2026 CrowRules Entertainment · CrowRules TV</div></footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 "use strict";
 
-/* =========================================================
-   CROWRULES TV — FRESH SHOW PAGE
-   Supabase project: zauxdqyssratvzmomozf
-   ========================================================= */
+const SUPABASE_URL="https://zauxdqyssratvzmomozf.supabase.co";
+const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InphdXhkcXlzc3JhdHZ6bW9tb3pmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc0MjE3MjYsImV4cCI6MjEwMjk5NzcyNn0.nPTPMgD8gHzL7qRmMuUNJxpjXaCJRVXmgxck15AKDDA";
+const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
+  auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+});
 
-const SUPABASE_URL = "https://zauxdqyssratvzmomozf.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InphdXhkcXlzc3JhdHZ6bW9tb3pmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc0MjE3MjYsImV4cCI6MjEwMjk5NzcyNn0.nPTPMgD8gHzL7qRmMuUNJxpjXaCJRVXmgxck15AKDDA";
-
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY,
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true
-    }
-  }
-);
-
-const SHOWS = {
-  tacoma: {
-    id: "tacoma",
-    table: "tacoma_nights_episodes",
-    title: "Tacoma Nights",
-    eyebrow: "TONIGHT IN TACOMA",
-    tagline: "Stories, people and life from Tacoma.",
-    countdownLabel: "NEXT TACOMA NIGHTS BROADCAST"
-  },
-  backdeck: {
-    id: "backdeck",
-    table: "back_deck_episodes",
-    title: "Back Deck Live",
-    eyebrow: "LIVE FROM THE BACK DECK",
-    tagline: "Live conversations, games and good times.",
-    countdownLabel: "NEXT LIVE ON THE BACK DECK"
-  },
-  bird: {
-    id: "bird",
-    table: "bird_brain_episodes",
-    title: "Bird Brains",
-    eyebrow: "BIRD BRAIN BROADCAST",
-    tagline: "The weird side of CrowRules TV.",
-    countdownLabel: "NEXT BRAIN DROP"
-  },
-  dj: {
-    id: "dj",
-    table: "dj_show_episodes",
-    title: "D&J Show",
-    eyebrow: "D&J SHOW // ON AIR",
-    tagline: "Talk, music and whatever happens next.",
-    countdownLabel: "NEXT D&J BROADCAST"
-  }
+const SHOWS={
+  tacoma:{id:"tacoma",table:"tacoma_nights_episodes",title:"Tacoma Nights",eyebrow:"TONIGHT IN TACOMA",tagline:"Stories, people and life from Tacoma.",countdown:"NEXT TACOMA NIGHTS BROADCAST"},
+  backdeck:{id:"backdeck",table:"back_deck_episodes",title:"Back Deck Live",eyebrow:"LIVE FROM THE BACK DECK",tagline:"Live conversations, games and good times.",countdown:"NEXT LIVE ON THE BACK DECK"},
+  bird:{id:"bird",table:"bird_brain_episodes",title:"Bird Brains",eyebrow:"BIRD BRAIN BROADCAST",tagline:"The weird side of CrowRules TV.",countdown:"NEXT BRAIN DROP"},
+  dj:{id:"dj",table:"dj_show_episodes",title:"D&J Show",eyebrow:"D&J SHOW // ON AIR",tagline:"Talk, music and whatever happens next.",countdown:"NEXT D&J BROADCAST"}
 };
 
-const params = new URLSearchParams(location.search);
-const requestedShow = (params.get("show") || "tacoma").toLowerCase();
-const CURRENT_SHOW = SHOWS[requestedShow] || SHOWS.tacoma;
+const params=new URLSearchParams(location.search);
+const CURRENT_SHOW=SHOWS[(params.get("show")||"tacoma").toLowerCase()]||SHOWS.tacoma;
+document.body.dataset.show=CURRENT_SHOW.id;
 
-document.body.dataset.show = CURRENT_SHOW.id;
+let episodes=[],currentEpisode=null,currentEpisodeIndex=-1;
+let playbackGeneration=0,youtubeApiPromise=null,ytPlayer=null;
+let engagementSessionId=crypto.randomUUID(),heartbeatTimer=null,chatChannel=null,userSession=null;
 
-let episodes = [];
-let currentEpisode = null;
-let currentEpisodeIndex = -1;
-let playbackGeneration = 0;
-let youtubeApiPromise = null;
-let ytPlayer = null;
-let engagementSessionId = crypto.randomUUID();
-let heartbeatTimer = null;
-let chatChannel = null;
-let countdownTimer = null;
-let userSession = null;
+const $=id=>document.getElementById(id);
+const nativeVideo=$("nativeVideo"),youtubeContainer=$("youtubePlayer");
 
-/* ---------- DOM ---------- */
-const $ = id => document.getElementById(id);
-const nativeVideo = $("nativeVideo");
-const youtubeContainer = $("youtubePlayer");
+$("eyebrow").textContent=CURRENT_SHOW.eyebrow;
+$("showTitle").textContent=CURRENT_SHOW.title;
+$("artTitle").textContent=CURRENT_SHOW.title;
+$("showTagline").textContent=CURRENT_SHOW.tagline;
+$("countdownLabel").textContent=CURRENT_SHOW.countdown;
+$("statusLabel").textContent=CURRENT_SHOW.eyebrow;
 
-/* ---------- Theme ---------- */
-$("eyebrow").textContent = CURRENT_SHOW.eyebrow;
-$("showTitle").textContent = CURRENT_SHOW.title;
-$("artTitle").textContent = CURRENT_SHOW.title;
-$("showTagline").textContent = CURRENT_SHOW.tagline;
-$("countdownLabel").textContent = CURRENT_SHOW.countdownLabel;
-$("statusLabel").textContent = CURRENT_SHOW.eyebrow;
-
-/* ---------- Utilities ---------- */
-function setStatus(message, isError = false) {
-  $("statusBar").textContent = message;
-  $("statusBar").classList.toggle("error", isError);
-}
-
-function escapeText(value) {
-  return value == null ? "" : String(value);
-}
-
-function normalizeStatus(ep) {
-  return String(ep?.status || "").toLowerCase();
-}
-
-function isPublished(ep) {
-  if (ep?.is_published === false) return false;
-  return true;
-}
-
-function getEpisodeTitle(ep) {
-  return ep?.title || "Untitled Episode";
-}
-
-function getThumbnail(ep) {
-  if (ep?.thumbnail_url) return ep.thumbnail_url;
-  const id = getYouTubeId(ep);
-  return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : "";
-}
-
-function parseDate(value) {
-  if (!value) return null;
-  const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? null : d;
-}
-
-function formatDate(value) {
-  const d = parseDate(value);
-  if (!d) return "TBA";
-  return d.toLocaleString([], {
-    month:"short", day:"numeric", year:"numeric",
-    hour:"numeric", minute:"2-digit"
-  });
-}
-
-function formatDuration(seconds) {
-  const n = Number(seconds);
-  if (!Number.isFinite(n) || n <= 0) return "—";
-  const h = Math.floor(n / 3600);
-  const m = Math.floor((n % 3600) / 60);
-  const s = Math.floor(n % 60);
-  return h ? `${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`
-           : `${m}:${String(s).padStart(2,"0")}`;
-}
-
-function getDurationSeconds(ep) {
-  if (Number.isFinite(Number(ep?.duration_seconds))) return Number(ep.duration_seconds);
-  if (Number.isFinite(Number(ep?.runtime_minutes))) return Number(ep.runtime_minutes) * 60;
-  if (typeof ep?.duration === "number") return ep.duration;
-  if (typeof ep?.duration === "string") {
-    const parts = ep.duration.split(":").map(Number);
-    if (parts.every(Number.isFinite)) {
-      if (parts.length === 3) return parts[0]*3600 + parts[1]*60 + parts[2];
-      if (parts.length === 2) return parts[0]*60 + parts[1];
-    }
+function setStatus(text,error=false){$("statusBar").textContent=text;$("statusBar").classList.toggle("error",error)}
+function esc(v){return v==null?"":String(v)}
+function html(v){return esc(v).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
+function attr(v){return html(v)}
+function date(v){if(!v)return null;const d=new Date(v);return Number.isNaN(d.getTime())?null:d}
+function dateText(v){const d=date(v);return d?d.toLocaleString([],{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"}):"TBA"}
+function duration(ep){
+  if(Number.isFinite(Number(ep?.duration_seconds)))return Number(ep.duration_seconds);
+  if(Number.isFinite(Number(ep?.runtime_minutes)))return Number(ep.runtime_minutes)*60;
+  if(typeof ep?.duration==="number")return ep.duration;
+  if(typeof ep?.duration==="string"){
+    const p=ep.duration.split(":").map(Number);
+    if(p.every(Number.isFinite))return p.length===3?p[0]*3600+p[1]*60+p[2]:p.length===2?p[0]*60+p[1]:null;
   }
   return null;
 }
+function durationText(n){n=Number(n);if(!Number.isFinite(n)||n<=0)return"—";const h=Math.floor(n/3600),m=Math.floor(n%3600/60),s=Math.floor(n%60);return h?`${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`:`${m}:${String(s).padStart(2,"0")}`}
+function status(ep){return String(ep?.status||"published").toLowerCase()}
 
-/* ---------- YouTube parsing ---------- */
-function getYouTubeIdFromValue(value) {
-  if (!value) return null;
-
-  const raw = String(value).trim();
-
-  if (/^[A-Za-z0-9_-]{11}$/.test(raw)) return raw;
-
-  try {
-    const u = new URL(raw);
-
-    if (u.hostname === "youtu.be") {
-      const id = u.pathname.split("/").filter(Boolean)[0];
-      return /^[A-Za-z0-9_-]{11}$/.test(id || "") ? id : null;
+/* =========================
+   YOUTUBE SOURCE DETECTION
+   ========================= */
+function youtubeId(value){
+  if(!value)return null;
+  const raw=String(value).trim();
+  if(/^[A-Za-z0-9_-]{11}$/.test(raw))return raw;
+  try{
+    const u=new URL(raw);
+    if(u.hostname==="youtu.be"){
+      const id=u.pathname.split("/").filter(Boolean)[0];
+      return /^[A-Za-z0-9_-]{11}$/.test(id||"")?id:null;
     }
-
-    if (u.hostname.includes("youtube.com")) {
-      if (u.searchParams.get("v")) {
-        const id = u.searchParams.get("v");
-        return /^[A-Za-z0-9_-]{11}$/.test(id || "") ? id : null;
-      }
-
-      const parts = u.pathname.split("/").filter(Boolean);
-      const index = parts.findIndex(x => ["embed","shorts","live"].includes(x));
-      if (index >= 0 && parts[index + 1]) {
-        const id = parts[index + 1];
-        return /^[A-Za-z0-9_-]{11}$/.test(id) ? id : null;
-      }
+    if(u.hostname.includes("youtube.com")){
+      const q=u.searchParams.get("v");
+      if(q&&/^[A-Za-z0-9_-]{11}$/.test(q))return q;
+      const parts=u.pathname.split("/").filter(Boolean);
+      const i=parts.findIndex(x=>["embed","shorts","live"].includes(x));
+      if(i>=0&&/^[A-Za-z0-9_-]{11}$/.test(parts[i+1]||""))return parts[i+1];
     }
-  } catch (_) {}
-
+  }catch(_){}
   return null;
 }
-
-function getYouTubeId(ep) {
-  return (
-    getYouTubeIdFromValue(ep?.youtube_video_id) ||
-    getYouTubeIdFromValue(ep?.youtube_url) ||
-    getYouTubeIdFromValue(ep?.video_url)
-  );
+function episodeYoutubeId(ep){
+  return youtubeId(ep?.youtube_video_id)||youtubeId(ep?.youtube_url)||youtubeId(ep?.video_url);
 }
-
-function isYouTubeUrl(value) {
-  return !!getYouTubeIdFromValue(value);
-}
-
-function getDirectVideoUrl(ep) {
-  const candidates = [
-    ep?.video_url,
-    ep?.media_url,
-    ep?.stream_url
-  ];
-
-  for (const value of candidates) {
-    if (!value) continue;
-    if (isYouTubeUrl(value)) continue;
-    const v = String(value).trim();
-    if (/^https?:\/\//i.test(v)) return v;
+function directVideo(ep){
+  for(const value of [ep?.video_url,ep?.media_url,ep?.stream_url]){
+    if(!value||youtubeId(value))continue;
+    const v=String(value).trim();
+    if(/^https?:\/\//i.test(v))return v;
   }
   return null;
 }
+function thumb(ep){
+  return ep?.thumbnail_url||((episodeYoutubeId(ep))?`https://img.youtube.com/vi/${episodeYoutubeId(ep)}/hqdefault.jpg`:"");
+}
 
-/* ---------- Player ---------- */
-function resetPlayer() {
+/* =========================
+   PLAYER
+   IMPORTANT: resetPlayer()
+   NEVER increments playbackGeneration.
+   ========================= */
+function resetPlayer(){
   stopHeartbeat();
-
-  nativeVideo.pause();
-  nativeVideo.removeAttribute("src");
-  nativeVideo.load();
-  nativeVideo.style.display = "none";
-
-  youtubeContainer.innerHTML = "";
-  youtubeContainer.style.display = "none";
-
-  if (ytPlayer && typeof ytPlayer.destroy === "function") {
-    try { ytPlayer.destroy(); } catch (_) {}
-  }
-  ytPlayer = null;
-
-  $("playerMessage").classList.remove("show");
-  $("playerType").textContent = "READY";
-  $("sourceBadge").textContent = "ON DEMAND";
-  $("liveDot").classList.remove("off");
+  nativeVideo.pause();nativeVideo.removeAttribute("src");nativeVideo.load();nativeVideo.style.display="none";
+  youtubeContainer.innerHTML="";youtubeContainer.style.display="none";
+  if(ytPlayer?.destroy){try{ytPlayer.destroy()}catch(_){}}
+  ytPlayer=null;$("playerMessage").classList.remove("show");$("playerType").textContent="READY";
+  $("sourceBadge").textContent="ON DEMAND";$("liveDot").classList.remove("off");
 }
+function message(text){const e=$("playerMessage");e.textContent=text;e.classList.add("show")}
+function clearMessage(){$("playerMessage").classList.remove("show")}
 
-function showPlayerMessage(message) {
-  const el = $("playerMessage");
-  el.textContent = message;
-  el.classList.add("show");
-}
-
-function clearPlayerMessage() {
-  $("playerMessage").classList.remove("show");
-}
-
-async function loadYouTubeApi() {
-  if (window.YT?.Player) return window.YT;
-  if (youtubeApiPromise) return youtubeApiPromise;
-
-  youtubeApiPromise = new Promise((resolve, reject) => {
-    const previous = window.onYouTubeIframeAPIReady;
-    let done = false;
-
-    const finish = value => {
-      if (done) return;
-      done = true;
-      clearTimeout(timer);
-      if (previous) window.onYouTubeIframeAPIReady = previous;
-      value instanceof Error ? reject(value) : resolve(value);
-    };
-
-    window.onYouTubeIframeAPIReady = () => {
-      try {
-        if (previous) previous();
-      } catch (_) {}
-      finish(window.YT);
-    };
-
-    const existing = document.querySelector('script[src*="youtube.com/iframe_api"]');
-    if (!existing) {
-      const script = document.createElement("script");
-      script.src = "https://www.youtube.com/iframe_api";
-      script.async = true;
-      document.head.appendChild(script);
+function loadYouTubeAPI(){
+  if(window.YT?.Player)return Promise.resolve(window.YT);
+  if(youtubeApiPromise)return youtubeApiPromise;
+  youtubeApiPromise=new Promise((resolve,reject)=>{
+    let finished=false;
+    const old=window.onYouTubeIframeAPIReady;
+    const timer=setTimeout(()=>{youtubeApiPromise=null;finish(new Error("YouTube API timeout"))},12000);
+    function finish(err){
+      if(finished)return;finished=true;clearTimeout(timer);
+      if(err)reject(err);else resolve(window.YT);
     }
-
-    const timer = setTimeout(() => {
-      youtubeApiPromise = null;
-      finish(new Error("YouTube API timed out."));
-    }, 12000);
+    window.onYouTubeIframeAPIReady=()=>{try{if(old)old()}catch(_){};finish()};
+    if(!document.querySelector('script[src*="youtube.com/iframe_api"]')){
+      const s=document.createElement("script");s.src="https://www.youtube.com/iframe_api";s.async=true;document.head.appendChild(s);
+    }
   });
-
   return youtubeApiPromise;
 }
 
-async function loadEpisode(ep, index = currentEpisodeIndex) {
-  const generation = ++playbackGeneration;
-  currentEpisode = ep;
-  currentEpisodeIndex = index;
+async function loadEpisode(ep,index=currentEpisodeIndex){
+  const generation=++playbackGeneration;
+  currentEpisode=ep;currentEpisodeIndex=index;
+  resetPlayer();renderEpisodes();updateCurrentMeta();
+  if(!ep){message("No episode selected.");return}
 
-  resetPlayer();
-  renderEpisodes();
-  updateCurrentMeta();
+  const yid=episodeYoutubeId(ep),direct=directVideo(ep);
 
-  if (!ep) {
-    showPlayerMessage("No episode selected.");
+  if(yid){
+    $("playerType").textContent="YOUTUBE";$("sourceBadge").textContent="YOUTUBE";youtubeContainer.style.display="block";
+    try{
+      await loadYouTubeAPI();
+      if(generation!==playbackGeneration)return;
+      ytPlayer=new YT.Player("youtubePlayer",{videoId:yid,playerVars:{autoplay:0,playsinline:1,rel:0,modestbranding:1},events:{
+        onReady:()=>{if(generation!==playbackGeneration)return;clearMessage();$("playerType").textContent="YOUTUBE READY"},
+        onStateChange:e=>{if(generation!==playbackGeneration)return;const playing=e.data===YT.PlayerState.PLAYING;if(playing)startHeartbeat();else stopHeartbeat();$("playBtn").textContent=playing?"❚❚ Pause":"▶ Play"},
+        onError:e=>{const m={2:"Invalid YouTube video ID.",5:"YouTube HTML5 player error.",100:"This YouTube video was removed or not found.",101:"Embedding is disabled for this video.",150:"Embedding is disabled for this video."};message(m[e.data]||"YouTube playback failed.");$("playerType").textContent="ERROR"}
+      }});
+    }catch(_){message("Unable to load the YouTube player.");$("playerType").textContent="ERROR"}
     return;
   }
 
-  const youtubeId = getYouTubeId(ep);
-  const directUrl = getDirectVideoUrl(ep);
-
-  if (youtubeId) {
-    $("playerType").textContent = "YOUTUBE";
-    $("sourceBadge").textContent = "YOUTUBE";
-
-    youtubeContainer.style.display = "block";
-
-    try {
-      await loadYouTubeApi();
-      if (generation !== playbackGeneration) return;
-
-      ytPlayer = new YT.Player("youtubePlayer", {
-        videoId: youtubeId,
-        playerVars: {
-          autoplay: 0,
-          playsinline: 1,
-          rel: 0,
-          modestbranding: 1
-        },
-        events: {
-          onReady: () => {
-            if (generation !== playbackGeneration) return;
-            clearPlayerMessage();
-            $("playerType").textContent = "YOUTUBE READY";
-            startHeartbeat();
-          },
-          onStateChange: event => {
-            if (generation !== playbackGeneration) return;
-            const playing = event.data === YT.PlayerState.PLAYING;
-            if (playing) {
-              clearPlayerMessage();
-              startHeartbeat();
-            } else {
-              stopHeartbeat();
-            }
-          },
-          onError: event => {
-            const map = {
-              2:"Invalid YouTube video ID.",
-              5:"YouTube HTML5 player error.",
-              100:"This YouTube video was removed or not found.",
-              101:"Embedding is disabled for this video.",
-              150:"Embedding is disabled for this video."
-            };
-            showPlayerMessage(map[event.data] || "YouTube playback failed.");
-            $("playerType").textContent = "ERROR";
-          }
-        }
-      });
-    } catch (err) {
-      showPlayerMessage("Unable to load the YouTube player.");
-      $("playerType").textContent = "ERROR";
-    }
+  if(direct){
+    $("playerType").textContent="DIRECT VIDEO";nativeVideo.style.display="block";nativeVideo.src=direct;nativeVideo.load();
+    nativeVideo.addEventListener("canplay",()=>{
+      if(generation!==playbackGeneration)return;
+      clearMessage();nativeVideo.play().catch(()=>message("CLICK PLAY TO START THIS EPISODE."));
+    },{once:true});
+    nativeVideo.addEventListener("error",()=>{if(generation!==playbackGeneration)return;message("The direct video source could not be played.");$("playerType").textContent="ERROR"},{once:true});
     return;
   }
-
-  if (directUrl) {
-    $("playerType").textContent = "DIRECT VIDEO";
-    $("sourceBadge").textContent = "ON DEMAND";
-    nativeVideo.style.display = "block";
-    nativeVideo.src = directUrl;
-    nativeVideo.load();
-
-    nativeVideo.addEventListener("canplay", () => {
-      if (generation !== playbackGeneration) return;
-      clearPlayerMessage();
-      nativeVideo.play().catch(() => {
-        showPlayerMessage("CLICK PLAY TO START THIS EPISODE.");
-      });
-    }, {once:true});
-
-    nativeVideo.addEventListener("error", () => {
-      if (generation !== playbackGeneration) return;
-      showPlayerMessage("The direct video source could not be played.");
-      $("playerType").textContent = "ERROR";
-    }, {once:true});
-
-    startHeartbeat();
-    return;
-  }
-
-  showPlayerMessage("This episode does not have a playable video source yet.");
-  $("playerType").textContent = "NO SOURCE";
+  message("This episode does not have a playable video source yet.");$("playerType").textContent="NO SOURCE";
 }
 
-/* ---------- Episode loading ---------- */
-async function loadEpisodes() {
+/* =========================
+   EPISODES
+   ========================= */
+async function loadEpisodes(){
   setStatus(`Loading ${CURRENT_SHOW.title}…`);
+  const {data,error}=await supabaseClient.from(CURRENT_SHOW.table).select("*")
+    .order("season_number",{ascending:true,nullsFirst:false})
+    .order("episode_number",{ascending:true,nullsFirst:false})
+    .order("display_order",{ascending:true,nullsFirst:false});
 
-  const { data, error } = await supabaseClient
-    .from(CURRENT_SHOW.table)
-    .select("*")
-    .order("season_number", {ascending:true, nullsFirst:false})
-    .order("episode_number", {ascending:true, nullsFirst:false})
-    .order("episode_number", {ascending:true, nullsFirst:false});
+  if(error){console.error(error);setStatus(`Episode load failed: ${error.message}`,true);$("episodes").innerHTML='<div class="empty error">Unable to load episodes.</div>';return}
+  episodes=(data||[]).filter(ep=>ep.is_published!==false);
+  $("episodeCount").textContent=episodes.length;renderEpisodes();
 
-  if (error) {
-    console.error(error);
-    setStatus(`Episode load failed: ${error.message}`, true);
-    $("episodes").innerHTML = `<div class="empty error">Unable to load episodes.</div>`;
-    return;
-  }
-
-  episodes = (data || []).filter(isPublished);
-
-  renderEpisodes();
-
-  const playable = episodes.filter(ep => getYouTubeId(ep) || getDirectVideoUrl(ep));
-
-  let initialIndex = playable.findIndex(ep => {
-    const status = normalizeStatus(ep);
-    return status === "published" || status === "live" || status === "on_demand";
-  });
-
-  if (initialIndex < 0) initialIndex = playable.length ? 0 : -1;
-
-  if (initialIndex >= 0) {
-    const actualIndex = episodes.indexOf(playable[initialIndex]);
-    await loadEpisode(episodes[actualIndex], actualIndex);
-  } else {
-    updateCurrentMeta();
-    showPlayerMessage("No playable published episodes are available yet.");
-  }
-
-  $("episodeCount").textContent = episodes.length;
-  setStatus(`Loaded ${episodes.length} published episode${episodes.length === 1 ? "" : "s"}.`);
+  const playable=episodes.filter(ep=>episodeYoutubeId(ep)||directVideo(ep));
+  const preferred=playable.find(ep=>["published","live","on_demand"].includes(status(ep)))||playable[0];
+  if(preferred)await loadEpisode(preferred,episodes.indexOf(preferred));
+  else message("No playable published episodes are available yet.");
+  setStatus(`Loaded ${episodes.length} published episode${episodes.length===1?"":"s"}.`);
+}
+function renderEpisodes(){
+  if(!episodes.length){$("episodes").innerHTML='<div class="empty">No published episodes yet.</div>';return}
+  $("episodes").innerHTML=episodes.map((ep,i)=>{
+    const season=ep.season_number??ep.season,number=ep.episode_number??ep.display_order,d=duration(ep),t=thumb(ep);
+    return `<article class="episode ${i===currentEpisodeIndex?"active":""}" data-index="${i}">
+      <div class="thumb">${t?`<img src="${attr(t)}" alt="">`:"NO ART"}</div>
+      <div><div class="ep-title">${html(ep.title||"Untitled Episode")}</div>
+      <div class="ep-meta">${season?`S${html(season)} `:""}${number!=null?`E${html(number)}`:""}${d?` · ${durationText(d)}`:""}</div></div>
+      <span class="pill">${html(status(ep))}</span>
+    </article>`;
+  }).join("");
+  document.querySelectorAll(".episode").forEach(e=>e.onclick=()=>loadEpisode(episodes[Number(e.dataset.index)],Number(e.dataset.index)));
+}
+function updateCurrentMeta(){
+  $("currentEpisodeLabel").textContent=currentEpisode?.title||"None";
+  $("showStatus").textContent=(status(currentEpisode)||"ready").toUpperCase();
 }
 
-function renderEpisodes() {
-  const root = $("episodes");
+/* =========================
+   SCHEDULE
+   ========================= */
+async function loadSchedule(){
+  const {data,error}=await supabaseClient.from("schedule_items").select("*").eq("is_published",true).order("starts_at",{ascending:true}).limit(20);
+  if(error){console.warn("Schedule query failed:",error);$("schedule").innerHTML='<div class="empty">Schedule unavailable.</div>';return}
+  const now=Date.now();
+  const rows=(data||[]).filter(x=>{const end=date(x.ends_at||x.end_time);return !end||end.getTime()>=now});
+  $("schedule").innerHTML=rows.length?rows.slice(0,10).map(x=>`<div class="sched"><div class="sched-time">${html(dateText(x.starts_at||x.start_time))}</div><div class="sched-title">${html(x.title||"Untitled")}</div></div>`).join(""):'<div class="empty">No upcoming schedule items.</div>';
+}
 
-  if (!episodes.length) {
-    root.innerHTML = `<div class="empty">No published episodes yet.</div>`;
-    return;
+/* =========================
+   COUNTDOWN
+   ========================= */
+function nextScheduled(){
+  const now=Date.now();
+  return episodes.map(ep=>({ep,d:date(ep.scheduled_at||ep.scheduled_start||ep.release_date)})
+    .filter(x=>x.d&&x.d.getTime()>now).sort((a,b)=>a.d-b.d)[0]||null;
+}
+function updateCountdown(){
+  const n=nextScheduled();
+  if(!n){$("countdownTime").textContent="NO UPCOMING EVENT";return}
+  let s=Math.floor((n.d.getTime()-Date.now())/1000),days=Math.floor(s/86400);s%=86400;
+  const h=Math.floor(s/3600);s%=3600;const m=Math.floor(s/60);s%=60;
+  $("countdownTime").textContent=days?`${days}d ${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`:`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+}
+
+/* =========================
+   ENGAGEMENT / CROW POINTS
+   Server-side RPC only.
+   ========================= */
+async function heartbeat(playing=false){
+  if(!currentEpisode)return;
+  let position=0,dur=duration(currentEpisode);
+  try{
+    if(ytPlayer?.getCurrentTime){position=Number(ytPlayer.getCurrentTime())||0;dur=Number(ytPlayer.getDuration())||dur}
+    else{position=Number(nativeVideo.currentTime)||0;dur=Number(nativeVideo.duration)||dur}
+  }catch(_){}
+  const {error}=await supabaseClient.rpc("cr_record_media_heartbeat",{
+    p_session_id:engagementSessionId,p_media_type:"video",p_content_id:currentEpisode.id||null,
+    p_content_key:`${CURRENT_SHOW.id}:${currentEpisode.id||currentEpisodeIndex}`,
+    p_content_title:currentEpisode.title||"Untitled Episode",p_position_seconds:position,
+    p_duration_seconds:dur||null,p_playing:!!playing
+  });
+  if(error)console.debug("Heartbeat:",error.message);
+}
+function startHeartbeat(){if(heartbeatTimer)return;heartbeat(true);heartbeatTimer=setInterval(()=>heartbeat(true),10000)}
+function stopHeartbeat(){if(!heartbeatTimer)return;clearInterval(heartbeatTimer);heartbeatTimer=null;heartbeat(false)}
+
+/* =========================
+   REALTIME CHAT
+   ========================= */
+function addChat(payload){
+  if(!payload||typeof payload!=="object")return;
+  const box=$("chatMessages"),d=document.createElement("div");d.className="msg";
+  const strong=document.createElement("strong");strong.textContent=String(payload.name||"Guest").slice(0,40);
+  const p=document.createElement("p");p.textContent=String(payload.message||"").slice(0,280);
+  d.append(strong,p);box.appendChild(d);box.scrollTop=box.scrollHeight;
+}
+async function initChat(){
+  chatChannel=supabaseClient.channel(`cr-chat-${CURRENT_SHOW.id}`,{config:{broadcast:{self:true}}});
+  chatChannel.on("broadcast",{event:"chat"},({payload})=>addChat(payload));
+  const result=await chatChannel.subscribe();
+  $("chatStatus").textContent=result==="SUBSCRIBED"?"LIVE":"OFFLINE";
+}
+$("chatForm").onsubmit=async e=>{
+  e.preventDefault();const input=$("chatInput"),text=input.value.trim();if(!text||!chatChannel)return;input.value="";
+  let name="Guest";
+  if(userSession?.user)name=userSession.user.user_metadata?.display_name||userSession.user.user_metadata?.full_name||userSession.user.email?.split("@")[0]||"Member";
+  await chatChannel.send({type:"broadcast",event:"chat",payload:{name:String(name).slice(0,40),message:text.slice(0,280),at:new Date().toISOString()}});
+};
+
+/* =========================
+   AUTH
+   ========================= */
+async function loadAuth(){const {data}=await supabaseClient.auth.getSession();userSession=data.session;$("authBtn").textContent=userSession?"Sign Out":"Sign In"}
+$("authBtn").onclick=async()=>{if(userSession){await supabaseClient.auth.signOut();userSession=null;$("authBtn").textContent="Sign In"}else location.href="./login.html?return="+encodeURIComponent(location.href)};
+supabaseClient.auth.onAuthStateChange((_event,session)=>{userSession=session;$("authBtn").textContent=session?"Sign Out":"Sign In"});
+
+/* =========================
+   PLAYER CONTROLS
+   ========================= */
+$("playBtn").onclick=()=>{
+  clearMessage();
+  if(ytPlayer?.getPlayerState){const s=ytPlayer.getPlayerState();if(s===YT.PlayerState.PLAYING)ytPlayer.pauseVideo();else ytPlayer.playVideo();return}
+  if(nativeVideo.src){if(nativeVideo.paused)nativeVideo.play().catch(()=>message("CLICK PLAY TO START"));else nativeVideo.pause()}
+};
+$("muteBtn").onclick=()=>{
+  if(ytPlayer?.isMuted){if(ytPlayer.isMuted())ytPlayer.unMute();else ytPlayer.mute()}
+  else nativeVideo.muted=!nativeVideo.muted;
+};
+$("pipBtn").onclick=async()=>{if(nativeVideo.style.display!=="none"&&document.pictureInPictureEnabled){try{if(document.pictureInPictureElement)await document.exitPictureInPicture();else await nativeVideo.requestPictureInPicture()}catch(_){}}else message("PIP is available for direct video playback.")}
+$("popoutBtn").onclick=()=>window.open(location.href,"CrowRulesTVPlayer","width=1100,height=700,resizable=yes,scrollbars=yes");
+$("retryBtn").onclick=()=>currentEpisode&&loadEpisode(currentEpisode,currentEpisodeIndex);
+nativeVideo.addEventListener("play",()=>{startHeartbeat();$("playBtn").textContent="❚❚ Pause"});
+nativeVideo.addEventListener("pause",()=>{stopHeartbeat();$("playBtn").textContent="▶ Play"});
+nativeVideo.addEventListener("ended",stopHeartbeat);
+
+/* =========================================================
+   SUPABASE THEME ENGINE
+   FIX: show_ids NULL is treated as [] = ALL SHOWS.
+   New saves should send [] rather than null.
+   ========================================================= */
+async function loadActiveTheme(){
+  try{
+    const {data:themes,error}=await supabaseClient.from("cr_admin_theme_events")
+      .select("id,slug,name,theme_type,start_at,end_at,enabled,priority,show_ids,background,accent,accent_2,banner_text,hero_title,hero_description,effects,metadata,custom_html,custom_css")
+      .eq("enabled",true).order("priority",{ascending:false});
+    if(error){console.warn("Theme load failed:",error.message);return null}
+    if(!Array.isArray(themes)||!themes.length)return null;
+
+    const now=Date.now();
+    const active=themes.filter(theme=>{
+      const start=date(theme.start_at),end=date(theme.end_at);
+      if(start&&now<start.getTime())return false;
+      if(end&&now>end.getTime())return false;
+
+      /* CRITICAL show_ids normalization */
+      const showIds=Array.isArray(theme.show_ids)?theme.show_ids:[];
+      /* Empty array means the theme applies to every show. */
+      if(showIds.length===0)return true;
+      return showIds.map(String).includes(String(CURRENT_SHOW.id));
+    });
+
+    if(!active.length)return null;
+    const theme=active[0];
+    console.log("CrowRules active theme:",theme.name,theme.slug,"show_ids:",theme.show_ids);
+    applyTheme(theme);
+    return theme;
+  }catch(err){console.warn("Theme loader error:",err);return null}
+}
+
+function applyTheme(theme){
+  const root=document.documentElement;
+  if(theme.accent)root.style.setProperty("--accent",theme.accent);
+  if(theme.accent_2)root.style.setProperty("--accent2",theme.accent_2);
+  if(theme.background)root.style.setProperty("--theme-background",theme.background);
+  document.body.dataset.theme=theme.slug||"";
+  document.body.dataset.themeType=theme.theme_type||"";
+
+  if(theme.banner_text){
+    let b=document.getElementById("crThemeBanner");
+    if(!b){
+      b=document.createElement("div");b.id="crThemeBanner";b.className="status shell";
+      document.querySelector("main>.shell").prepend(b);
+    }
+    b.textContent=theme.banner_text;
   }
+  if(theme.hero_title)$("showTitle").textContent=theme.hero_title;
+  if(theme.hero_description)$("showTagline").textContent=theme.hero_description;
 
-  root.innerHTML = episodes.map((ep, i) => {
-    const thumb = getThumbnail(ep);
-    const active = i === currentEpisodeIndex ? "active" : "";
-    const season = ep.season_number ?? ep.season;
-    const number = ep.episode_number ?? ep.display_order;
-    const dur = getDurationSeconds(ep);
+  if(theme.custom_css)applyCustomCSS(theme.custom_css);
+  if(theme.custom_html)applyCustomHTML(theme.custom_html);
+  applyEffects(theme.effects);
+}
 
-    return `
-      <article class="episode ${active}" data-index="${i}">
-        <div class="thumb">
-          ${thumb ? `<img src="${escapeAttr(thumb)}" alt="">` : "NO ART"}
-        </div>
-        <div>
-          <div class="episode-title">${escapeHtml(getEpisodeTitle(ep))}</div>
-          <div class="episode-meta">
-            ${season ? `S${escapeHtml(season)} ` : ""}
-            ${number != null ? `E${escapeHtml(number)}` : ""}
-            ${dur ? ` · ${formatDuration(dur)}` : ""}
-          </div>
-        </div>
-        <span class="pill">${escapeHtml(normalizeStatus(ep) || "published")}</span>
-      </article>
-    `;
-  }).join("");
+function applyCustomCSS(raw){
+  let style=document.getElementById("crCustomThemeCSS");
+  if(!style){style=document.createElement("style");style.id="crCustomThemeCSS";document.head.appendChild(style)}
+  const css=String(raw)
+    .replace(/<\/?script[^>]*>/gi,"")
+    .replace(/javascript\s*:/gi,"")
+    .replace(/expression\s*\(/gi,"")
+    .replace(/@import/gi,"");
+  style.textContent=css;
+}
 
-  root.querySelectorAll(".episode").forEach(card => {
-    card.addEventListener("click", () => {
-      const i = Number(card.dataset.index);
-      if (episodes[i]) loadEpisode(episodes[i], i);
+function applyCustomHTML(raw){
+  let box=document.getElementById("crCustomThemeHTML");
+  if(!box){box=document.createElement("div");box.id="crCustomThemeHTML";box.className="cr-holiday-custom";document.body.prepend(box)}
+  const template=document.createElement("template");template.innerHTML=String(raw);
+  template.content.querySelectorAll("script,iframe,object,embed,form,style").forEach(e=>e.remove());
+  template.content.querySelectorAll("*").forEach(el=>{
+    [...el.attributes].forEach(a=>{
+      const n=a.name.toLowerCase(),v=a.value||"";
+      if(n.startsWith("on")||n==="srcdoc"||v.toLowerCase().includes("javascript:"))el.removeAttribute(a.name);
     });
   });
+  box.replaceChildren(template.content.cloneNode(true));
 }
 
-function updateCurrentMeta() {
-  $("currentEpisodeLabel").textContent = currentEpisode
-    ? getEpisodeTitle(currentEpisode)
-    : "None";
-
-  $("showStatus").textContent = currentEpisode
-    ? (normalizeStatus(currentEpisode) || "published").toUpperCase()
-    : "READY";
-}
-
-/* ---------- Schedule ---------- */
-async function loadSchedule() {
-  const { data, error } = await supabaseClient
-    .from("schedule_items")
-    .select("*")
-    .eq("is_published", true)
-    .order("starts_at", {ascending:true})
-    .limit(20);
-
-  if (error) {
-    console.warn("Schedule query failed:", error);
-    $("schedule").innerHTML = `<div class="empty">Schedule unavailable.</div>`;
-    return;
-  }
-
-  const now = Date.now();
-
-  const filtered = (data || []).filter(item => {
-    const start = parseDate(item.starts_at || item.start_time);
-    const end = parseDate(item.ends_at || item.end_time);
-    return !end || end.getTime() >= now;
+function applyEffects(effects){
+  if(!effects||typeof effects!=="object")return;
+  Object.entries(effects).forEach(([key,value])=>{
+    if(value===true)document.body.classList.add("cr-effect-"+key);
   });
-
-  if (!filtered.length) {
-    $("schedule").innerHTML = `<div class="empty">No upcoming schedule items.</div>`;
-    return;
-  }
-
-  $("schedule").innerHTML = filtered.slice(0,10).map(item => `
-    <div class="schedule-item">
-      <div class="schedule-time">${escapeHtml(formatDate(item.starts_at || item.start_time))}</div>
-      <div class="schedule-title">${escapeHtml(item.title || "Untitled")}</div>
-    </div>
-  `).join("");
 }
 
-/* ---------- Countdown ---------- */
-function getNextScheduledEpisode() {
-  const now = Date.now();
-
-  return episodes
-    .map(ep => ({ep, date: parseDate(ep.scheduled_at || ep.scheduled_start || ep.release_date)}))
-    .filter(x => x.date && x.date.getTime() > now)
-    .sort((a,b) => a.date - b.date)[0] || null;
-}
-
-function updateCountdown() {
-  const next = getNextScheduledEpisode();
-
-  if (!next) {
-    $("countdownTime").textContent = "NO UPCOMING EVENT";
-    return;
-  }
-
-  const diff = Math.max(0, next.date.getTime() - Date.now());
-  const total = Math.floor(diff / 1000);
-  const days = Math.floor(total / 86400);
-  const hours = Math.floor((total % 86400) / 3600);
-  const mins = Math.floor((total % 3600) / 60);
-  const secs = total % 60;
-
-  $("countdownTime").textContent =
-    days > 0
-      ? `${days}d ${String(hours).padStart(2,"0")}:${String(mins).padStart(2,"0")}:${String(secs).padStart(2,"0")}`
-      : `${String(hours).padStart(2,"0")}:${String(mins).padStart(2,"0")}:${String(secs).padStart(2,"0")}`;
-}
-
-/* ---------- Engagement ---------- */
-async function sendHeartbeat(playing = false) {
-  if (!currentEpisode) return;
-
-  let position = 0;
-  let duration = getDurationSeconds(currentEpisode);
-
-  try {
-    if (ytPlayer?.getCurrentTime) {
-      position = Number(ytPlayer.getCurrentTime()) || 0;
-      duration = Number(ytPlayer.getDuration()) || duration;
-    } else {
-      position = Number(nativeVideo.currentTime) || 0;
-      duration = Number(nativeVideo.duration) || duration;
-    }
-  } catch (_) {}
-
-  const payload = {
-    p_session_id: engagementSessionId,
-    p_media_type: "video",
-    p_content_id: currentEpisode.id || null,
-    p_content_key: `${CURRENT_SHOW.id}:${currentEpisode.id || currentEpisodeIndex}`,
-    p_content_title: getEpisodeTitle(currentEpisode),
-    p_position_seconds: position,
-    p_duration_seconds: duration || null,
-    p_playing: !!playing
-  };
-
-  const { error } = await supabaseClient.rpc("cr_record_media_heartbeat", payload);
-  if (error) console.debug("Heartbeat:", error.message);
-}
-
-function startHeartbeat() {
-  if (heartbeatTimer) return;
-  sendHeartbeat(true);
-  heartbeatTimer = setInterval(() => sendHeartbeat(true), 10000);
-}
-
-function stopHeartbeat() {
-  if (!heartbeatTimer) return;
-  clearInterval(heartbeatTimer);
-  heartbeatTimer = null;
-  sendHeartbeat(false);
-}
-
-/* ---------- Chat ---------- */
-function addChatMessage(payload) {
-  if (!payload || typeof payload !== "object") return;
-
-  const box = $("chatMessages");
-  const div = document.createElement("div");
-  div.className = "chat-msg";
-
-  const strong = document.createElement("strong");
-  strong.textContent = String(payload.name || "Guest").slice(0,40);
-
-  const p = document.createElement("p");
-  p.textContent = String(payload.message || "").slice(0,280);
-
-  div.append(strong,p);
-  box.appendChild(div);
-  box.scrollTop = box.scrollHeight;
-}
-
-async function initChat() {
-  chatChannel = supabaseClient.channel(`cr-chat-${CURRENT_SHOW.id}`, {
-    config: { broadcast: { self: true } }
-  });
-
-  chatChannel.on("broadcast", {event:"chat"}, ({payload}) => addChatMessage(payload));
-
-  const result = await chatChannel.subscribe();
-  $("chatStatus").textContent = result === "SUBSCRIBED" ? "LIVE" : "OFFLINE";
-}
-
-$("chatForm").addEventListener("submit", async e => {
-  e.preventDefault();
-
-  const input = $("chatInput");
-  const message = input.value.trim();
-  if (!message || !chatChannel) return;
-
-  input.value = "";
-
-  let name = "Guest";
-  if (userSession?.user) {
-    name =
-      userSession.user.user_metadata?.display_name ||
-      userSession.user.user_metadata?.full_name ||
-      userSession.user.email?.split("@")[0] ||
-      "Member";
-  }
-
-  await chatChannel.send({
-    type:"broadcast",
-    event:"chat",
-    payload:{name:name.slice(0,40),message:message.slice(0,280),at:new Date().toISOString()}
-  });
-});
-
-/* ---------- Auth ---------- */
-async function loadAuth() {
-  const {data} = await supabaseClient.auth.getSession();
-  userSession = data.session;
-
-  $("authBtn").textContent = userSession ? "Sign Out" : "Sign In";
-}
-
-$("authBtn").addEventListener("click", async () => {
-  if (userSession) {
-    await supabaseClient.auth.signOut();
-    userSession = null;
-    $("authBtn").textContent = "Sign In";
-  } else {
-    location.href = "./login.html?return=" + encodeURIComponent(location.href);
-  }
-});
-
-supabaseClient.auth.onAuthStateChange((_event, session) => {
-  userSession = session;
-  $("authBtn").textContent = session ? "Sign Out" : "Sign In";
-});
-
-/* ---------- Controls ---------- */
-$("playBtn").addEventListener("click", () => {
-  clearPlayerMessage();
-
-  if (ytPlayer?.getPlayerState) {
-    const state = ytPlayer.getPlayerState();
-    if (state === YT.PlayerState.PLAYING) ytPlayer.pauseVideo();
-    else ytPlayer.playVideo();
-    return;
-  }
-
-  if (nativeVideo.src) {
-    if (nativeVideo.paused) nativeVideo.play().catch(() => showPlayerMessage("CLICK PLAY TO START"));
-    else nativeVideo.pause();
-  }
-});
-
-$("muteBtn").addEventListener("click", () => {
-  if (ytPlayer?.isMuted) {
-    if (ytPlayer.isMuted()) ytPlayer.unMute();
-    else ytPlayer.mute();
-  } else {
-    nativeVideo.muted = !nativeVideo.muted;
-  }
-});
-
-$("pipBtn").addEventListener("click", async () => {
-  if (nativeVideo.style.display !== "none" && document.pictureInPictureEnabled) {
-    try {
-      if (document.pictureInPictureElement) await document.exitPictureInPicture();
-      else await nativeVideo.requestPictureInPicture();
-    } catch (_) {}
-  } else {
-    showPlayerMessage("PIP is available for direct video playback in this player.");
-  }
-});
-
-$("popoutBtn").addEventListener("click", () => {
-  const url = location.href;
-  window.open(url, "CrowRulesTVPlayer", "width=1100,height=700,resizable=yes,scrollbars=yes");
-});
-
-$("retryBtn").addEventListener("click", () => {
-  if (currentEpisode) loadEpisode(currentEpisode, currentEpisodeIndex);
-});
-
-nativeVideo.addEventListener("play", () => startHeartbeat());
-nativeVideo.addEventListener("pause", () => stopHeartbeat());
-nativeVideo.addEventListener("ended", () => stopHeartbeat());
-nativeVideo.addEventListener("timeupdate", () => {
-  $("playBtn").textContent = nativeVideo.paused ? "▶ Play" : "❚❚ Pause";
-});
-
-/* ---------- Safe HTML helpers ---------- */
-function escapeHtml(value) {
-  return escapeText(value)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
-
-function escapeAttr(value) {
-  return escapeHtml(value);
-}
-
-/* ---------- Supabase theme handling ----------
-   Important: All Shows MUST use [] rather than null.
-   The DB also normalizes null -> [] as a safety net.
--------------------------------------------------- */
-async function loadActiveTheme() {
-  try {
-    const {data, error} = await supabaseClient.rpc("cr_admin_active_themes");
-    if (error || !Array.isArray(data)) return;
-
-    const now = Date.now();
-
-    const active = data
-      .filter(theme => theme?.enabled !== false)
-      .filter(theme => {
-        const start = parseDate(theme.start_at);
-        const end = parseDate(theme.end_at);
-        return (!start || start.getTime() <= now) &&
-               (!end || end.getTime() >= now);
-      })
-      .sort((a,b) => Number(b.priority || 0) - Number(a.priority || 0))[0];
-
-    if (!active) return;
-
-    if (active.accent) document.documentElement.style.setProperty("--accent", active.accent);
-    if (active.accent_2) document.documentElement.style.setProperty("--accent2", active.accent_2);
-
-    if (active.banner_text) {
-      const badge = document.createElement("div");
-      badge.className = "statusbar shell";
-      badge.style.marginBottom = "20px";
-      badge.textContent = active.banner_text;
-      document.querySelector("main .shell").prepend(badge);
-    }
-  } catch (_) {}
-}
-
-/* ---------- Startup ---------- */
-(async function init() {
+/* =========================================================
+   STARTUP
+   ========================================================= */
+(async function init(){
   await loadAuth();
   await loadActiveTheme();
   await loadEpisodes();
   await loadSchedule();
   await initChat();
-
-  countdownTimer = setInterval(updateCountdown, 1000);
   updateCountdown();
-
-  window.addEventListener("beforeunload", () => {
-    stopHeartbeat();
-    if (chatChannel) supabaseClient.removeChannel(chatChannel);
-  });
+  setInterval(updateCountdown,1000);
+  window.addEventListener("beforeunload",()=>{stopHeartbeat();if(chatChannel)supabaseClient.removeChannel(chatChannel)});
 })();
 </script>
 </body>
