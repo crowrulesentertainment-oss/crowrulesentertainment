@@ -4,15 +4,31 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#050505">
-<meta name="description" content="CrowRules Entertainment — Launching October 1, 2026.">
 
-<title>CrowRules Entertainment — Coming Soon</title>
+<meta
+  name="description"
+  content="CrowRules Entertainment — The next chapter begins October 1, 2026."
+>
+
+<title>CrowRules Entertainment — Launching</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<link
+  href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@400;500;600;700;800;900&display=swap"
+  rel="stylesheet"
+>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+
+/* =========================================================
+   CROW RULES ENTERTAINMENT
+   CINEMATIC LAUNCH INDEX
+   ========================================================= */
+
 :root{
   --black:#050505;
   --black2:#090909;
@@ -40,21 +56,23 @@ body{
 }
 
 body{
-  background:
-    radial-gradient(circle at 50% 35%, rgba(225,6,0,.12), transparent 35%),
-    linear-gradient(180deg,#050505,#000);
+  background:#000;
   color:var(--white);
   font-family:Montserrat,Arial,sans-serif;
   overflow:hidden;
 }
 
-/* CRT / scanlines */
+/* =========================================================
+   GLOBAL CRT EFFECTS
+   ========================================================= */
+
 body::before{
   content:"";
   position:fixed;
   inset:0;
   pointer-events:none;
-  z-index:20;
+  z-index:100;
+
   background:
     repeating-linear-gradient(
       to bottom,
@@ -63,102 +81,553 @@ body::before{
       transparent 1px,
       transparent 4px
     );
-  opacity:.35;
+
+  opacity:.32;
 }
 
-/* Red edge glow */
 body::after{
   content:"";
   position:fixed;
   inset:0;
   pointer-events:none;
-  z-index:19;
+  z-index:99;
+
   box-shadow:
     inset 0 0 100px rgba(225,6,0,.08),
-    inset 0 0 250px rgba(0,0,0,.9);
+    inset 0 0 250px rgba(0,0,0,.95);
 }
 
-.launch-screen{
-  min-height:100vh;
-  width:100%;
+/* =========================================================
+   CINEMATIC INTRO
+   ========================================================= */
+
+.intro{
+  position:fixed;
+  inset:0;
+  z-index:80;
+
+  background:#000;
+
   display:flex;
   align-items:center;
   justify-content:center;
-  position:relative;
-  padding:30px;
+
+  overflow:hidden;
+
+  transition:
+    opacity 1s ease,
+    visibility 1s ease;
 }
 
-.grid{
+.intro.hide{
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+}
+
+.intro-grid{
+  position:absolute;
+  inset:-30%;
+
+  background-image:
+    linear-gradient(
+      rgba(225,6,0,.08) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(225,6,0,.08) 1px,
+      transparent 1px
+    );
+
+  background-size:70px 70px;
+
+  transform:
+    perspective(600px)
+    rotateX(58deg)
+    translateY(20%);
+
+  animation:
+    gridMove 10s linear infinite;
+
+  opacity:.35;
+}
+
+@keyframes gridMove{
+
+  from{
+    transform:
+      perspective(600px)
+      rotateX(58deg)
+      translateY(20%);
+  }
+
+  to{
+    transform:
+      perspective(600px)
+      rotateX(58deg)
+      translateY(5%);
+  }
+
+}
+
+.intro-vignette{
   position:absolute;
   inset:0;
+
+  background:
+    radial-gradient(
+      circle at center,
+      transparent 0%,
+      rgba(0,0,0,.3) 45%,
+      #000 100%
+    );
+}
+
+.intro-red-light{
+  position:absolute;
+
+  width:500px;
+  height:500px;
+
+  border-radius:50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(225,6,0,.22),
+      rgba(225,6,0,.06) 35%,
+      transparent 70%
+    );
+
+  filter:blur(20px);
+
+  animation:
+    redPulse 3s ease-in-out infinite;
+}
+
+@keyframes redPulse{
+
+  0%,
+  100%{
+    transform:scale(.8);
+    opacity:.4;
+  }
+
+  50%{
+    transform:scale(1.15);
+    opacity:1;
+  }
+
+}
+
+.intro-content{
+  position:relative;
+  z-index:5;
+
+  text-align:center;
+
+  width:min(900px,90%);
+
+  animation:
+    introAppear 1.8s ease forwards;
+}
+
+@keyframes introAppear{
+
+  from{
+    opacity:0;
+    transform:scale(1.08);
+    filter:blur(12px);
+  }
+
+  to{
+    opacity:1;
+    transform:scale(1);
+    filter:blur(0);
+  }
+
+}
+
+.intro-line{
+  width:0;
+  height:1px;
+
+  background:var(--red);
+
+  margin:0 auto 30px;
+
+  box-shadow:
+    0 0 20px var(--red);
+
+  animation:
+    lineExpand 1.4s .5s ease forwards;
+}
+
+@keyframes lineExpand{
+
+  to{
+    width:min(500px,70%);
+  }
+
+}
+
+.intro-kicker{
+  font-family:Orbitron,sans-serif;
+
+  color:#777;
+
+  font-size:10px;
+
+  letter-spacing:.45em;
+
+  margin-bottom:22px;
+
+  animation:
+    textFade 1s .8s ease both;
+}
+
+.intro-logo{
+  font-family:Orbitron,sans-serif;
+
+  font-size:
+    clamp(
+      34px,
+      7vw,
+      90px
+    );
+
+  font-weight:900;
+
+  letter-spacing:.04em;
+
+  line-height:.95;
+
+  text-transform:uppercase;
+
+  text-shadow:
+    0 0 25px rgba(225,6,0,.25);
+
+  animation:
+    logoReveal 1.5s 1s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.intro-logo span{
+  color:var(--red);
+}
+
+@keyframes logoReveal{
+
+  from{
+    opacity:0;
+    letter-spacing:.35em;
+    transform:scaleX(1.2);
+  }
+
+  to{
+    opacity:1;
+    letter-spacing:.04em;
+    transform:scaleX(1);
+  }
+
+}
+
+.intro-tagline{
+  margin-top:28px;
+
+  color:#aaa;
+
+  font-family:Orbitron,sans-serif;
+
+  font-size:
+    clamp(
+      10px,
+      1.5vw,
+      14px
+    );
+
+  letter-spacing:.28em;
+
+  text-transform:uppercase;
+
+  animation:
+    textFade 1s 1.7s ease both;
+}
+
+@keyframes textFade{
+
+  from{
+    opacity:0;
+    transform:translateY(10px);
+  }
+
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+}
+
+.intro-progress{
+  width:min(360px,65%);
+
+  height:2px;
+
+  background:#181818;
+
+  margin:45px auto 0;
+
+  overflow:hidden;
+
+  animation:
+    textFade 1s 2s ease both;
+}
+
+.intro-progress-bar{
+  width:0;
+  height:100%;
+
+  background:var(--red);
+
+  box-shadow:
+    0 0 15px var(--red);
+
+  animation:
+    progressLoad 3.2s 2s linear forwards;
+}
+
+@keyframes progressLoad{
+
+  to{
+    width:100%;
+  }
+
+}
+
+.intro-status{
+  margin-top:16px;
+
+  font-family:Orbitron,sans-serif;
+
+  font-size:9px;
+
+  color:#555;
+
+  letter-spacing:.25em;
+
+  animation:
+    textFade 1s 2s ease both;
+}
+
+/* =========================================================
+   SKIP INTRO
+   ========================================================= */
+
+.skip-intro{
+  position:absolute;
+
+  right:28px;
+  bottom:25px;
+
+  z-index:10;
+
+  border:1px solid #292929;
+
+  background:rgba(0,0,0,.7);
+
+  color:#666;
+
+  padding:9px 13px;
+
+  font-family:Orbitron,sans-serif;
+
+  font-size:9px;
+
+  letter-spacing:.15em;
+
+  cursor:pointer;
+
+  transition:.25s ease;
+}
+
+.skip-intro:hover{
+  border-color:var(--red);
+  color:var(--white);
+}
+
+/* =========================================================
+   MAIN LAUNCH SCREEN
+   ========================================================= */
+
+.launch-screen{
+  position:relative;
+
+  min-height:100vh;
+  width:100%;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:30px;
+
+  background:
+    radial-gradient(
+      circle at 50% 35%,
+      rgba(225,6,0,.13),
+      transparent 35%
+    ),
+    linear-gradient(
+      180deg,
+      #050505,
+      #000
+    );
+}
+
+.launch-grid{
+  position:absolute;
+  inset:0;
+
   opacity:.12;
+
   background-image:
-    linear-gradient(rgba(225,6,0,.18) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(225,6,0,.18) 1px,transparent 1px);
+    linear-gradient(
+      rgba(225,6,0,.18) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(225,6,0,.18) 1px,
+      transparent 1px
+    );
+
   background-size:70px 70px;
-  transform:perspective(600px) rotateX(55deg) scale(1.5);
+
+  transform:
+    perspective(600px)
+    rotateX(55deg)
+    scale(1.5);
+
   transform-origin:center bottom;
 }
 
-.content{
+.launch-content{
   position:relative;
-  z-index:5;
+  z-index:10;
+
   width:min(1050px,100%);
+
   text-align:center;
+
+  opacity:0;
+
+  transform:translateY(20px);
+
+  transition:
+    opacity 1s ease,
+    transform 1s ease;
+}
+
+body.intro-complete .launch-content{
+  opacity:1;
+  transform:translateY(0);
 }
 
 .brand{
   font-family:Orbitron,sans-serif;
-  font-size:clamp(18px,2vw,26px);
+
+  font-size:
+    clamp(
+      18px,
+      2vw,
+      26px
+    );
+
   font-weight:800;
+
   letter-spacing:.25em;
+
   color:var(--red2);
+
   margin-bottom:28px;
-  text-transform:uppercase;
 }
 
 .status{
   display:inline-flex;
+
   align-items:center;
+  justify-content:center;
+
   gap:10px;
+
   border:1px solid var(--darkred);
-  background:rgba(225,6,0,.06);
+
+  background:
+    rgba(225,6,0,.06);
+
   padding:9px 15px;
+
   margin-bottom:35px;
+
   font-family:Orbitron,sans-serif;
+
   font-size:11px;
+
   letter-spacing:.18em;
+
   color:#ff7777;
 }
 
 .status-dot{
   width:8px;
   height:8px;
+
   background:var(--red);
+
   border-radius:50%;
-  box-shadow:0 0 15px var(--red);
-  animation:pulse 1s infinite;
+
+  box-shadow:
+    0 0 15px var(--red);
+
+  animation:
+    pulse 1s infinite;
 }
 
 @keyframes pulse{
-  0%,100%{
+
+  0%,
+  100%{
     opacity:1;
     transform:scale(1);
   }
+
   50%{
-    opacity:.35;
+    opacity:.3;
     transform:scale(.7);
   }
+
 }
 
 h1{
   font-family:Orbitron,sans-serif;
-  font-size:clamp(42px,8vw,105px);
+
+  font-size:
+    clamp(
+      42px,
+      8vw,
+      105px
+    );
+
   line-height:.95;
+
   font-weight:900;
+
   letter-spacing:-.04em;
+
   text-transform:uppercase;
+
   margin-bottom:25px;
+
   text-shadow:
     0 0 30px rgba(225,6,0,.25),
     4px 4px 0 rgba(225,6,0,.08);
@@ -170,85 +639,140 @@ h1 span{
 
 .subtitle{
   max-width:720px;
-  margin:0 auto 45px;
+
+  margin:
+    0 auto 45px;
+
   color:#aaa;
+
   font-size:15px;
+
   line-height:1.8;
 }
 
 .countdown-label{
   font-family:Orbitron,sans-serif;
+
   font-size:11px;
+
   font-weight:700;
+
   letter-spacing:.3em;
+
   color:#777;
+
   margin-bottom:18px;
 }
 
 .countdown{
   display:grid;
-  grid-template-columns:repeat(4,1fr);
+
+  grid-template-columns:
+    repeat(4,1fr);
+
   gap:14px;
+
   max-width:820px;
+
   margin:0 auto;
 }
 
 .time-box{
   position:relative;
+
   background:
-    linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,255,255,.01));
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.035),
+      rgba(255,255,255,.01)
+    );
+
   border:1px solid var(--line);
+
   min-height:150px;
+
   display:flex;
+
   flex-direction:column;
+
   justify-content:center;
+
   align-items:center;
+
   overflow:hidden;
 }
 
 .time-box::before{
   content:"";
+
   position:absolute;
+
   top:0;
   left:0;
+
   width:35px;
   height:2px;
+
   background:var(--red);
-  box-shadow:0 0 15px var(--red);
+
+  box-shadow:
+    0 0 15px var(--red);
 }
 
 .time-box::after{
   content:"";
+
   position:absolute;
+
   bottom:0;
   right:0;
+
   width:35px;
   height:2px;
+
   background:var(--red);
 }
 
 .number{
   font-family:Orbitron,sans-serif;
-  font-size:clamp(38px,6vw,70px);
+
+  font-size:
+    clamp(
+      38px,
+      6vw,
+      70px
+    );
+
   font-weight:800;
+
   line-height:1;
+
   color:var(--white);
 }
 
 .unit{
   margin-top:12px;
+
   color:#666;
+
   font-family:Orbitron,sans-serif;
+
   font-size:10px;
+
   font-weight:700;
+
   letter-spacing:.25em;
 }
 
 .launch-date{
   margin-top:35px;
+
   font-family:Orbitron,sans-serif;
+
   font-size:12px;
+
   letter-spacing:.2em;
+
   color:#777;
 }
 
@@ -256,30 +780,50 @@ h1 span{
   color:var(--red2);
 }
 
-.footer{
-  position:absolute;
-  bottom:25px;
-  left:0;
-  right:0;
-  z-index:5;
-  text-align:center;
-  color:#444;
+.loading{
+  margin-top:18px;
+
+  color:#555;
+
   font-family:Orbitron,sans-serif;
+
   font-size:9px;
-  letter-spacing:.22em;
+
+  letter-spacing:.2em;
 }
+
+.error-message{
+  display:none;
+
+  margin-top:18px;
+
+  color:#ff5555;
+
+  font-family:Orbitron,sans-serif;
+
+  font-size:9px;
+
+  letter-spacing:.1em;
+}
+
+/* =========================================================
+   CORNERS
+   ========================================================= */
 
 .corner{
   position:absolute;
+
   width:50px;
   height:50px;
-  border-color:rgba(225,6,0,.4);
-  z-index:4;
+
+  border-color:
+    rgba(225,6,0,.4);
 }
 
 .corner.tl{
   top:30px;
   left:30px;
+
   border-top:1px solid;
   border-left:1px solid;
 }
@@ -287,6 +831,7 @@ h1 span{
 .corner.tr{
   top:30px;
   right:30px;
+
   border-top:1px solid;
   border-right:1px solid;
 }
@@ -294,6 +839,7 @@ h1 span{
 .corner.bl{
   bottom:30px;
   left:30px;
+
   border-bottom:1px solid;
   border-left:1px solid;
 }
@@ -301,58 +847,82 @@ h1 span{
 .corner.br{
   bottom:30px;
   right:30px;
+
   border-bottom:1px solid;
   border-right:1px solid;
 }
 
-/* Launch transition */
-.launching .content{
-  animation:launchFlash .8s ease forwards;
-}
+/* =========================================================
+   LAUNCH FLASH
+   ========================================================= */
 
 .launching{
-  animation:screenFlash 2s ease forwards;
+  animation:
+    launchFlash 1.7s ease forwards;
+}
+
+.launching .launch-content{
+  animation:
+    launchContent .9s ease forwards;
 }
 
 @keyframes launchFlash{
+
   0%{
-    opacity:1;
-    transform:scale(1);
+    background:#050505;
   }
-  30%{
-    opacity:.2;
-    transform:scale(1.02);
+
+  15%{
+    background:#e10600;
   }
-  55%{
-    opacity:1;
-    transform:scale(.99);
+
+  19%{
+    background:#050505;
   }
+
+  28%{
+    background:#e10600;
+  }
+
+  34%{
+    background:#050505;
+  }
+
   100%{
-    opacity:1;
-    transform:scale(1);
+    background:#050505;
   }
+
 }
 
-@keyframes screenFlash{
+@keyframes launchContent{
+
   0%{
-    background-color:#050505;
+    opacity:1;
+    transform:scale(1);
   }
-  20%{
-    background-color:#e10600;
+
+  25%{
+    opacity:.1;
+    transform:scale(1.04);
+    filter:blur(4px);
   }
-  24%{
-    background-color:#050505;
+
+  50%{
+    opacity:1;
+    transform:scale(.99);
+    filter:blur(0);
   }
-  30%{
-    background-color:#e10600;
-  }
-  35%{
-    background-color:#050505;
-  }
+
   100%{
-    background-color:#050505;
+    opacity:1;
+    transform:scale(1);
   }
+
 }
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
 
 @media(max-width:700px){
 
@@ -361,8 +931,8 @@ h1 span{
   }
 
   .brand{
-    letter-spacing:.14em;
     font-size:15px;
+    letter-spacing:.14em;
   }
 
   .status{
@@ -370,17 +940,25 @@ h1 span{
   }
 
   h1{
-    font-size:clamp(38px,12vw,65px);
+    font-size:
+      clamp(
+        38px,
+        12vw,
+        65px
+      );
   }
 
   .subtitle{
     font-size:13px;
     line-height:1.7;
+
     margin-bottom:35px;
   }
 
   .countdown{
-    grid-template-columns:repeat(2,1fr);
+    grid-template-columns:
+      repeat(2,1fr);
+
     gap:10px;
   }
 
@@ -420,241 +998,824 @@ h1 span{
   .corner.br{
     bottom:15px;
   }
+
+  .intro-logo{
+    font-size:
+      clamp(
+        30px,
+        10vw,
+        55px
+      );
+  }
+
+  .intro-tagline{
+    letter-spacing:.15em;
+    line-height:1.7;
+  }
+
 }
 
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
 @media(prefers-reduced-motion:reduce){
+
   *,
   *::before,
   *::after{
     animation-duration:.001ms !important;
     animation-iteration-count:1 !important;
+
+    transition-duration:.001ms !important;
   }
+
 }
+
 </style>
 </head>
 
 <body>
 
-<div class="launch-screen" id="launchScreen">
+<!-- =======================================================
+     CINEMATIC INTRO
+     ======================================================= -->
 
-  <div class="grid"></div>
+<section class="intro" id="intro">
+
+  <div class="intro-grid"></div>
+
+  <div class="intro-red-light"></div>
+
+  <div class="intro-vignette"></div>
+
+  <div class="intro-content">
+
+    <div class="intro-line"></div>
+
+    <div class="intro-kicker">
+      CROW RULES ENTERTAINMENT
+    </div>
+
+    <div class="intro-logo">
+      CROW<span>RULES</span>
+    </div>
+
+    <div class="intro-tagline">
+      Independent Media // Original Stories // Built Different
+    </div>
+
+    <div class="intro-progress">
+      <div class="intro-progress-bar"></div>
+    </div>
+
+    <div class="intro-status" id="introStatus">
+      INITIALIZING THE SIGNAL...
+    </div>
+
+  </div>
+
+  <button
+    class="skip-intro"
+    id="skipIntro"
+    type="button"
+  >
+    SKIP INTRO
+  </button>
+
+</section>
+
+
+<!-- =======================================================
+     MAIN COUNTDOWN
+     ======================================================= -->
+
+<main
+  class="launch-screen"
+  id="launchScreen"
+>
+
+  <div class="launch-grid"></div>
 
   <div class="corner tl"></div>
   <div class="corner tr"></div>
   <div class="corner bl"></div>
   <div class="corner br"></div>
 
-  <main class="content">
+  <section class="launch-content">
 
     <div class="brand">
-      CROWRULES ENTERTAINMENT
+      CROW RULES ENTERTAINMENT
     </div>
 
-    <div class="status">
+    <div
+      class="status"
+      id="status"
+    >
       <span class="status-dot"></span>
-      LAUNCH SEQUENCE ACTIVE
+      CONNECTING TO LAUNCH SYSTEM
     </div>
 
-    <h1>
+    <h1 id="headline">
       THE NEXT<br>
       <span>CHAPTER</span><br>
       BEGINS.
     </h1>
 
-    <p class="subtitle">
-      Independent television, film, music, creators, digital media,
-      community and original stories — all under one roof.
+    <p
+      class="subtitle"
+      id="subtitle"
+    >
+      Independent television, film, music, creators,
+      digital media, community and original stories —
+      all under one roof.
     </p>
 
-    <div class="countdown-label">
-      CROWRULES GOES LIVE IN
+    <div
+      class="countdown-label"
+      id="countdownLabel"
+    >
+      CROW RULES GOES LIVE IN
     </div>
 
     <div class="countdown">
 
       <div class="time-box">
-        <div class="number" id="days">00</div>
-        <div class="unit">DAYS</div>
+
+        <div
+          class="number"
+          id="days"
+        >
+          00
+        </div>
+
+        <div class="unit">
+          DAYS
+        </div>
+
       </div>
 
       <div class="time-box">
-        <div class="number" id="hours">00</div>
-        <div class="unit">HOURS</div>
+
+        <div
+          class="number"
+          id="hours"
+        >
+          00
+        </div>
+
+        <div class="unit">
+          HOURS
+        </div>
+
       </div>
 
       <div class="time-box">
-        <div class="number" id="minutes">00</div>
-        <div class="unit">MINUTES</div>
+
+        <div
+          class="number"
+          id="minutes"
+        >
+          00
+        </div>
+
+        <div class="unit">
+          MINUTES
+        </div>
+
       </div>
 
       <div class="time-box">
-        <div class="number" id="seconds">00</div>
-        <div class="unit">SECONDS</div>
+
+        <div
+          class="number"
+          id="seconds"
+        >
+          00
+        </div>
+
+        <div class="unit">
+          SECONDS
+        </div>
+
       </div>
 
     </div>
 
-    <div class="launch-date">
+    <div
+      class="launch-date"
+      id="launchDateDisplay"
+    >
       LAUNCH DATE:
-      <strong>OCTOBER 1, 2026</strong>
+      <strong>LOADING...</strong>
     </div>
 
-  </main>
+    <div
+      class="loading"
+      id="loading"
+    >
+      INITIALIZING CROW RULES NETWORK...
+    </div>
 
-  <div class="footer">
-    CROWRULES ENTERTAINMENT // INDEPENDENT MEDIA // TACOMA, WASHINGTON
-  </div>
+    <div
+      class="error-message"
+      id="errorMessage"
+    >
+      LAUNCH CONFIGURATION COULD NOT BE LOADED.
+    </div>
 
-</div>
+  </section>
+
+</main>
+
 
 <script>
-/*
-==========================================================
- CROW RULES ENTERTAINMENT
- INDEX LAUNCH COUNTDOWN
-==========================================================
 
- index.html = countdown page
- home.html  = regular CrowRules Entertainment homepage
+/* =========================================================
+   SUPABASE CONFIG
+   ========================================================= */
 
- At zero, the countdown automatically redirects to home.html.
-==========================================================
-*/
+const SUPABASE_URL =
+  "https://cevylpnoexugwgygvtgu.supabase.co";
 
-/*
-  October 1, 2026 at 12:00 AM Pacific Time.
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNldnlscG5vZXh1Z3dneWd2dGd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4MTYxOTYsImV4cCI6MjEwNDM5MjE5Nn0.bvSF3qRqFNvCtaF5CSDeeEO3yJnsnYt9CXmgUaBWjNQ";
 
-  October 1 is during PDT (UTC-7), so this is:
-  2026-10-01T00:00:00-07:00
-*/
-const launchDate = new Date(
-  "2026-10-01T00:00:00-07:00"
-).getTime();
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+  );
+
+
+/* =========================================================
+   DOM
+   ========================================================= */
+
+const intro =
+  document.getElementById("intro");
+
+const skipIntro =
+  document.getElementById("skipIntro");
+
+const introStatus =
+  document.getElementById("introStatus");
+
+const launchScreen =
+  document.getElementById("launchScreen");
+
+const statusElement =
+  document.getElementById("status");
+
+const headlineElement =
+  document.getElementById("headline");
+
+const subtitleElement =
+  document.getElementById("subtitle");
+
+const countdownLabelElement =
+  document.getElementById("countdownLabel");
+
+const launchDateElement =
+  document.getElementById("launchDateDisplay");
+
+const loadingElement =
+  document.getElementById("loading");
+
+const errorElement =
+  document.getElementById("errorMessage");
+
+const daysElement =
+  document.getElementById("days");
+
+const hoursElement =
+  document.getElementById("hours");
+
+const minutesElement =
+  document.getElementById("minutes");
+
+const secondsElement =
+  document.getElementById("seconds");
+
+
+/* =========================================================
+   STATE
+   ========================================================= */
+
+let launchAt = null;
+
+let destinationPath =
+  "home.html";
 
 let countdownTimer = null;
+
 let launchTriggered = false;
 
-const daysElement = document.getElementById("days");
-const hoursElement = document.getElementById("hours");
-const minutesElement = document.getElementById("minutes");
-const secondsElement = document.getElementById("seconds");
-const launchScreen = document.getElementById("launchScreen");
+let introFinished = false;
+
+
+/* =========================================================
+   FORMAT
+   ========================================================= */
 
 function pad(number){
-  return String(number).padStart(2,"0");
+
+  return String(number)
+    .padStart(2,"0");
+
 }
 
-function launchCrowRules(){
 
-  if(launchTriggered) return;
+/* =========================================================
+   CINEMATIC INTRO
+   ========================================================= */
 
-  launchTriggered = true;
+function finishIntro(){
 
-  if(countdownTimer){
-    clearInterval(countdownTimer);
-    countdownTimer = null;
-  }
-
-  /*
-    Final launch state
-  */
-
-  daysElement.textContent = "00";
-  hoursElement.textContent = "00";
-  minutesElement.textContent = "00";
-  secondsElement.textContent = "00";
-
-  document.querySelector(".status").innerHTML =
-    '<span class="status-dot"></span> SIGNAL IS LIVE';
-
-  document.querySelector(".countdown-label").textContent =
-    "WELCOME TO CROWRULES ENTERTAINMENT";
-
-  document.querySelector(".launch-date").innerHTML =
-    "<strong>THE STORY STARTS NOW.</strong>";
-
-  launchScreen.classList.add("launching");
-
-  /*
-    Give the launch animation time to play,
-    then load the actual CrowRules homepage.
-  */
-
-  setTimeout(function(){
-
-    window.location.replace("home.html");
-
-  },2000);
-}
-
-function updateCountdown(){
-
-  const now = Date.now();
-  const distance = launchDate - now;
-
-  /*
-    If countdown reaches zero,
-    immediately launch the real homepage.
-  */
-
-  if(distance <= 0){
-    launchCrowRules();
+  if(introFinished){
     return;
   }
 
-  const days = Math.floor(
-    distance / (1000 * 60 * 60 * 24)
+  introFinished = true;
+
+  introStatus.textContent =
+    "THE SIGNAL IS READY.";
+
+  intro.classList.add("hide");
+
+  document.body.classList.add(
+    "intro-complete"
   );
 
-  const hours = Math.floor(
-    (distance % (1000 * 60 * 60 * 24)) /
-    (1000 * 60 * 60)
-  );
-
-  const minutes = Math.floor(
-    (distance % (1000 * 60 * 60)) /
-    (1000 * 60)
-  );
-
-  const seconds = Math.floor(
-    (distance % (1000 * 60)) /
-    1000
-  );
-
-  daysElement.textContent = pad(days);
-  hoursElement.textContent = pad(hours);
-  minutesElement.textContent = pad(minutes);
-  secondsElement.textContent = pad(seconds);
 }
+
 
 /*
-==========================================================
- INITIAL CHECK
-==========================================================
+  Automatically finish intro after
+  cinematic sequence.
 */
 
-if(Date.now() >= launchDate){
+setTimeout(
+  finishIntro,
+  5500
+);
 
-  /*
-    If someone visits index.html after launch day,
-    don't show the countdown again.
-  */
 
-  window.location.replace("home.html");
+/*
+  Skip button
+*/
 
-}else{
+skipIntro.addEventListener(
+  "click",
+  finishIntro
+);
 
-  /*
-    Start countdown.
-  */
 
-  updateCountdown();
+/*
+  ESC key also skips
+*/
 
-  countdownTimer = setInterval(
-    updateCountdown,
-    1000
-  );
+document.addEventListener(
+  "keydown",
+  function(event){
+
+    if(event.key === "Escape"){
+
+      finishIntro();
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   DATE FORMAT
+   ========================================================= */
+
+function formatLaunchDate(date){
+
+  return new Intl.DateTimeFormat(
+    "en-US",
+    {
+      month:"long",
+      day:"numeric",
+      year:"numeric",
+      hour:"numeric",
+      minute:"2-digit",
+      timeZoneName:"short"
+    }
+  ).format(date);
+
 }
+
+
+/* =========================================================
+   LOAD SUPABASE LAUNCH CONFIG
+   ========================================================= */
+
+async function loadLaunchConfiguration(){
+
+  try{
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("site_launches")
+        .select(
+          "site_name,launch_at,destination_path,status"
+        )
+        .eq(
+          "site_key",
+          "crowrules-entertainment"
+        )
+        .limit(1)
+        .maybeSingle();
+
+
+    if(error){
+      throw error;
+    }
+
+
+    if(!data){
+
+      throw new Error(
+        "CrowRules launch configuration not found."
+      );
+
+    }
+
+
+    /*
+      Store configuration
+    */
+
+    launchAt =
+      new Date(
+        data.launch_at
+      ).getTime();
+
+
+    destinationPath =
+      data.destination_path ||
+      "home.html";
+
+
+    /*
+      Display launch date
+    */
+
+    launchDateElement.innerHTML =
+      "LAUNCH DATE: <strong>" +
+      formatLaunchDate(
+        new Date(data.launch_at)
+      ) +
+      "</strong>";
+
+
+    statusElement.innerHTML =
+      '<span class="status-dot"></span> ' +
+      'LAUNCH SEQUENCE ACTIVE';
+
+
+    loadingElement.style.display =
+      "none";
+
+
+    /*
+      Already launched
+    */
+
+    if(Date.now() >= launchAt){
+
+      launchCrowRules();
+
+      return;
+
+    }
+
+
+    /*
+      Start timer
+    */
+
+    updateCountdown();
+
+    countdownTimer =
+      setInterval(
+        updateCountdown,
+        1000
+      );
+
+  }catch(error){
+
+    console.error(
+      "CrowRules launch configuration error:",
+      error
+    );
+
+
+    /*
+      Fallback date:
+      October 1, 2026 at 12:00 AM Pacific.
+    */
+
+    launchAt =
+      new Date(
+        "2026-10-01T00:00:00-07:00"
+      ).getTime();
+
+
+    destinationPath =
+      "home.html";
+
+
+    launchDateElement.innerHTML =
+      'LAUNCH DATE: <strong>OCTOBER 1, 2026</strong>';
+
+
+    statusElement.innerHTML =
+      '<span class="status-dot"></span> ' +
+      'LAUNCH FALLBACK ACTIVE';
+
+
+    loadingElement.style.display =
+      "none";
+
+
+    errorElement.style.display =
+      "block";
+
+
+    updateCountdown();
+
+    countdownTimer =
+      setInterval(
+        updateCountdown,
+        1000
+      );
+
+  }
+
+}
+
+
+/* =========================================================
+   COUNTDOWN
+   ========================================================= */
+
+function updateCountdown(){
+
+  if(!launchAt){
+    return;
+  }
+
+
+  const now =
+    Date.now();
+
+  const distance =
+    launchAt - now;
+
+
+  /*
+    Countdown reached zero.
+  */
+
+  if(distance <= 0){
+
+    launchCrowRules();
+
+    return;
+
+  }
+
+
+  const days =
+    Math.floor(
+      distance /
+      (1000 * 60 * 60 * 24)
+    );
+
+
+  const hours =
+    Math.floor(
+      (
+        distance %
+        (1000 * 60 * 60 * 24)
+      ) /
+      (1000 * 60 * 60)
+    );
+
+
+  const minutes =
+    Math.floor(
+      (
+        distance %
+        (1000 * 60 * 60)
+      ) /
+      (1000 * 60)
+    );
+
+
+  const seconds =
+    Math.floor(
+      (
+        distance %
+        (1000 * 60)
+      ) /
+      1000
+    );
+
+
+  daysElement.textContent =
+    pad(days);
+
+  hoursElement.textContent =
+    pad(hours);
+
+  minutesElement.textContent =
+    pad(minutes);
+
+  secondsElement.textContent =
+    pad(seconds);
+
+}
+
+
+/* =========================================================
+   LAUNCH SEQUENCE
+   ========================================================= */
+
+function launchCrowRules(){
+
+  if(launchTriggered){
+    return;
+  }
+
+
+  launchTriggered = true;
+
+
+  /*
+    Stop countdown.
+  */
+
+  if(countdownTimer){
+
+    clearInterval(
+      countdownTimer
+    );
+
+    countdownTimer = null;
+
+  }
+
+
+  /*
+    Force zero.
+  */
+
+  daysElement.textContent =
+    "00";
+
+  hoursElement.textContent =
+    "00";
+
+  minutesElement.textContent =
+    "00";
+
+  secondsElement.textContent =
+    "00";
+
+
+  /*
+    Change screen messaging.
+  */
+
+  statusElement.innerHTML =
+    '<span class="status-dot"></span> ' +
+    'SIGNAL IS LIVE';
+
+
+  headlineElement.innerHTML =
+    'CROW RULES<br><span>IS LIVE.</span>';
+
+
+  subtitleElement.textContent =
+    "The countdown is over. " +
+    "Welcome to CrowRules Entertainment.";
+
+
+  countdownLabelElement.textContent =
+    "WELCOME TO THE NEXT CHAPTER";
+
+
+  launchDateElement.innerHTML =
+    "<strong>THE STORY STARTS NOW.</strong>";
+
+
+  loadingElement.style.display =
+    "none";
+
+
+  errorElement.style.display =
+    "none";
+
+
+  /*
+    Cinematic launch flash.
+  */
+
+  launchScreen.classList.add(
+    "launching"
+  );
+
+
+  /*
+    Log launch event.
+  */
+
+  recordLaunchEvent();
+
+
+  /*
+    Allow launch animation to play,
+    then load the regular homepage.
+  */
+
+  setTimeout(
+    function(){
+
+      window.location.replace(
+        destinationPath
+      );
+
+    },
+    1800
+  );
+
+}
+
+
+/* =========================================================
+   LOG LAUNCH EVENT
+   ========================================================= */
+
+async function recordLaunchEvent(){
+
+  try{
+
+    await supabaseClient
+      .from("launch_events")
+      .insert({
+
+        site_key:
+          "crowrules-entertainment",
+
+        event_type:
+          "launch_reached",
+
+        metadata:{
+          destination:
+            destinationPath,
+
+          client_time:
+            new Date().toISOString(),
+
+          source:
+            "index.html"
+        }
+
+      });
+
+  }catch(error){
+
+    /*
+      Logging failure should never
+      prevent the actual launch.
+    */
+
+    console.warn(
+      "Launch event logging failed:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   START APPLICATION
+   ========================================================= */
+
+loadLaunchConfiguration();
+
 </script>
 
 </body>
