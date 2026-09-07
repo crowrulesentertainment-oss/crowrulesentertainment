@@ -1,1426 +1,1732 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1"
-  >
-
-  <meta
-    name="theme-color"
-    content="#05060a"
-  >
-
-  <meta
-    name="description"
-    content="CrowRules TV — watch the latest published episodes, live programming, schedules and community chat."
-  >
-
-  <title>CrowRules TV</title>
-
-  <link
-    rel="preconnect"
-    href="https://fonts.googleapis.com"
-  >
-
-  <link
-    rel="preconnect"
-    href="https://fonts.gstatic.com"
-    crossorigin
-  >
-
-  <link
-    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@400;500;600;700;800;900&display=swap"
-    rel="stylesheet"
-  >
-
-  <style>
-    :root{
-      --bg:#05060a;
-      --bg2:#090b12;
-      --panel:#0d1018;
-      --panel2:#111522;
-      --panel3:#151a29;
-
-      --text:#f3f6ff;
-      --muted:#929bb2;
-      --muted2:#687188;
-
-      --cyan:#00eaff;
-      --purple:#8b5cf6;
-      --pink:#ff2bd6;
-      --green:#35f59a;
-      --red:#ff4d67;
-      --yellow:#ffd166;
-
-      --border:rgba(255,255,255,.09);
-      --border2:rgba(0,234,255,.22);
-
-      --shadow:
-        0 20px 60px rgba(0,0,0,.45);
-
-      --glow:
-        0 0 25px rgba(0,234,255,.14);
-
-      --radius:18px;
-
-      --max:1450px;
-    }
-
-    *{
-      box-sizing:border-box;
-    }
-
-    html{
-      scroll-behavior:smooth;
-    }
-
-    body{
-      margin:0;
-      min-height:100vh;
-      background:
-        radial-gradient(
-          circle at 10% 0%,
-          rgba(0,234,255,.08),
-          transparent 28%
-        ),
-        radial-gradient(
-          circle at 90% 10%,
-          rgba(139,92,246,.10),
-          transparent 30%
-        ),
-        linear-gradient(
-          180deg,
-          #05060a 0%,
-          #070912 45%,
-          #05060a 100%
-        );
-      color:var(--text);
-      font-family:"Montserrat",sans-serif;
-    }
-
-    body::before{
-      content:"";
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      opacity:.08;
-      background-image:
-        linear-gradient(
-          rgba(255,255,255,.03) 1px,
-          transparent 1px
-        ),
-        linear-gradient(
-          90deg,
-          rgba(255,255,255,.03) 1px,
-          transparent 1px
-        );
-      background-size:40px 40px;
-      mask-image:
-        linear-gradient(
-          to bottom,
-          black,
-          transparent 85%
-        );
-    }
-
-    button,
-    input,
-    textarea{
-      font:inherit;
-    }
-
-    button{
-      cursor:pointer;
-    }
-
-    a{
-      color:inherit;
-      text-decoration:none;
-    }
-
-    .hidden{
-      display:none !important;
-    }
-
-    .container{
-      width:min(
-        calc(100% - 32px),
-        var(--max)
-      );
-      margin:0 auto;
-    }
-
-    /* =====================================================
-       TOP BAR
-       ===================================================== */
-
-    .topbar{
-      position:sticky;
-      top:0;
-      z-index:1000;
-
-      border-bottom:1px solid var(--border);
-
-      background:
-        rgba(5,6,10,.88);
-
-      backdrop-filter:
-        blur(18px);
-
-      box-shadow:
-        0 10px 40px rgba(0,0,0,.28);
-    }
-
-    .topbar-inner{
-      min-height:72px;
-
-      display:flex;
-      align-items:center;
-      gap:22px;
-
-      overflow-x:auto;
-    }
-
-    .brand{
-      flex:0 0 auto;
-
-      display:flex;
-      align-items:center;
-      gap:12px;
-
-      font-family:"Orbitron",sans-serif;
-      font-weight:800;
-      letter-spacing:.08em;
-    }
-
-    .brand-mark{
-      width:42px;
-      height:42px;
-
-      display:grid;
-      place-items:center;
-
-      border:1px solid var(--border2);
-      border-radius:12px;
-
-      background:
-        linear-gradient(
-          135deg,
-          rgba(0,234,255,.15),
-          rgba(139,92,246,.15)
-        );
-
-      box-shadow:
-        0 0 25px rgba(0,234,255,.12);
-    }
-
-    .brand-mark span{
-      font-size:22px;
-    }
-
-    .brand-text{
-      white-space:nowrap;
-    }
-
-    .brand-text strong{
-      color:var(--cyan);
-    }
-
-    .brand-text small{
-      display:block;
-      color:var(--muted);
-      font-family:"Montserrat",sans-serif;
-      font-size:9px;
-      letter-spacing:.25em;
-      margin-top:2px;
-    }
-
-    .show-nav{
-      display:flex;
-      align-items:center;
-      gap:7px;
-      flex:1;
-    }
-
-    .show-link{
-      flex:0 0 auto;
-
-      padding:10px 14px;
-
-      border:1px solid transparent;
-      border-radius:10px;
-
-      color:var(--muted);
-
-      font-size:12px;
-      font-weight:700;
-
-      letter-spacing:.04em;
-
-      transition:
-        .2s ease;
-    }
-
-    .show-link:hover{
-      color:var(--text);
-
-      border-color:var(--border);
-
-      background:
-        rgba(255,255,255,.04);
-    }
-
-    .show-link.active{
-      color:var(--cyan);
-
-      border-color:
-        rgba(0,234,255,.25);
-
-      background:
-        rgba(0,234,255,.07);
-
-      box-shadow:
-        inset 0 0 20px rgba(0,234,255,.04);
-    }
-
-    .account-area{
-      flex:0 0 auto;
-
-      display:flex;
-      align-items:center;
-      gap:8px;
-    }
+<meta charset="utf-8">
+
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1"
+>
+
+<meta
+  name="theme-color"
+  content="#05060a"
+>
+
+<meta
+  name="description"
+  content="CrowRules TV — Watch shows, earn Crow Points, track watch time and join the community."
+>
+
+<title>CrowRules TV — Shows</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link
+  href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap"
+  rel="stylesheet"
+>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+/* =========================================================
+   CROWRULES TV — FULL SHOW PAGE
+   ========================================================= */
+
+:root{
+  --bg:#05060a;
+  --bg2:#080a11;
+  --panel:#0b0e17;
+  --panel2:#0f1320;
+
+  --text:#f4f7fb;
+  --muted:#8993a7;
+  --muted2:#626c7e;
 
-    .account-name{
-      max-width:130px;
+  --cyan:#00eaff;
+  --purple:#9b5cff;
+  --pink:#ff3cac;
+  --green:#35f59a;
+  --yellow:#ffd166;
+  --red:#ff4d67;
 
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
+  --border:rgba(255,255,255,.09);
 
-      color:var(--muted);
-      font-size:11px;
-    }
+  --shadow:
+    0 20px 70px rgba(0,0,0,.45);
 
-    /* =====================================================
-       BUTTONS
-       ===================================================== */
+  --radius:18px;
+}
 
-    .btn{
-      border:1px solid var(--border);
+*{
+  box-sizing:border-box;
+}
 
-      background:
-        rgba(255,255,255,.04);
+html{
+  scroll-behavior:smooth;
+}
 
-      color:var(--text);
+body{
+  margin:0;
 
-      border-radius:10px;
+  min-height:100vh;
 
-      padding:10px 14px;
+  color:var(--text);
 
-      font-size:11px;
-      font-weight:800;
+  background:
+    radial-gradient(
+      circle at 15% 0%,
+      rgba(0,234,255,.07),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 90% 15%,
+      rgba(155,92,255,.09),
+      transparent 30%
+    ),
+    linear-gradient(
+      180deg,
+      #05060a 0%,
+      #070912 100%
+    );
 
-      letter-spacing:.06em;
+  font-family:
+    "Montserrat",
+    system-ui,
+    sans-serif;
+}
 
-      transition:
-        .2s ease;
-    }
+button,
+input,
+textarea{
+  font:inherit;
+}
 
-    .btn:hover{
-      border-color:
-        rgba(0,234,255,.32);
+button{
+  cursor:pointer;
+}
 
-      background:
-        rgba(0,234,255,.08);
+a{
+  color:inherit;
+  text-decoration:none;
+}
 
-      color:var(--cyan);
 
-      transform:
-        translateY(-1px);
-    }
+/* =========================================================
+   GLOBAL
+   ========================================================= */
 
-    .btn.primary{
-      border-color:
-        rgba(0,234,255,.35);
+.container{
+  width:min(
+    1400px,
+    calc(100% - 32px)
+  );
 
-      background:
-        linear-gradient(
-          135deg,
-          rgba(0,234,255,.16),
-          rgba(139,92,246,.16)
-        );
+  margin:auto;
+}
 
-      color:var(--cyan);
-    }
+.hidden{
+  display:none !important;
+}
 
-    .btn.danger{
-      color:#ff8395;
-    }
 
-    /* =====================================================
-       HERO
-       ===================================================== */
+/* =========================================================
+   TOP BAR
+   ========================================================= */
 
-    .hero{
-      padding:
-        54px 0 30px;
-    }
+.topbar{
+  position:sticky;
 
-    .hero-grid{
-      display:grid;
+  top:0;
 
-      grid-template-columns:
-        minmax(0,1fr)
-        minmax(320px,440px);
+  z-index:1000;
 
-      gap:30px;
+  backdrop-filter:
+    blur(18px);
 
-      align-items:end;
-    }
+  background:
+    rgba(5,6,10,.82);
 
-    .eyebrow{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
+  border-bottom:
+    1px solid var(--border);
+}
 
-      margin-bottom:15px;
+.topbar-inner{
+  min-height:70px;
 
-      color:var(--cyan);
+  display:flex;
 
-      font-family:"Orbitron",sans-serif;
+  align-items:center;
 
-      font-size:10px;
-      font-weight:700;
+  justify-content:space-between;
 
-      letter-spacing:.22em;
-      text-transform:uppercase;
-    }
+  gap:20px;
+}
 
-    .live-dot{
-      width:8px;
-      height:8px;
+.brand{
+  display:flex;
 
-      border-radius:50%;
+  align-items:center;
 
-      background:var(--green);
+  gap:12px;
 
-      box-shadow:
-        0 0 12px var(--green);
+  min-width:0;
+}
 
-      animation:
-        pulse 1.5s infinite;
-    }
+.brand-mark{
+  width:40px;
+  height:40px;
 
-    @keyframes pulse{
-      0%,100%{
-        opacity:1;
-        transform:scale(1);
-      }
+  display:grid;
 
-      50%{
-        opacity:.45;
-        transform:scale(.75);
-      }
-    }
+  place-items:center;
 
-    .hero h1{
-      margin:0;
+  border-radius:11px;
 
-      font-family:"Orbitron",sans-serif;
+  color:#05060a;
 
-      font-size:
-        clamp(
-          30px,
-          5vw,
-          65px
-        );
+  font-family:"Orbitron",sans-serif;
 
-      line-height:1.02;
+  font-weight:900;
 
-      letter-spacing:-.03em;
-    }
+  background:
+    linear-gradient(
+      135deg,
+      var(--cyan),
+      var(--purple)
+    );
 
-    .hero h1 span{
-      color:var(--cyan);
+  box-shadow:
+    0 0 25px
+    rgba(0,234,255,.22);
+}
 
-      text-shadow:
-        0 0 25px rgba(0,234,255,.18);
-    }
+.brand-copy{
+  min-width:0;
+}
 
-    .hero-description{
-      max-width:760px;
+.brand-title{
+  font-family:"Orbitron",sans-serif;
 
-      margin:
-        18px 0 0;
+  font-weight:900;
 
-      color:var(--muted);
+  font-size:15px;
 
-      line-height:1.75;
+  letter-spacing:.05em;
+}
 
-      font-size:14px;
-    }
+.brand-subtitle{
+  color:var(--muted2);
 
-    /* =====================================================
-       COUNTDOWN
-       ===================================================== */
+  font-size:9px;
 
-    .countdown-card{
-      position:relative;
+  letter-spacing:.18em;
 
-      padding:20px;
+  text-transform:uppercase;
+}
 
-      border:
-        1px solid
-        rgba(0,234,255,.16);
+.top-actions{
+  display:flex;
 
-      border-radius:var(--radius);
+  align-items:center;
 
-      background:
-        linear-gradient(
-          145deg,
-          rgba(0,234,255,.07),
-          rgba(139,92,246,.05)
-        );
+  gap:8px;
+}
 
-      box-shadow:
-        var(--glow);
-    }
+.top-button{
+  border:
+    1px solid var(--border);
 
-    .countdown-label{
-      color:var(--muted2);
+  color:var(--muted);
 
-      font-family:"Orbitron",sans-serif;
+  background:
+    rgba(255,255,255,.025);
 
-      font-size:9px;
-      font-weight:700;
+  border-radius:9px;
 
-      letter-spacing:.2em;
-      text-transform:uppercase;
-    }
+  padding:9px 12px;
 
-    .countdown-title{
-      margin-top:7px;
+  font-family:"Orbitron",sans-serif;
 
-      font-weight:800;
-      font-size:15px;
-    }
+  font-size:8px;
 
-    .countdown{
-      display:grid;
+  font-weight:800;
 
-      grid-template-columns:
-        repeat(4,1fr);
+  letter-spacing:.1em;
 
-      gap:8px;
+  transition:.2s ease;
+}
 
-      margin-top:16px;
-    }
+.top-button:hover{
+  color:var(--text);
 
-    .time-box{
-      padding:12px 8px;
+  border-color:
+    rgba(0,234,255,.25);
 
-      border:
-        1px solid var(--border);
+  background:
+    rgba(0,234,255,.05);
+}
 
-      border-radius:11px;
+.top-button.primary{
+  color:#05060a;
 
-      text-align:center;
+  border-color:transparent;
 
-      background:
-        rgba(0,0,0,.18);
-    }
+  background:
+    linear-gradient(
+      135deg,
+      var(--cyan),
+      var(--purple)
+    );
+}
 
-    .time-number{
-      display:block;
 
-      font-family:"Orbitron",sans-serif;
+/* =========================================================
+   SHOW NAVIGATION
+   ========================================================= */
 
-      font-size:20px;
-      font-weight:800;
+.show-nav{
+  padding:22px 0 0;
+}
 
-      color:var(--cyan);
-    }
+.show-nav-title{
+  color:var(--muted2);
 
-    .time-label{
-      display:block;
+  font-family:"Orbitron",sans-serif;
 
-      margin-top:4px;
+  font-size:8px;
 
-      color:var(--muted2);
+  font-weight:800;
 
-      font-size:8px;
-      letter-spacing:.1em;
-    }
+  letter-spacing:.18em;
 
-    .schedule-message{
-      margin-top:13px;
+  margin-bottom:10px;
+}
 
-      color:var(--muted);
+.show-links{
+  display:flex;
 
-      font-size:10px;
-      line-height:1.5;
-    }
+  gap:8px;
 
-    /* =====================================================
-       MAIN LAYOUT
-       ===================================================== */
+  overflow-x:auto;
 
-    .main-grid{
-      display:grid;
+  padding-bottom:5px;
 
-      grid-template-columns:
-        minmax(0,1fr)
-        360px;
+  scrollbar-width:thin;
+}
 
-      gap:22px;
+.show-link{
+  flex:
+    0 0 auto;
 
-      padding-bottom:60px;
-    }
+  padding:11px 15px;
 
-    .panel{
-      border:
-        1px solid var(--border);
+  border:
+    1px solid var(--border);
 
-      border-radius:var(--radius);
+  border-radius:10px;
 
-      background:
-        linear-gradient(
-          145deg,
-          rgba(17,21,34,.94),
-          rgba(9,11,18,.94)
-        );
+  color:var(--muted);
 
-      box-shadow:
-        var(--shadow);
+  background:
+    rgba(255,255,255,.025);
 
-      overflow:hidden;
-    }
+  font-family:"Orbitron",sans-serif;
 
-    .panel-header{
-      min-height:62px;
+  font-size:8px;
 
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
+  font-weight:800;
 
-      gap:15px;
+  letter-spacing:.07em;
 
-      padding:
-        15px 18px;
+  transition:.2s ease;
+}
 
-      border-bottom:
-        1px solid var(--border);
-    }
+.show-link:hover{
+  color:var(--text);
 
-    .panel-title{
-      font-family:"Orbitron",sans-serif;
+  border-color:
+    rgba(0,234,255,.3);
+}
 
-      font-size:11px;
-      font-weight:800;
+.show-link.active{
+  color:#05060a;
 
-      letter-spacing:.13em;
-      text-transform:uppercase;
-    }
+  border-color:transparent;
 
-    .panel-subtitle{
-      margin-top:4px;
+  background:
+    linear-gradient(
+      135deg,
+      var(--cyan),
+      var(--purple)
+    );
 
-      color:var(--muted2);
+  box-shadow:
+    0 0 22px
+    rgba(0,234,255,.13);
+}
 
-      font-size:9px;
-    }
 
-    /* =====================================================
-       PLAYER
-       ===================================================== */
+/* =========================================================
+   MAIN
+   ========================================================= */
 
-    .player-shell{
-      padding:14px;
-    }
+main{
+  padding:
+    28px 0 70px;
+}
 
-    .player{
-      position:relative;
+.show-heading{
+  display:flex;
 
-      width:100%;
+  align-items:flex-end;
 
-      aspect-ratio:16 / 9;
+  justify-content:space-between;
 
-      overflow:hidden;
+  gap:25px;
 
-      border-radius:14px;
+  margin-bottom:22px;
+}
 
-      background:#000;
+.show-heading h1{
+  margin:0;
 
-      border:
-        1px solid
-        rgba(255,255,255,.07);
+  font-family:"Orbitron",sans-serif;
 
-      box-shadow:
-        inset 0 0 80px rgba(0,0,0,.55);
-    }
+  font-size:
+    clamp(24px,4vw,42px);
 
-    /*
-      IMPORTANT:
-      There is exactly ONE native video
-      and ONE YouTube container.
-    */
+  line-height:1.05;
 
-    #nativeVideo{
-      width:100%;
-      height:100%;
+  letter-spacing:.02em;
+}
 
-      display:block;
+.show-description{
+  max-width:800px;
 
-      object-fit:contain;
+  margin-top:10px;
 
-      background:#000;
-    }
+  color:var(--muted);
 
-    #youtubeContainer{
-      position:absolute;
+  font-size:13px;
 
-      inset:0;
+  line-height:1.7;
+}
 
-      width:100%;
-      height:100%;
+.live-indicator{
+  display:inline-flex;
 
-      background:#000;
-    }
+  align-items:center;
 
-    #youtubeContainer iframe{
-      width:100% !important;
-      height:100% !important;
+  gap:7px;
 
-      border:0 !important;
-    }
+  padding:8px 11px;
 
-    .player-status{
-      position:absolute;
+  border:
+    1px solid
+    rgba(53,245,154,.22);
 
-      top:12px;
-      left:12px;
+  border-radius:9px;
 
-      z-index:10;
+  color:var(--green);
 
-      padding:6px 9px;
+  background:
+    rgba(53,245,154,.05);
 
-      border:
-        1px solid
-        rgba(255,255,255,.12);
+  font-family:"Orbitron",sans-serif;
 
-      border-radius:7px;
+  font-size:8px;
 
-      background:
-        rgba(0,0,0,.65);
+  font-weight:800;
 
-      color:var(--cyan);
+  letter-spacing:.1em;
+}
 
-      font-family:"Orbitron",sans-serif;
+.live-dot{
+  width:7px;
+  height:7px;
 
-      font-size:8px;
-      font-weight:800;
+  border-radius:50%;
 
-      letter-spacing:.13em;
+  background:var(--green);
 
-      backdrop-filter:
-        blur(8px);
-    }
+  box-shadow:
+    0 0 12px
+    rgba(53,245,154,.7);
 
-    .player-message{
-      position:absolute;
+  animation:
+    livePulse 1.5s infinite;
+}
 
-      inset:0;
+@keyframes livePulse{
 
-      z-index:8;
+  50%{
+    opacity:.35;
+    transform:scale(.7);
+  }
 
-      display:none;
+}
 
-      align-items:center;
-      justify-content:center;
 
-      padding:25px;
+/* =========================================================
+   CONTENT GRID
+   ========================================================= */
 
-      background:
-        radial-gradient(
-          circle,
-          rgba(0,234,255,.08),
-          rgba(0,0,0,.88) 70%
-        );
+.content-grid{
+  display:grid;
 
-      text-align:center;
-    }
+  grid-template-columns:
+    minmax(0,1fr)
+    360px;
 
-    .player-message.show{
-      display:flex;
-    }
+  gap:20px;
 
-    .player-message-inner{
-      max-width:520px;
-    }
+  align-items:start;
+}
 
-    .player-message h2{
-      margin:0;
 
-      font-family:"Orbitron",sans-serif;
+/* =========================================================
+   PLAYER
+   ONE PLAYER CONTAINER ONLY
+   ========================================================= */
 
-      font-size:17px;
-      letter-spacing:.08em;
-    }
+.player-shell{
+  overflow:hidden;
 
-    .player-message p{
-      margin:
-        10px 0 0;
+  border:
+    1px solid var(--border);
 
-      color:var(--muted);
+  border-radius:
+    var(--radius);
 
-      font-size:12px;
+  background:#000;
 
-      line-height:1.6;
-    }
+  box-shadow:
+    var(--shadow);
+}
 
-    .player-controls{
-      display:flex;
+.player{
+  position:relative;
 
-      flex-wrap:wrap;
+  width:100%;
 
-      gap:8px;
+  aspect-ratio:16/9;
 
-      padding:
-        12px 0 0;
-    }
+  min-height:300px;
 
-    /* =====================================================
-       EPISODE INFO
-       ===================================================== */
+  overflow:hidden;
 
-    .episode-info{
-      padding:20px;
-    }
+  background:#000;
+}
 
-    .episode-kicker{
-      color:var(--cyan);
+.player video{
+  width:100%;
+  height:100%;
 
-      font-family:"Orbitron",sans-serif;
+  display:block;
 
-      font-size:9px;
-      font-weight:700;
+  object-fit:contain;
 
-      letter-spacing:.15em;
-      text-transform:uppercase;
-    }
+  background:#000;
+}
 
-    .episode-title{
-      margin:
-        7px 0 0;
+.youtube-frame{
+  position:absolute;
 
-      font-family:"Orbitron",sans-serif;
+  inset:0;
 
-      font-size:
-        clamp(
-          19px,
-          3vw,
-          30px
-        );
+  width:100%;
+  height:100%;
+}
 
-      line-height:1.2;
-    }
+.youtube-frame > div{
+  width:100%;
+  height:100%;
+}
 
-    .episode-meta{
-      margin-top:9px;
+.player-status{
+  position:absolute;
 
-      color:var(--muted2);
+  top:13px;
+  left:13px;
 
-      font-size:10px;
-    }
+  z-index:20;
 
-    .episode-description{
-      margin-top:15px;
+  padding:7px 9px;
 
-      color:var(--muted);
+  border:
+    1px solid
+    rgba(255,255,255,.12);
 
-      font-size:12px;
+  border-radius:7px;
 
-      line-height:1.7;
-    }
+  background:
+    rgba(0,0,0,.7);
 
-    /* =====================================================
-       EPISODES
-       ===================================================== */
+  color:var(--muted);
 
-    .episode-list{
-      padding:12px;
-    }
+  font-family:"Orbitron",sans-serif;
 
-    .episode-card{
-      display:grid;
+  font-size:7px;
 
-      grid-template-columns:
-        110px
-        minmax(0,1fr)
-        auto;
+  font-weight:800;
 
-      gap:13px;
+  letter-spacing:.12em;
 
-      align-items:center;
+  pointer-events:none;
+}
 
-      padding:10px;
+.player-status.playing{
+  color:var(--green);
+}
 
-      margin-bottom:8px;
+.player-status.error{
+  color:var(--red);
+}
 
-      border:
-        1px solid var(--border);
+.player-message{
+  position:absolute;
 
-      border-radius:12px;
+  inset:0;
 
-      background:
-        rgba(255,255,255,.025);
+  z-index:10;
 
-      transition:.2s ease;
-    }
+  display:none;
 
-    .episode-card:hover{
-      border-color:
-        rgba(0,234,255,.22);
+  place-items:center;
 
-      background:
-        rgba(0,234,255,.035);
-    }
+  padding:25px;
 
-    .episode-card.active{
-      border-color:
-        rgba(0,234,255,.34);
+  text-align:center;
 
-      background:
-        rgba(0,234,255,.06);
-    }
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(0,234,255,.04),
+      rgba(0,0,0,.88)
+    );
+}
 
-    .episode-thumb{
-      width:110px;
-      aspect-ratio:16 / 9;
+.player-message.show{
+  display:grid;
+}
 
-      border-radius:8px;
+.player-message-inner{
+  max-width:500px;
+}
 
-      overflow:hidden;
+.player-message h2{
+  margin:0;
 
-      background:
-        linear-gradient(
-          135deg,
-          #101522,
-          #07090f
-        );
-    }
+  font-family:"Orbitron",sans-serif;
 
-    .episode-thumb img{
-      width:100%;
-      height:100%;
+  font-size:18px;
+}
 
-      display:block;
+.player-message p{
+  margin:9px 0 0;
 
-      object-fit:cover;
-    }
+  color:var(--muted);
 
-    .episode-card-title{
-      font-weight:800;
+  font-size:11px;
 
-      font-size:12px;
+  line-height:1.6;
+}
 
-      line-height:1.4;
-    }
+.player-message button{
+  margin-top:16px;
 
-    .episode-card-meta{
-      margin-top:5px;
+  padding:10px 15px;
 
-      color:var(--muted2);
+  border:0;
 
-      font-size:9px;
-    }
+  border-radius:9px;
 
-    .episode-card-status{
-      display:inline-block;
+  color:#05060a;
 
-      margin-top:6px;
+  background:
+    linear-gradient(
+      135deg,
+      var(--cyan),
+      var(--purple)
+    );
 
-      color:var(--green);
+  font-family:"Orbitron",sans-serif;
 
-      font-family:"Orbitron",sans-serif;
+  font-size:8px;
 
-      font-size:7px;
-      letter-spacing:.12em;
-    }
+  font-weight:900;
+}
 
-    /* =====================================================
-       CHAT
-       ===================================================== */
 
-    .chat-body{
-      display:flex;
-      flex-direction:column;
+/* =========================================================
+   PLAYER INFO
+   ========================================================= */
 
-      height:500px;
-    }
+.episode-info{
+  padding:18px;
 
-    .chat-status{
-      padding:
-        9px 14px;
+  border-top:
+    1px solid var(--border);
 
-      border-bottom:
-        1px solid var(--border);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.025),
+      rgba(255,255,255,.01)
+    );
+}
 
-      color:var(--green);
+.episode-meta{
+  display:flex;
 
-      font-family:"Orbitron",sans-serif;
+  flex-wrap:wrap;
 
-      font-size:8px;
+  gap:7px;
 
-      letter-spacing:.13em;
-    }
+  margin-bottom:8px;
+}
 
-    .chat-messages{
-      flex:1;
+.meta-chip{
+  padding:5px 8px;
 
-      overflow-y:auto;
+  border:
+    1px solid var(--border);
 
-      padding:14px;
-    }
+  border-radius:6px;
 
-    .chat-empty{
-      color:var(--muted2);
+  color:var(--muted2);
 
-      text-align:center;
+  font-family:"Orbitron",sans-serif;
 
-      font-size:11px;
+  font-size:7px;
 
-      padding:
-        35px 10px;
-    }
+  font-weight:700;
 
-    .chat-message{
-      margin-bottom:12px;
-    }
+  letter-spacing:.07em;
+}
 
-    .chat-user{
-      color:var(--cyan);
+.episode-title{
+  margin:0;
 
-      font-size:9px;
-      font-weight:800;
-    }
+  font-family:"Orbitron",sans-serif;
 
-    .chat-time{
-      color:var(--muted2);
+  font-size:19px;
 
-      margin-left:6px;
+  line-height:1.3;
+}
 
-      font-size:8px;
-    }
+.episode-description{
+  margin:8px 0 0;
 
-    .chat-text{
-      margin-top:3px;
+  color:var(--muted);
 
-      color:#dbe1ef;
+  font-size:11px;
 
-      font-size:11px;
+  line-height:1.7;
+}
 
-      line-height:1.5;
 
-      overflow-wrap:anywhere;
-    }
+/* =========================================================
+   COUNTDOWN
+   ========================================================= */
 
-    .chat-form{
-      display:grid;
+.countdown-card{
+  margin-top:15px;
 
-      grid-template-columns:
-        105px
-        1fr
-        auto;
+  padding:16px;
 
-      gap:7px;
+  border:
+    1px solid
+    rgba(155,92,255,.16);
 
-      padding:10px;
+  border-radius:14px;
 
-      border-top:
-        1px solid var(--border);
-    }
+  background:
+    linear-gradient(
+      135deg,
+      rgba(155,92,255,.07),
+      rgba(0,234,255,.025)
+    );
+}
 
-    .input{
-      width:100%;
+.countdown-label{
+  color:var(--purple);
 
-      border:
-        1px solid var(--border);
+  font-family:"Orbitron",sans-serif;
 
-      outline:none;
+  font-size:7px;
 
-      border-radius:9px;
+  font-weight:900;
 
-      background:
-        rgba(0,0,0,.24);
+  letter-spacing:.17em;
+}
 
-      color:var(--text);
+.countdown-title{
+  margin-top:6px;
 
-      padding:10px;
+  font-size:11px;
 
-      font-size:10px;
-    }
+  font-weight:700;
+}
 
-    .input:focus{
-      border-color:
-        rgba(0,234,255,.35);
+.countdown-time{
+  margin-top:10px;
 
-      box-shadow:
-        0 0 0 3px
-        rgba(0,234,255,.05);
-    }
+  font-family:"Orbitron",sans-serif;
 
-    /* =====================================================
-       AUTH MODAL
-       ===================================================== */
+  font-size:
+    clamp(22px,4vw,34px);
 
-    .modal{
-      position:fixed;
+  font-weight:900;
 
-      inset:0;
+  letter-spacing:.04em;
+}
 
-      z-index:3000;
+.countdown-date{
+  margin-top:5px;
 
-      display:none;
+  color:var(--muted2);
 
-      align-items:center;
-      justify-content:center;
+  font-size:9px;
+}
 
-      padding:20px;
 
-      background:
-        rgba(0,0,0,.75);
+/* =========================================================
+   ENGAGEMENT HUD
+   ========================================================= */
 
-      backdrop-filter:
-        blur(10px);
-    }
+.engagement-hud{
+  margin-top:20px;
 
-    .modal.show{
-      display:flex;
-    }
+  padding:18px;
 
-    .modal-card{
-      width:min(
-        100%,
-        430px
-      );
+  border:
+    1px solid
+    rgba(0,234,255,.13);
 
-      border:
-        1px solid
-        rgba(0,234,255,.18);
+  border-radius:18px;
 
-      border-radius:18px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(0,234,255,.035),
+      rgba(155,92,255,.035)
+    );
+}
 
-      background:
-        #0c0f17;
+.engagement-header{
+  display:flex;
 
-      box-shadow:
-        0 30px 100px rgba(0,0,0,.65);
+  justify-content:space-between;
 
-      padding:25px;
-    }
+  align-items:center;
 
-    .modal-title{
-      font-family:"Orbitron",sans-serif;
+  gap:15px;
 
-      font-size:17px;
-    }
+  margin-bottom:14px;
+}
 
-    .modal-subtitle{
-      margin-top:7px;
+.engagement-kicker{
+  color:var(--cyan);
 
-      color:var(--muted);
+  font-family:"Orbitron",sans-serif;
 
-      font-size:11px;
+  font-size:7px;
 
-      line-height:1.6;
-    }
+  font-weight:900;
 
-    .auth-form{
-      display:grid;
+  letter-spacing:.18em;
+}
 
-      gap:9px;
+.engagement-header h2{
+  margin:5px 0 0;
 
-      margin-top:18px;
-    }
+  font-family:"Orbitron",sans-serif;
 
-    .auth-actions{
-      display:flex;
+  font-size:15px;
+}
 
-      gap:8px;
+.engagement-session-status{
+  padding:7px 9px;
 
-      flex-wrap:wrap;
+  border:
+    1px solid var(--border);
 
-      margin-top:13px;
-    }
+  border-radius:7px;
 
-    .auth-status{
-      margin-top:10px;
+  color:var(--muted2);
 
-      color:var(--muted);
+  font-family:"Orbitron",sans-serif;
 
-      font-size:10px;
+  font-size:6px;
 
-      line-height:1.5;
-    }
+  font-weight:900;
 
-    /* =====================================================
-       TOAST
-       ===================================================== */
+  letter-spacing:.1em;
 
-    .toast{
-      position:fixed;
+  white-space:nowrap;
+}
 
-      right:20px;
-      bottom:20px;
+.engagement-session-status.active{
+  color:var(--green);
 
-      z-index:4000;
+  border-color:
+    rgba(53,245,154,.22);
 
-      max-width:360px;
+  background:
+    rgba(53,245,154,.04);
+}
 
-      padding:13px 15px;
+.engagement-grid{
+  display:grid;
 
-      border:
-        1px solid
-        rgba(0,234,255,.2);
+  grid-template-columns:
+    repeat(4,1fr);
 
-      border-radius:11px;
+  gap:9px;
+}
 
-      background:
-        rgba(10,13,21,.95);
+.engagement-card{
+  min-width:0;
 
-      color:var(--text);
+  padding:13px;
 
-      box-shadow:
-        var(--shadow);
+  border:
+    1px solid var(--border);
 
-      font-size:11px;
+  border-radius:12px;
 
-      transform:
-        translateY(20px);
+  background:
+    rgba(0,0,0,.14);
+}
 
-      opacity:0;
+.engagement-label{
+  color:var(--muted2);
 
-      pointer-events:none;
+  font-family:"Orbitron",sans-serif;
 
-      transition:.25s ease;
-    }
+  font-size:6px;
 
-    .toast.show{
-      opacity:1;
+  font-weight:900;
 
-      transform:
-        translateY(0);
-    }
+  letter-spacing:.13em;
+}
 
-    /* =====================================================
-       FOOTER
-       ===================================================== */
+.engagement-value{
+  margin-top:6px;
 
-    footer{
-      padding:
-        30px 0 50px;
+  font-family:"Orbitron",sans-serif;
 
-      border-top:
-        1px solid var(--border);
+  font-size:17px;
 
-      color:var(--muted2);
+  font-weight:900;
+}
 
-      text-align:center;
+.points-card .engagement-value{
+  color:var(--yellow);
+}
 
-      font-size:9px;
+.engagement-detail{
+  margin-top:3px;
 
-      letter-spacing:.08em;
-    }
+  color:var(--muted2);
 
-    /* =====================================================
-       RESPONSIVE
-       ===================================================== */
+  font-size:7px;
 
-    @media(max-width:1050px){
+  line-height:1.4;
+}
 
-      .main-grid{
-        grid-template-columns:1fr;
-      }
+.session-progress{
+  margin-top:13px;
 
-      .hero-grid{
-        grid-template-columns:1fr;
-      }
+  padding-top:12px;
 
-    }
+  border-top:
+    1px solid var(--border);
+}
 
-    @media(max-width:760px){
+.session-progress-top{
+  display:flex;
 
-      .topbar-inner{
-        min-height:62px;
-      }
+  justify-content:space-between;
 
-      .brand-text{
-        display:none;
-      }
+  color:var(--muted2);
 
-      .show-nav{
-        overflow-x:auto;
-      }
+  font-family:"Orbitron",sans-serif;
 
-      .account-name{
-        display:none;
-      }
+  font-size:6px;
 
-      .hero{
-        padding-top:35px;
-      }
+  letter-spacing:.1em;
+}
 
-      .main-grid{
-        gap:15px;
-      }
+.session-progress-track{
+  height:4px;
 
-      .episode-card{
-        grid-template-columns:
-          85px
-          minmax(0,1fr);
-      }
+  margin-top:7px;
 
-      .episode-card .btn{
-        grid-column:2;
-        justify-self:start;
-      }
+  overflow:hidden;
 
-      .episode-thumb{
-        width:85px;
-      }
+  border-radius:10px;
 
-      .chat-form{
-        grid-template-columns:1fr;
-      }
+  background:
+    rgba(255,255,255,.06);
+}
 
-    }
+.session-progress-fill{
+  width:0%;
 
-    @media(max-width:480px){
+  height:100%;
 
-      .container{
-        width:
-          calc(100% - 20px);
-      }
+  border-radius:10px;
 
-      .countdown{
-        gap:5px;
-      }
+  background:
+    linear-gradient(
+      90deg,
+      var(--cyan),
+      var(--purple),
+      var(--pink)
+    );
 
-      .time-number{
-        font-size:16px;
-      }
+  transition:
+    width .5s ease;
+}
 
-      .player-shell{
-        padding:8px;
-      }
 
-      .episode-info{
-        padding:15px;
-      }
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
 
-    }
-  </style>
+.sidebar{
+  display:flex;
+
+  flex-direction:column;
+
+  gap:15px;
+}
+
+.side-card{
+  overflow:hidden;
+
+  border:
+    1px solid var(--border);
+
+  border-radius:
+    var(--radius);
+
+  background:
+    rgba(11,14,23,.82);
+}
+
+.side-header{
+  padding:14px 15px;
+
+  border-bottom:
+    1px solid var(--border);
+
+  font-family:"Orbitron",sans-serif;
+
+  font-size:8px;
+
+  font-weight:900;
+
+  letter-spacing:.12em;
+}
+
+
+/* =========================================================
+   EPISODE LIST
+   ========================================================= */
+
+.episode-list{
+  max-height:520px;
+
+  overflow-y:auto;
+}
+
+.episode-row{
+  width:100%;
+
+  display:block;
+
+  text-align:left;
+
+  padding:13px 14px;
+
+  border:0;
+
+  border-bottom:
+    1px solid var(--border);
+
+  color:var(--text);
+
+  background:transparent;
+
+  transition:.2s ease;
+}
+
+.episode-row:hover{
+  background:
+    rgba(0,234,255,.035);
+}
+
+.episode-row.active{
+  background:
+    rgba(0,234,255,.06);
+}
+
+.episode-row-title{
+  font-size:10px;
+
+  font-weight:700;
+
+  line-height:1.45;
+}
+
+.episode-row-meta{
+  margin-top:5px;
+
+  color:var(--muted2);
+
+  font-size:7px;
+
+  font-family:"Orbitron",sans-serif;
+}
+
+
+/* =========================================================
+   CHAT
+   ========================================================= */
+
+.chat-messages{
+  height:330px;
+
+  overflow-y:auto;
+
+  padding:12px;
+}
+
+.chat-message{
+  margin-bottom:11px;
+}
+
+.chat-name{
+  color:var(--cyan);
+
+  font-family:"Orbitron",sans-serif;
+
+  font-size:7px;
+
+  font-weight:800;
+}
+
+.chat-text{
+  margin-top:3px;
+
+  color:var(--text);
+
+  font-size:9px;
+
+  line-height:1.5;
+
+  overflow-wrap:anywhere;
+}
+
+.chat-time{
+  margin-top:2px;
+
+  color:var(--muted2);
+
+  font-size:6px;
+}
+
+.chat-form{
+  display:flex;
+
+  gap:7px;
+
+  padding:10px;
+
+  border-top:
+    1px solid var(--border);
+}
+
+.chat-form input{
+  min-width:0;
+
+  flex:1;
+
+  padding:10px;
+
+  border:
+    1px solid var(--border);
+
+  outline:0;
+
+  border-radius:8px;
+
+  color:var(--text);
+
+  background:
+    rgba(255,255,255,.035);
+
+  font-size:9px;
+}
+
+.chat-form button{
+  padding:
+    0 13px;
+
+  border:0;
+
+  border-radius:8px;
+
+  color:#05060a;
+
+  background:var(--cyan);
+
+  font-family:"Orbitron",sans-serif;
+
+  font-size:7px;
+
+  font-weight:900;
+}
+
+.chat-status{
+  padding:
+    7px 11px;
+
+  color:var(--muted2);
+
+  font-family:"Orbitron",sans-serif;
+
+  font-size:6px;
+
+  letter-spacing:.1em;
+}
+
+
+/* =========================================================
+   AUTH MODAL
+   ========================================================= */
+
+.modal{
+  position:fixed;
+
+  inset:0;
+
+  z-index:5000;
+
+  display:none;
+
+  place-items:center;
+
+  padding:20px;
+
+  background:
+    rgba(0,0,0,.78);
+
+  backdrop-filter:
+    blur(10px);
+}
+
+.modal.show{
+  display:grid;
+}
+
+.modal-card{
+  width:
+    min(420px,100%);
+
+  padding:22px;
+
+  border:
+    1px solid
+    rgba(0,234,255,.16);
+
+  border-radius:18px;
+
+  background:
+    #0a0d15;
+
+  box-shadow:
+    0 30px 100px rgba(0,0,0,.6);
+}
+
+.modal-card h2{
+  margin:0;
+
+  font-family:"Orbitron",sans-serif;
+
+  font-size:18px;
+}
+
+.modal-card p{
+  color:var(--muted);
+
+  font-size:10px;
+
+  line-height:1.6;
+}
+
+.auth-input{
+  width:100%;
+
+  margin-top:9px;
+
+  padding:11px;
+
+  border:
+    1px solid var(--border);
+
+  border-radius:9px;
+
+  outline:0;
+
+  color:var(--text);
+
+  background:
+    rgba(255,255,255,.035);
+}
+
+.auth-actions{
+  display:flex;
+
+  gap:8px;
+
+  margin-top:12px;
+}
+
+.auth-actions button{
+  flex:1;
+
+  padding:11px;
+
+  border:
+    1px solid var(--border);
+
+  border-radius:9px;
+
+  color:var(--text);
+
+  background:
+    rgba(255,255,255,.04);
+
+  font-family:"Orbitron",sans-serif;
+
+  font-size:7px;
+
+  font-weight:900;
+}
+
+.auth-actions .primary{
+  color:#05060a;
+
+  border:0;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--cyan),
+      var(--purple)
+    );
+}
+
+.auth-message{
+  min-height:18px;
+
+  margin-top:10px;
+
+  color:var(--muted);
+
+  font-size:8px;
+}
+
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+
+.toast{
+  position:fixed;
+
+  right:18px;
+  bottom:18px;
+
+  z-index:6000;
+
+  max-width:340px;
+
+  padding:12px 15px;
+
+  border:
+    1px solid var(--border);
+
+  border-radius:10px;
+
+  color:var(--text);
+
+  background:
+    rgba(10,13,21,.95);
+
+  box-shadow:
+    var(--shadow);
+
+  font-size:9px;
+
+  transform:
+    translateY(20px);
+
+  opacity:0;
+
+  pointer-events:none;
+
+  transition:.25s ease;
+}
+
+.toast.show{
+  opacity:1;
+
+  transform:
+    translateY(0);
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+footer{
+  padding:
+    25px 0 45px;
+
+  border-top:
+    1px solid var(--border);
+
+  color:var(--muted2);
+
+  text-align:center;
+
+  font-size:8px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media(max-width:1050px){
+
+  .content-grid{
+    grid-template-columns:1fr;
+  }
+
+  .sidebar{
+    display:grid;
+
+    grid-template-columns:
+      repeat(2,1fr);
+  }
+
+}
+
+@media(max-width:800px){
+
+  .engagement-grid{
+    grid-template-columns:
+      repeat(2,1fr);
+  }
+
+  .show-heading{
+    align-items:flex-start;
+
+    flex-direction:column;
+  }
+
+}
+
+@media(max-width:650px){
+
+  .container{
+    width:
+      calc(100% - 20px);
+  }
+
+  .topbar-inner{
+    min-height:60px;
+  }
+
+  .brand-subtitle{
+    display:none;
+  }
+
+  .top-button{
+    padding:8px 9px;
+  }
+
+  .top-button span{
+    display:none;
+  }
+
+  .sidebar{
+    display:flex;
+  }
+
+  .player{
+    min-height:220px;
+  }
+
+  .engagement-header{
+    align-items:flex-start;
+
+    flex-direction:column;
+  }
+
+}
+
+</style>
 </head>
 
 <body>
 
-  <!-- =====================================================
-       TOP NAVIGATION
-       ===================================================== -->
 
-  <header class="topbar">
+<!-- =========================================================
+     TOP BAR
+     ========================================================= -->
 
-    <div class="container topbar-inner">
+<header class="topbar">
 
-      <a
-        class="brand"
-        href="./"
-        aria-label="CrowRules TV home"
-      >
+  <div class="container topbar-inner">
 
-        <div class="brand-mark">
-          <span>🐦‍⬛</span>
+    <a
+      class="brand"
+      href="#"
+      aria-label="CrowRules TV"
+    >
+
+      <div class="brand-mark">
+        CR
+      </div>
+
+      <div class="brand-copy">
+
+        <div class="brand-title">
+          CROWRULES TV
         </div>
 
-        <div class="brand-text">
-          CROW<span>RULES</span> TV
-          <small>INDEPENDENT STREAMING NETWORK</small>
+        <div class="brand-subtitle">
+          Independent Streaming Network
         </div>
-
-      </a>
-
-
-      <nav
-        class="show-nav"
-        id="showNav"
-        aria-label="Shows"
-      >
-      </nav>
-
-
-      <div class="account-area">
-
-        <span
-          class="account-name"
-          id="accountName"
-        >
-          Guest
-        </span>
-
-        <button
-          class="btn"
-          id="authBtn"
-          type="button"
-        >
-          SIGN IN
-        </button>
 
       </div>
 
+    </a>
+
+
+    <div class="top-actions">
+
+      <button
+        class="top-button"
+        id="accountButton"
+      >
+        ACCOUNT
+      </button>
+
+      <button
+        class="top-button primary"
+        id="loginButton"
+      >
+        <span>SIGN IN</span>
+      </button>
+
     </div>
 
-  </header>
+  </div>
+
+</header>
 
 
-  <!-- =====================================================
-       HERO
-       ===================================================== -->
+<!-- =========================================================
+     PAGE
+     ========================================================= -->
 
-  <main>
+<main>
 
-    <section class="hero">
+  <div class="container">
 
-      <div class="container hero-grid">
 
-        <div>
+    <!-- SHOW NAV -->
 
-          <div class="eyebrow">
-            <span class="live-dot"></span>
-            CROWRULES TV // NOW TRANSMITTING
-          </div>
+    <section class="show-nav">
 
-          <h1>
-            <span id="heroShowTitle">
-              CrowRules TV
-            </span>
-          </h1>
+      <div class="show-nav-title">
+        CROWRULES TV // SHOWS
+      </div>
 
-          <p
-            class="hero-description"
-            id="heroDescription"
-          >
-            Loading show transmission...
-          </p>
+      <nav
+        class="show-links"
+        id="showLinks"
+      ></nav>
 
+    </section>
+
+
+    <!-- SHOW HEADER -->
+
+    <section class="show-heading">
+
+      <div>
+
+        <h1 id="showTitle">
+          Loading…
+        </h1>
+
+        <div
+          class="show-description"
+          id="showDescription"
+        >
+          Loading CrowRules TV transmission.
         </div>
 
+      </div>
 
-        <div class="countdown-card">
+      <div
+        class="live-indicator"
+        id="liveIndicator"
+      >
+
+        <span class="live-dot"></span>
+
+        CROWRULES TV
+
+      </div>
+
+    </section>
+
+
+    <!-- CONTENT -->
+
+    <section class="content-grid">
+
+
+      <!-- =================================================
+           LEFT
+           ================================================= -->
+
+      <div>
+
+
+        <!-- =================================================
+             SINGLE PLAYER
+             ================================================= -->
+
+        <section class="player-shell">
+
+          <div
+            class="player"
+            id="player"
+          >
+
+            <div
+              class="player-status"
+              id="playerStatus"
+            >
+              LOADING
+            </div>
+
+
+            <!--
+              IMPORTANT:
+
+              There is exactly ONE native video element.
+              There is exactly ONE YouTube mount.
+
+              Switching sources destroys the previous
+              YouTube player before creating another one.
+            -->
+
+            <video
+              id="nativeVideo"
+              playsinline
+              controls
+              preload="metadata"
+              hidden
+            ></video>
+
+
+            <div
+              id="youtubeContainer"
+              class="youtube-frame"
+              hidden
+            ></div>
+
+
+            <div
+              class="player-message show"
+              id="playerMessage"
+            >
+
+              <div class="player-message-inner">
+
+                <h2 id="playerMessageTitle">
+                  LOADING TRANSMISSION
+                </h2>
+
+                <p id="playerMessageText">
+                  CrowRules TV is locating the newest
+                  published episode.
+                </p>
+
+                <button
+                  id="playerMessageButton"
+                  class="hidden"
+                >
+                  RETRY
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- EPISODE INFO -->
+
+          <div class="episode-info">
+
+            <div
+              class="episode-meta"
+              id="episodeMeta"
+            ></div>
+
+            <h2
+              class="episode-title"
+              id="episodeTitle"
+            >
+              Loading episode…
+            </h2>
+
+            <p
+              class="episode-description"
+              id="episodeDescription"
+            >
+              Loading…
+            </p>
+
+          </div>
+
+        </section>
+
+
+        <!-- =================================================
+             COUNTDOWN
+             ================================================= -->
+
+        <section class="countdown-card">
 
           <div class="countdown-label">
             NEXT SCHEDULED EVENT
@@ -1428,407 +1734,265 @@
 
           <div
             class="countdown-title"
-            id="scheduleTitle"
+            id="countdownTitle"
           >
-            Loading schedule...
+            Loading schedule…
           </div>
 
-          <div class="countdown">
-
-            <div class="time-box">
-              <span
-                class="time-number"
-                id="days"
-              >00</span>
-
-              <span class="time-label">
-                DAYS
-              </span>
-            </div>
-
-            <div class="time-box">
-              <span
-                class="time-number"
-                id="hours"
-              >00</span>
-
-              <span class="time-label">
-                HOURS
-              </span>
-            </div>
-
-            <div class="time-box">
-              <span
-                class="time-number"
-                id="minutes"
-              >00</span>
-
-              <span class="time-label">
-                MINUTES
-              </span>
-            </div>
-
-            <div class="time-box">
-              <span
-                class="time-number"
-                id="seconds"
-              >00</span>
-
-              <span class="time-label">
-                SECONDS
-              </span>
-            </div>
+          <div
+            class="countdown-time"
+            id="countdownTime"
+          >
+            --:--:--
 
           </div>
 
           <div
-            class="schedule-message"
-            id="scheduleMessage"
+            class="countdown-date"
+            id="countdownDate"
           >
-            Loading schedule...
+            Checking CrowRules TV schedule…
           </div>
 
-        </div>
-
-      </div>
-
-    </section>
+        </section>
 
 
-    <!-- ===================================================
-         MAIN
-         =================================================== -->
+        <!-- =================================================
+             MEMBER ENGAGEMENT
+             ================================================= -->
 
-    <section class="container main-grid">
+        <section
+          class="engagement-hud"
+          id="engagementHud"
+        >
 
-      <!-- ================================================
-           LEFT COLUMN
-           ================================================ -->
-
-      <div>
-
-        <section class="panel">
-
-          <div class="panel-header">
+          <div class="engagement-header">
 
             <div>
 
-              <div class="panel-title">
-                Latest Published Episode
+              <div class="engagement-kicker">
+                CROWRULES MEMBER ENGAGEMENT
               </div>
 
-              <div class="panel-subtitle">
-                Automatically selected from the current show
-              </div>
+              <h2>
+                Your CrowRules Activity
+              </h2>
 
             </div>
 
             <div
-              id="sourceStatus"
-              class="panel-subtitle"
+              class="engagement-session-status"
+              id="engagementSessionStatus"
             >
-              SOURCE: CHECKING
+              SIGN IN TO TRACK
             </div>
 
           </div>
 
 
-          <div class="player-shell">
+          <div class="engagement-grid">
 
-            <!-- =================================================
-                 CRITICAL:
-                 ONLY ONE PLAYER CONTAINER.
-                 ONLY ONE NATIVE VIDEO.
-                 ONLY ONE YOUTUBE MOUNT.
-                 ================================================= -->
 
-            <div
-              class="player"
-              id="player"
-            >
+            <div class="engagement-card">
 
-              <div
-                class="player-status"
-                id="playerStatus"
-              >
-                LOADING
+              <div class="engagement-label">
+                WATCH TIME
               </div>
 
-
-              <video
-                id="nativeVideo"
-                playsinline
-                controls
-                preload="metadata"
-                hidden
-              ></video>
-
+              <div
+                class="engagement-value"
+                id="watchTimeValue"
+              >
+                SIGN IN
+              </div>
 
               <div
-                id="youtubeContainer"
-                hidden
+                class="engagement-detail"
+                id="watchTimeDetail"
+              >
+                Member tracking
+              </div>
+
+            </div>
+
+
+            <div class="engagement-card points-card">
+
+              <div class="engagement-label">
+                CROW POINTS
+              </div>
+
+              <div
+                class="engagement-value"
+                id="crowPointsValue"
+              >
+                —
+              </div>
+
+              <div
+                class="engagement-detail"
+                id="crowPointsDetail"
+              >
+                Sign in to earn points
+              </div>
+
+            </div>
+
+
+            <div class="engagement-card">
+
+              <div class="engagement-label">
+                CURRENT SESSION
+              </div>
+
+              <div
+                class="engagement-value"
+                id="sessionTimeValue"
+              >
+                0m
+              </div>
+
+              <div
+                class="engagement-detail"
+                id="sessionDetail"
+              >
+                Waiting for playback
+              </div>
+
+            </div>
+
+
+            <div class="engagement-card">
+
+              <div class="engagement-label">
+                THIS MONTH
+              </div>
+
+              <div
+                class="engagement-value"
+                id="monthlyPointsValue"
+              >
+                —
+              </div>
+
+              <div
+                class="engagement-detail"
+                id="monthlyWatchValue"
+              >
+                Member feature
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="session-progress">
+
+            <div class="session-progress-top">
+
+              <span>
+                ACTIVE WATCH SESSION
+              </span>
+
+              <span
+                id="sessionProgressText"
+              >
+                0 seconds
+              </span>
+
+            </div>
+
+            <div class="session-progress-track">
+
+              <div
+                class="session-progress-fill"
+                id="sessionProgressFill"
               ></div>
 
-
-              <div
-                class="player-message show"
-                id="playerMessage"
-              >
-
-                <div class="player-message-inner">
-
-                  <h2>
-                    LOADING TRANSMISSION
-                  </h2>
-
-                  <p>
-                    Locating the newest published episode...
-                  </p>
-
-                </div>
-
-              </div>
-
-            </div>
-
-
-            <div class="player-controls">
-
-              <button
-                class="btn"
-                id="previousBtn"
-                type="button"
-              >
-                ◀ PREVIOUS
-              </button>
-
-              <button
-                class="btn primary"
-                id="playLatestBtn"
-                type="button"
-              >
-                ▶ PLAY LATEST
-              </button>
-
-              <button
-                class="btn"
-                id="nextBtn"
-                type="button"
-              >
-                NEXT ▶
-              </button>
-
-              <button
-                class="btn"
-                id="retryBtn"
-                type="button"
-              >
-                ↻ RETRY SOURCE
-              </button>
-
-            </div>
-
-          </div>
-
-
-          <div class="episode-info">
-
-            <div
-              class="episode-kicker"
-              id="episodeKicker"
-            >
-              LATEST EPISODE
-            </div>
-
-            <h2
-              class="episode-title"
-              id="episodeTitle"
-            >
-              Loading...
-            </h2>
-
-            <div
-              class="episode-meta"
-              id="episodeMeta"
-            >
-              —
-            </div>
-
-            <div
-              class="episode-description"
-              id="episodeDescription"
-            >
-              —
             </div>
 
           </div>
 
         </section>
 
+      </div>
 
-        <!-- ==============================================
-             EPISODE LIBRARY
-             ============================================== -->
 
-        <section
-          class="panel"
-          style="margin-top:22px"
-        >
+      <!-- =================================================
+           RIGHT SIDEBAR
+           ================================================= -->
 
-          <div class="panel-header">
+      <aside class="sidebar">
 
-            <div>
 
-              <div class="panel-title">
-                Episode Library
-              </div>
+        <!-- EPISODES -->
 
-              <div class="panel-subtitle">
-                Published episodes for this show
-              </div>
+        <section class="side-card">
 
-            </div>
-
-            <div
-              id="episodeCount"
-              class="panel-subtitle"
-            >
-              0 EPISODES
-            </div>
-
+          <div class="side-header">
+            LATEST PUBLISHED EPISODES
           </div>
-
 
           <div
             class="episode-list"
             id="episodeList"
           >
 
-            <div class="chat-empty">
-              Loading episodes...
+            <div
+              style="
+                padding:20px;
+                color:var(--muted2);
+                font-size:9px;
+              "
+            >
+              Loading episodes…
             </div>
 
           </div>
 
         </section>
 
-      </div>
 
+        <!-- CHAT -->
 
-      <!-- ================================================
-           RIGHT COLUMN
-           ================================================ -->
+        <section class="side-card">
 
-      <aside>
-
-        <section class="panel">
-
-          <div class="panel-header">
-
-            <div>
-
-              <div class="panel-title">
-                Community Chat
-              </div>
-
-              <div class="panel-subtitle">
-                Talk with the CrowRules community
-              </div>
-
-            </div>
-
-          </div>
-
-
-          <div class="chat-body">
-
-            <div
-              class="chat-status"
-              id="chatStatus"
-            >
-              ● LIVE CHAT // CONNECTING
-            </div>
-
-
-            <div
-              class="chat-messages"
-              id="chatMessages"
-            >
-
-              <div
-                class="chat-empty"
-                id="chatEmpty"
-              >
-                No messages yet.
-              </div>
-
-            </div>
-
-
-            <form
-              class="chat-form"
-              id="chatForm"
-            >
-
-              <input
-                class="input"
-                id="chatNickname"
-                maxlength="30"
-                placeholder="Name"
-                autocomplete="nickname"
-              >
-
-              <input
-                class="input"
-                id="chatInput"
-                maxlength="280"
-                placeholder="Send a message..."
-                autocomplete="off"
-                required
-              >
-
-              <button
-                class="btn primary"
-                type="submit"
-              >
-                SEND
-              </button>
-
-            </form>
-
-          </div>
-
-        </section>
-
-
-        <section
-          class="panel"
-          style="margin-top:22px"
-        >
-
-          <div class="panel-header">
-
-            <div>
-
-              <div class="panel-title">
-                Show Info
-              </div>
-
-            </div>
-
+          <div class="side-header">
+            LIVE CHAT
           </div>
 
           <div
-            style="
-              padding:18px;
-              color:var(--muted);
-              font-size:11px;
-              line-height:1.7;
-            "
-            id="showInfo"
+            class="chat-status"
+            id="chatStatus"
           >
-            Loading...
+            CONNECTING // REALTIME
           </div>
+
+          <div
+            class="chat-messages"
+            id="chatMessages"
+          ></div>
+
+          <form
+            class="chat-form"
+            id="chatForm"
+          >
+
+            <input
+              id="chatInput"
+              maxlength="280"
+              autocomplete="off"
+              placeholder="Say something…"
+            >
+
+            <button
+              type="submit"
+            >
+              SEND
+            </button>
+
+          </form>
 
         </section>
 
@@ -1836,4695 +2000,4181 @@
 
     </section>
 
-  </main>
+  </div>
+
+</main>
 
 
-  <!-- =====================================================
-       FOOTER
-       ===================================================== -->
+<!-- =========================================================
+     FOOTER
+     ========================================================= -->
 
-  <footer>
+<footer>
 
-    <div class="container">
+  <div class="container">
 
-      CROWRULES ENTERTAINMENT ©
-      <span id="footerYear"></span>
-      · CROWRULES TV
-      · INDEPENDENT STREAMING NETWORK
-
-    </div>
-
-  </footer>
-
-
-  <!-- =====================================================
-       AUTH MODAL
-       ===================================================== -->
-
-  <div
-    class="modal"
-    id="authModal"
-  >
-
-    <div class="modal-card">
-
-      <div class="modal-title">
-        CROWRULES MEMBER ACCESS
-      </div>
-
-      <div class="modal-subtitle">
-        Sign in to save your viewing activity,
-        participate in member features and connect
-        with the CrowRules community.
-      </div>
-
-
-      <form
-        class="auth-form"
-        id="authForm"
-      >
-
-        <input
-          class="input"
-          id="authEmail"
-          type="email"
-          placeholder="Email address"
-          autocomplete="email"
-          required
-        >
-
-        <input
-          class="input"
-          id="authPassword"
-          type="password"
-          placeholder="Password"
-          autocomplete="current-password"
-          required
-        >
-
-        <input
-          class="input"
-          id="authDisplayName"
-          type="text"
-          placeholder="Display name (sign up only)"
-          autocomplete="name"
-        >
-
-
-        <div class="auth-actions">
-
-          <button
-            class="btn primary"
-            type="submit"
-            id="loginSubmit"
-          >
-            SIGN IN
-          </button>
-
-          <button
-            class="btn"
-            type="button"
-            id="signupBtn"
-          >
-            CREATE ACCOUNT
-          </button>
-
-          <button
-            class="btn"
-            type="button"
-            id="forgotBtn"
-          >
-            FORGOT PASSWORD
-          </button>
-
-          <button
-            class="btn"
-            type="button"
-            id="closeAuthBtn"
-          >
-            CLOSE
-          </button>
-
-        </div>
-
-      </form>
-
-
-      <div
-        class="auth-status"
-        id="authStatus"
-      ></div>
-
-    </div>
+    CROWRULES TV © 2026 —
+    INDEPENDENT ENTERTAINMENT NETWORK
 
   </div>
 
-
-  <!-- =====================================================
-       TOAST
-       ===================================================== -->
-
-  <div
-    class="toast"
-    id="toast"
-  ></div>
+</footer>
 
 
-  <!-- =====================================================
-       SUPABASE
-       ===================================================== -->
+<!-- =========================================================
+     AUTH MODAL
+     ========================================================= -->
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<div
+  class="modal"
+  id="authModal"
+>
+
+  <div class="modal-card">
+
+    <h2>
+      CrowRules Member Login
+    </h2>
+
+    <p>
+      Sign in to track watch time, sessions and Crow Points.
+    </p>
+
+    <input
+      class="auth-input"
+      id="authEmail"
+      type="email"
+      autocomplete="email"
+      placeholder="Email"
+    >
+
+    <input
+      class="auth-input"
+      id="authPassword"
+      type="password"
+      autocomplete="current-password"
+      placeholder="Password"
+    >
+
+    <input
+      class="auth-input"
+      id="authName"
+      type="text"
+      autocomplete="name"
+      placeholder="Display name (signup only)"
+    >
+
+    <div class="auth-actions">
+
+      <button
+        class="primary"
+        id="signInButton"
+      >
+        SIGN IN
+      </button>
+
+      <button
+        id="signUpButton"
+      >
+        SIGN UP
+      </button>
+
+    </div>
+
+    <div class="auth-actions">
+
+      <button
+        id="forgotButton"
+      >
+        FORGOT PASSWORD
+      </button>
+
+      <button
+        id="closeAuthButton"
+      >
+        CLOSE
+      </button>
+
+    </div>
+
+    <div
+      class="auth-message"
+      id="authMessage"
+    ></div>
+
+  </div>
+
+</div>
 
 
-  <script>
-    "use strict";
+<!-- TOAST -->
+
+<div
+  class="toast"
+  id="toast"
+></div>
 
 
-    /* =====================================================
-       SUPABASE CONFIG
-       ===================================================== */
+<script>
 
-    const SUPABASE_URL =
-      "https://zauxdqyssratvzmomozf.supabase.co";
+/* =========================================================
+   SUPABASE
+   ========================================================= */
 
-    const SUPABASE_KEY =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InphdXhkcXlzc3JhdHZ6bW9tb3pmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc0MjE3MjYsImV4cCI6MjEwMjk5NzcyNn0.nPTPMgD8gHzL7qRmMuUNJxpjXaCJRVXmgxck15AKDDA";
+const SUPABASE_URL =
+  "https://zauxdqyssratvzmomozf.supabase.co";
 
+const SUPABASE_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InphdXhkcXlzc3JhdHZ6bW9tb3pmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc0MjE3MjYsImV4cCI6MjEwMjk5NzcyNn0.nPTPMgD8gHzL7qRmMuUNJxpjXaCJRVXmgxck15AKDDA";
 
-    const supabaseClient =
-      window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY,
-        {
-          auth:{
-            persistSession:true,
-            autoRefreshToken:true,
-            detectSessionInUrl:true
-          }
-        }
-      );
-
-
-    /* =====================================================
-       SHOW CONFIGURATION
-       ===================================================== */
-
-    /*
-      IMPORTANT:
-      Change ONLY the table names if your database uses
-      different names.
-
-      Back Deck Live is confirmed as:
-      back_deck_episodes
-    */
-
-    const SHOWS = {
-
-      "tacoma-nights":{
-        title:"Tacoma Nights",
-
-        description:
-          "Tacoma Nights is CrowRules Entertainment's original Tacoma-focused show featuring conversations, stories, commentary and life around the South Sound.",
-
-        table:
-          "tacoma_nights_episodes"
-      },
-
-
-      "back-deck-live":{
-        title:"Back Deck Live",
-
-        description:
-          "Back Deck Live is the weekly CrowRules live companion show featuring conversations, community interaction and whatever happens on the Back Deck.",
-
-        table:
-          "back_deck_episodes"
-      },
-
-
-      "dj-show":{
-        title:"D&J Show",
-
-        description:
-          "The D&J Show brings conversations, entertainment and personality together in the CrowRules universe.",
-
-        table:
-          "dj_show_episodes"
-      },
-
-
-      "bird-brains":{
-        title:"Bird Brains",
-
-        description:
-          "Bird Brains is a CrowRules original built around unpredictable conversations, humor, stories and the wonderfully chaotic side of life.",
-
-        table:
-          "bird_brain_episodes"
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY,
+    {
+      auth:{
+        persistSession:true,
+        autoRefreshToken:true,
+        detectSessionInUrl:true
       }
+    }
+  );
 
-    };
 
+/* =========================================================
+   DOM
+   ========================================================= */
 
-    /* =====================================================
-       DOM
-       ===================================================== */
+const $ =
+  id => document.getElementById(id);
 
-    const $ = id =>
-      document.getElementById(id);
 
+/* =========================================================
+   SHOW DEFINITIONS
+   ========================================================= */
 
-    const showNav =
-      $("showNav");
+const SHOWS = {
 
-    const heroShowTitle =
-      $("heroShowTitle");
+  "tacoma-nights":{
+    title:"Tacoma Nights",
+    description:
+      "CrowRules TV's Tacoma-centered original show featuring stories, conversations, commentary and life around Tacoma.",
+    table:"tacoma_nights_episodes",
+    scheduleTable:"schedule_items"
+  },
 
-    const heroDescription =
-      $("heroDescription");
+  "back-deck-live":{
+    title:"Back Deck Live",
+    description:
+      "The live CrowRules TV companion show featuring conversations, community, entertainment and what's happening now.",
+    table:"back_deck_episodes",
+    scheduleTable:"schedule_items"
+  },
 
-    const scheduleTitle =
-      $("scheduleTitle");
+  "dj-show":{
+    title:"D&J Show",
+    description:
+      "A CrowRules original featuring conversation, entertainment and the D&J perspective.",
+    table:"dj_show_episodes",
+    scheduleTable:"schedule_items"
+  },
 
-    const scheduleMessage =
-      $("scheduleMessage");
+  "bird-brains":{
+    title:"Bird Brains",
+    description:
+      "The CrowRules show for strange stories, unexpected conversations and bird-brained entertainment.",
+    table:"bird_brain_episodes",
+    scheduleTable:"schedule_items"
+  }
 
-    const sourceStatus =
-      $("sourceStatus");
+};
 
-    const playerStatus =
-      $("playerStatus");
 
-    const playerMessage =
-      $("playerMessage");
+/* =========================================================
+   CURRENT STATE
+   ========================================================= */
 
-    const nativeVideo =
-      $("nativeVideo");
+let showId =
+  new URLSearchParams(
+    location.search
+  ).get("show");
 
-    const youtubeContainer =
-      $("youtubeContainer");
+if(!SHOWS[showId]){
+  showId =
+    "tacoma-nights";
+}
 
-    const episodeTitle =
-      $("episodeTitle");
+let currentShow =
+  SHOWS[showId];
 
-    const episodeDescription =
-      $("episodeDescription");
+let currentEpisode =
+  null;
 
-    const episodeMeta =
-      $("episodeMeta");
+let currentEpisodeIndex =
+  -1;
 
-    const episodeKicker =
-      $("episodeKicker");
+let currentUser =
+  null;
 
-    const episodeList =
-      $("episodeList");
+let currentSession =
+  null;
 
-    const episodeCount =
-      $("episodeCount");
+let playbackGeneration =
+  0;
 
-    const previousBtn =
-      $("previousBtn");
+let youtubePlayer =
+  null;
 
-    const nextBtn =
-      $("nextBtn");
+let youtubeApiPromise =
+  null;
 
-    const playLatestBtn =
-      $("playLatestBtn");
+let youtubeApiFailed =
+  false;
 
-    const retryBtn =
-      $("retryBtn");
+let chatChannel =
+  null;
 
-    const showInfo =
-      $("showInfo");
+let scheduleRefreshTimer =
+  null;
 
-    const chatStatus =
-      $("chatStatus");
+let countdownTimer =
+  null;
 
-    const chatMessages =
-      $("chatMessages");
+let nextScheduleEvent =
+  null;
 
-    const chatEmpty =
-      $("chatEmpty");
 
-    const chatForm =
-      $("chatForm");
+/* =========================================================
+   ENGAGEMENT STATE
+   ========================================================= */
 
-    const chatInput =
-      $("chatInput");
+const tracking = {
 
-    const chatNickname =
-      $("chatNickname");
+  sessionId:
+    crypto.randomUUID(),
 
-    const authBtn =
-      $("authBtn");
+  playing:false,
 
-    const accountName =
-      $("accountName");
+  sessionSeconds:0,
 
-    const authModal =
-      $("authModal");
+  watchSeconds:0,
 
-    const authForm =
-      $("authForm");
+  points:0,
 
-    const authEmail =
-      $("authEmail");
+  lifetimePoints:0,
 
-    const authPassword =
-      $("authPassword");
+  monthlyPoints:0,
 
-    const authDisplayName =
-      $("authDisplayName");
+  monthlyWatchSeconds:0,
 
-    const authStatus =
-      $("authStatus");
+  lastHeartbeat:0,
 
-    const signupBtn =
-      $("signupBtn");
+  lastPosition:0
 
-    const forgotBtn =
-      $("forgotBtn");
+};
 
-    const closeAuthBtn =
-      $("closeAuthBtn");
 
-    const toast =
-      $("toast");
+/* =========================================================
+   PLAYER ELEMENTS
+   ========================================================= */
 
+const nativeVideo =
+  $("nativeVideo");
 
-    /* =====================================================
-       STATE
-       ===================================================== */
+const youtubeContainer =
+  $("youtubeContainer");
 
-    let showId =
-      null;
+const playerStatus =
+  $("playerStatus");
 
-    let currentShow =
-      null;
+const playerMessage =
+  $("playerMessage");
 
-    let episodes =
-      [];
+const playerMessageTitle =
+  $("playerMessageTitle");
 
-    let currentEpisode =
-      null;
+const playerMessageText =
+  $("playerMessageText");
 
-    let currentEpisodeIndex =
-      -1;
+const playerMessageButton =
+  $("playerMessageButton");
 
-    let currentSession =
-      null;
 
-    let currentUser =
-      null;
+/* =========================================================
+   PUBLISHED CHECK
+   ========================================================= */
 
-    let chatChannel =
-      null;
+function isPublished(row){
 
-    let scheduleTimer =
-      null;
+  if(!row){
+    return false;
+  }
 
-    let countdownTimer =
-      null;
+  if(
+    row.is_published === false
+  ){
+    return false;
+  }
 
-    let scheduleTarget =
-      null;
+  const status =
+    String(
+      row.status || ""
+    ).toLowerCase()
+    .trim();
 
-    let scheduleLive =
-      false;
+  if([
+    "draft",
+    "hidden",
+    "archived",
+    "cancelled",
+    "canceled"
+  ].includes(status)){
+    return false;
+  }
 
-    let youtubePlayer =
-      null;
+  return true;
 
-    let youtubeApiPromise =
-      null;
+}
 
-    let youtubeApiFailed =
-      false;
 
-    /*
-      Every player load gets a new generation number.
+/* =========================================================
+   VALUE HELPERS
+   ========================================================= */
 
-      Old callbacks are ignored if they belong to
-      a previous player.
-    */
-    let playbackGeneration =
-      0;
+function first(row,keys){
 
+  for(const key of keys){
 
-    /* =====================================================
-       TRACKING
-       ===================================================== */
-
-    const tracking = {
-
-      sessionId:
-        crypto.randomUUID(),
-
-      episodeId:
-        null,
-
-      contentKey:
-        null,
-
-      title:
-        null,
-
-      position:
-        0,
-
-      reportedPosition:
-        0,
-
-      duration:
-        0,
-
-      playing:
-        false,
-
-      lastTick:
-        performance.now(),
-
-      lastHeartbeat:
-        0,
-
-      lastSeek:
-        0
-
-    };
-
-
-    /* =====================================================
-       INITIALIZATION
-       ===================================================== */
-
-    document.addEventListener(
-      "DOMContentLoaded",
-      init
-    );
-
-
-    async function init(){
-
-      $("footerYear").textContent =
-        new Date().getFullYear();
-
-
-      showId =
-        getShowFromUrl();
-
-
-      if(!SHOWS[showId]){
-
-        showId =
-          "tacoma-nights";
-
-        updateUrl();
-
-      }
-
-
-      currentShow =
-        SHOWS[showId];
-
-
-      renderShowNavigation();
-
-      renderShowHeader();
-
-      loadSavedNickname();
-
-      setupPlayerEvents();
-
-      setupButtons();
-
-      setupAuth();
-
-      await restoreSession();
-
-      await restartShow();
-
+    if(
+      row &&
+      row[key] !== undefined &&
+      row[key] !== null &&
+      String(row[key]).trim() !== ""
+    ){
+      return row[key];
     }
 
+  }
 
-    /* =====================================================
-       URL / SHOW ROUTING
-       ===================================================== */
+  return null;
 
-    function getShowFromUrl(){
+}
 
-      const params =
-        new URLSearchParams(
-          window.location.search
-        );
 
-      return (
-        params.get("id") ||
-        "tacoma-nights"
-      );
+function getEpisodeTitle(row){
 
-    }
+  return first(
+    row,
+    [
+      "title",
+      "episode_title",
+      "name",
+      "episode_name"
+    ]
+  ) ||
+  "Untitled Episode";
 
+}
 
-    function updateUrl(){
 
-      const url =
-        new URL(
-          window.location.href
-        );
+function getEpisodeDescription(row){
 
-      url.searchParams.set(
-        "id",
-        showId
-      );
+  return first(
+    row,
+    [
+      "description",
+      "summary",
+      "episode_description",
+      "excerpt"
+    ]
+  ) ||
+  "No episode description available.";
 
-      window.history.replaceState(
-        {},
-        "",
-        url
-      );
+}
 
-    }
 
+function getPublishedDate(row){
 
-    function switchShow(id){
+  return first(
+    row,
+    [
+      "published_at",
+      "publish_date",
+      "published_on",
+      "release_date",
+      "created_at"
+    ]
+  );
 
-      if(!SHOWS[id]){
-        return;
-      }
+}
 
-      if(id === showId){
-        return;
-      }
 
-      showId =
-        id;
+/* =========================================================
+   YOUTUBE PARSER
+   ========================================================= */
 
-      currentShow =
-        SHOWS[showId];
+function parseYouTubeId(value){
 
-      updateUrl();
+  if(!value){
+    return null;
+  }
 
-      restartShow();
+  const raw =
+    String(value).trim();
 
-    }
+  if(
+    /^[A-Za-z0-9_-]{11}$/.test(raw)
+  ){
+    return raw;
+  }
 
+  try{
 
-    /* =====================================================
-       SHOW NAV
-       ===================================================== */
+    const url =
+      new URL(raw);
 
-    function renderShowNavigation(){
+    const host =
+      url.hostname.toLowerCase();
 
-      showNav.innerHTML =
-        "";
 
-      Object.entries(
-        SHOWS
-      ).forEach(
-        ([id,show])=>{
-
-          const link =
-            document.createElement(
-              "a"
-            );
-
-          link.href =
-            `?id=${encodeURIComponent(id)}`;
-
-          link.className =
-            "show-link" +
-            (
-              id === showId
-                ? " active"
-                : ""
-            );
-
-          link.textContent =
-            show.title;
-
-          link.addEventListener(
-            "click",
-            event=>{
-
-              event.preventDefault();
-
-              switchShow(id);
-
-            }
-          );
-
-          showNav.appendChild(
-            link
-          );
-
-        }
-      );
-
-    }
-
-
-    function renderShowHeader(){
-
-      heroShowTitle.textContent =
-        currentShow.title;
-
-      heroDescription.textContent =
-        currentShow.description;
-
-      showInfo.textContent =
-        currentShow.description;
-
-      document.title =
-        `CrowRules TV — ${currentShow.title}`;
-
-    }
-
-
-    /* =====================================================
-       RESTART SHOW
-       ===================================================== */
-
-    async function restartShow(){
-
-      /*
-        FIRST:
-        destroy every existing player resource.
-
-        This is the main duplicate-player protection.
-      */
-      destroyAllPlayers();
-
-
-      stopCountdown();
-
-
-      if(scheduleTimer){
-
-        clearInterval(
-          scheduleTimer
-        );
-
-        scheduleTimer =
-          null;
-
-      }
-
-
-      episodes =
-        [];
-
-      currentEpisode =
-        null;
-
-      currentEpisodeIndex =
-        -1;
-
-
-      renderShowNavigation();
-
-      renderShowHeader();
-
-
-      episodeTitle.textContent =
-        "Loading latest episode...";
-
-      episodeDescription.textContent =
-        "";
-
-      episodeMeta.textContent =
-        "Searching published catalog...";
-
-
-      episodeList.innerHTML =
-        `<div class="chat-empty">
-          Loading episodes...
-        </div>`;
-
-
-      episodeCount.textContent =
-        "LOADING";
-
-
-      await setupChat();
-
-      await loadEpisodes();
-
-      await refreshSchedule();
-
-
-      scheduleTimer =
-        setInterval(
-          refreshSchedule,
-          60000
-        );
-
-    }
-
-
-    /* =====================================================
-       DATABASE HELPERS
-       ===================================================== */
-
-    function first(
-      row,
-      fields
+    if(
+      host === "youtu.be" ||
+      host.endsWith(".youtu.be")
     ){
 
-      for(
-        const field of fields
-      ){
+      const id =
+        url.pathname
+          .replace(/^\/+/,"")
+          .split("/")[0];
 
-        if(
-          row &&
-          row[field] !== undefined &&
-          row[field] !== null &&
-          row[field] !== ""
-        ){
-
-          return row[field];
-
-        }
-
-      }
-
-      return null;
-
-    }
-
-
-    function toNumber(value){
-
-      const number =
-        Number(value);
-
-      return Number.isFinite(number)
-        ? number
+      return id
+        ? id.slice(0,11)
         : null;
 
     }
 
 
-    function isPublished(row){
+    const queryId =
+      url.searchParams.get("v");
 
-      /*
-        Explicit false means not published.
-      */
-      if(
-        row.is_published === false
-      ){
-
-        return false;
-
-      }
-
-
-      const status =
-        String(
-          first(
-            row,
-            [
-              "status",
-              "publication_status"
-            ]
-          ) || ""
-        )
-        .trim()
-        .toLowerCase();
-
-
-      if(
-        [
-          "draft",
-          "hidden",
-          "archived",
-          "cancelled",
-          "canceled"
-        ].includes(status)
-      ){
-
-        return false;
-
-      }
-
-
-      return true;
-
+    if(queryId){
+      return queryId.slice(0,11);
     }
 
 
-    function isScheduled(row){
-
-      if(
-        row.is_scheduled === false
-      ){
-
-        return false;
-
-      }
-
-      return true;
-
-    }
-
-
-    /* =====================================================
-       YOUTUBE PARSING
-       ===================================================== */
-
-    function parseYouTubeId(value){
-
-      if(!value){
-        return null;
-      }
-
-
-      const raw =
-        String(value)
-          .trim();
-
-
-      /*
-        Raw YouTube ID.
-      */
-      if(
-        /^[A-Za-z0-9_-]{11}$/
-          .test(raw)
-      ){
-
-        return raw;
-
-      }
-
-
-      try{
-
-        const url =
-          new URL(raw);
-
-        const host =
-          url.hostname
-            .toLowerCase();
-
-
-        /*
-          youtu.be/VIDEOID
-        */
-        if(
-          host === "youtu.be" ||
-          host.endsWith(".youtu.be")
-        ){
-
-          const id =
-            url.pathname
-              .replace(/^\/+/,"")
-              .split("/")[0];
-
-          return id
-            ? id.slice(0,11)
-            : null;
-
-        }
-
-
-        /*
-          youtube.com/watch?v=VIDEOID
-        */
-        const queryId =
-          url.searchParams.get("v");
-
-        if(queryId){
-
-          return queryId.slice(
-            0,
-            11
-          );
-
-        }
-
-
-        /*
-          /shorts/VIDEOID
-          /embed/VIDEOID
-          /live/VIDEOID
-        */
-        const parts =
-          url.pathname
-            .split("/")
-            .filter(Boolean);
-
-
-        const marker =
-          parts.findIndex(
-            part =>
-              [
-                "embed",
-                "shorts",
-                "live"
-              ].includes(part)
-          );
-
-
-        if(
-          marker >= 0 &&
-          parts[marker + 1]
-        ){
-
-          return parts[
-            marker + 1
-          ].slice(
-            0,
-            11
-          );
-
-        }
-
-      }catch(error){
-
-        /*
-          Not a URL.
-        */
-
-      }
-
-
-      return null;
-
-    }
-
-
-    function getYouTubeId(row){
-
-      /*
-        Explicit YouTube ID.
-      */
-      const explicit =
-        first(
-          row,
-          [
-            "youtube_video_id",
-            "youtubeVideoId",
-            "youtube_id"
-          ]
-        );
-
-
-      const explicitId =
-        parseYouTubeId(
-          explicit
-        );
-
-
-      if(explicitId){
-
-        return explicitId;
-
-      }
-
-
-      /*
-        Dedicated YouTube URL.
-      */
-      const youtubeUrl =
-        first(
-          row,
-          [
-            "youtube_url",
-            "youtubeUrl"
-          ]
-        );
-
-
-      const youtubeId =
-        parseYouTubeId(
-          youtubeUrl
-        );
-
-
-      if(youtubeId){
-
-        return youtubeId;
-
-      }
-
-
-      /*
-        IMPORTANT:
-        Back Deck stores YouTube URLs in video_url.
-      */
-      const videoUrl =
-        first(
-          row,
-          [
-            "video_url",
-            "videoUrl",
-            "media_url",
-            "stream_url",
-            "mp4_url"
-          ]
-        );
-
-
-      const videoId =
-        parseYouTubeId(
-          videoUrl
-        );
-
-
-      if(videoId){
-
-        return videoId;
-
-      }
-
-
-      return null;
-
-    }
-
-
-    /* =====================================================
-       DIRECT VIDEO URL
-       ===================================================== */
-
-    function getDirectVideoUrl(row){
-
-      const value =
-        first(
-          row,
-          [
-            "video_url",
-            "videoUrl",
-            "media_url",
-            "file_url",
-            "stream_url",
-            "mp4_url"
-          ]
-        );
-
-
-      if(!value){
-
-        return null;
-
-      }
-
-
-      const text =
-        String(value)
-          .trim();
-
-
-      if(
-        /youtube\.com|youtu\.be/i
-          .test(text)
-      ){
-
-        return null;
-
-      }
-
-
-      return text;
-
-    }
-
-
-    /* =====================================================
-       THUMBNAIL
-       ===================================================== */
-
-    function getThumbnail(row){
-
-      const thumbnail =
-        first(
-          row,
-          [
-            "thumbnail_url",
-            "thumbnail",
-            "image_url",
-            "cover_url",
-            "poster_url"
-          ]
-        );
-
-
-      if(thumbnail){
-
-        return thumbnail;
-
-      }
-
-
-      const youtubeId =
-        getYouTubeId(row);
-
-
-      if(youtubeId){
-
-        return (
-          `https://i.ytimg.com/vi/` +
-          `${encodeURIComponent(youtubeId)}/hqdefault.jpg`
-        );
-
-      }
-
-
-      return "";
-
-    }
-
-
-    /* =====================================================
-       TITLE
-       ===================================================== */
-
-    function getEpisodeTitle(row){
-
-      return (
-        first(
-          row,
-          [
-            "title",
-            "name",
-            "episode_title",
-            "episode_name"
-          ]
-        ) ||
-        "Untitled Episode"
+    const parts =
+      url.pathname
+        .split("/")
+        .filter(Boolean);
+
+    const marker =
+      parts.findIndex(
+        part =>
+          part === "embed" ||
+          part === "shorts" ||
+          part === "live"
       );
 
-    }
-
-
-    function getDescription(row){
-
-      return (
-        first(
-          row,
-          [
-            "description",
-            "summary",
-            "synopsis",
-            "body"
-          ]
-        ) ||
-        ""
-      );
-
-    }
-
-
-    /* =====================================================
-       PUBLISHED DATE
-       ===================================================== */
-
-    function getPublishedDate(row){
-
-      return (
-        first(
-          row,
-          [
-            "published_at",
-            "publish_at",
-            "published_on",
-            "release_date",
-            "air_date"
-          ]
-        ) ||
-        null
-      );
-
-    }
-
-
-    function getEpisodeNumber(row){
-
-      return (
-        toNumber(
-          first(
-            row,
-            [
-              "episode_number",
-              "episode",
-              "episode_no",
-              "number"
-            ]
-          )
-        ) || 0
-      );
-
-    }
-
-
-    function getSeasonNumber(row){
-
-      return (
-        toNumber(
-          first(
-            row,
-            [
-              "season_number",
-              "season"
-            ]
-          )
-        ) || 0
-      );
-
-    }
-
-
-    /* =====================================================
-       PLAYABLE
-       ===================================================== */
-
-    function isPlayable(row){
-
-      return Boolean(
-        getDirectVideoUrl(row) ||
-        getYouTubeId(row)
-      );
-
-    }
-
-
-    /* =====================================================
-       SORTING
-       ===================================================== */
-
-    function sortEpisodes(list){
-
-      return list.sort(
-        (a,b)=>{
-
-          const ad =
-            getPublishedDate(a)
-              ? new Date(
-                  getPublishedDate(a)
-                ).getTime()
-              : 0;
-
-          const bd =
-            getPublishedDate(b)
-              ? new Date(
-                  getPublishedDate(b)
-                ).getTime()
-              : 0;
-
-
-          if(bd !== ad){
-
-            return bd - ad;
-
-          }
-
-
-          const seasonDiff =
-            getSeasonNumber(b) -
-            getSeasonNumber(a);
-
-
-          if(seasonDiff){
-
-            return seasonDiff;
-
-          }
-
-
-          const episodeDiff =
-            getEpisodeNumber(b) -
-            getEpisodeNumber(a);
-
-
-          if(episodeDiff){
-
-            return episodeDiff;
-
-          }
-
-
-          /*
-            created_at is only a final ordering fallback.
-          */
-          const ac =
-            a.created_at
-              ? new Date(
-                  a.created_at
-                ).getTime()
-              : 0;
-
-          const bc =
-            b.created_at
-              ? new Date(
-                  b.created_at
-                ).getTime()
-              : 0;
-
-
-          return bc - ac;
-
-        }
-      );
-
-    }
-
-
-    /* =====================================================
-       LOAD EPISODES
-       ===================================================== */
-
-    async function loadEpisodes(){
-
-      const table =
-        currentShow.table;
-
-
-      const result =
-        await supabaseClient
-          .from(table)
-          .select("*")
-          .limit(500);
-
-
-      if(result.error){
-
-        console.error(
-          "Episode query failed:",
-          result.error
-        );
-
-
-        episodeList.innerHTML =
-          `<div class="chat-empty">
-            Unable to load episodes.<br><br>
-            ${escapeHtml(
-              result.error.message
-            )}
-          </div>`;
-
-
-        episodeCount.textContent =
-          "DATABASE ERROR";
-
-
-        showToast(
-          "Episode database query failed."
-        );
-
-
-        return;
-
-      }
-
-
-      episodes =
-        (result.data || [])
-          .filter(isPublished)
-          .filter(isPlayable);
-
-
-      episodes =
-        sortEpisodes(
-          episodes
-        );
-
-
-      episodeCount.textContent =
-        `${episodes.length} EPISODE${episodes.length === 1 ? "" : "S"}`;
-
-
-      renderEpisodeList();
-
-
-      /*
-        Automatically load newest published playable episode.
-      */
-      if(episodes.length){
-
-        await selectEpisode(
-          0,
-          false
-        );
-
-      }else{
-
-        showNoEpisode();
-
-      }
-
-    }
-
-
-    /* =====================================================
-       RENDER EPISODE LIST
-       ===================================================== */
-
-    function renderEpisodeList(){
-
-      if(!episodes.length){
-
-        episodeList.innerHTML =
-          `<div class="chat-empty">
-            No published playable episodes found.
-          </div>`;
-
-        return;
-
-      }
-
-
-      episodeList.innerHTML =
-        "";
-
-
-      episodes.forEach(
-        (row,index)=>{
-
-          const card =
-            document.createElement(
-              "article"
-            );
-
-          card.className =
-            "episode-card" +
-            (
-              index === currentEpisodeIndex
-                ? " active"
-                : ""
-            );
-
-
-          const thumbnail =
-            getThumbnail(row);
-
-
-          const season =
-            getSeasonNumber(row);
-
-          const number =
-            getEpisodeNumber(row);
-
-
-          const title =
-            getEpisodeTitle(row);
-
-
-          const date =
-            getPublishedDate(row);
-
-
-          card.innerHTML = `
-
-            <div class="episode-thumb">
-
-              ${
-                thumbnail
-                  ? `
-                    <img
-                      src="${escapeAttribute(thumbnail)}"
-                      alt=""
-                      loading="lazy"
-                    >
-                  `
-                  : ""
-              }
-
-            </div>
-
-
-            <div>
-
-              <div class="episode-card-title">
-                ${escapeHtml(title)}
-              </div>
-
-              <div class="episode-card-meta">
-
-                ${
-                  season
-                    ? `S${String(season).padStart(2,"0")} `
-                    : ""
-                }
-
-                ${
-                  number
-                    ? `E${String(number).padStart(2,"0")}`
-                    : ""
-                }
-
-                ${
-                  date
-                    ? ` · ${formatDate(date)}`
-                    : ""
-                }
-
-              </div>
-
-              <div class="episode-card-status">
-                PUBLISHED
-              </div>
-
-            </div>
-
-
-            <button
-              class="btn"
-              type="button"
-              data-episode-index="${index}"
-            >
-              PLAY
-            </button>
-
-          `;
-
-
-          card
-            .querySelector("button")
-            .addEventListener(
-              "click",
-              ()=>{
-
-                selectEpisode(
-                  index,
-                  true
-                );
-
-              }
-            );
-
-
-          card.addEventListener(
-            "dblclick",
-            ()=>{
-
-              selectEpisode(
-                index,
-                true
-              );
-
-            }
-          );
-
-
-          episodeList.appendChild(
-            card
-          );
-
-        }
-      );
-
-    }
-
-
-    /* =====================================================
-       SELECT EPISODE
-       ===================================================== */
-
-    async function selectEpisode(
-      index,
-      userInitiated
+    if(
+      marker >= 0 &&
+      parts[marker + 1]
     ){
+      return parts[
+        marker + 1
+      ].slice(0,11);
+    }
 
-      if(
-        index < 0 ||
-        index >= episodes.length
-      ){
+  }catch(error){}
 
-        return;
+  return null;
 
-      }
+}
 
 
-      currentEpisodeIndex =
+/* =========================================================
+   DIRECT VIDEO URL
+   ========================================================= */
+
+function getDirectVideoUrl(row){
+
+  const value =
+    first(
+      row,
+      [
+        "video_url",
+        "videoUrl",
+        "media_url",
+        "file_url",
+        "stream_url",
+        "mp4_url"
+      ]
+    );
+
+  if(!value){
+    return null;
+  }
+
+  const text =
+    String(value).trim();
+
+  if(
+    /youtube\.com|youtu\.be/i.test(
+      text
+    )
+  ){
+    return null;
+  }
+
+  return text;
+
+}
+
+
+/* =========================================================
+   YOUTUBE ID
+   ========================================================= */
+
+function getYouTubeVideoId(row){
+
+  const explicit =
+    first(
+      row,
+      [
+        "youtube_video_id",
+        "youtubeVideoId",
+        "youtube_id"
+      ]
+    );
+
+  const explicitId =
+    parseYouTubeId(
+      explicit
+    );
+
+  if(explicitId){
+    return explicitId;
+  }
+
+
+  const youtubeUrl =
+    first(
+      row,
+      [
+        "youtube_url",
+        "youtubeUrl"
+      ]
+    );
+
+  const youtubeId =
+    parseYouTubeId(
+      youtubeUrl
+    );
+
+  if(youtubeId){
+    return youtubeId;
+  }
+
+
+  const videoUrl =
+    first(
+      row,
+      [
+        "video_url",
+        "videoUrl",
+        "media_url",
+        "stream_url",
+        "mp4_url"
+      ]
+    );
+
+  return parseYouTubeId(
+    videoUrl
+  );
+
+}
+
+
+/* =========================================================
+   SORT EPISODES
+   ========================================================= */
+
+function episodeSort(a,b){
+
+  const dateA =
+    new Date(
+      getPublishedDate(a) ||
+      0
+    ).getTime();
+
+  const dateB =
+    new Date(
+      getPublishedDate(b) ||
+      0
+    ).getTime();
+
+  if(dateA !== dateB){
+    return dateB - dateA;
+  }
+
+
+  const seasonA =
+    Number(
+      first(
+        a,
+        [
+          "season_number",
+          "season"
+        ]
+      ) || 0
+    );
+
+  const seasonB =
+    Number(
+      first(
+        b,
+        [
+          "season_number",
+          "season"
+        ]
+      ) || 0
+    );
+
+
+  if(seasonA !== seasonB){
+    return seasonB - seasonA;
+  }
+
+
+  const episodeA =
+    Number(
+      first(
+        a,
+        [
+          "episode_number",
+          "episode"
+        ]
+      ) || 0
+    );
+
+  const episodeB =
+    Number(
+      first(
+        b,
+        [
+          "episode_number",
+          "episode"
+        ]
+      ) || 0
+    );
+
+
+  return episodeB - episodeA;
+
+}
+
+
+/* =========================================================
+   LOAD EPISODES
+   ========================================================= */
+
+async function loadEpisodes(){
+
+  $("episodeList").innerHTML =
+    `
+      <div style="
+        padding:20px;
+        color:var(--muted2);
+        font-size:9px;
+      ">
+        Loading episodes…
+      </div>
+    `;
+
+
+  const table =
+    currentShow.table;
+
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from(table)
+      .select("*")
+      .limit(200);
+
+
+  if(error){
+
+    console.error(
+      "Episode load failed:",
+      error
+    );
+
+    $("episodeList").innerHTML =
+      `
+        <div style="
+          padding:20px;
+          color:var(--red);
+          font-size:9px;
+        ">
+          EPISODE LOAD FAILED
+          <br><br>
+          ${escapeHtml(
+            error.message
+          )}
+        </div>
+      `;
+
+    showPlayerError(
+      "DATABASE ERROR",
+      "CrowRules TV could not load this show's episodes."
+    );
+
+    return;
+
+  }
+
+
+  const episodes =
+    (data || [])
+      .filter(isPublished)
+      .filter(
+        row =>
+          getDirectVideoUrl(row) ||
+          getYouTubeVideoId(row)
+      )
+      .sort(episodeSort);
+
+
+  renderEpisodeList(
+    episodes
+  );
+
+
+  if(!episodes.length){
+
+    showPlayerError(
+      "NO PLAYABLE EPISODES",
+      "No published playable episode was found for this show."
+    );
+
+    return;
+
+  }
+
+
+  currentEpisode =
+    episodes[0];
+
+  currentEpisodeIndex =
+    0;
+
+
+  renderEpisode(
+    currentEpisode
+  );
+
+
+  loadEpisode(
+    currentEpisode,
+    false
+  );
+
+}
+
+
+/* =========================================================
+   EPISODE LIST
+   ========================================================= */
+
+function renderEpisodeList(
+  episodes
+){
+
+  const list =
+    $("episodeList");
+
+
+  list.innerHTML = "";
+
+
+  if(!episodes.length){
+
+    list.innerHTML =
+      `
+        <div style="
+          padding:20px;
+          color:var(--muted2);
+          font-size:9px;
+        ">
+          No published episodes.
+        </div>
+      `;
+
+    return;
+
+  }
+
+
+  episodes.forEach(
+    (episode,index)=>{
+
+      const button =
+        document.createElement(
+          "button"
+        );
+
+      button.className =
+        "episode-row";
+
+
+      button.dataset.index =
         index;
 
-      currentEpisode =
-        episodes[index];
 
-
-      renderEpisodeList();
-
-
-      await loadEpisode(
-        currentEpisode,
-        userInitiated
-      );
-
-    }
-
-
-    /* =====================================================
-       LOAD EPISODE
-       ===================================================== */
-
-    async function loadEpisode(
-      row,
-      userInitiated
-    ){
-
-      if(!row){
-
-        return;
-
-      }
-
-
-      /*
-        New generation invalidates every callback
-        belonging to the previous player.
-      */
-      const generation =
-        ++playbackGeneration;
-
-
-      /*
-        Reset the ONLY player before loading anything.
-      */
-      resetPlayer();
-
-
-      const title =
-        getEpisodeTitle(row);
-
-
-      episodeKicker.textContent =
-        `${currentShow.title} // PUBLISHED`;
-
-
-      episodeTitle.textContent =
-        title;
-
-
-      episodeDescription.textContent =
-        getDescription(row);
-
-
-      episodeMeta.textContent =
-        buildEpisodeMeta(row);
-
-
-      tracking.episodeId =
-        row.id || null;
-
-
-      tracking.contentKey =
-        `${showId}:${row.id || title}`;
-
-
-      tracking.title =
-        title;
-
-
-      tracking.position =
-        0;
-
-      tracking.reportedPosition =
-        0;
-
-      tracking.duration =
-        0;
-
-
-      const directUrl =
-        getDirectVideoUrl(row);
-
-
-      const youtubeId =
-        getYouTubeId(row);
-
-
-      /*
-        Prefer direct video.
-      */
-      if(directUrl){
-
-        await loadNativeVideo(
-          directUrl,
-          youtubeId,
-          generation
+      const season =
+        first(
+          episode,
+          [
+            "season_number",
+            "season"
+          ]
         );
 
-        return;
 
-      }
-
-
-      /*
-        Otherwise YouTube.
-      */
-      if(youtubeId){
-
-        await loadYouTubeVideo(
-          youtubeId,
-          generation
+      const number =
+        first(
+          episode,
+          [
+            "episode_number",
+            "episode"
+          ]
         );
 
-        return;
 
-      }
-
-
-      showSourceError(
-        "No playable video source was found."
-      );
-
-    }
-
-
-    /* =====================================================
-       RESET PLAYER
-       ===================================================== */
-
-    function resetPlayer(){
-
-      /*
-        Stop native video.
-      */
-      try{
-
-        nativeVideo.pause();
-
-      }catch(error){}
-
-
-      nativeVideo.removeAttribute(
-        "src"
-      );
-
-
-      nativeVideo.load();
-
-
-      nativeVideo.hidden =
-        true;
-
-
-      /*
-        Destroy existing YouTube player.
-      */
-      if(youtubePlayer){
-
-        try{
-
-          youtubePlayer.stopVideo();
-
-        }catch(error){}
-
-
-        try{
-
-          youtubePlayer.destroy();
-
-        }catch(error){}
-
-
-        youtubePlayer =
-          null;
-
-      }
-
-
-      /*
-        Empty the SINGLE YouTube mount.
-      */
-      youtubeContainer.innerHTML =
-        "";
-
-
-      youtubeContainer.hidden =
-        true;
-
-
-      tracking.playing =
-        false;
-
-
-      setPlayerStatus(
-        "LOADING"
-      );
-
-
-      sourceStatus.textContent =
-        "SOURCE: CHECKING";
-
-
-      playerMessage.classList.add(
-        "show"
-      );
-
-
-      playerMessage.querySelector(
-        "h2"
-      ).textContent =
-        "LOADING TRANSMISSION";
-
-
-      playerMessage.querySelector(
-        "p"
-      ).textContent =
-        "Locating playable source...";
-
-    }
-
-
-    /* =====================================================
-       DESTROY ALL PLAYERS
-       ===================================================== */
-
-    function destroyAllPlayers(){
-
-      /*
-        Invalidate all old callbacks.
-      */
-      playbackGeneration++;
-
-
-      try{
-
-        nativeVideo.pause();
-
-      }catch(error){}
-
-
-      nativeVideo.removeAttribute(
-        "src"
-      );
-
-
-      nativeVideo.load();
-
-
-      nativeVideo.hidden =
-        true;
-
-
-      if(youtubePlayer){
-
-        try{
-
-          youtubePlayer.stopVideo();
-
-        }catch(error){}
-
-
-        try{
-
-          youtubePlayer.destroy();
-
-        }catch(error){}
-
-
-        youtubePlayer =
-          null;
-
-      }
-
-
-      youtubeContainer.innerHTML =
-        "";
-
-
-      youtubeContainer.hidden =
-        true;
-
-
-      tracking.playing =
-        false;
-
-    }
-
-
-    /* =====================================================
-       NATIVE VIDEO
-       ===================================================== */
-
-    async function loadNativeVideo(
-      url,
-      fallbackYoutubeId,
-      generation
-    ){
-
-      if(
-        generation !==
-        playbackGeneration
-      ){
-
-        return;
-
-      }
-
-
-      /*
-        Make sure YouTube is completely gone.
-      */
-      if(youtubePlayer){
-
-        try{
-
-          youtubePlayer.destroy();
-
-        }catch(error){}
-
-
-        youtubePlayer =
-          null;
-
-      }
-
-
-      youtubeContainer.innerHTML =
-        "";
-
-      youtubeContainer.hidden =
-        true;
-
-
-      nativeVideo.hidden =
-        false;
-
-
-      nativeVideo.pause();
-
-
-      nativeVideo.removeAttribute(
-        "src"
-      );
-
-
-      nativeVideo.src =
-        url;
-
-
-      nativeVideo.autoplay =
-        true;
-
-      nativeVideo.muted =
-        false;
-
-      nativeVideo.volume =
-        1;
-
-      nativeVideo.playsInline =
-        true;
-
-
-      sourceStatus.textContent =
-        "SOURCE: DIRECT VIDEO";
-
-
-      nativeVideo.onloadedmetadata =
+      button.innerHTML =
+        `
+          <div class="episode-row-title">
+            ${escapeHtml(
+              getEpisodeTitle(
+                episode
+              )
+            )}
+          </div>
+
+          <div class="episode-row-meta">
+
+            ${
+              season
+                ? `S${escapeHtml(
+                    String(season)
+                  )}`
+                : ""
+            }
+
+            ${
+              number
+                ? ` · E${escapeHtml(
+                    String(number)
+                  )}`
+                : ""
+            }
+
+          </div>
+        `;
+
+
+      button.addEventListener(
+        "click",
         ()=>{
 
-          if(
-            generation !==
-            playbackGeneration
-          ){
+          currentEpisodeIndex =
+            index;
 
-            return;
-
-          }
+          currentEpisode =
+            episodes[index];
 
 
-          tracking.duration =
-            Number(
-              nativeVideo.duration
-            ) || 0;
-
-
-          nativeVideo
-            .play()
-            .then(
-              ()=>{
-
-                if(
-                  generation !==
-                  playbackGeneration
-                ){
-
-                  return;
-
-                }
-
-
-                tracking.playing =
-                  true;
-
-
-                setPlayerStatus(
-                  "PLAYING"
-                );
-
-
-                playerMessage.classList.remove(
-                  "show"
-                );
-
-              }
+          document
+            .querySelectorAll(
+              ".episode-row"
             )
-            .catch(
-              ()=>{
-
-                if(
-                  generation !==
-                  playbackGeneration
-                ){
-
-                  return;
-
-                }
-
-
-                tracking.playing =
-                  false;
-
-
-                setPlayerStatus(
-                  "CLICK TO PLAY"
-                );
-
-
-                showPlayerMessage(
-                  "AUTOPLAY BLOCKED",
-                  "Your browser blocked audible autoplay. Press PLAY."
-                );
-
-              }
+            .forEach(
+              el =>
+                el.classList.remove(
+                  "active"
+                )
             );
 
-        };
 
-
-      nativeVideo.onplaying =
-        ()=>{
-
-          if(
-            generation !==
-            playbackGeneration
-          ){
-
-            return;
-
-          }
-
-
-          tracking.playing =
-            true;
-
-
-          setPlayerStatus(
-            "PLAYING"
+          button.classList.add(
+            "active"
           );
 
+
+          renderEpisode(
+            currentEpisode
+          );
+
+
+          loadEpisode(
+            currentEpisode,
+            true
+          );
+
+        }
+      );
+
+
+      list.appendChild(
+        button
+      );
+
+    }
+  );
+
+
+  const firstButton =
+    list.querySelector(
+      ".episode-row"
+    );
+
+  if(firstButton){
+
+    firstButton.classList.add(
+      "active"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   RENDER EPISODE
+   ========================================================= */
+
+function renderEpisode(
+  episode
+){
+
+  $("episodeTitle").textContent =
+    getEpisodeTitle(
+      episode
+    );
+
+
+  $("episodeDescription").textContent =
+    getEpisodeDescription(
+      episode
+    );
+
+
+  const meta =
+    $("episodeMeta");
+
+  meta.innerHTML = "";
+
+
+  const season =
+    first(
+      episode,
+      [
+        "season_number",
+        "season"
+      ]
+    );
+
+
+  const number =
+    first(
+      episode,
+      [
+        "episode_number",
+        "episode"
+      ]
+    );
+
+
+  const published =
+    getPublishedDate(
+      episode
+    );
+
+
+  if(season){
+
+    addMetaChip(
+      `SEASON ${season}`
+    );
+
+  }
+
+
+  if(number){
+
+    addMetaChip(
+      `EPISODE ${number}`
+    );
+
+  }
+
+
+  if(published){
+
+    const date =
+      new Date(
+        published
+      );
+
+    if(!isNaN(date)){
+
+      addMetaChip(
+        date.toLocaleDateString(
+          "en-US",
+          {
+            month:"short",
+            day:"numeric",
+            year:"numeric"
+          }
+        )
+      );
+
+    }
+
+  }
+
+}
+
+
+/* =========================================================
+   META CHIP
+   ========================================================= */
+
+function addMetaChip(
+  text
+){
+
+  const chip =
+    document.createElement(
+      "span"
+    );
+
+  chip.className =
+    "meta-chip";
+
+  chip.textContent =
+    text;
+
+  $("episodeMeta")
+    .appendChild(
+      chip
+    );
+
+}
+
+
+/* =========================================================
+   PLAYER RESET
+   ========================================================= */
+
+function resetPlayer(){
+
+  playbackGeneration++;
+
+
+  nativeVideo.pause();
+
+  nativeVideo.removeAttribute(
+    "src"
+  );
+
+  nativeVideo.load();
+
+  nativeVideo.hidden =
+    true;
+
+
+  if(youtubePlayer){
+
+    try{
+
+      youtubePlayer.stopVideo();
+
+    }catch(error){}
+
+
+    try{
+
+      youtubePlayer.destroy();
+
+    }catch(error){}
+
+  }
+
+
+  youtubePlayer =
+    null;
+
+
+  youtubeContainer.innerHTML =
+    "";
+
+  youtubeContainer.hidden =
+    true;
+
+
+  playerMessage.classList.add(
+    "show"
+  );
+
+
+  playerMessageButton.classList.add(
+    "hidden"
+  );
+
+
+  setPlayerStatus(
+    "LOADING"
+  );
+
+}
+
+
+/* =========================================================
+   LOAD EPISODE
+   ========================================================= */
+
+async function loadEpisode(
+  episode,
+  userInitiated = false
+){
+
+  const generation =
+    ++playbackGeneration;
+
+
+  resetPlayer();
+
+
+  if(!episode){
+
+    showPlayerError(
+      "NO EPISODE",
+      "No episode was selected."
+    );
+
+    return;
+
+  }
+
+
+  currentEpisode =
+    episode;
+
+
+  const directUrl =
+    getDirectVideoUrl(
+      episode
+    );
+
+
+  const youtubeId =
+    getYouTubeVideoId(
+      episode
+    );
+
+
+  if(directUrl){
+
+    await loadNativeVideo(
+      directUrl,
+      youtubeId,
+      generation,
+      userInitiated
+    );
+
+    return;
+
+  }
+
+
+  if(youtubeId){
+
+    await loadYouTubeVideo(
+      youtubeId,
+      generation
+    );
+
+    return;
+
+  }
+
+
+  showPlayerError(
+    "NO PLAYABLE SOURCE",
+    "This published episode does not contain a supported video source."
+  );
+
+}
+
+
+/* =========================================================
+   NATIVE VIDEO
+   ========================================================= */
+
+async function loadNativeVideo(
+  url,
+  fallbackYoutubeId,
+  generation,
+  userInitiated
+){
+
+  if(
+    generation !==
+    playbackGeneration
+  ){
+    return;
+  }
+
+
+  youtubeContainer.hidden =
+    true;
+
+
+  nativeVideo.hidden =
+    false;
+
+
+  nativeVideo.autoplay =
+    true;
+
+  nativeVideo.muted =
+    false;
+
+  nativeVideo.volume =
+    1;
+
+  nativeVideo.playsInline =
+    true;
+
+  nativeVideo.controls =
+    true;
+
+
+  nativeVideo.src =
+    url;
+
+
+  setPlayerStatus(
+    "LOADING"
+  );
+
+
+  playerMessage.classList.add(
+    "show"
+  );
+
+
+  playerMessageTitle.textContent =
+    "LOADING TRANSMISSION";
+
+
+  playerMessageText.textContent =
+    "Preparing the latest published episode.";
+
+
+  try{
+
+    await nativeVideo.play();
+
+
+    if(
+      generation !==
+      playbackGeneration
+    ){
+      return;
+    }
+
+
+    setPlayerStatus(
+      "PLAYING",
+      "playing"
+    );
+
+
+    playerMessage.classList.remove(
+      "show"
+    );
+
+
+    setEngagementPlaying(
+      true
+    );
+
+  }catch(error){
+
+    /*
+      Audible autoplay may be blocked
+      by the browser. This is NOT a
+      source failure.
+    */
+
+    setPlayerStatus(
+      "CLICK TO PLAY"
+    );
+
+
+    playerMessage.classList.add(
+      "show"
+    );
+
+
+    playerMessageTitle.textContent =
+      "READY TO PLAY";
+
+
+    playerMessageText.textContent =
+      "Your browser blocked autoplay with sound. Press PLAY to start.";
+
+    playerMessageButton.classList.remove(
+      "hidden"
+    );
+
+
+    playerMessageButton.onclick =
+      async ()=>{
+
+        try{
+
+          await nativeVideo.play();
 
           playerMessage.classList.remove(
             "show"
           );
 
-        };
-
-
-      nativeVideo.onpause =
-        ()=>{
-
-          tracking.playing =
-            false;
-
-        };
-
-
-      nativeVideo.onended =
-        ()=>{
-
-          tracking.playing =
-            false;
-
           setPlayerStatus(
-            "ENDED"
+            "PLAYING",
+            "playing"
           );
 
-        };
-
-
-      nativeVideo.onerror =
-        async ()=>{
-
-          if(
-            generation !==
-            playbackGeneration
-          ){
-
-            return;
-
-          }
-
-
-          /*
-            If direct playback fails,
-            use YouTube fallback when available.
-          */
-          if(fallbackYoutubeId){
-
-            await loadYouTubeVideo(
-              fallbackYoutubeId,
-              generation
-            );
-
-            return;
-
-          }
-
-
-          showSourceError(
-            "The direct video source could not be played."
+          setEngagementPlaying(
+            true
           );
 
-        };
+        }catch(error){
 
-
-      nativeVideo.load();
-
-    }
-
-
-    /* =====================================================
-       YOUTUBE API
-       ===================================================== */
-
-    function loadYouTubeAPI(){
-
-      if(
-        window.YT &&
-        window.YT.Player
-      ){
-
-        youtubeApiFailed =
-          false;
-
-        return Promise.resolve();
-
-      }
-
-
-      if(
-        youtubeApiFailed
-      ){
-
-        return Promise.reject(
-          new Error(
-            "YouTube API previously failed."
-          )
-        );
-
-      }
-
-
-      if(youtubeApiPromise){
-
-        return youtubeApiPromise;
-
-      }
-
-
-      youtubeApiPromise =
-        new Promise(
-          (resolve,reject)=>{
-
-            let settled =
-              false;
-
-
-            const finishSuccess =
-              ()=>{
-
-                if(settled){
-                  return;
-                }
-
-                settled =
-                  true;
-
-                youtubeApiFailed =
-                  false;
-
-                resolve();
-
-              };
-
-
-            const finishFailure =
-              error=>{
-
-                if(settled){
-                  return;
-                }
-
-                settled =
-                  true;
-
-                youtubeApiFailed =
-                  true;
-
-                youtubeApiPromise =
-                  null;
-
-                reject(
-                  error
-                );
-
-              };
-
-
-            const previousCallback =
-              window.onYouTubeIframeAPIReady;
-
-
-            window.onYouTubeIframeAPIReady =
-              ()=>{
-
-                try{
-
-                  if(
-                    typeof previousCallback ===
-                    "function"
-                  ){
-
-                    previousCallback();
-
-                  }
-
-                }catch(error){}
-
-
-                if(
-                  window.YT &&
-                  window.YT.Player
-                ){
-
-                  finishSuccess();
-
-                }else{
-
-                  finishFailure(
-                    new Error(
-                      "YouTube API loaded without YT.Player."
-                    )
-                  );
-
-                }
-
-              };
-
-
-            const existing =
-              document.querySelector(
-                'script[src="https://www.youtube.com/iframe_api"]'
-              );
-
-
-            if(!existing){
-
-              const script =
-                document.createElement(
-                  "script"
-                );
-
-
-              script.src =
-                "https://www.youtube.com/iframe_api";
-
-
-              script.async =
-                true;
-
-
-              script.onerror =
-                ()=>{
-
-                  finishFailure(
-                    new Error(
-                      "YouTube API script failed to load."
-                    )
-                  );
-
-                };
-
-
-              document.head.appendChild(
-                script
-              );
-
-            }
-
-
-            /*
-              Timeout prevents permanent loading state.
-            */
-            setTimeout(
-              ()=>{
-
-                if(
-                  window.YT &&
-                  window.YT.Player
-                ){
-
-                  finishSuccess();
-
-                }else{
-
-                  finishFailure(
-                    new Error(
-                      "YouTube API timeout."
-                    )
-                  );
-
-                }
-
-              },
-              10000
-            );
-
-          }
-        );
-
-
-      return youtubeApiPromise;
-
-    }
-
-
-    /* =====================================================
-       YOUTUBE PLAYER
-       ===================================================== */
-
-    async function loadYouTubeVideo(
-      videoId,
-      generation
-    ){
-
-      if(
-        generation !==
-        playbackGeneration
-      ){
-
-        return;
-
-      }
-
-
-      /*
-        Stop native player completely.
-      */
-      try{
-
-        nativeVideo.pause();
-
-      }catch(error){}
-
-
-      nativeVideo.removeAttribute(
-        "src"
-      );
-
-
-      nativeVideo.load();
-
-
-      nativeVideo.hidden =
-        true;
-
-
-      /*
-        Destroy previous YouTube instance.
-      */
-      if(youtubePlayer){
-
-        try{
-
-          youtubePlayer.destroy();
-
-        }catch(error){}
-
-
-        youtubePlayer =
-          null;
-
-      }
-
-
-      /*
-        Reuse the SAME mount point.
-      */
-      youtubeContainer.innerHTML =
-        "";
-
-
-      youtubeContainer.hidden =
-        false;
-
-
-      sourceStatus.textContent =
-        "SOURCE: YOUTUBE";
-
-
-      setPlayerStatus(
-        "CONNECTING"
-      );
-
-
-      showPlayerMessage(
-        "LOADING YOUTUBE",
-        "Connecting to the YouTube player..."
-      );
-
-
-      try{
-
-        await loadYouTubeAPI();
-
-      }catch(error){
-
-        console.error(
-          "YouTube API failed:",
-          error
-        );
-
-
-        if(
-          generation ===
-          playbackGeneration
-        ){
-
-          showYouTubeError(
-            "YouTube player failed to load. Press RETRY to try again."
+          showToast(
+            "Press the video's play button to begin."
           );
 
         }
-
-        return;
-
-      }
-
-
-      if(
-        generation !==
-        playbackGeneration
-      ){
-
-        return;
-
-      }
-
-
-      /*
-        Exactly ONE mount element.
-      */
-      const mount =
-        document.createElement(
-          "div"
-        );
-
-
-      mount.id =
-        `youtube-player-${generation}`;
-
-
-      mount.style.width =
-        "100%";
-
-
-      mount.style.height =
-        "100%";
-
-
-      youtubeContainer.appendChild(
-        mount
-      );
-
-
-      try{
-
-        youtubePlayer =
-          new YT.Player(
-            mount,
-            {
-
-              width:"100%",
-
-              height:"100%",
-
-              videoId:
-
-                videoId,
-
-              playerVars:{
-
-                autoplay:1,
-
-                mute:0,
-
-                playsinline:1,
-
-                controls:1,
-
-                rel:0,
-
-                modestbranding:1,
-
-                enablejsapi:1
-
-              },
-
-
-              events:{
-
-                onReady:
-                  event=>{
-
-                    if(
-                      generation !==
-                      playbackGeneration
-                    ){
-
-                      try{
-
-                        event.target.destroy();
-
-                      }catch(error){}
-
-                      return;
-
-                    }
-
-
-                    try{
-
-                      event.target.setVolume(
-                        100
-                      );
-
-                      event.target.unMute();
-
-                      event.target.playVideo();
-
-                    }catch(error){
-
-                      showPlayerMessage(
-                        "AUTOPLAY BLOCKED",
-                        "Your browser blocked audible autoplay. Press PLAY."
-                      );
-
-                      setPlayerStatus(
-                        "CLICK TO PLAY"
-                      );
-
-                    }
-
-                  },
-
-
-                onStateChange:
-                  event=>{
-
-                    if(
-                      generation !==
-                      playbackGeneration
-                    ){
-
-                      return;
-
-                    }
-
-
-                    if(
-                      event.data ===
-                      YT.PlayerState.PLAYING
-                    ){
-
-                      tracking.playing =
-                        true;
-
-
-                      tracking.duration =
-                        Number(
-                          youtubePlayer
-                            .getDuration()
-                        ) || 0;
-
-
-                      setPlayerStatus(
-                        "PLAYING"
-                      );
-
-
-                      playerMessage.classList.remove(
-                        "show"
-                      );
-
-                    }
-
-
-                    if(
-                      event.data ===
-                      YT.PlayerState.PAUSED
-                    ){
-
-                      tracking.playing =
-                        false;
-
-                    }
-
-
-                    if(
-                      event.data ===
-                      YT.PlayerState.ENDED
-                    ){
-
-                      tracking.playing =
-                        false;
-
-
-                      setPlayerStatus(
-                        "ENDED"
-                      );
-
-                    }
-
-                  },
-
-
-                onError:
-                  event=>{
-
-                    if(
-                      generation !==
-                      playbackGeneration
-                    ){
-
-                      return;
-
-                    }
-
-
-                    const code =
-                      Number(
-                        event.data
-                      );
-
-
-                    let message =
-                      "YouTube could not play this video.";
-
-
-                    if(code === 2){
-
-                      message =
-                        "Invalid YouTube video ID.";
-
-                    }
-
-
-                    if(code === 5){
-
-                      message =
-                        "YouTube HTML5 player error.";
-
-                    }
-
-
-                    if(code === 100){
-
-                      message =
-                        "This YouTube video was not found or has been removed.";
-
-                    }
-
-
-                    if(
-                      code === 101 ||
-                      code === 150
-                    ){
-
-                      message =
-                        "This YouTube video does not allow embedded playback.";
-
-                    }
-
-
-                    showYouTubeError(
-                      message
-                    );
-
-                  }
-
-              }
-
-            }
-          );
-
-      }catch(error){
-
-        console.error(
-          "YouTube player creation failed:",
-          error
-        );
-
-
-        youtubePlayer =
-          null;
-
-
-        showYouTubeError(
-          "Unable to create the YouTube player."
-        );
-
-      }
-
-    }
-
-
-    /* =====================================================
-       PLAYER EVENTS
-       ===================================================== */
-
-    function setupPlayerEvents(){
-
-      nativeVideo.addEventListener(
-        "timeupdate",
-        ()=>{
-
-          tracking.position =
-            Number(
-              nativeVideo.currentTime
-            ) || 0;
-
-
-          tracking.duration =
-            Number(
-              nativeVideo.duration
-            ) || tracking.duration;
-
-        }
-      );
-
-
-      nativeVideo.addEventListener(
-        "seeking",
-        ()=>{
-
-          tracking.lastSeek =
-            Date.now();
-
-        }
-      );
-
-    }
-
-
-    /* =====================================================
-       BUTTONS
-       ===================================================== */
-
-    function setupButtons(){
-
-      previousBtn.addEventListener(
-        "click",
-        ()=>{
-
-          if(
-            currentEpisodeIndex <
-            episodes.length - 1
-          ){
-
-            selectEpisode(
-              currentEpisodeIndex + 1,
-              true
-            );
-
-          }
-
-        }
-      );
-
-
-      nextBtn.addEventListener(
-        "click",
-        ()=>{
-
-          if(
-            currentEpisodeIndex > 0
-          ){
-
-            selectEpisode(
-              currentEpisodeIndex - 1,
-              true
-            );
-
-          }
-
-        }
-      );
-
-
-      playLatestBtn.addEventListener(
-        "click",
-        ()=>{
-
-          if(episodes.length){
-
-            selectEpisode(
-              0,
-              true
-            );
-
-          }
-
-        }
-      );
-
-
-      retryBtn.addEventListener(
-        "click",
-        async ()=>{
-
-          /*
-            Reset API state.
-          */
-          youtubeApiFailed =
-            false;
-
-          youtubeApiPromise =
-            null;
-
-
-          if(currentEpisode){
-
-            await loadEpisode(
-              currentEpisode,
-              true
-            );
-
-          }
-
-        }
-      );
-
-    }
-
-
-    /* =====================================================
-       PLAYER STATUS
-       ===================================================== */
-
-    function setPlayerStatus(
-      text
-    ){
-
-      playerStatus.textContent =
-        text;
-
-    }
-
-
-    function showPlayerMessage(
-      title,
-      message
-    ){
-
-      playerMessage
-        .querySelector("h2")
-        .textContent =
-        title;
-
-
-      playerMessage
-        .querySelector("p")
-        .textContent =
-        message;
-
-
-      playerMessage.classList.add(
-        "show"
-      );
-
-    }
-
-
-    function setPlayerMessage(
-      message
-    ){
-
-      playerMessage
-        .querySelector("p")
-        .textContent =
-        message;
-
-    }
-
-
-    function showSourceError(
-      message
-    ){
-
-      setPlayerStatus(
-        "SOURCE ERROR"
-      );
-
-
-      sourceStatus.textContent =
-        "SOURCE: UNAVAILABLE";
-
-
-      showPlayerMessage(
-        "NO PLAYABLE SOURCE",
-        message
-      );
-
-    }
-
-
-    function showYouTubeError(
-      message
-    ){
-
-      setPlayerStatus(
-        "YOUTUBE ERROR"
-      );
-
-
-      showPlayerMessage(
-        "YOUTUBE PLAYBACK ERROR",
-        message
-      );
-
-    }
-
-
-    function showNoEpisode(){
-
-      currentEpisode =
-        null;
-
-      currentEpisodeIndex =
-        -1;
-
-
-      episodeTitle.textContent =
-        "No Published Episode";
-
-
-      episodeDescription.textContent =
-        "No published playable video was found for this show.";
-
-
-      episodeMeta.textContent =
-        "DATABASE CATALOG EMPTY";
-
-
-      episodeKicker.textContent =
-        `${currentShow.title} // CATALOG`;
-
-
-      setPlayerStatus(
-        "NO VIDEO"
-      );
-
-
-      sourceStatus.textContent =
-        "SOURCE: NONE";
-
-
-      showPlayerMessage(
-        "NO PUBLISHED VIDEO",
-        `No published playable episode was found for ${currentShow.title}.`
-      );
-
-    }
-
-
-    /* =====================================================
-       SCHEDULE
-       ===================================================== */
-
-    async function refreshSchedule(){
-
-      const table =
-        currentShow.table;
-
-
-      /*
-        We intentionally load schedule information
-        from the selected show's table only.
-
-        This prevents another show's schedule from
-        appearing on the current show page.
-      */
-      const result =
-        await supabaseClient
-          .from(table)
-          .select("*")
-          .limit(500);
-
-
-      if(result.error){
-
-        console.error(
-          "Schedule query failed:",
-          result.error
-        );
-
-
-        scheduleTitle.textContent =
-          "Schedule unavailable";
-
-
-        scheduleMessage.textContent =
-          result.error.message;
-
-
-        scheduleTarget =
-          null;
-
-        scheduleLive =
-          false;
-
-
-        stopCountdown();
-
-        return;
-
-      }
-
-
-      const rows =
-        result.data || [];
-
-
-      const now =
-        new Date();
-
-
-      /*
-        LIVE EVENT FIRST.
-      */
-      const live =
-        rows.find(
-          row =>
-            isScheduled(row) &&
-            isLiveRow(row,now)
-        );
-
-
-      if(live){
-
-        scheduleLive =
-          true;
-
-        scheduleTarget =
-          getScheduleEnd(
-            live
-          ) ||
-          null;
-
-
-        scheduleTitle.textContent =
-          `LIVE NOW — ${getEpisodeTitle(live)}`;
-
-
-        if(scheduleTarget){
-
-          scheduleMessage.textContent =
-            `Live until ${formatDateTime(scheduleTarget)}.`;
-
-          startCountdown();
-
-        }else{
-
-          scheduleMessage.textContent =
-            `${currentShow.title} is currently live.`;
-
-          stopCountdown();
-
-          setCountdownZero();
-
-        }
-
-
-        return;
-
-      }
-
-
-      /*
-        Find next FUTURE scheduled event.
-      */
-      const future =
-        rows
-          .filter(
-            row =>
-              isScheduled(row)
-          )
-          .map(
-            row => ({
-              row,
-              start:
-                getScheduleStart(row)
-            })
-          )
-          .filter(
-            item =>
-              item.start &&
-              item.start.getTime() >
-                now.getTime()
-          )
-          .sort(
-            (a,b)=>
-              a.start.getTime() -
-              b.start.getTime()
-          );
-
-
-      if(!future.length){
-
-        scheduleLive =
-          false;
-
-        scheduleTarget =
-          null;
-
-
-        scheduleTitle.textContent =
-          "No upcoming event";
-
-
-        scheduleMessage.textContent =
-          `No scheduled ${currentShow.title} event found.`;
-
-
-        stopCountdown();
-
-        setCountdownZero();
-
-        return;
-
-      }
-
-
-      const next =
-        future[0];
-
-
-      scheduleLive =
-        false;
-
-
-      scheduleTarget =
-        next.start;
-
-
-      scheduleTitle.textContent =
-        getEpisodeTitle(
-          next.row
-        );
-
-
-      scheduleMessage.textContent =
-        `Starts ${formatDateTime(next.start)} · Pacific Time`;
-
-
-      startCountdown();
-
-    }
-
-
-    function isLiveRow(
-      row,
-      now
-    ){
-
-      const explicit =
-        row.is_live === true;
-
-
-      const status =
-        String(
-          first(
-            row,
-            [
-              "status",
-              "schedule_status"
-            ]
-          ) || ""
-        )
-        .toLowerCase();
-
-
-      if(
-        explicit ||
-        status === "live"
-      ){
-
-        return true;
-
-      }
-
-
-      const start =
-        getScheduleStart(row);
-
-
-      const end =
-        getScheduleEnd(row);
-
-
-      if(
-        start &&
-        end
-      ){
-
-        return (
-          now >= start &&
-          now <= end
-        );
-
-      }
-
-
-      return false;
-
-    }
-
-
-    function getScheduleStart(row){
-
-      const value =
-        first(
-          row,
-          [
-            "scheduled_start_at",
-            "scheduled_start",
-            "start_time",
-            "start_at",
-            "air_time",
-            "scheduled_at"
-          ]
-        );
-
-
-      if(!value){
-
-        return null;
-
-      }
-
-
-      const date =
-        new Date(value);
-
-
-      return Number.isNaN(
-        date.getTime()
-      )
-        ? null
-        : date;
-
-    }
-
-
-    function getScheduleEnd(row){
-
-      const value =
-        first(
-          row,
-          [
-            "scheduled_end_at",
-            "scheduled_end",
-            "end_time",
-            "end_at"
-          ]
-        );
-
-
-      if(!value){
-
-        return null;
-
-      }
-
-
-      const date =
-        new Date(value);
-
-
-      return Number.isNaN(
-        date.getTime()
-      )
-        ? null
-        : date;
-
-    }
-
-
-    /* =====================================================
-       COUNTDOWN
-       ===================================================== */
-
-    function startCountdown(){
-
-      stopCountdown();
-
-
-      updateCountdown();
-
-
-      countdownTimer =
-        setInterval(
-          updateCountdown,
-          1000
-        );
-
-    }
-
-
-    function stopCountdown(){
-
-      if(countdownTimer){
-
-        clearInterval(
-          countdownTimer
-        );
-
-        countdownTimer =
-          null;
-
-      }
-
-    }
-
-
-    function updateCountdown(){
-
-      if(!scheduleTarget){
-
-        setCountdownZero();
-
-        return;
-
-      }
-
-
-      /*
-        A live event with no end time does not use a
-        countdown.
-      */
-      if(
-        scheduleLive &&
-        !scheduleTarget
-      ){
-
-        setCountdownZero();
-
-        return;
-
-      }
-
-
-      const now =
-        Date.now();
-
-
-      const target =
-        scheduleTarget.getTime();
-
-
-      let diff =
-        target - now;
-
-
-      if(diff <= 0){
-
-        setCountdownZero();
-
-        refreshSchedule();
-
-        return;
-
-      }
-
-
-      const totalSeconds =
-        Math.floor(
-          diff / 1000
-        );
-
-
-      const days =
-        Math.floor(
-          totalSeconds / 86400
-        );
-
-
-      const hours =
-        Math.floor(
-          (totalSeconds % 86400) /
-          3600
-        );
-
-
-      const minutes =
-        Math.floor(
-          (totalSeconds % 3600) /
-          60
-        );
-
-
-      const seconds =
-        totalSeconds % 60;
-
-
-      $("days").textContent =
-        String(days)
-          .padStart(2,"0");
-
-
-      $("hours").textContent =
-        String(hours)
-          .padStart(2,"0");
-
-
-      $("minutes").textContent =
-        String(minutes)
-          .padStart(2,"0");
-
-
-      $("seconds").textContent =
-        String(seconds)
-          .padStart(2,"0");
-
-    }
-
-
-    function setCountdownZero(){
-
-      $("days").textContent =
-        "00";
-
-      $("hours").textContent =
-        "00";
-
-      $("minutes").textContent =
-        "00";
-
-      $("seconds").textContent =
-        "00";
-
-    }
-
-
-    /* =====================================================
-       CHAT
-       ===================================================== */
-
-    async function setupChat(){
-
-      if(chatChannel){
-
-        try{
-
-          await supabaseClient
-            .removeChannel(
-              chatChannel
-            );
-
-        }catch(error){}
-
-
-        chatChannel =
-          null;
-
-      }
-
-
-      chatMessages.innerHTML =
-        `<div
-          class="chat-empty"
-          id="chatEmpty"
-        >
-          No messages yet.
-        </div>`;
-
-
-      chatChannel =
-        supabaseClient.channel(
-          `cr-chat-${showId}`,
-          {
-            config:{
-              broadcast:{
-                self:true
-              }
-            }
-          }
-        );
-
-
-      chatChannel.on(
-        "broadcast",
-        {
-          event:"chat"
-        },
-        ({payload})=>{
-
-          if(payload){
-
-            addChatMessage(
-              payload
-            );
-
-          }
-
-        }
-      );
-
-
-      const result =
-        await chatChannel.subscribe();
-
-
-      if(result === "SUBSCRIBED"){
-
-        chatStatus.textContent =
-          "● LIVE CHAT // REALTIME";
-
-      }else{
-
-        chatStatus.textContent =
-          "● CHAT OFFLINE";
-
-      }
-
-    }
-
-
-    async function sendChatMessage(){
-
-      const message =
-        chatInput.value
-          .trim();
-
-
-      if(!message){
-
-        return;
-
-      }
-
-
-      if(!chatChannel){
-
-        showToast(
-          "Chat is not connected."
-        );
-
-        return;
-
-      }
-
-
-      const nickname =
-        (
-          chatNickname.value.trim() ||
-          currentUser?.email?.split("@")[0] ||
-          "Guest"
-        )
-        .slice(0,30);
-
-
-      localStorage.setItem(
-        "cr_chat_nickname",
-        nickname
-      );
-
-
-      const payload = {
-
-        id:
-          crypto.randomUUID(),
-
-        sender:
-          nickname,
-
-        userId:
-          currentUser?.id ||
-          null,
-
-        message:
-          message.slice(0,280),
-
-        sentAt:
-          new Date().toISOString()
 
       };
 
-
-      const result =
-        await chatChannel.send({
-
-          type:"broadcast",
-
-          event:"chat",
-
-          payload
-
-        });
+  }
 
 
-      if(result !== "ok"){
+  nativeVideo.onerror =
+    async ()=>{
 
-        showToast(
-          "Unable to send chat message."
-        );
-
-        return;
-
-      }
-
-
-      chatInput.value =
-        "";
-
-    }
-
-
-    function addChatMessage(
-      payload
-    ){
-
-      if(chatEmpty){
-
-        chatEmpty.remove();
-
-      }
-
-
-      const wrapper =
-        document.createElement(
-          "div"
-        );
-
-
-      wrapper.className =
-        "chat-message";
-
-
-      const user =
-        document.createElement(
-          "div"
-        );
-
-
-      user.className =
-        "chat-user";
-
-
-      user.textContent =
-        payload.sender ||
-        "Guest";
-
-
-      const time =
-        document.createElement(
-          "span"
-        );
-
-
-      time.className =
-        "chat-time";
-
-
-      time.textContent =
-        formatChatTime(
-          payload.sentAt
-        );
-
-
-      user.appendChild(
-        time
-      );
-
-
-      const text =
-        document.createElement(
-          "div"
-        );
-
-
-      text.className =
-        "chat-text";
-
-
-      /*
-        SECURITY:
-        textContent prevents HTML injection.
-      */
-      text.textContent =
-        payload.message ||
-        "";
-
-
-      wrapper.appendChild(
-        user
-      );
-
-      wrapper.appendChild(
-        text
-      );
-
-
-      chatMessages.appendChild(
-        wrapper
-      );
-
-
-      while(
-        chatMessages.children.length >
-        150
+      if(
+        generation !==
+        playbackGeneration
       ){
-
-        chatMessages.firstElementChild
-          .remove();
-
+        return;
       }
 
 
-      chatMessages.scrollTop =
-        chatMessages.scrollHeight;
+      if(fallbackYoutubeId){
 
-    }
+        await loadYouTubeVideo(
+          fallbackYoutubeId,
+          generation
+        );
+
+      }else{
+
+        showPlayerError(
+          "VIDEO SOURCE ERROR",
+          "The video file could not be played."
+        );
+
+      }
+
+    };
+
+}
 
 
-    chatForm.addEventListener(
-      "submit",
-      event=>{
+/* =========================================================
+   YOUTUBE API
+   ========================================================= */
 
-        event.preventDefault();
+function loadYouTubeAPI(){
 
-        sendChatMessage();
+  if(
+    window.YT &&
+    window.YT.Player
+  ){
+
+    youtubeApiFailed =
+      false;
+
+    return Promise.resolve();
+  }
+
+
+  if(youtubeApiFailed){
+
+    return Promise.reject(
+      new Error(
+        "YouTube API previously failed."
+      )
+    );
+
+  }
+
+
+  if(youtubeApiPromise){
+
+    return youtubeApiPromise;
+
+  }
+
+
+  youtubeApiPromise =
+    new Promise(
+      (resolve,reject)=>{
+
+        let settled =
+          false;
+
+
+        const finishResolve =
+          ()=>{
+
+            if(settled){
+              return;
+            }
+
+            settled =
+              true;
+
+            youtubeApiFailed =
+              false;
+
+            resolve();
+
+          };
+
+
+        const finishReject =
+          error=>{
+
+            if(settled){
+              return;
+            }
+
+            settled =
+              true;
+
+            youtubeApiFailed =
+              true;
+
+            youtubeApiPromise =
+              null;
+
+            reject(error);
+
+          };
+
+
+        const previousReady =
+          window.onYouTubeIframeAPIReady;
+
+
+        window.onYouTubeIframeAPIReady =
+          ()=>{
+
+            try{
+
+              if(
+                typeof previousReady ===
+                "function"
+              ){
+
+                previousReady();
+
+              }
+
+            }catch(error){}
+
+
+            finishResolve();
+
+          };
+
+
+        const existing =
+          document.querySelector(
+            'script[src="https://www.youtube.com/iframe_api"]'
+          );
+
+
+        if(!existing){
+
+          const script =
+            document.createElement(
+              "script"
+            );
+
+          script.src =
+            "https://www.youtube.com/iframe_api";
+
+          script.async =
+            true;
+
+
+          script.onerror =
+            ()=>{
+
+              finishReject(
+                new Error(
+                  "YouTube iframe API failed to load."
+                )
+              );
+
+            };
+
+
+          document.head.appendChild(
+            script
+          );
+
+        }
+
+
+        const timeout =
+          setTimeout(
+            ()=>{
+
+              if(
+                !(
+                  window.YT &&
+                  window.YT.Player
+                )
+              ){
+
+                finishReject(
+                  new Error(
+                    "YouTube API timed out."
+                  )
+                );
+
+              }
+
+            },
+            10000
+          );
+
+
+        const check =
+          setInterval(
+            ()=>{
+
+              if(
+                window.YT &&
+                window.YT.Player
+              ){
+
+                clearTimeout(
+                  timeout
+                );
+
+                clearInterval(
+                  check
+                );
+
+                finishResolve();
+
+              }
+
+            },
+            100
+          );
 
       }
     );
 
 
-    function loadSavedNickname(){
+  return youtubeApiPromise;
 
-      chatNickname.value =
-        localStorage.getItem(
-          "cr_chat_nickname"
-        ) || "";
-
-    }
+}
 
 
-    /* =====================================================
-       AUTH
-       ===================================================== */
+/* =========================================================
+   YOUTUBE PLAYER
+   ========================================================= */
 
-    function setupAuth(){
+async function loadYouTubeVideo(
+  videoId,
+  generation
+){
 
-      authBtn.addEventListener(
-        "click",
-        ()=>{
+  if(
+    generation !==
+    playbackGeneration
+  ){
+    return;
+  }
 
-          if(currentUser){
 
-            signOut();
+  nativeVideo.pause();
 
-          }else{
+  nativeVideo.removeAttribute(
+    "src"
+  );
 
-            openAuth();
+  nativeVideo.load();
+
+  nativeVideo.hidden =
+    true;
+
+
+  if(youtubePlayer){
+
+    try{
+      youtubePlayer.destroy();
+    }catch(error){}
+
+    youtubePlayer =
+      null;
+
+  }
+
+
+  youtubeContainer.innerHTML =
+    "";
+
+  youtubeContainer.hidden =
+    false;
+
+
+  playerMessage.classList.add(
+    "show"
+  );
+
+
+  playerMessageTitle.textContent =
+    "CONNECTING TO YOUTUBE";
+
+
+  playerMessageText.textContent =
+    "Loading the published CrowRules TV video.";
+
+
+  setPlayerStatus(
+    "YOUTUBE"
+  );
+
+
+  try{
+
+    await loadYouTubeAPI();
+
+  }catch(error){
+
+    showYouTubeError(
+      error
+    );
+
+    return;
+
+  }
+
+
+  if(
+    generation !==
+    playbackGeneration
+  ){
+    return;
+  }
+
+
+  const mount =
+    document.createElement(
+      "div"
+    );
+
+
+  mount.id =
+    "youtube-player-" +
+    generation;
+
+
+  youtubeContainer.appendChild(
+    mount
+  );
+
+
+  try{
+
+    youtubePlayer =
+      new YT.Player(
+        mount.id,
+        {
+
+          videoId,
+
+          width:"100%",
+          height:"100%",
+
+          playerVars:{
+            autoplay:1,
+            mute:0,
+            playsinline:1,
+            controls:1,
+            rel:0,
+            modestbranding:1
+          },
+
+          events:{
+
+            onReady:
+              event=>{
+
+                if(
+                  generation !==
+                  playbackGeneration
+                ){
+                  return;
+                }
+
+
+                try{
+
+                  event.target.unMute();
+
+                  event.target.setVolume(
+                    100
+                  );
+
+                  event.target.playVideo();
+
+                }catch(error){}
+
+
+                setPlayerStatus(
+                  "PLAYING",
+                  "playing"
+                );
+
+                playerMessage.classList.remove(
+                  "show"
+                );
+
+                setEngagementPlaying(
+                  true
+                );
+
+              },
+
+
+            onStateChange:
+              event=>{
+
+                if(
+                  generation !==
+                  playbackGeneration
+                ){
+                  return;
+                }
+
+
+                if(
+                  event.data ===
+                  YT.PlayerState.PLAYING
+                ){
+
+                  tracking.playing =
+                    true;
+
+                  setEngagementPlaying(
+                    true
+                  );
+
+
+                  setPlayerStatus(
+                    "PLAYING",
+                    "playing"
+                  );
+
+
+                  playerMessage.classList.remove(
+                    "show"
+                  );
+
+                }
+
+
+                if(
+                  event.data ===
+                  YT.PlayerState.PAUSED
+                ){
+
+                  tracking.playing =
+                    false;
+
+                  setEngagementPlaying(
+                    false
+                  );
+
+                  sendEngagementHeartbeat();
+
+                  setPlayerStatus(
+                    "PAUSED"
+                  );
+
+                }
+
+
+                if(
+                  event.data ===
+                  YT.PlayerState.ENDED
+                ){
+
+                  tracking.playing =
+                    false;
+
+                  setEngagementPlaying(
+                    false
+                  );
+
+                  sendEngagementHeartbeat();
+
+                  setPlayerStatus(
+                    "ENDED"
+                  );
+
+                }
+
+              },
+
+
+            onError:
+              event=>{
+
+                handleYouTubeError(
+                  event.data
+                );
+
+              }
 
           }
 
         }
       );
 
+  }catch(error){
 
-      closeAuthBtn.addEventListener(
-        "click",
-        closeAuth
-      );
+    showYouTubeError(
+      error
+    );
 
+  }
 
-      signupBtn.addEventListener(
-        "click",
-        signup
-      );
+}
 
 
-      forgotBtn.addEventListener(
-        "click",
-        forgotPassword
-      );
+/* =========================================================
+   YOUTUBE ERRORS
+   ========================================================= */
+
+function handleYouTubeError(
+  code
+){
+
+  const messages = {
+
+    2:
+      "YouTube rejected the video ID.",
+
+    5:
+      "YouTube's HTML5 player could not play this video.",
+
+    100:
+      "This YouTube video was removed or could not be found.",
+
+    101:
+      "This video does not allow embedded playback.",
+
+    150:
+      "This video does not allow embedded playback."
+
+  };
 
 
-      authForm.addEventListener(
-        "submit",
-        event=>{
+  showPlayerError(
+    "YOUTUBE PLAYBACK ERROR",
+    messages[code] ||
+      `YouTube returned playback error ${code}.`
+  );
 
-          event.preventDefault();
+}
 
-          signIn();
 
-        }
-      );
+/* =========================================================
+   YOUTUBE API ERROR
+   ========================================================= */
+
+function showYouTubeError(
+  error
+){
+
+  console.error(
+    "YouTube API:",
+    error
+  );
+
+
+  showPlayerError(
+    "YOUTUBE UNAVAILABLE",
+    "The YouTube player could not load. You can retry without losing the selected episode."
+  );
+
+}
+
+
+/* =========================================================
+   PLAYER ERROR
+   ========================================================= */
+
+function showPlayerError(
+  title,
+  text
+){
+
+  setPlayerStatus(
+    "ERROR",
+    "error"
+  );
+
+
+  playerMessage.classList.add(
+    "show"
+  );
+
+
+  playerMessageTitle.textContent =
+    title;
+
+
+  playerMessageText.textContent =
+    text;
+
+
+  playerMessageButton.classList.remove(
+    "hidden"
+  );
+
+
+  playerMessageButton.onclick =
+    ()=>{
+
+      retryCurrentEpisode();
+
+    };
+
+}
+
+
+/* =========================================================
+   RETRY
+   ========================================================= */
+
+async function retryCurrentEpisode(){
+
+  youtubeApiPromise =
+    null;
+
+  youtubeApiFailed =
+    false;
+
+
+  if(currentEpisode){
+
+    await loadEpisode(
+      currentEpisode,
+      true
+    );
+
+  }else{
+
+    await loadEpisodes();
+
+  }
+
+}
+
+
+/* =========================================================
+   PLAYER STATUS
+   ========================================================= */
+
+function setPlayerStatus(
+  text,
+  className = ""
+){
+
+  playerStatus.textContent =
+    text;
+
+  playerStatus.className =
+    "player-status";
+
+  if(className){
+
+    playerStatus.classList.add(
+      className
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   NATIVE VIDEO EVENTS
+   ========================================================= */
+
+nativeVideo.addEventListener(
+  "playing",
+  ()=>{
+
+    tracking.playing =
+      true;
+
+    setEngagementPlaying(
+      true
+    );
+
+    setPlayerStatus(
+      "PLAYING",
+      "playing"
+    );
+
+    playerMessage.classList.remove(
+      "show"
+    );
+
+  }
+);
+
+
+nativeVideo.addEventListener(
+  "pause",
+  ()=>{
+
+    tracking.playing =
+      false;
+
+    setEngagementPlaying(
+      false
+    );
+
+    sendEngagementHeartbeat();
+
+  }
+);
+
+
+nativeVideo.addEventListener(
+  "ended",
+  ()=>{
+
+    tracking.playing =
+      false;
+
+    setEngagementPlaying(
+      false
+    );
+
+    sendEngagementHeartbeat();
+
+  }
+);
+
+
+/* =========================================================
+   ENGAGEMENT
+   ========================================================= */
+
+function startCrowRulesSession(){
+
+  tracking.sessionId =
+    crypto.randomUUID();
+
+  tracking.sessionSeconds =
+    0;
+
+  tracking.lastHeartbeat =
+    0;
+
+  tracking.lastPosition =
+    0;
+
+
+  setEngagementStatus(
+    "SESSION ACTIVE"
+  );
+
+
+  refreshMemberEngagement();
+
+}
+
+
+/* =========================================================
+   PLAYBACK STATE
+   ========================================================= */
+
+function setEngagementPlaying(
+  playing
+){
+
+  tracking.playing =
+    Boolean(playing);
+
+
+  if(
+    !currentUser
+  ){
+
+    setEngagementStatus(
+      "SIGN IN TO TRACK"
+    );
+
+    return;
+
+  }
+
+
+  setEngagementStatus(
+    tracking.playing
+      ? "SESSION ACTIVE"
+      : "SESSION PAUSED"
+  );
+
+}
+
+
+/* =========================================================
+   SESSION TICK
+   ========================================================= */
+
+setInterval(
+  ()=>{
+
+    if(
+      currentUser &&
+      tracking.playing
+    ){
+
+      tracking.sessionSeconds++;
+
+      renderEngagement();
 
     }
 
-
-    async function restoreSession(){
-
-      const result =
-        await supabaseClient
-          .auth
-          .getSession();
+  },
+  1000
+);
 
 
-      currentSession =
-        result.data?.session ||
-        null;
+/* =========================================================
+   HEARTBEAT
+   ========================================================= */
+
+async function sendEngagementHeartbeat(){
+
+  if(
+    !currentUser ||
+    !currentEpisode
+  ){
+    return;
+  }
 
 
-      currentUser =
-        currentSession?.user ||
-        null;
+  const now =
+    performance.now();
 
 
-      updateAccountUI();
+  if(
+    tracking.lastHeartbeat &&
+    now -
+    tracking.lastHeartbeat <
+    8000
+  ){
+    return;
+  }
 
 
-      supabaseClient.auth.onAuthStateChange(
-        (_event,session)=>{
+  tracking.lastHeartbeat =
+    now;
 
-          currentSession =
-            session;
 
-          currentUser =
-            session?.user ||
-            null;
+  let position =
+    0;
 
-          updateAccountUI();
+  let duration =
+    0;
 
-        }
+
+  if(
+    !nativeVideo.hidden
+  ){
+
+    position =
+      Number(
+        nativeVideo.currentTime
+      ) || 0;
+
+    duration =
+      Number(
+        nativeVideo.duration
+      ) || 0;
+
+  }
+
+
+  if(
+    youtubePlayer &&
+    typeof youtubePlayer.getCurrentTime ===
+    "function"
+  ){
+
+    try{
+
+      position =
+        Number(
+          youtubePlayer.getCurrentTime()
+        ) || position;
+
+      duration =
+        Number(
+          youtubePlayer.getDuration()
+        ) || duration;
+
+    }catch(error){}
+
+  }
+
+
+  const {data,error} =
+    await supabaseClient.rpc(
+      "cr_record_media_heartbeat",
+      {
+
+        p_session_id:
+          tracking.sessionId,
+
+        p_media_type:
+          "video",
+
+        p_content_id:
+          currentEpisode.id ||
+          null,
+
+        p_content_key:
+          `${showId}:${
+            currentEpisode.id ||
+            currentEpisodeIndex
+          }`,
+
+        p_content_title:
+          getEpisodeTitle(
+            currentEpisode
+          ),
+
+        p_position_seconds:
+          position,
+
+        p_duration_seconds:
+          duration ||
+          null,
+
+        p_playing:
+          Boolean(
+            tracking.playing
+          )
+
+      }
+    );
+
+
+  if(error){
+
+    console.warn(
+      "Engagement heartbeat:",
+      error.message
+    );
+
+    return;
+
+  }
+
+
+  /*
+    Supabase is authoritative.
+
+    The browser does not award
+    Crow Points itself.
+  */
+
+  if(data){
+
+    tracking.watchSeconds =
+      Number(
+        data.watch_seconds ||
+        0
+      );
+
+
+    tracking.points =
+      Number(
+        data.points ||
+        0
+      );
+
+
+    tracking.lifetimePoints =
+      Number(
+        data.lifetime_points ||
+        0
+      );
+
+
+    tracking.monthlyPoints =
+      Number(
+        data.monthly_points ||
+        0
+      );
+
+
+    tracking.monthlyWatchSeconds =
+      Number(
+        data.monthly_watch_seconds ||
+        0
+      );
+
+
+    tracking.sessionSeconds =
+      Number(
+        data.session_seconds ||
+        tracking.sessionSeconds
+      );
+
+
+    renderEngagement();
+
+  }
+
+}
+
+
+/* =========================================================
+   REFRESH MEMBER ENGAGEMENT
+   ========================================================= */
+
+async function refreshMemberEngagement(){
+
+  if(!currentUser){
+
+    renderGuestEngagement();
+
+    return;
+
+  }
+
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.rpc(
+      "cr_get_member_engagement"
+    );
+
+
+  if(error){
+
+    console.warn(
+      "Member engagement:",
+      error.message
+    );
+
+    return;
+
+  }
+
+
+  if(!data){
+    return;
+  }
+
+
+  tracking.watchSeconds =
+    Number(
+      data.watch_seconds ||
+      0
+    );
+
+
+  tracking.points =
+    Number(
+      data.points ||
+      0
+    );
+
+
+  tracking.lifetimePoints =
+    Number(
+      data.lifetime_points ||
+      0
+    );
+
+
+  tracking.monthlyPoints =
+    Number(
+      data.monthly_points ||
+      0
+    );
+
+
+  tracking.monthlyWatchSeconds =
+    Number(
+      data.monthly_watch_seconds ||
+      0
+    );
+
+
+  renderEngagement();
+
+}
+
+
+/* =========================================================
+   ENGAGEMENT RENDER
+   ========================================================= */
+
+function renderEngagement(){
+
+  $("watchTimeValue").textContent =
+    formatWatchTime(
+      tracking.watchSeconds
+    );
+
+
+  $("watchTimeDetail").textContent =
+    `${formatNumber(
+      tracking.watchSeconds
+    )} seconds watched`;
+
+
+  $("crowPointsValue").textContent =
+    formatNumber(
+      tracking.points
+    );
+
+
+  $("crowPointsDetail").textContent =
+    `${formatNumber(
+      tracking.lifetimePoints
+    )} lifetime points`;
+
+
+  $("sessionTimeValue").textContent =
+    formatWatchTime(
+      tracking.sessionSeconds
+    );
+
+
+  $("sessionDetail").textContent =
+    tracking.playing
+      ? "Watching now"
+      : "Playback paused";
+
+
+  $("monthlyPointsValue").textContent =
+    formatNumber(
+      tracking.monthlyPoints
+    );
+
+
+  $("monthlyWatchValue").textContent =
+    `${formatWatchTime(
+      tracking.monthlyWatchSeconds
+    )} watched`;
+
+
+  $("sessionProgressText").textContent =
+    `${formatNumber(
+      tracking.sessionSeconds
+    )} seconds`;
+
+
+  const percent =
+    Math.min(
+      100,
+      tracking.sessionSeconds /
+      3600 *
+      100
+    );
+
+
+  $("sessionProgressFill")
+    .style.width =
+    `${percent}%`;
+
+}
+
+
+/* =========================================================
+   GUEST ENGAGEMENT
+   ========================================================= */
+
+function renderGuestEngagement(){
+
+  $("watchTimeValue").textContent =
+    "SIGN IN";
+
+  $("watchTimeDetail").textContent =
+    "Member tracking";
+
+  $("crowPointsValue").textContent =
+    "—";
+
+  $("crowPointsDetail").textContent =
+    "Sign in to earn points";
+
+  $("sessionTimeValue").textContent =
+    "0m";
+
+  $("sessionDetail").textContent =
+    "Sign in to track";
+
+  $("monthlyPointsValue").textContent =
+    "—";
+
+  $("monthlyWatchValue").textContent =
+    "Member feature";
+
+  setEngagementStatus(
+    "SIGN IN TO TRACK"
+  );
+
+}
+
+
+/* =========================================================
+   ENGAGEMENT STATUS
+   ========================================================= */
+
+function setEngagementStatus(
+  text
+){
+
+  const element =
+    $("engagementSessionStatus");
+
+  element.textContent =
+    text;
+
+  element.classList.toggle(
+    "active",
+    text === "SESSION ACTIVE"
+  );
+
+}
+
+
+/* =========================================================
+   FORMAT TIME
+   ========================================================= */
+
+function formatWatchTime(
+  seconds
+){
+
+  seconds =
+    Math.max(
+      0,
+      Number(seconds) || 0
+    );
+
+
+  const hours =
+    Math.floor(
+      seconds / 3600
+    );
+
+
+  const minutes =
+    Math.floor(
+      (seconds % 3600) /
+      60
+    );
+
+
+  if(hours > 0){
+
+    return `${hours}h ${minutes}m`;
+
+  }
+
+
+  return `${minutes}m`;
+
+}
+
+
+function formatNumber(
+  value
+){
+
+  return new Intl.NumberFormat(
+    "en-US"
+  ).format(
+    Number(value) || 0
+  );
+
+}
+
+
+/* =========================================================
+   SCHEDULE
+   ========================================================= */
+
+async function refreshSchedule(){
+
+  const title =
+    $("countdownTitle");
+
+  const time =
+    $("countdownTime");
+
+  const date =
+    $("countdownDate");
+
+
+  title.textContent =
+    "Checking schedule…";
+
+  time.textContent =
+    "--:--:--";
+
+  date.textContent =
+    "Checking CrowRules TV schedule…";
+
+
+  /*
+    The schedule schema can vary between
+    show installations.
+
+    We request broad rows and normalize
+    the common field names below.
+  */
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from(
+        currentShow.scheduleTable
+      )
+      .select("*")
+      .limit(300);
+
+
+  if(error){
+
+    console.warn(
+      "Schedule query:",
+      error.message
+    );
+
+
+    title.textContent =
+      "Schedule unavailable";
+
+
+    date.textContent =
+      "The episode player remains available.";
+
+
+    return;
+
+  }
+
+
+  const now =
+    Date.now();
+
+
+  const events =
+    (data || [])
+      .filter(
+        row =>
+          scheduleBelongsToShow(
+            row
+          )
+      )
+      .filter(
+        row =>
+          !isCancelledSchedule(
+            row
+          )
+      )
+      .filter(
+        row =>
+          row.is_scheduled !== false
+      );
+
+
+  let liveEvent =
+    events.find(
+      row =>
+        row.is_live === true ||
+        String(
+          row.status || ""
+        ).toLowerCase() === "live"
+    );
+
+
+  if(liveEvent){
+
+    nextScheduleEvent =
+      liveEvent;
+
+    title.textContent =
+      "LIVE NOW";
+
+    time.textContent =
+      "LIVE";
+
+    date.textContent =
+      getScheduleTitle(
+        liveEvent
+      );
+
+    startCountdownTimer();
+
+    return;
+
+  }
+
+
+  const future =
+    events
+      .map(
+        row=>({
+
+          row,
+
+          timestamp:
+            getScheduleStart(
+              row
+            )
+
+        })
+      )
+      .filter(
+        item =>
+          item.timestamp &&
+          item.timestamp > now
+      )
+      .sort(
+        (a,b)=>
+          a.timestamp -
+          b.timestamp
+      );
+
+
+  if(!future.length){
+
+    nextScheduleEvent =
+      null;
+
+    title.textContent =
+      `No scheduled ${currentShow.title} event found.`;
+
+    time.textContent =
+      "--:--:--";
+
+    date.textContent =
+      "Check back for the next CrowRules TV event.";
+
+    stopCountdown();
+
+    return;
+
+  }
+
+
+  nextScheduleEvent =
+    future[0].row;
+
+
+  title.textContent =
+    getScheduleTitle(
+      nextScheduleEvent
+    );
+
+
+  renderCountdown();
+
+
+  startCountdownTimer();
+
+}
+
+
+/* =========================================================
+   SCHEDULE SHOW MATCH
+   ========================================================= */
+
+function scheduleBelongsToShow(
+  row
+){
+
+  const possible =
+    [
+      "show_id",
+      "show_key",
+      "slug",
+      "program_slug",
+      "series_slug",
+      "show_slug"
+    ];
+
+
+  const values =
+    possible
+      .map(
+        key =>
+          row[key]
+      )
+      .filter(Boolean)
+      .map(
+        value =>
+          String(value)
+            .toLowerCase()
+            .trim()
+      );
+
+
+  if(!values.length){
+
+    /*
+      If the schedule table has no
+      show identifier, don't silently
+      claim it belongs to another show.
+
+      A title/name match is used as
+      the fallback.
+    */
+
+    const title =
+      String(
+        first(
+          row,
+          [
+            "title",
+            "program_title",
+            "show_title",
+            "name"
+          ]
+        ) || ""
+      ).toLowerCase();
+
+
+    return title.includes(
+      currentShow.title.toLowerCase()
+    );
+
+  }
+
+
+  return values.some(
+    value =>
+      value ===
+      showId ||
+      value ===
+      currentShow.title.toLowerCase() ||
+      value.includes(
+        showId
+      )
+  );
+
+}
+
+
+/* =========================================================
+   SCHEDULE TIME
+   ========================================================= */
+
+function getScheduleStart(
+  row
+){
+
+  const value =
+    first(
+      row,
+      [
+        "scheduled_start_at",
+        "scheduled_start",
+        "start_at",
+        "start_time",
+        "starts_at",
+        "air_at",
+        "air_date"
+      ]
+    );
+
+
+  if(!value){
+    return null;
+  }
+
+
+  const timestamp =
+    new Date(
+      value
+    ).getTime();
+
+
+  return Number.isFinite(
+    timestamp
+  )
+    ? timestamp
+    : null;
+
+}
+
+
+/* =========================================================
+   SCHEDULE TITLE
+   ========================================================= */
+
+function getScheduleTitle(
+  row
+){
+
+  return first(
+    row,
+    [
+      "title",
+      "program_title",
+      "show_title",
+      "name"
+    ]
+  ) ||
+  `Next ${currentShow.title}`;
+
+}
+
+
+/* =========================================================
+   CANCELLED
+   ========================================================= */
+
+function isCancelledSchedule(
+  row
+){
+
+  const status =
+    String(
+      row.status || ""
+    ).toLowerCase();
+
+
+  return [
+    "cancelled",
+    "canceled",
+    "draft",
+    "archived",
+    "hidden"
+  ].includes(
+    status
+  );
+
+}
+
+
+/* =========================================================
+   COUNTDOWN
+   ========================================================= */
+
+function startCountdownTimer(){
+
+  stopCountdown();
+
+
+  countdownTimer =
+    setInterval(
+      renderCountdown,
+      1000
+    );
+
+}
+
+
+function stopCountdown(){
+
+  if(countdownTimer){
+
+    clearInterval(
+      countdownTimer
+    );
+
+    countdownTimer =
+      null;
+
+  }
+
+}
+
+
+function renderCountdown(){
+
+  if(!nextScheduleEvent){
+    return;
+  }
+
+
+  if(
+    nextScheduleEvent.is_live === true ||
+    String(
+      nextScheduleEvent.status || ""
+    ).toLowerCase() === "live"
+  ){
+
+    $("countdownTime")
+      .textContent =
+      "LIVE";
+
+    return;
+
+  }
+
+
+  const timestamp =
+    getScheduleStart(
+      nextScheduleEvent
+    );
+
+
+  if(!timestamp){
+
+    $("countdownTime")
+      .textContent =
+      "--:--:--";
+
+    return;
+
+  }
+
+
+  const difference =
+    timestamp -
+    Date.now();
+
+
+  if(difference <= 0){
+
+    $("countdownTime")
+      .textContent =
+      "STARTING NOW";
+
+
+    refreshSchedule();
+
+    return;
+
+  }
+
+
+  const seconds =
+    Math.floor(
+      difference / 1000
+    );
+
+
+  const days =
+    Math.floor(
+      seconds / 86400
+    );
+
+
+  const hours =
+    Math.floor(
+      (seconds % 86400) /
+      3600
+    );
+
+
+  const minutes =
+    Math.floor(
+      (seconds % 3600) /
+      60
+    );
+
+
+  const secs =
+    seconds % 60;
+
+
+  $("countdownTime")
+    .textContent =
+    days > 0
+      ? `${days}d ${pad(hours)}:${pad(minutes)}:${pad(secs)}`
+      : `${pad(hours)}:${pad(minutes)}:${pad(secs)}`;
+
+
+  $("countdownDate")
+    .textContent =
+    new Date(
+      timestamp
+    ).toLocaleString(
+      "en-US",
+      {
+        dateStyle:"medium",
+        timeStyle:"short"
+      }
+    );
+
+}
+
+
+function pad(
+  value
+){
+
+  return String(
+    value
+  ).padStart(
+    2,
+    "0"
+  );
+
+}
+
+
+/* =========================================================
+   SHOW NAV
+   ========================================================= */
+
+function renderShowNavigation(){
+
+  const container =
+    $("showLinks");
+
+  container.innerHTML =
+    "";
+
+
+  Object.entries(
+    SHOWS
+  ).forEach(
+    ([id,show])=>{
+
+      const link =
+        document.createElement(
+          "a"
+        );
+
+      link.className =
+        "show-link";
+
+
+      if(id === showId){
+
+        link.classList.add(
+          "active"
+        );
+
+      }
+
+
+      link.href =
+        `?show=${encodeURIComponent(
+          id
+        )}`;
+
+
+      link.textContent =
+        show.title;
+
+
+      container.appendChild(
+        link
       );
 
     }
+  );
+
+}
 
 
-    function updateAccountUI(){
+/* =========================================================
+   SHOW HEADER
+   ========================================================= */
 
-      if(currentUser){
+function renderShowHeader(){
 
-        accountName.textContent =
-          currentUser.email ||
-          "Member";
+  $("showTitle").textContent =
+    currentShow.title;
 
+  $("showDescription").textContent =
+    currentShow.description;
 
-        authBtn.textContent =
-          "SIGN OUT";
+  document.title =
+    `CrowRules TV — ${currentShow.title}`;
 
-      }else{
-
-        accountName.textContent =
-          "Guest";
+}
 
 
-        authBtn.textContent =
-          "SIGN IN";
+/* =========================================================
+   CHAT
+   ========================================================= */
+
+async function setupChat(){
+
+  if(chatChannel){
+
+    try{
+
+      await supabaseClient
+        .removeChannel(
+          chatChannel
+        );
+
+    }catch(error){}
+
+    chatChannel =
+      null;
+
+  }
+
+
+  $("chatMessages")
+    .innerHTML =
+    "";
+
+
+  $("chatStatus")
+    .textContent =
+    "CONNECTING // REALTIME";
+
+
+  chatChannel =
+    supabaseClient.channel(
+      `cr-chat-${showId}`,
+      {
+        config:{
+          broadcast:{
+            self:true
+          }
+        }
+      }
+    );
+
+
+  chatChannel.on(
+    "broadcast",
+    {
+      event:"chat"
+    },
+    ({payload})=>{
+
+      if(payload){
+
+        addChatMessage(
+          payload
+        );
 
       }
 
     }
+  );
 
 
-    function openAuth(){
-
-      authStatus.textContent =
-        "";
+  const status =
+    await chatChannel.subscribe();
 
 
-      authModal.classList.add(
-        "show"
-      );
+  if(status !== "SUBSCRIBED"){
+
+    $("chatStatus")
+      .textContent =
+      "CHAT OFFLINE";
+
+    return;
+
+  }
 
 
-      authEmail.focus();
+  $("chatStatus")
+    .textContent =
+    "LIVE CHAT // REALTIME";
 
-    }
-
-
-    function closeAuth(){
-
-      authModal.classList.remove(
-        "show"
-      );
-
-    }
+}
 
 
-    async function signIn(){
+/* =========================================================
+   CHAT SEND
+   ========================================================= */
 
-      authStatus.textContent =
-        "Signing in...";
+$("chatForm")
+  .addEventListener(
+    "submit",
+    async event=>{
 
-
-      const email =
-        authEmail.value.trim();
-
-
-      const password =
-        authPassword.value;
+      event.preventDefault();
 
 
-      const result =
-        await supabaseClient.auth.signInWithPassword({
-          email,
-          password
-        });
+      const input =
+        $("chatInput");
 
 
-      if(result.error){
+      const text =
+        input.value
+          .trim()
+          .slice(
+            0,
+            280
+          );
 
-        authStatus.textContent =
-          result.error.message;
+
+      if(!text){
+        return;
+      }
+
+
+      const nickname =
+        getChatNickname();
+
+
+      if(
+        !chatChannel
+      ){
+
+        showToast(
+          "Chat is currently offline."
+        );
 
         return;
 
       }
 
 
-      currentSession =
-        result.data.session;
+      await chatChannel.send(
+        {
+          type:"broadcast",
+          event:"chat",
+          payload:{
 
+            id:
+              crypto.randomUUID(),
+
+            sender:
+              nickname,
+
+            userId:
+              currentUser?.id ||
+              null,
+
+            message:
+              text,
+
+            sentAt:
+              new Date()
+                .toISOString()
+
+          }
+        }
+      );
+
+
+      input.value =
+        "";
+
+    }
+  );
+
+
+/* =========================================================
+   CHAT MESSAGE
+   ========================================================= */
+
+function addChatMessage(
+  payload
+){
+
+  const wrapper =
+    document.createElement(
+      "div"
+    );
+
+  wrapper.className =
+    "chat-message";
+
+
+  const name =
+    document.createElement(
+      "div"
+    );
+
+  name.className =
+    "chat-name";
+
+  name.textContent =
+    payload.sender ||
+    "Anonymous";
+
+
+  const message =
+    document.createElement(
+      "div"
+    );
+
+  message.className =
+    "chat-text";
+
+  message.textContent =
+    payload.message ||
+    "";
+
+
+  const time =
+    document.createElement(
+      "div"
+    );
+
+  time.className =
+    "chat-time";
+
+  time.textContent =
+    payload.sentAt
+      ? new Date(
+          payload.sentAt
+        ).toLocaleTimeString(
+          [],
+          {
+            hour:"numeric",
+            minute:"2-digit"
+          }
+        )
+      : "";
+
+
+  wrapper.appendChild(
+    name
+  );
+
+  wrapper.appendChild(
+    message
+  );
+
+  wrapper.appendChild(
+    time
+  );
+
+
+  $("chatMessages")
+    .appendChild(
+      wrapper
+    );
+
+
+  $("chatMessages")
+    .scrollTop =
+    $("chatMessages").scrollHeight;
+
+
+  while(
+    $("chatMessages")
+      .children.length > 100
+  ){
+
+    $("chatMessages")
+      .firstElementChild
+      .remove();
+
+  }
+
+}
+
+
+/* =========================================================
+   CHAT NICKNAME
+   ========================================================= */
+
+function getChatNickname(){
+
+  if(!currentUser){
+
+    return "Guest";
+
+  }
+
+
+  return (
+    currentUser.user_metadata
+      ?.display_name ||
+    currentUser.user_metadata
+      ?.name ||
+    currentUser.email
+      ?.split("@")[0] ||
+    "Member"
+  );
+
+}
+
+
+/* =========================================================
+   AUTH
+   ========================================================= */
+
+async function restoreAuth(){
+
+  const {
+    data
+  } =
+    await supabaseClient
+      .auth
+      .getSession();
+
+
+  currentSession =
+    data?.session ||
+    null;
+
+  currentUser =
+    currentSession?.user ||
+    null;
+
+
+  updateAccountUI();
+
+
+  if(currentUser){
+
+    startCrowRulesSession();
+
+  }else{
+
+    renderGuestEngagement();
+
+  }
+
+
+  supabaseClient.auth.onAuthStateChange(
+    (_event,session)=>{
+
+      currentSession =
+        session;
 
       currentUser =
-        result.data.user;
+        session?.user ||
+        null;
 
 
       updateAccountUI();
+
+
+      if(currentUser){
+
+        startCrowRulesSession();
+
+        refreshMemberEngagement();
+
+      }else{
+
+        tracking.playing =
+          false;
+
+        renderGuestEngagement();
+
+      }
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   ACCOUNT UI
+   ========================================================= */
+
+function updateAccountUI(){
+
+  if(currentUser){
+
+    $("accountButton")
+      .textContent =
+      getChatNickname()
+        .toUpperCase();
+
+
+    $("loginButton")
+      .querySelector("span")
+      .textContent =
+      "SIGN OUT";
+
+  }else{
+
+    $("accountButton")
+      .textContent =
+      "ACCOUNT";
+
+
+    $("loginButton")
+      .querySelector("span")
+      .textContent =
+      "SIGN IN";
+
+  }
+
+}
+
+
+/* =========================================================
+   ACCOUNT BUTTON
+   ========================================================= */
+
+$("accountButton")
+  .addEventListener(
+    "click",
+    ()=>{
+
+      if(currentUser){
+
+        showToast(
+          `${getChatNickname()} — ${formatNumber(tracking.points)} Crow Points`
+        );
+
+      }else{
+
+        openAuth();
+
+      }
+
+    }
+  );
+
+
+$("loginButton")
+  .addEventListener(
+    "click",
+    async ()=>{
+
+      if(currentUser){
+
+        await supabaseClient
+          .auth
+          .signOut();
+
+        showToast(
+          "Signed out."
+        );
+
+      }else{
+
+        openAuth();
+
+      }
+
+    }
+  );
+
+
+/* =========================================================
+   AUTH MODAL
+   ========================================================= */
+
+function openAuth(){
+
+  $("authModal")
+    .classList.add(
+      "show"
+    );
+
+}
+
+
+function closeAuth(){
+
+  $("authModal")
+    .classList.remove(
+      "show"
+    );
+
+}
+
+
+$("closeAuthButton")
+  .addEventListener(
+    "click",
+    closeAuth
+  );
+
+
+$("authModal")
+  .addEventListener(
+    "click",
+    event=>{
+
+      if(
+        event.target ===
+        $("authModal")
+      ){
+
+        closeAuth();
+
+      }
+
+    }
+  );
+
+
+/* =========================================================
+   SIGN IN
+   ========================================================= */
+
+$("signInButton")
+  .addEventListener(
+    "click",
+    async ()=>{
+
+      const email =
+        $("authEmail")
+          .value
+          .trim();
+
+      const password =
+        $("authPassword")
+          .value;
+
+
+      if(
+        !email ||
+        !password
+      ){
+
+        setAuthMessage(
+          "Enter your email and password."
+        );
+
+        return;
+
+      }
+
+
+      setAuthMessage(
+        "Signing in…"
+      );
+
+
+      const {
+        error
+      } =
+        await supabaseClient
+          .auth
+          .signInWithPassword(
+            {
+              email,
+              password
+            }
+          );
+
+
+      if(error){
+
+        setAuthMessage(
+          error.message
+        );
+
+        return;
+
+      }
+
+
+      setAuthMessage(
+        "Signed in."
+      );
 
 
       closeAuth();
 
 
       showToast(
-        "Signed in successfully."
+        "Welcome back to CrowRules TV."
       );
 
     }
+  );
 
 
-    async function signup(){
+/* =========================================================
+   SIGN UP
+   ========================================================= */
+
+$("signUpButton")
+  .addEventListener(
+    "click",
+    async ()=>{
 
       const email =
-        authEmail.value.trim();
-
+        $("authEmail")
+          .value
+          .trim();
 
       const password =
-        authPassword.value;
+        $("authPassword")
+          .value;
+
+      const name =
+        $("authName")
+          .value
+          .trim();
 
 
-      const displayName =
-        authDisplayName.value.trim();
+      if(
+        !email ||
+        !password
+      ){
 
-
-      if(!email || !password){
-
-        authStatus.textContent =
-          "Enter an email and password.";
+        setAuthMessage(
+          "Enter an email and password."
+        );
 
         return;
 
       }
 
 
-      authStatus.textContent =
-        "Creating account...";
+      setAuthMessage(
+        "Creating your CrowRules account…"
+      );
 
 
-      const result =
-        await supabaseClient.auth.signUp({
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .auth
+          .signUp(
+            {
+              email,
+              password,
 
-          email,
-
-          password,
-
-          options:{
-            data:{
-              display_name:
-                displayName || null
+              options:{
+                data:{
+                  display_name:
+                    name ||
+                    email.split("@")[0]
+                }
+              }
             }
-          }
-
-        });
+          );
 
 
-      if(result.error){
+      if(error){
 
-        authStatus.textContent =
-          result.error.message;
+        setAuthMessage(
+          error.message
+        );
 
         return;
 
       }
 
 
-      if(result.data.session){
-
-        currentSession =
-          result.data.session;
-
-        currentUser =
-          result.data.user;
-
-        updateAccountUI();
+      if(
+        data?.session
+      ){
 
         closeAuth();
 
         showToast(
-          "Account created."
+          "Your CrowRules member account is ready."
         );
 
       }else{
 
-        authStatus.textContent =
-          "Account created. Check your email to confirm your address.";
+        setAuthMessage(
+          "Account created. Check your email if confirmation is required."
+        );
 
       }
 
     }
+  );
 
 
-    async function forgotPassword(){
+/* =========================================================
+   PASSWORD RESET
+   ========================================================= */
+
+$("forgotButton")
+  .addEventListener(
+    "click",
+    async ()=>{
 
       const email =
-        authEmail.value.trim();
+        $("authEmail")
+          .value
+          .trim();
 
 
       if(!email){
 
-        authStatus.textContent =
-          "Enter your email address first.";
+        setAuthMessage(
+          "Enter your email first."
+        );
 
         return;
 
       }
 
 
-      authStatus.textContent =
-        "Sending password reset email...";
-
-
-      const result =
+      const {
+        error
+      } =
         await supabaseClient
           .auth
           .resetPasswordForEmail(
-            email,
-            {
-              redirectTo:
-                window.location.origin +
-                window.location.pathname
-            }
+            email
           );
 
 
-      if(result.error){
+      if(error){
 
-        authStatus.textContent =
-          result.error.message;
+        setAuthMessage(
+          error.message
+        );
 
         return;
 
       }
 
 
-      authStatus.textContent =
-        "Password reset instructions have been sent if the account exists.";
-
-    }
-
-
-    async function signOut(){
-
-      await supabaseClient.auth.signOut();
-
-      currentSession =
-        null;
-
-      currentUser =
-        null;
-
-      updateAccountUI();
-
-      showToast(
-        "Signed out."
+      setAuthMessage(
+        "Password reset instructions sent."
       );
 
     }
+  );
 
 
-    /* =====================================================
-       MEMBER WATCH TRACKING
-       ===================================================== */
+function setAuthMessage(
+  message
+){
 
-    let heartbeatTimer =
-      null;
+  $("authMessage")
+    .textContent =
+    message;
 
+}
 
-    function startTracking(){
 
-      stopTracking();
+/* =========================================================
+   TOAST
+   ========================================================= */
 
+let toastTimer =
+  null;
 
-      heartbeatTimer =
-        setInterval(
-          trackingTick,
-          2000
-        );
 
-    }
+function showToast(
+  message
+){
 
+  const toast =
+    $("toast");
 
-    function stopTracking(){
 
-      if(heartbeatTimer){
+  toast.textContent =
+    message;
 
-        clearInterval(
-          heartbeatTimer
-        );
 
-        heartbeatTimer =
-          null;
+  toast.classList.add(
+    "show"
+  );
 
-      }
 
-    }
+  clearTimeout(
+    toastTimer
+  );
 
 
-    async function trackingTick(){
-
-      if(!currentEpisode){
-
-        return;
-
-      }
-
-
-      let position =
-        tracking.position;
-
-
-      let duration =
-        tracking.duration;
-
-
-      /*
-        Pull position from native player.
-      */
-      if(
-        !nativeVideo.hidden
-      ){
-
-        position =
-          Number(
-            nativeVideo.currentTime
-          ) || 0;
-
-        duration =
-          Number(
-            nativeVideo.duration
-          ) || duration;
-
-      }
-
-
-      /*
-        Pull position from YouTube player.
-      */
-      if(
-        youtubePlayer &&
-        typeof youtubePlayer.getCurrentTime ===
-        "function"
-      ){
-
-        try{
-
-          position =
-            Number(
-              youtubePlayer
-                .getCurrentTime()
-            ) || position;
-
-
-          duration =
-            Number(
-              youtubePlayer
-                .getDuration()
-            ) || duration;
-
-        }catch(error){}
-
-      }
-
-
-      tracking.position =
-        position;
-
-
-      tracking.duration =
-        duration;
-
-
-      /*
-        Do not send fake playing=true.
-      */
-      const playing =
-        Boolean(
-          tracking.playing
-        );
-
-
-      const now =
-        performance.now();
-
-
-      const elapsed =
-        now -
-        tracking.lastHeartbeat;
-
-
-      /*
-        Heartbeat roughly every 10 seconds.
-      */
-      if(
-        elapsed < 10000
-      ){
-
-        return;
-
-      }
-
-
-      tracking.lastHeartbeat =
-        now;
-
-
-      await recordHeartbeat(
-        playing
-      );
-
-    }
-
-
-    async function recordHeartbeat(
-      playing
-    ){
-
-      if(!currentUser){
-
-        return;
-
-      }
-
-
-      if(!currentEpisode){
-
-        return;
-
-      }
-
-
-      try{
-
-        await supabaseClient
-          .rpc(
-            "cr_record_media_heartbeat",
-            {
-              p_session_id:
-                tracking.sessionId,
-
-              p_media_type:
-                "video",
-
-              p_content_id:
-                tracking.episodeId,
-
-              p_content_key:
-                tracking.contentKey,
-
-              p_content_title:
-                tracking.title,
-
-              p_position_seconds:
-                Number(
-                  tracking.position
-                ) || 0,
-
-              p_duration_seconds:
-                Number(
-                  tracking.duration
-                ) || null,
-
-              p_playing:
-                Boolean(
-                  playing
-                )
-            }
-          );
-
-      }catch(error){
-
-        console.debug(
-          "Heartbeat:",
-          error
-        );
-
-      }
-
-    }
-
-
-    startTracking();
-
-
-    document.addEventListener(
-      "visibilitychange",
+  toastTimer =
+    setTimeout(
       ()=>{
-
-        if(
-          document.visibilityState ===
-          "hidden"
-        ){
-
-          recordHeartbeat(
-            false
-          );
-
-        }
-
-      }
+        toast.classList.remove(
+          "show"
+        );
+      },
+      3500
     );
 
-
-    window.addEventListener(
-      "beforeunload",
-      ()=>{
-
-        /*
-          Best-effort final state.
-        */
-        recordHeartbeat(
-          false
-        );
-
-      }
-    );
+}
 
 
-    /* =====================================================
-       FORMATTING
-       ===================================================== */
+/* =========================================================
+   ESCAPE HTML
+   ========================================================= */
 
-    function buildEpisodeMeta(
-      row
+function escapeHtml(
+  value
+){
+
+  return String(
+    value ?? ""
+  )
+  .replace(
+    /&/g,
+    "&amp;"
+  )
+  .replace(
+    /</g,
+    "&lt;"
+  )
+  .replace(
+    />/g,
+    "&gt;"
+  )
+  .replace(
+    /"/g,
+    "&quot;"
+  )
+  .replace(
+    /'/g,
+    "&#039;"
+  );
+
+}
+
+
+/* =========================================================
+   VISIBILITY FLUSH
+   ========================================================= */
+
+document.addEventListener(
+  "visibilitychange",
+  ()=>{
+
+    if(
+      document.visibilityState ===
+      "hidden"
     ){
 
-      const pieces =
-        [];
-
-
-      const season =
-        getSeasonNumber(row);
-
-
-      const episode =
-        getEpisodeNumber(row);
-
-
-      if(season){
-
-        pieces.push(
-          `Season ${season}`
-        );
-
-      }
-
-
-      if(episode){
-
-        pieces.push(
-          `Episode ${episode}`
-        );
-
-      }
-
-
-      const date =
-        getPublishedDate(row);
-
-
-      if(date){
-
-        pieces.push(
-          formatDate(date)
-        );
-
-      }
-
-
-      if(
-        getYouTubeId(row)
-      ){
-
-        pieces.push(
-          "YouTube"
-        );
-
-      }else if(
-        getDirectVideoUrl(row)
-      ){
-
-        pieces.push(
-          "Direct Video"
-        );
-
-      }
-
-
-      return pieces.length
-        ? pieces.join(" · ")
-        : "Published episode";
+      sendEngagementHeartbeat();
 
     }
 
-
-    function formatDate(
-      value
-    ){
-
-      const date =
-        new Date(value);
+  }
+);
 
 
-      if(
-        Number.isNaN(
-          date.getTime()
-        )
-      ){
+window.addEventListener(
+  "pagehide",
+  ()=>{
 
-        return String(value);
+    sendEngagementHeartbeat();
 
-      }
-
-
-      return new Intl.DateTimeFormat(
-        "en-US",
-        {
-          year:"numeric",
-          month:"short",
-          day:"numeric"
-        }
-      ).format(date);
-
-    }
+  }
+);
 
 
-    function formatDateTime(
-      date
-    ){
+/* =========================================================
+   HEARTBEAT LOOP
+   ========================================================= */
 
-      return new Intl.DateTimeFormat(
-        "en-US",
-        {
-          dateStyle:"medium",
-          timeStyle:"short",
-          timeZone:"America/Los_Angeles"
-        }
-      ).format(date);
+setInterval(
+  ()=>{
+    sendEngagementHeartbeat();
+  },
+  10000
+);
+
+
+/* =========================================================
+   MEMBER REFRESH
+   ========================================================= */
+
+setInterval(
+  ()=>{
+
+    if(currentUser){
+
+      refreshMemberEngagement();
 
     }
 
+  },
+  60000
+);
 
-    function formatChatTime(
-      value
-    ){
 
-      if(!value){
+/* =========================================================
+   SCHEDULE REFRESH
+   ========================================================= */
 
-        return "";
+scheduleRefreshTimer =
+  setInterval(
+    refreshSchedule,
+    60000
+  );
 
-      }
 
+/* =========================================================
+   INITIALIZE
+   ========================================================= */
 
-      const date =
-        new Date(value);
+async function initialize(){
 
+  renderShowNavigation();
 
-      if(
-        Number.isNaN(
-          date.getTime()
-        )
-      ){
+  renderShowHeader();
 
-        return "";
+  renderGuestEngagement();
 
-      }
+  await restoreAuth();
 
+  await setupChat();
 
-      return new Intl.DateTimeFormat(
-        "en-US",
-        {
-          hour:"numeric",
-          minute:"2-digit"
-        }
-      ).format(date);
+  await loadEpisodes();
 
-    }
+  await refreshSchedule();
 
+}
 
-    /* =====================================================
-       SECURITY HELPERS
-       ===================================================== */
 
-    function escapeHtml(
-      value
-    ){
+/* =========================================================
+   START
+   ========================================================= */
 
-      const div =
-        document.createElement(
-          "div"
-        );
+initialize();
 
-
-      div.textContent =
-        String(value ?? "");
-
-
-      return div.innerHTML;
-
-    }
-
-
-    function escapeAttribute(
-      value
-    ){
-
-      return escapeHtml(
-        value
-      )
-      .replace(
-        /"/g,
-        "&quot;"
-      );
-
-    }
-
-
-    /* =====================================================
-       TOAST
-       ===================================================== */
-
-    let toastTimer =
-      null;
-
-
-    function showToast(
-      message
-    ){
-
-      toast.textContent =
-        message;
-
-
-      toast.classList.add(
-        "show"
-      );
-
-
-      if(toastTimer){
-
-        clearTimeout(
-          toastTimer
-        );
-
-      }
-
-
-      toastTimer =
-        setTimeout(
-          ()=>{
-
-            toast.classList.remove(
-              "show"
-            );
-
-          },
-          3500
-        );
-
-    }
-
-
-    /* =====================================================
-       AUTH MODAL ESCAPE
-       ===================================================== */
-
-    document.addEventListener(
-      "keydown",
-      event=>{
-
-        if(
-          event.key ===
-          "Escape"
-        ){
-
-          closeAuth();
-
-        }
-
-      }
-    );
-
-
-    /* =====================================================
-       PAGE UNLOAD CLEANUP
-       ===================================================== */
-
-    window.addEventListener(
-      "pagehide",
-      ()=>{
-
-        destroyAllPlayers();
-
-        stopCountdown();
-
-        stopTracking();
-
-
-        if(chatChannel){
-
-          try{
-
-            supabaseClient
-              .removeChannel(
-                chatChannel
-              );
-
-          }catch(error){}
-
-        }
-
-      }
-    );
-
-  </script>
+</script>
 
 </body>
 </html>
