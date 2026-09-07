@@ -4,583 +4,5771 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#05060a">
-<meta name="description" content="CrowRules Entertainment Member Hub — member dashboard, CrowPoints, watch history, favorites, My List, CrowSpace, applications, suggestions, notifications and Supabase-powered content.">
-<title>CrowRules Entertainment — Member Hub v11.0 Ultimate</title>
+<meta name="description" content="CrowRules Entertainment Member Hub — watch time, sessions, CrowPoints, leaderboard, community and Supabase member management.">
+<title>CrowRules Entertainment — Member Hub v11.0</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://www.youtube.com/iframe_api"></script>
+
 <style>
-:root{--bg:#05060a;--panel:#0d1018;--panel2:#111722;--panel3:#080b11;--line:#252d3c;--text:#f4f7fb;--muted:#96a2b5;--accent:#b9ff39;--accent2:#63d9ff;--ok:#50e3a4;--warn:#ffca57;--danger:#ff5d6c;--shadow:0 18px 55px #0009}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 15% 0,#19243a 0,#05060a 36%),#05060a;color:var(--text);font-family:Montserrat,Arial,sans-serif}
-button,input,textarea,select{font:inherit}button{cursor:pointer}.hidden{display:none!important}
-header{position:sticky;top:0;z-index:30;background:#05060af2;backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
-.top{max-width:1540px;margin:auto;padding:13px 18px;display:flex;justify-content:space-between;align-items:center;gap:14px}.brand{font-family:Orbitron;font-weight:900;letter-spacing:1px}.brand span{color:var(--accent)}.brand small{font-size:10px;color:var(--muted);letter-spacing:2px}
-.userbox{display:flex;align-items:center;gap:9px}.avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;background:#18202e;border:1px solid var(--line)}
-nav{max-width:1540px;margin:auto;padding:0 18px 11px;display:flex;gap:7px;overflow:auto}nav button,.btn{border:1px solid var(--line);background:#101520;color:var(--text);padding:9px 13px;border-radius:10px;white-space:nowrap}.btn:hover,nav button:hover{border-color:#5a6880}.btn.primary{background:var(--accent);border-color:var(--accent);color:#071000;font-weight:800}.btn.ok{background:#0b2a20;color:#98ffd7;border-color:#245f49}.btn.warn{background:#2b2110;color:#ffe09b;border-color:#70571d}.btn.danger{background:#2a1015;color:#ffb3bb;border-color:#6e2631}
-main{max-width:1540px;margin:auto;padding:22px 18px 70px}.hero{display:grid;grid-template-columns:1.55fr 1fr;gap:16px}.card,.item{background:linear-gradient(180deg,#101621f5,#0a0e15f5);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:18px}.hero h1{font-family:Orbitron;font-size:clamp(26px,4vw,45px);margin:0 0 8px}.hero p{color:var(--muted);line-height:1.65}.section{margin-top:18px}.section h2{font-family:Orbitron;font-size:20px;margin:0 0 12px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;height:100%}.stat{background:#090c12;border:1px solid var(--line);border-radius:14px;padding:14px}.stat small{color:var(--muted)}.stat b{display:block;font-family:Orbitron;font-size:24px;margin-top:5px}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.two{grid-template-columns:1fr 1fr}.four{grid-template-columns:repeat(4,1fr)}.five{grid-template-columns:repeat(5,1fr)}
-.item h3{margin:0 0 7px;font-size:16px}.item p{font-size:13px;line-height:1.55;color:#c2cad8;margin:7px 0}.muted{color:var(--muted)}.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.between{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.badge{display:inline-flex;padding:5px 8px;border-radius:999px;background:#1a2130;border:1px solid #2c3547;color:#cbd4e4;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.45px}.badge.pending,.badge.reviewing{color:#ffe09b}.badge.approved,.badge.accepted,.badge.implemented{color:#9dffd5}.badge.rejected,.badge.declined{color:#ff9fa9}
-.tabs,.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.tab.active{background:var(--accent);border-color:var(--accent);color:#071000;font-weight:800}.toolbar input,.toolbar select,.field input,.field textarea,.field select{background:#080b11;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px;width:100%}.toolbar input{max-width:420px}
-.field{margin-bottom:11px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}.field textarea{min-height:105px;resize:vertical}
-.media-card{overflow:hidden}.thumb{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;background:#080b11;border:1px solid var(--line);margin-bottom:10px}.progress{height:7px;background:#07090e;border-radius:99px;overflow:hidden;border:1px solid var(--line)}.progress i{display:block;height:100%;background:var(--accent);width:0}
-.notice{padding:12px;border-radius:12px;background:#111824;border:1px solid var(--line);color:#cbd4e4;margin-bottom:12px}.notice.good{border-color:#245f49}.notice.bad{border-color:#6e2631}
-.modal{position:fixed;inset:0;background:#000c;z-index:80;display:grid;place-items:center;padding:18px}.modalbox{max-width:780px;width:100%;max-height:90vh;overflow:auto;background:#0d1119;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow)}
-.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:14px}table{width:100%;border-collapse:collapse;min-width:720px}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);font-size:12px;vertical-align:top}th{color:#cbd4e4;background:#0a0d13}
-#toast{position:fixed;right:18px;bottom:18px;z-index:100;max-width:430px}.toast{padding:13px 15px;background:#111824;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);margin-top:8px}
-footer{border-top:1px solid var(--line);padding:26px 18px;text-align:center;color:var(--muted);font-size:12px}
-.kpi{font-family:Orbitron;font-size:28px}.empty{padding:24px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:14px}
-@media(max-width:1100px){.hero,.two{grid-template-columns:1fr}.four,.five{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:650px){.grid,.four,.five{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.userbox .name{display:none}.top{align-items:flex-start}.brand small{display:none}}
+:root{
+  --bg:#05060a;
+  --panel:#0d1018;
+  --panel2:#121724;
+  --panel3:#080b11;
+  --line:#242b3a;
+  --text:#f4f7fb;
+  --muted:#9aa5b8;
+  --accent:#b9ff39;
+  --accent2:#63d9ff;
+  --danger:#ff5d6c;
+  --warn:#ffca57;
+  --ok:#50e3a4;
+  --purple:#b78cff;
+  --shadow:0 18px 50px #0008;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at 20% 0,#172033 0,#05060a 38%),
+    var(--bg);
+  color:var(--text);
+  font-family:Montserrat,Arial,sans-serif;
+}
+
+button,
+input,
+textarea,
+select{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+.hidden{
+  display:none!important;
+}
+
+header{
+  position:sticky;
+  top:0;
+  z-index:100;
+  background:#05060aee;
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+
+.top{
+  max-width:1550px;
+  margin:auto;
+  padding:14px 18px;
+  display:flex;
+  gap:16px;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.brand{
+  font-family:Orbitron,sans-serif;
+  font-weight:900;
+  letter-spacing:1px;
+}
+
+.brand span{
+  color:var(--accent);
+}
+
+.brand small{
+  color:var(--muted);
+  font-size:10px;
+  letter-spacing:1px;
+}
+
+.userbox{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.avatar{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  object-fit:cover;
+  background:#1b2230;
+  border:1px solid var(--line);
+}
+
+.name{
+  font-weight:700;
+}
+
+nav{
+  max-width:1550px;
+  margin:auto;
+  padding:0 18px 12px;
+  display:flex;
+  gap:8px;
+  overflow:auto;
+}
+
+nav button,
+.btn{
+  border:1px solid var(--line);
+  background:#101520;
+  color:var(--text);
+  padding:9px 13px;
+  border-radius:10px;
+  transition:.2s;
+}
+
+nav button:hover,
+.btn:hover{
+  border-color:#60708a;
+  transform:translateY(-1px);
+}
+
+.btn.primary{
+  background:var(--accent);
+  color:#071000;
+  border-color:var(--accent);
+  font-weight:800;
+}
+
+.btn.ok{
+  background:#0d2920;
+  color:#8dffd0;
+  border-color:#245f49;
+}
+
+.btn.warn{
+  background:#2a2110;
+  color:#ffe09b;
+  border-color:#70571d;
+}
+
+.btn.danger{
+  background:#2a1015;
+  color:#ffb0b8;
+  border-color:#6e2631;
+}
+
+.btn.blue{
+  background:#0d2029;
+  color:#8fe8ff;
+  border-color:#23586c;
+}
+
+main{
+  max-width:1550px;
+  margin:auto;
+  padding:24px 18px 80px;
+}
+
+.hero{
+  display:grid;
+  grid-template-columns:1.6fr 1fr;
+  gap:18px;
+  margin-bottom:18px;
+}
+
+.card{
+  background:linear-gradient(180deg,#101521ee,#0b0e15ee);
+  border:1px solid var(--line);
+  border-radius:18px;
+  box-shadow:var(--shadow);
+  padding:18px;
+}
+
+.hero h1{
+  font-family:Orbitron,sans-serif;
+  font-size:clamp(26px,4vw,46px);
+  margin:0 0 8px;
+}
+
+.hero p{
+  color:var(--muted);
+  line-height:1.6;
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+
+.stat{
+  background:#0a0d13;
+  border:1px solid var(--line);
+  padding:14px;
+  border-radius:14px;
+}
+
+.stat small{
+  color:var(--muted);
+}
+
+.stat b{
+  font-family:Orbitron,sans-serif;
+  font-size:24px;
+  display:block;
+  margin-top:5px;
+}
+
+.section{
+  margin-top:20px;
+}
+
+.section h2{
+  font-family:Orbitron,sans-serif;
+  margin:0 0 12px;
+  font-size:20px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+}
+
+.two{
+  grid-template-columns:1fr 1fr;
+}
+
+.four{
+  grid-template-columns:repeat(4,1fr);
+}
+
+.item{
+  border:1px solid var(--line);
+  background:#0b0f17;
+  border-radius:15px;
+  padding:15px;
+}
+
+.item h3{
+  margin:0 0 7px;
+  font-size:16px;
+}
+
+.item p{
+  margin:7px 0;
+  color:#c0c8d7;
+  line-height:1.5;
+  font-size:13px;
+}
+
+.row{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.between{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:flex-start;
+}
+
+.badge{
+  display:inline-flex;
+  padding:5px 8px;
+  border-radius:999px;
+  background:#1a2130;
+  color:#cbd4e4;
+  border:1px solid #2c3547;
+  font-size:11px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.4px;
+}
+
+.badge.active,
+.badge.approved,
+.badge.accepted,
+.badge.implemented{
+  color:#9dffd5;
+}
+
+.badge.pending,
+.badge.reviewing{
+  color:#ffe29c;
+}
+
+.badge.rejected,
+.badge.declined{
+  color:#ff9fa9;
+}
+
+.muted{
+  color:var(--muted);
+}
+
+.notice{
+  padding:12px;
+  border-radius:12px;
+  background:#111824;
+  border:1px solid var(--line);
+  color:#cbd4e4;
+  margin-bottom:12px;
+}
+
+.notice.good{
+  border-color:#245f49;
+}
+
+.notice.bad{
+  border-color:#6e2631;
+}
+
+.tabs{
+  display:flex;
+  gap:8px;
+  overflow:auto;
+  margin-bottom:14px;
+}
+
+.tab.active{
+  background:var(--accent);
+  color:#071000;
+  border-color:var(--accent);
+  font-weight:800;
+}
+
+.toolbar{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+
+.toolbar input,
+.toolbar select,
+.field input,
+.field textarea,
+.field select{
+  width:100%;
+  background:#080b11;
+  color:var(--text);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:10px;
+}
+
+.toolbar input{
+  max-width:440px;
+}
+
+.field{
+  margin-bottom:11px;
+}
+
+.field label{
+  display:block;
+  font-size:12px;
+  color:var(--muted);
+  margin-bottom:5px;
+}
+
+.field textarea{
+  min-height:100px;
+  resize:vertical;
+}
+
+.tablewrap{
+  overflow:auto;
+  border:1px solid var(--line);
+  border-radius:14px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:850px;
+}
+
+th,
+td{
+  text-align:left;
+  padding:11px;
+  border-bottom:1px solid var(--line);
+  font-size:12px;
+  vertical-align:top;
+}
+
+th{
+  color:#cbd4e4;
+  background:#0a0d13;
+}
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:#000b;
+  z-index:500;
+  display:grid;
+  place-items:center;
+  padding:18px;
+}
+
+.modalbox{
+  max-width:800px;
+  width:100%;
+  max-height:90vh;
+  overflow:auto;
+  background:#0d1119;
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:18px;
+  box-shadow:var(--shadow);
+}
+
+footer{
+  border-top:1px solid var(--line);
+  padding:25px 18px;
+  color:var(--muted);
+  text-align:center;
+  font-size:12px;
+}
+
+/* WATCH CENTER */
+
+.watch-layout{
+  display:grid;
+  grid-template-columns:minmax(0,2fr) minmax(300px,1fr);
+  gap:18px;
+}
+
+.player-shell{
+  background:#000;
+  border:1px solid var(--line);
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:var(--shadow);
+}
+
+.player{
+  width:100%;
+  aspect-ratio:16/9;
+  background:#000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.player video,
+.player iframe{
+  width:100%;
+  height:100%;
+  border:0;
+}
+
+.player-placeholder{
+  text-align:center;
+  color:var(--muted);
+  padding:40px;
+}
+
+.watch-status{
+  padding:14px;
+  background:#0b0f17;
+  border-top:1px solid var(--line);
+}
+
+.watch-live{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.live-dot{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:var(--danger);
+  box-shadow:0 0 15px var(--danger);
+}
+
+.live-dot.active{
+  background:var(--ok);
+  box-shadow:0 0 15px var(--ok);
+}
+
+.watch-metrics{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  margin-top:12px;
+}
+
+.metric{
+  background:#080b11;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:10px;
+}
+
+.metric small{
+  color:var(--muted);
+  display:block;
+}
+
+.metric strong{
+  font-family:Orbitron,sans-serif;
+  display:block;
+  margin-top:3px;
+}
+
+.progress{
+  height:8px;
+  border-radius:999px;
+  background:#202532;
+  overflow:hidden;
+  margin-top:12px;
+}
+
+.progress > div{
+  height:100%;
+  width:0%;
+  background:var(--accent);
+  transition:width .3s;
+}
+
+.player-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  max-height:520px;
+  overflow:auto;
+}
+
+.player-item{
+  border:1px solid var(--line);
+  background:#0a0d13;
+  padding:11px;
+  border-radius:11px;
+  cursor:pointer;
+}
+
+.player-item:hover{
+  border-color:#5b6880;
+}
+
+.player-item.active{
+  border-color:var(--accent);
+}
+
+/* LEADERBOARD */
+
+.rank{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:#171d29;
+  border:1px solid var(--line);
+  font-family:Orbitron,sans-serif;
+  font-weight:800;
+}
+
+.rank.top{
+  color:var(--accent);
+  border-color:var(--accent);
+}
+
+.member-line{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.member-avatar{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  object-fit:cover;
+  background:#1b2230;
+  border:1px solid var(--line);
+}
+
+.points{
+  color:var(--accent);
+  font-family:Orbitron,sans-serif;
+  font-weight:800;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:1100px){
+  .hero,
+  .watch-layout,
+  .two{
+    grid-template-columns:1fr;
+  }
+
+  .grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .four{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media(max-width:650px){
+  .grid,
+  .four{
+    grid-template-columns:1fr;
+  }
+
+  .stats{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .watch-metrics{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .name{
+    display:none;
+  }
+}
 </style>
 </head>
+
 <body>
+
 <header>
-<div class="top">
-  <div class="brand">CROW<span>RULES</span> <small>MEMBER HUB v11</small></div>
-  <div class="userbox">
-    <img id="avatar" class="avatar" alt="Member avatar">
-    <span id="userName" class="name">Guest</span>
-    <button id="loginBtn" class="btn">Login</button>
-    <button id="logoutBtn" class="btn hidden">Logout</button>
+  <div class="top">
+
+    <div class="brand">
+      CROW<span>RULES</span>
+      <small>MEMBER HUB</small>
+    </div>
+
+    <div class="userbox">
+      <img id="avatar" class="avatar" alt="">
+      <span id="userName" class="name">Guest</span>
+
+      <button id="loginBtn" class="btn">
+        Login
+      </button>
+
+      <button id="logoutBtn" class="btn hidden">
+        Logout
+      </button>
+    </div>
+
   </div>
-</div>
-<nav id="nav"></nav>
+
+  <nav id="nav"></nav>
 </header>
 
 <main>
-<div id="statusNotice" class="notice hidden"></div>
 
-<section class="hero">
-  <div class="card">
-    <h1 id="heroTitle">Your CrowRules Hub</h1>
-    <p id="heroText">Your central member dashboard for CrowRules Entertainment. Manage your profile, follow your favorite shows, resume watching, earn CrowPoints, connect with CrowSpace and track your activity.</p>
-    <div class="row">
-      <button class="btn primary" data-go="profile">My Profile</button>
-      <button class="btn" data-go="watch">Continue Watching</button>
-      <button class="btn" data-go="community">CrowSpace</button>
-      <button class="btn" id="refreshAll">Refresh</button>
+  <div id="configNotice" class="notice hidden"></div>
+
+  <!-- HERO -->
+
+  <section class="hero">
+
+    <div class="card">
+
+      <h1>Your CrowRules Hub</h1>
+
+      <p>
+        Your CrowRules Entertainment member dashboard for
+        watch time, CrowPoints, sessions, leaderboard rankings,
+        community activity, applications, suggestions and more.
+      </p>
+
+      <div class="row">
+
+        <button class="btn primary" data-go="watch">
+          Watch & Earn
+        </button>
+
+        <button class="btn" data-go="leaderboard">
+          Leaderboard
+        </button>
+
+        <button class="btn" data-go="profile">
+          My Profile
+        </button>
+
+      </div>
+
     </div>
-  </div>
-  <div class="card">
-    <div class="stats">
-      <div class="stat"><small>Lifetime CrowPoints</small><b id="lifetime">0</b></div>
-      <div class="stat"><small>Monthly CrowPoints</small><b id="monthly">0</b></div>
-      <div class="stat"><small>Watch Hours</small><b id="watchHours">0.0</b></div>
-      <div class="stat"><small>Listen Hours</small><b id="listenHours">0.0</b></div>
+
+    <div class="card">
+
+      <div class="stats">
+
+        <div class="stat">
+          <small>Lifetime Points</small>
+          <b id="lifetime">0</b>
+        </div>
+
+        <div class="stat">
+          <small>Monthly Points</small>
+          <b id="monthly">0</b>
+        </div>
+
+        <div class="stat">
+          <small>Watch Hours</small>
+          <b id="watchHours">0.0</b>
+        </div>
+
+        <div class="stat">
+          <small>Sessions</small>
+          <b id="sessionCount">0</b>
+        </div>
+
+      </div>
+
     </div>
-  </div>
-</section>
 
-<section id="dashboard" class="section">
-<h2>Member Dashboard</h2>
-<div id="dashboardGrid" class="grid four"></div>
-</section>
+  </section>
 
-<section id="watch" class="section">
-<h2>Continue Watching</h2>
-<div id="watchView"></div>
-</section>
 
-<section id="profile" class="section">
-<h2>My Profile</h2>
-<div class="grid two">
-  <div class="card" id="profileCard"></div>
-  <div class="card">
-    <h3>Membership & Rewards</h3>
-    <div id="rewardView" class="muted">Log in to load rewards.</div>
-  </div>
-</div>
-</section>
+  <!-- DASHBOARD -->
 
-<section id="favorites" class="section">
-<h2>Favorites & My List</h2>
-<div class="tabs">
-<button class="btn tab active" data-library-tab="favorites">Favorites</button>
-<button class="btn tab" data-library-tab="list">My List</button>
-</div>
-<div id="libraryView"></div>
-</section>
+  <section id="dashboard" class="section">
 
-<section id="leaderboard" class="section">
-<h2>CrowPoints Leaderboard</h2>
-<div class="toolbar"><button id="refreshLeaderboard" class="btn">Refresh Leaderboard</button></div>
-<div id="leaderboardView"></div>
-</section>
+    <h2>Member Dashboard</h2>
 
-<section id="applications" class="section">
-<h2>Creator Applications</h2>
-<div class="tabs">
-<button class="btn tab active" data-app-tab="mine">My Applications</button>
-<button class="btn tab" data-app-tab="submit">Apply to Create</button>
-<button class="btn tab" data-app-tab="review">Admin Review</button>
-<button class="btn tab" data-app-tab="sports">Sports Creator Apps</button>
-</div>
-<div id="applicationsView"></div>
-</section>
+    <div id="dashboardGrid" class="grid four"></div>
 
-<section id="suggestions" class="section">
-<h2>Suggestions</h2>
-<div class="toolbar">
-<button id="newSuggestion" class="btn primary">+ Submit Suggestion</button>
-<button id="refreshSuggestions" class="btn">Refresh</button>
-</div>
-<div id="suggestionsView"></div>
-</section>
+  </section>
 
-<section id="community" class="section">
-<h2>CrowSpace</h2>
-<div class="grid two">
-  <div class="card">
-    <div class="between"><h3>Community Snapshot</h3><button class="btn" id="openChat">Open Chat</button></div>
+
+  <!-- WATCH CENTER -->
+
+  <section id="watch" class="section">
+
+    <h2>Watch & Earn</h2>
+
+    <div id="watchLoginNotice" class="notice">
+      Login to track watch time and earn CrowPoints.
+    </div>
+
+    <div class="watch-layout">
+
+      <div>
+
+        <div class="player-shell">
+
+          <div id="player" class="player">
+
+            <div class="player-placeholder">
+
+              <h3>Choose a CrowRules video</h3>
+
+              <p>
+                Verified watch time begins automatically
+                when playback starts.
+              </p>
+
+            </div>
+
+          </div>
+
+          <div class="watch-status">
+
+            <div class="watch-live">
+
+              <span id="watchDot" class="live-dot"></span>
+
+              <strong id="watchState">
+                Player idle
+              </strong>
+
+              <span class="muted" id="currentTitle"></span>
+
+            </div>
+
+            <div class="watch-metrics">
+
+              <div class="metric">
+                <small>Session</small>
+                <strong id="sessionTime">00:00</strong>
+              </div>
+
+              <div class="metric">
+                <small>Verified Watch</small>
+                <strong id="verifiedTime">00:00</strong>
+              </div>
+
+              <div class="metric">
+                <small>Earned This Session</small>
+                <strong id="sessionPoints">0</strong>
+              </div>
+
+              <div class="metric">
+                <small>Total Points</small>
+                <strong id="playerPoints">0</strong>
+              </div>
+
+            </div>
+
+            <div class="progress">
+              <div id="watchProgress"></div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="card">
+
+        <div class="between">
+          <div>
+            <h3>Available Content</h3>
+            <small class="muted">
+              Select a video to start a tracked session.
+            </small>
+          </div>
+
+          <button class="btn" id="refreshContent">
+            Refresh
+          </button>
+        </div>
+
+        <br>
+
+        <div id="playerList" class="player-list">
+          <div class="notice">
+            Loading content...
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- LEADERBOARD -->
+
+  <section id="leaderboard" class="section">
+
+    <h2>CrowPoints Leaderboard</h2>
+
+    <div class="toolbar">
+
+      <button class="btn primary" id="lifetimeBoard">
+        Lifetime
+      </button>
+
+      <button class="btn" id="monthlyBoard">
+        Monthly
+      </button>
+
+      <button class="btn" id="refreshBoard">
+        Refresh
+      </button>
+
+    </div>
+
+    <div class="grid two">
+
+      <div class="card">
+
+        <h3>Top CrowRules Members</h3>
+
+        <div id="leaderboardView">
+          Loading leaderboard...
+        </div>
+
+      </div>
+
+      <div class="card">
+
+        <h3>Your Ranking</h3>
+
+        <div id="myRankView">
+          Login to view your ranking.
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- PROFILE -->
+
+  <section id="profile" class="section">
+
+    <h2>My Profile</h2>
+
+    <div class="grid two">
+
+      <div class="card" id="profileCard">
+        Login to view your profile.
+      </div>
+
+      <div class="card">
+
+        <h3>Recent Activity</h3>
+
+        <div id="activityList" class="muted">
+          Login to view activity.
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- APPLICATIONS -->
+
+  <section id="applications" class="section">
+
+    <h2>Podcaster Applications</h2>
+
+    <div class="tabs">
+
+      <button
+        class="btn tab active"
+        data-app-tab="mine">
+        My Applications
+      </button>
+
+      <button
+        class="btn tab"
+        data-app-tab="review">
+        Review Queue
+      </button>
+
+      <button
+        class="btn tab"
+        data-app-tab="sports">
+        Sports Creator Applications
+      </button>
+
+    </div>
+
+    <div id="applicationsView"></div>
+
+  </section>
+
+
+  <!-- SUGGESTIONS -->
+
+  <section id="suggestions" class="section">
+
+    <h2>Suggestions</h2>
+
+    <div class="toolbar">
+
+      <button
+        id="newSuggestion"
+        class="btn primary">
+        + Submit Suggestion
+      </button>
+
+      <button
+        id="refreshSuggestions"
+        class="btn">
+        Refresh
+      </button>
+
+    </div>
+
+    <div id="suggestionsView"></div>
+
+  </section>
+
+
+  <!-- COMMUNITY -->
+
+  <section id="community" class="section">
+
+    <h2>CrowSpace Community</h2>
+
     <div id="communityView" class="grid two"></div>
-  </div>
-  <div class="card">
-    <h3>Recent Community Posts</h3>
-    <div id="postsView"></div>
-  </div>
-</div>
-</section>
 
-<section id="content" class="section">
-<h2>CrowRules Content</h2>
-<div class="tabs">
-<button class="btn tab active" data-content-tab="shows">Shows</button>
-<button class="btn tab" data-content-tab="episodes">Episodes</button>
-<button class="btn tab" data-content-tab="schedule">Schedule</button>
-<button class="btn tab" data-content-tab="news">News</button>
-<button class="btn tab" data-content-tab="sports">Sports</button>
-</div>
-<div id="contentView"></div>
-</section>
+  </section>
 
-<section id="notifications" class="section">
-<h2>Notifications</h2>
-<div class="toolbar"><button id="markNotifications" class="btn">Mark All Read</button><button id="refreshNotifications" class="btn">Refresh</button></div>
-<div id="notificationsView"></div>
-</section>
 
-<section id="database" class="section">
-<h2>Supabase Data Center</h2>
-<div class="notice">This diagnostic view only shows rows that the current browser session is permitted to read through Supabase RLS. It never bypasses RLS and never uses a service-role key.</div>
-<div class="toolbar"><input id="tableSearch" placeholder="Filter tables…"><button id="loadTables" class="btn">Check Available Tables</button></div>
-<div id="tableCards" class="grid"></div>
-</section>
+  <!-- CONTENT -->
+
+  <section id="content" class="section">
+
+    <h2>CrowRules Content</h2>
+
+    <div class="tabs">
+
+      <button
+        class="btn tab active"
+        data-content-tab="shows">
+        Shows
+      </button>
+
+      <button
+        class="btn tab"
+        data-content-tab="episodes">
+        Episodes
+      </button>
+
+      <button
+        class="btn tab"
+        data-content-tab="schedule">
+        Schedule
+      </button>
+
+      <button
+        class="btn tab"
+        data-content-tab="news">
+        News
+      </button>
+
+      <button
+        class="btn tab"
+        data-content-tab="sports">
+        Sports
+      </button>
+
+    </div>
+
+    <div id="contentView"></div>
+
+  </section>
+
+
+  <!-- NOTIFICATIONS -->
+
+  <section id="notifications" class="section">
+
+    <h2>Notifications</h2>
+
+    <div id="notificationsView"></div>
+
+  </section>
+
+
+  <!-- DATABASE -->
+
+  <section id="data" class="section">
+
+    <h2>Supabase Data Center</h2>
+
+    <p class="muted">
+      This section only shows records permitted by Supabase
+      Data API and RLS policies. It does not bypass database
+      security.
+    </p>
+
+    <div class="toolbar">
+
+      <input
+        id="tableSearch"
+        placeholder="Search database tables...">
+
+      <button
+        id="loadAll"
+        class="btn">
+        Load Available Tables
+      </button>
+
+    </div>
+
+    <div id="tableCards" class="grid"></div>
+
+  </section>
+
 </main>
 
-<footer>CrowRules Entertainment • Member Hub v11.0 Ultimate • Supabase Auth + RLS • No service-role key in browser</footer>
+
+<footer>
+  CrowRules Entertainment • Member Hub v11.0 •
+  Verified Watch Tracking • CrowPoints • Leaderboard
+</footer>
+
 
 <div id="toast"></div>
+
+
 <div id="modal" class="modal hidden">
- <div class="modalbox">
-  <div class="between"><h2 id="modalTitle">Dialog</h2><button class="btn" onclick="closeModal()">Close</button></div>
-  <div id="modalBody"></div>
- </div>
+
+  <div class="modalbox">
+
+    <div class="between">
+
+      <h2 id="modalTitle">
+        Dialog
+      </h2>
+
+      <button
+        class="btn"
+        onclick="closeModal()">
+        Close
+      </button>
+
+    </div>
+
+    <div id="modalBody"></div>
+
+  </div>
+
 </div>
 
-<script>
-const SUPABASE_URL="https://zauxdqyssratvzmomozf.supabase.co";
-const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InphdXhkcXlzc3JhdHZ6bW9tb3pmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc0MjE3MjYsImV4cCI6MjEwMjk5NzcyNn0.nPTPMgD8gHzL7qRmMuUNJxpjXaCJRVXmgxck15AKDDA";
-const {createClient}=supabase;
-const db=createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 
-const TABLES=[
-"cr_members","cr_profiles","cr_member_activity","cr_member_watch_history","cr_member_watch_summary",
-"cr_member_watch_points","cr_member_engagement_ledger","cr_member_favorites","member_my_list","member_watch_history",
-"member_favorites","member_rewards","cr_member_monthly_leaderboard","cr_member_notifications","member_notifications",
-"cr_member_suggestions","cr_member_suggestion_votes","podcaster_applications","cr_podcaster_applications",
-"cr_sports_show_creator_applications","creator_applications","crowspace_profiles","crowspace_posts","crowspace_comments",
-"crowspace_reactions","crowspace_friendships","crowspace_groups","crowspace_group_members","cr_member_chat_rooms",
-"cr_member_chat","cr_original_productions","cr_episodes","cr_schedule","shows","episodes","seasons","schedule_items",
-"tv_channels","live_events","sports_shows","sports_episodes","sports_videos","sports_news","sports_schedules","sports_games","sports_teams"
+<script>
+
+/* ============================================================
+   CROW RULES MEMBER HUB v11
+   WATCH TIME / SESSIONS / CROWPOINTS / LEADERBOARD
+   ============================================================ */
+
+
+/* ============================================================
+   SUPABASE
+   ============================================================ */
+
+const SUPABASE_URL =
+  "https://zauxdqyssratvzmomozf.supabase.co";
+
+const SUPABASE_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InphdXhkcXlzc3JhdHZ6bW9tb3pmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc0MjE3MjYsImV4cCI6MjEwMjk5NzcyNn0.nPTPMgD8gHzL7qRmMuUNJxpjXaCJRVXmgxck15AKDDA";
+
+const {
+  createClient
+} = supabase;
+
+const db =
+  createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+
+/* ============================================================
+   TABLES
+   ============================================================ */
+
+const TABLES = [
+
+"back_deck_episodes",
+"cr_activity_feed",
+"cr_announcements",
+"cr_comments",
+"cr_content",
+"cr_episodes",
+"cr_events",
+"cr_media",
+"cr_media_sessions",
+"cr_member_activity",
+"cr_member_favorites",
+"cr_member_notifications",
+"cr_member_roles",
+"cr_member_stats",
+"cr_member_suggestions",
+"cr_member_watch_history",
+"cr_member_watch_points",
+"cr_member_watch_summary",
+"cr_members",
+"cr_news",
+"cr_original_productions",
+"cr_profiles",
+"cr_schedule",
+"cr_video_watch_sessions",
+"crowspace_comments",
+"crowspace_friendships",
+"crowspace_groups",
+"crowspace_group_members",
+"crowspace_notifications",
+"crowspace_posts",
+"crowspace_profiles",
+"podcaster_applications",
+"podcaster_profiles",
+"podcasts",
+"podcast_episodes",
+"sports_episodes",
+"sports_events",
+"sports_games",
+"sports_leagues",
+"sports_news",
+"sports_players",
+"sports_schedule",
+"sports_schedules",
+"sports_shows",
+"sports_standings",
+"sports_stats",
+"sports_teams",
+"sports_videos",
+"tacoma_nights_episodes"
+
 ];
 
-const state={user:null,member:null,admin:false,adminRole:null,appTab:"mine",contentTab:"shows",libraryTab:"favorites",cache:{}};
 
-const $=s=>document.querySelector(s);
-const $$=s=>[...document.querySelectorAll(s)];
-const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const uid=()=>state.user?.id||null;
-function toast(msg,good=true){const e=document.createElement("div");e.className="toast";e.textContent=msg;$("#toast").appendChild(e);setTimeout(()=>e.remove(),3600)}
-function fmtDate(v){if(!v)return"—";const d=new Date(v);return isNaN(d)?"—":d.toLocaleString()}
-function fmtDateOnly(v){if(!v)return"—";return new Date(v).toLocaleDateString()}
-function badge(v){return `<span class="badge ${esc(String(v||"unknown").toLowerCase())}">${esc(v||"unknown")}</span>`}
-function openModal(title,body){$("#modalTitle").textContent=title;$("#modalBody").innerHTML=body;$("#modal").classList.remove("hidden")}
-function closeModal(){$("#modal").classList.add("hidden")}
-function errText(error){return error?.message||"Database request failed."}
+/* ============================================================
+   STATE
+   ============================================================ */
 
-function nav(){
- const items=[["dashboard","Dashboard"],["watch","Continue Watching"],["profile","Profile"],["favorites","My Library"],["leaderboard","Leaderboard"],["applications","Applications"],["suggestions","Suggestions"],["community","CrowSpace"],["content","Content"],["notifications","Notifications"],["database","Database"]];
- $("#nav").innerHTML=items.map(x=>`<button data-go="${x[0]}">${x[1]}</button>`).join("");
- $$("[data-go]").forEach(b=>b.onclick=()=>document.getElementById(b.dataset.go)?.scrollIntoView({behavior:"smooth",block:"start"}));
-}
-nav();
+const state = {
 
-async function safeSelect(table,columns="*",builder=()=>{}){
- try{
-   let q=db.from(table).select(columns);
-   q=builder(q)||q;
-   const r=await q;
-   return r;
- }catch(e){return{data:null,error:e}}
-}
-async function countRows(table,builder=()=>{}){
- try{let q=db.from(table).select("*",{count:"exact",head:true});q=builder(q)||q;const r=await q;return{count:r.count||0,error:r.error};}catch(e){return{count:null,error:e}}
+  user:null,
+
+  member:null,
+
+  admin:false,
+
+  adminRole:null,
+
+  cache:{},
+
+  appTab:"mine",
+
+  contentTab:"shows",
+
+  leaderboardMode:"lifetime",
+
+  currentSession:null,
+
+  currentContent:null,
+
+  currentPlayer:null,
+
+  playerType:null,
+
+  playerDuration:0,
+
+  playerPlaying:false,
+
+  heartbeatTimer:null,
+
+  sessionStartedAt:null,
+
+  sessionBaseSeconds:0,
+
+  sessionPoints:0,
+
+  lastReportedPosition:0,
+
+  lastHeartbeatPosition:0,
+
+  youtubeReady:false
+
+};
+
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+
+const $ =
+  selector =>
+    document.querySelector(selector);
+
+const $$ =
+  selector =>
+    [...document.querySelectorAll(selector)];
+
+const esc =
+  value =>
+    String(value ?? "")
+      .replace(/[&<>"']/g,c=>({
+
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#39;"
+
+      }[c]));
+
+
+function toast(message,good=true){
+
+  const el =
+    document.createElement("div");
+
+  el.className="toast";
+
+  el.textContent=message;
+
+  el.style.cssText=
+    `
+      position:fixed;
+      right:18px;
+      bottom:18px;
+      z-index:999;
+      max-width:420px;
+      padding:13px 15px;
+      background:#111824;
+      border:1px solid ${good ? "#245f49" : "#6e2631"};
+      border-radius:12px;
+      box-shadow:0 18px 50px #0008;
+      margin-top:8px;
+    `;
+
+  document.body.appendChild(el);
+
+  setTimeout(
+    ()=>el.remove(),
+    3500
+  );
 }
 
-async function start(){
- const {data,error}=await db.auth.getUser();
- state.user=error?null:data?.user||null;
- if(state.user) await loadMember();
- else renderGuest();
- db.auth.onAuthStateChange(async(_event,session)=>{
-   state.user=session?.user||null;
-   if(state.user) await loadMember(); else renderGuest();
- });
+
+function fmtDate(value){
+
+  if(!value)
+    return "—";
+
+  return new Date(value)
+    .toLocaleString();
+
 }
+
+
+function formatSeconds(seconds){
+
+  seconds =
+    Math.max(
+      0,
+      Math.floor(
+        Number(seconds)||0
+      )
+    );
+
+  const h =
+    Math.floor(seconds/3600);
+
+  const m =
+    Math.floor(
+      (seconds%3600)/60
+    );
+
+  const s =
+    seconds%60;
+
+  if(h>0){
+
+    return [
+      String(h).padStart(2,"0"),
+      String(m).padStart(2,"0"),
+      String(s).padStart(2,"0")
+    ].join(":");
+
+  }
+
+  return [
+    String(m).padStart(2,"0"),
+    String(s).padStart(2,"0")
+  ].join(":");
+
+}
+
+
+function badge(value){
+
+  const v =
+    String(
+      value||"unknown"
+    ).toLowerCase();
+
+  return `
+    <span class="badge ${esc(v)}">
+      ${esc(value||"unknown")}
+    </span>
+  `;
+
+}
+
+
+function openModal(title,body){
+
+  $("#modalTitle")
+    .textContent=title;
+
+  $("#modalBody")
+    .innerHTML=body;
+
+  $("#modal")
+    .classList
+    .remove("hidden");
+
+}
+
+
+function closeModal(){
+
+  $("#modal")
+    .classList
+    .add("hidden");
+
+}
+
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+
+function buildNav(){
+
+  const items=[
+
+    ["dashboard","Dashboard"],
+    ["watch","Watch & Earn"],
+    ["leaderboard","Leaderboard"],
+    ["profile","Profile"],
+    ["applications","Applications"],
+    ["suggestions","Suggestions"],
+    ["community","CrowSpace"],
+    ["content","Content"],
+    ["notifications","Notifications"],
+    ["data","Database"]
+
+  ];
+
+  $("#nav").innerHTML =
+    items
+      .map(
+        item => `
+          <button data-go="${item[0]}">
+            ${item[1]}
+          </button>
+        `
+      )
+      .join("");
+
+  $$("[data-go]")
+    .forEach(button=>{
+
+      button.onclick=()=>{
+
+        const target =
+          document.getElementById(
+            button.dataset.go
+          );
+
+        target?.scrollIntoView({
+          behavior:"smooth"
+        });
+
+      };
+
+    });
+
+}
+
+buildNav();
+
+
+/* ============================================================
+   AUTH SESSION
+   ============================================================ */
+
+async function initialize(){
+
+  const {
+    data,
+    error
+  } =
+    await db.auth.getSession();
+
+  if(error){
+
+    console.error(error);
+
+    showConfigError(
+      error.message
+    );
+
+    return;
+
+  }
+
+  state.user =
+    data.session?.user || null;
+
+  if(state.user){
+
+    await loadMember();
+
+  }else{
+
+    renderGuest();
+
+  }
+
+  db.auth.onAuthStateChange(
+    async(
+      event,
+      session
+    )=>{
+
+      state.user =
+        session?.user || null;
+
+      if(state.user){
+
+        await loadMember();
+
+      }else{
+
+        stopTracking();
+
+        state.member=null;
+
+        renderGuest();
+
+      }
+
+    }
+  );
+
+}
+
+
+function showConfigError(message){
+
+  $("#configNotice")
+    .textContent=message;
+
+  $("#configNotice")
+    .classList
+    .remove("hidden");
+
+}
+
+
+/* ============================================================
+   LOAD MEMBER
+   ============================================================ */
 
 async function loadMember(){
- const u=state.user;
- const mres=await safeSelect("cr_members","*",(q)=>q.eq("user_id",u.id).maybeSingle());
- const pres=await safeSelect("cr_profiles","*",(q)=>q.eq("id",u.id).maybeSingle());
- const m=mres.data||{};
- const p=pres.data||{};
- state.member=Object.keys(m).length?m:{
-   id:null,user_id:u.id,display_name:p.display_name||u.user_metadata?.display_name||u.email?.split("@")[0],
-   username:p.username||u.email?.split("@")[0],avatar_url:p.avatar_url||"",bio:p.bio||"",
-   membership_tier:"free",role:"member",points:0,lifetime_points:0,monthly_points:0,
-   watch_seconds:0,listen_seconds:0,total_watch_minutes:0,total_listen_minutes:0
- };
- const a=await safeSelect("cr_admins","role,is_active",(q)=>q.eq("user_id",u.id).maybeSingle());
- state.admin=!!(a.data?.is_active&&["admin","owner","staff","producer","moderator"].includes(a.data.role));
- state.adminRole=a.data?.role||null;
- $("#userName").textContent=state.member.display_name||state.member.username||u.email||"Member";
- $("#avatar").src=state.member.avatar_url||avatarSvg(state.member.display_name||"C");
- $("#loginBtn").classList.add("hidden");$("#logoutBtn").classList.remove("hidden");
- $("#statusNotice").classList.add("hidden");
- await refreshAll();
-}
-function avatarSvg(letter){
- return "data:image/svg+xml,"+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="#18202e"/><text x="50%" y="58%" text-anchor="middle" fill="#b9ff39" font-family="Arial" font-size="42">${esc(String(letter).slice(0,1).toUpperCase())}</text></svg>`);
-}
-function renderGuest(){
- state.member=null;state.admin=false;
- $("#userName").textContent="Guest";$("#avatar").src=avatarSvg("C");
- $("#loginBtn").classList.remove("hidden");$("#logoutBtn").classList.add("hidden");
- $("#statusNotice").textContent="You are browsing as a guest. Log in to access your member profile, watch history, CrowPoints, applications, suggestions and private community features.";
- $("#statusNotice").classList.remove("hidden");
- updateStats();renderDashboard();renderProfile();renderWatch();renderLibrary();renderLeaderboard();renderApplications();renderSuggestions();renderCommunity();renderNotifications();renderContent();
+
+  const user =
+    state.user;
+
+  const {
+    data:m,
+    error:mError
+  } =
+    await db
+      .from("cr_members")
+      .select("*")
+      .eq("user_id",user.id)
+      .maybeSingle();
+
+  if(mError){
+
+    console.warn(
+      "Member query:",
+      mError.message
+    );
+
+  }
+
+  let member=m;
+
+  if(!member){
+
+    const {
+      data:p
+    } =
+      await db
+        .from("cr_profiles")
+        .select("*")
+        .eq("id",user.id)
+        .maybeSingle();
+
+    member={
+
+      user_id:user.id,
+
+      display_name:
+        p?.display_name ||
+        user.user_metadata?.display_name ||
+        user.email?.split("@")[0],
+
+      username:
+        p?.username ||
+        user.email?.split("@")[0],
+
+      avatar_url:
+        p?.avatar_url || "",
+
+      points:0,
+
+      lifetime_points:0,
+
+      monthly_points:0,
+
+      watch_seconds:0,
+
+      monthly_watch_seconds:0,
+
+      listen_seconds:0,
+
+      role:"member"
+
+    };
+
+  }
+
+  state.member=member;
+
+
+  /* ----------------------------------------------------------
+     ADMIN
+     ---------------------------------------------------------- */
+
+  try{
+
+    const {
+      data:a
+    } =
+      await db
+        .from("cr_admins")
+        .select("role,is_active")
+        .eq("user_id",user.id)
+        .maybeSingle();
+
+    state.admin =
+      !!(
+        a?.is_active &&
+        [
+          "admin",
+          "owner",
+          "staff",
+          "producer",
+          "moderator"
+        ].includes(a.role)
+      );
+
+    state.adminRole =
+      a?.role || null;
+
+  }catch(error){
+
+    state.admin=false;
+
+  }
+
+
+  /* ----------------------------------------------------------
+     UI
+     ---------------------------------------------------------- */
+
+  $("#userName")
+    .textContent =
+      member.display_name ||
+      member.username ||
+      user.email;
+
+  $("#avatar").src =
+    member.avatar_url ||
+    createAvatar(
+      member.display_name ||
+      member.username ||
+      "C"
+    );
+
+  $("#loginBtn")
+    .classList
+    .add("hidden");
+
+  $("#logoutBtn")
+    .classList
+    .remove("hidden");
+
+  $("#watchLoginNotice")
+    .classList
+    .add("hidden");
+
+  updateStats();
+
+  renderProfile();
+
+  renderDashboard();
+
+  renderActivity();
+
+  renderNotifications();
+
+  renderApplications();
+
+  renderSuggestions();
+
+  renderCommunity();
+
+  renderContent();
+
+  loadWatchableContent();
+
+  loadLeaderboard();
+
+  loadMySessions();
+
 }
 
-async function refreshAll(){
- updateStats();renderDashboard();renderProfile();renderReward();await Promise.all([
-   renderWatch(),renderLibrary(),renderLeaderboard(),renderApplications(),renderSuggestions(),
-   renderCommunity(),renderNotifications(),renderContent()
- ]);
+
+function createAvatar(letter){
+
+  const svg =
+    `
+    <svg xmlns="http://www.w3.org/2000/svg"
+         width="100"
+         height="100">
+
+      <rect
+        width="100"
+        height="100"
+        fill="#1b2230"/>
+
+      <text
+        x="50%"
+        y="58%"
+        text-anchor="middle"
+        fill="#b9ff39"
+        font-size="44"
+        font-family="Arial">
+        ${esc(
+          String(letter||"C")
+            .charAt(0)
+            .toUpperCase()
+        )}
+      </text>
+
+    </svg>
+    `;
+
+  return "data:image/svg+xml,"+
+    encodeURIComponent(svg);
+
 }
+
+
+/* ============================================================
+   GUEST
+   ============================================================ */
+
+function renderGuest(){
+
+  $("#userName")
+    .textContent="Guest";
+
+  $("#loginBtn")
+    .classList
+    .remove("hidden");
+
+  $("#logoutBtn")
+    .classList
+    .add("hidden");
+
+  $("#watchLoginNotice")
+    .classList
+    .remove("hidden");
+
+  $("#configNotice")
+    .textContent=
+      "Login to track watch time, sessions and CrowPoints.";
+
+  $("#configNotice")
+    .classList
+    .remove("hidden");
+
+  updateStats();
+
+  renderDashboard();
+
+  renderProfile();
+
+  renderApplications();
+
+  renderSuggestions();
+
+  renderCommunity();
+
+  renderContent();
+
+  renderNotifications();
+
+  loadWatchableContent();
+
+  loadLeaderboard();
+
+}
+
+
+/* ============================================================
+   STATS
+   ============================================================ */
 
 function updateStats(){
- const m=state.member||{};
- $("#lifetime").textContent=Number(m.lifetime_points??m.points??0).toLocaleString();
- $("#monthly").textContent=Number(m.monthly_points??0).toLocaleString();
- $("#watchHours").textContent=(Number(m.watch_seconds??(m.total_watch_minutes||0)*60||0)/3600).toFixed(1);
- $("#listenHours").textContent=(Number(m.listen_seconds??(m.total_listen_minutes||0)*60||0)/3600).toFixed(1);
+
+  const m =
+    state.member || {};
+
+  const lifetime =
+    Number(
+      m.lifetime_points ??
+      m.points ??
+      0
+    );
+
+  const monthly =
+    Number(
+      m.monthly_points ??
+      0
+    );
+
+  const watch =
+    Number(
+      m.watch_seconds ??
+      0
+    );
+
+  $("#lifetime")
+    .textContent =
+      lifetime.toLocaleString();
+
+  $("#monthly")
+    .textContent =
+      monthly.toLocaleString();
+
+  $("#watchHours")
+    .textContent =
+      (watch/3600)
+        .toFixed(1);
+
+  $("#sessionCount")
+    .textContent =
+      state.sessionCount || "0";
+
+  $("#playerPoints")
+    .textContent =
+      lifetime.toLocaleString();
+
 }
+
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+
 function renderDashboard(){
- const m=state.member||{};
- const cards=[
- ["👤","Membership",m.membership_tier||"Guest",m.role||"member"],
- ["⭐","CrowPoints",Number(m.lifetime_points??m.points??0).toLocaleString(),"lifetime points"],
- ["📺","Watch Time",((Number(m.watch_seconds??0))/3600).toFixed(1)+" hrs","tracked"],
- ["🎧","Listen Time",((Number(m.listen_seconds??0))/3600).toFixed(1)+" hrs","tracked"],
- ["❤️","Favorites","Your saved content","My Library"],
- ["📌","My List","Saved shows","Resume later"],
- ["🏆","Leaderboard","Monthly ranking","CrowPoints"],
- ["🌐","CrowSpace","Posts, friends & groups","community"]
- ];
- $("#dashboardGrid").innerHTML=cards.map(c=>`<div class="item"><div class="muted">${c[0]} ${esc(c[1])}</div><h3>${esc(c[2])}</h3><small class="muted">${esc(c[3])}</small></div>`).join("");
+
+  const m =
+    state.member || {};
+
+  const cards=[
+
+    [
+      "⭐",
+      "CrowPoints",
+      Number(
+        m.lifetime_points ??
+        m.points ??
+        0
+      ).toLocaleString(),
+      "lifetime points"
+    ],
+
+    [
+      "📅",
+      "Monthly Points",
+      Number(
+        m.monthly_points||0
+      ).toLocaleString(),
+      "this month"
+    ],
+
+    [
+      "📺",
+      "Watch Time",
+      (
+        Number(
+          m.watch_seconds||0
+        )/3600
+      ).toFixed(1)+" hours",
+      "verified playback"
+    ],
+
+    [
+      "🎬",
+      "Watch Sessions",
+      state.sessionCount || 0,
+      "tracked sessions"
+    ],
+
+    [
+      "🏆",
+      "Leaderboard",
+      "View Ranking",
+      "CrowPoints"
+    ],
+
+    [
+      "💡",
+      "Suggestions",
+      "Community Ideas",
+      "submit ideas"
+    ],
+
+    [
+      "🎙",
+      "Creator Apps",
+      "Applications",
+      "creator access"
+    ],
+
+    [
+      "🌐",
+      "CrowSpace",
+      "Community",
+      "posts, friends & groups"
+    ]
+
+  ];
+
+  $("#dashboardGrid")
+    .innerHTML =
+      cards
+        .map(
+          c => `
+            <div class="item">
+
+              <div class="muted">
+                ${c[0]}
+                ${esc(c[1])}
+              </div>
+
+              <h3>
+                ${esc(c[2])}
+              </h3>
+
+              <small class="muted">
+                ${esc(c[3])}
+              </small>
+
+            </div>
+          `
+        )
+        .join("");
+
 }
+
+
+/* ============================================================
+   WATCH CONTENT
+   ============================================================ */
+
+async function loadWatchableContent(){
+
+  const box =
+    $("#playerList");
+
+  box.innerHTML =
+    `
+      <div class="notice">
+        Loading videos...
+      </div>
+    `;
+
+  const results=[];
+
+
+  /* ----------------------------------------------------------
+     EPISODES
+     ---------------------------------------------------------- */
+
+  try{
+
+    const {
+      data
+    } =
+      await db
+        .from("cr_episodes")
+        .select("*")
+        .eq("is_published",true)
+        .order(
+          "release_date",
+          {ascending:false}
+        )
+        .limit(50);
+
+    (data||[])
+      .forEach(row=>{
+
+        results.push(
+          normalizeVideo(
+            row,
+            "episode"
+          )
+        );
+
+      });
+
+  }catch(error){
+
+    console.warn(
+      "cr_episodes:",
+      error
+    );
+
+  }
+
+
+  /* ----------------------------------------------------------
+     TACOMA NIGHTS
+     ---------------------------------------------------------- */
+
+  try{
+
+    const {
+      data
+    } =
+      await db
+        .from("tacoma_nights_episodes")
+        .select("*")
+        .order(
+          "created_at",
+          {ascending:false}
+        )
+        .limit(50);
+
+    (data||[])
+      .forEach(row=>{
+
+        results.push(
+          normalizeVideo(
+            row,
+            "tacoma_nights"
+          )
+        );
+
+      });
+
+  }catch(error){
+
+    console.warn(
+      "tacoma_nights_episodes:",
+      error
+    );
+
+  }
+
+
+  /* ----------------------------------------------------------
+     BACK DECK
+     ---------------------------------------------------------- */
+
+  try{
+
+    const {
+      data
+    } =
+      await db
+        .from("back_deck_episodes")
+        .select("*")
+        .order(
+          "created_at",
+          {ascending:false}
+        )
+        .limit(50);
+
+    (data||[])
+      .forEach(row=>{
+
+        results.push(
+          normalizeVideo(
+            row,
+            "back_deck"
+          )
+        );
+
+      });
+
+  }catch(error){
+
+    console.warn(
+      "back_deck_episodes:",
+      error
+    );
+
+  }
+
+
+  const usable =
+    results.filter(
+      item => item.videoUrl
+    );
+
+
+  if(!usable.length){
+
+    box.innerHTML =
+      `
+        <div class="notice">
+          No playable published videos were found.
+          Your content records need a
+          <b>video_url</b>,
+          <b>youtube_url</b>,
+          <b>youtube_id</b>,
+          or similar video field.
+        </div>
+      `;
+
+    return;
+
+  }
+
+
+  box.innerHTML =
+    usable
+      .map(
+        (video,index)=>`
+
+          <div
+            class="player-item"
+            data-video-index="${index}">
+
+            <div class="between">
+
+              <div>
+
+                <strong>
+                  ${esc(
+                    video.title ||
+                    "CrowRules Video"
+                  )}
+                </strong>
+
+                <div class="muted">
+                  ${esc(
+                    video.type
+                  )}
+                  ${video.releaseDate
+                    ? " • "+
+                      esc(
+                        fmtDate(
+                          video.releaseDate
+                        )
+                      )
+                    : ""}
+                </div>
+
+              </div>
+
+              <span class="badge">
+                WATCH
+              </span>
+
+            </div>
+
+          </div>
+
+        `
+      )
+      .join("");
+
+
+  $$(".player-item")
+    .forEach(item=>{
+
+      item.onclick=()=>{
+
+        const index =
+          Number(
+            item.dataset.videoIndex
+          );
+
+        startVideo(
+          usable[index]
+        );
+
+      };
+
+    });
+
+
+  /* ----------------------------------------------------------
+     AUTO LOAD FIRST VIDEO
+     ---------------------------------------------------------- */
+
+  if(
+    !state.currentContent &&
+    usable[0]
+  ){
+
+    startVideo(
+      usable[0],
+      true
+    );
+
+  }
+
+}
+
+
+function normalizeVideo(
+  row,
+  type
+){
+
+  const title =
+    row.title ||
+    row.name ||
+    row.episode_title ||
+    row.show_name ||
+    "CrowRules Video";
+
+  const videoUrl =
+    row.video_url ||
+    row.videoUrl ||
+    row.youtube_url ||
+    row.youtubeUrl ||
+    row.video ||
+    row.media_url ||
+    row.stream_url ||
+    row.file_url ||
+    (
+      row.youtube_id
+        ? "https://www.youtube.com/watch?v="+
+          row.youtube_id
+        : ""
+    ) ||
+    "";
+
+  const id =
+    row.id || null;
+
+  return {
+
+    id,
+
+    title,
+
+    type,
+
+    videoUrl,
+
+    releaseDate:
+      row.release_date ||
+      row.published_at ||
+      row.created_at ||
+      null,
+
+    duration:
+      Number(
+        row.duration_seconds ||
+        row.duration ||
+        0
+      ) || 0
+
+  };
+
+}
+
+
+/* ============================================================
+   VIDEO URL
+   ============================================================ */
+
+function getYouTubeId(url){
+
+  if(!url)
+    return null;
+
+  const value =
+    String(url).trim();
+
+  if(
+    /^[A-Za-z0-9_-]{11}$/
+      .test(value)
+  ){
+
+    return value;
+
+  }
+
+  const patterns=[
+
+    /youtube\.com\/watch\?v=([^&]+)/i,
+
+    /youtu\.be\/([^?&]+)/i,
+
+    /youtube\.com\/embed\/([^?&]+)/i,
+
+    /youtube\.com\/shorts\/([^?&]+)/i
+
+  ];
+
+  for(
+    const pattern
+    of patterns
+  ){
+
+    const match =
+      value.match(pattern);
+
+    if(match)
+      return match[1];
+
+  }
+
+  return null;
+
+}
+
+
+/* ============================================================
+   START VIDEO
+   ============================================================ */
+
+async function startVideo(
+  video,
+  silent=false
+){
+
+  if(!state.user){
+
+    if(!silent)
+      toast(
+        "Login to earn CrowPoints.",
+        false
+      );
+
+    return;
+
+  }
+
+
+  if(
+    state.currentContent &&
+    state.currentContent.id ===
+      video.id &&
+    state.currentSession
+  ){
+
+    return;
+
+  }
+
+
+  await stopTracking();
+
+
+  state.currentContent =
+    video;
+
+  state.sessionPoints=0;
+
+  state.sessionBaseSeconds=0;
+
+  state.lastReportedPosition=0;
+
+  state.lastHeartbeatPosition=0;
+
+  $("#currentTitle")
+    .textContent =
+      video.title;
+
+
+  const youtubeId =
+    getYouTubeId(
+      video.videoUrl
+    );
+
+
+  let sessionKey =
+    video.id
+      ? String(video.id)
+      : video.videoUrl;
+
+
+  /* ----------------------------------------------------------
+     START SECURE SESSION
+     ---------------------------------------------------------- */
+
+  const {
+    data:sessionId,
+    error
+  } =
+    await db.rpc(
+      "cr_member_start_watch_session",
+      {
+        p_video_key:
+          sessionKey,
+
+        p_video_title:
+          video.title,
+
+        p_content_type:
+          video.type || "video",
+
+        p_content_id:
+          video.id || null
+
+      }
+    );
+
+
+  if(error){
+
+    console.error(error);
+
+    toast(
+      "Could not start watch session: "+
+      error.message,
+      false
+    );
+
+    state.currentContent=null;
+
+    return;
+
+  }
+
+
+  state.currentSession =
+    sessionId;
+
+  state.sessionStartedAt =
+    Date.now();
+
+
+  if(youtubeId){
+
+    state.playerType="youtube";
+
+    createYouTubePlayer(
+      youtubeId
+    );
+
+  }else{
+
+    state.playerType="html5";
+
+    createHTML5Player(
+      video.videoUrl
+    );
+
+  }
+
+
+  updatePlayerUI();
+
+  loadLeaderboard();
+
+}
+
+
+/* ============================================================
+   HTML5 PLAYER
+   ============================================================ */
+
+function createHTML5Player(url){
+
+  $("#player").innerHTML =
+    `
+      <video
+        id="crVideo"
+        controls
+        playsinline
+        preload="metadata">
+
+        <source
+          src="${esc(url)}">
+
+        Your browser does not support
+        HTML5 video.
+
+      </video>
+    `;
+
+
+  const video =
+    $("#crVideo");
+
+  state.currentPlayer =
+    video;
+
+
+  video.addEventListener(
+    "loadedmetadata",
+    ()=>{
+
+      state.playerDuration =
+        Number(
+          video.duration
+        ) || 0;
+
+      updatePlayerUI();
+
+    }
+  );
+
+
+  video.addEventListener(
+    "play",
+    ()=>{
+
+      state.playerPlaying=true;
+
+      updatePlayerUI();
+
+      startHeartbeatLoop();
+
+    }
+  );
+
+
+  video.addEventListener(
+    "pause",
+    async()=>{
+
+      state.playerPlaying=false;
+
+      updatePlayerUI();
+
+      await heartbeat(true);
+
+    }
+  );
+
+
+  video.addEventListener(
+    "ended",
+    async()=>{
+
+      state.playerPlaying=false;
+
+      await heartbeat(
+        true,
+        true
+      );
+
+      await endCurrentSession(
+        true
+      );
+
+    }
+  );
+
+
+  video.addEventListener(
+    "error",
+    ()=>{
+
+      toast(
+        "The video could not be loaded.",
+        false
+      );
+
+    }
+  );
+
+}
+
+
+/* ============================================================
+   YOUTUBE PLAYER
+   ============================================================ */
+
+function createYouTubePlayer(videoId){
+
+  $("#player").innerHTML =
+    `
+      <div id="youtubePlayer"
+           style="width:100%;height:100%;">
+      </div>
+    `;
+
+
+  if(
+    typeof YT === "undefined" ||
+    !YT.Player
+  ){
+
+    toast(
+      "YouTube player is still loading. Try again.",
+      false
+    );
+
+    return;
+
+  }
+
+
+  state.currentPlayer =
+    new YT.Player(
+      "youtubePlayer",
+      {
+
+        videoId,
+
+        playerVars:{
+          autoplay:0,
+          controls:1,
+          playsinline:1,
+          rel:0,
+          modestbranding:1
+        },
+
+        events:{
+
+          onReady:event=>{
+
+            state.playerDuration =
+              Number(
+                event.target.getDuration()
+              ) || 0;
+
+            updatePlayerUI();
+
+          },
+
+          onStateChange:event=>{
+
+            if(
+              event.data ===
+              YT.PlayerState.PLAYING
+            ){
+
+              state.playerPlaying=true;
+
+              startHeartbeatLoop();
+
+            }
+
+            else if(
+              event.data ===
+              YT.PlayerState.PAUSED
+            ){
+
+              state.playerPlaying=false;
+
+              heartbeat(true);
+
+            }
+
+            else if(
+              event.data ===
+              YT.PlayerState.ENDED
+            ){
+
+              state.playerPlaying=false;
+
+              heartbeat(
+                true,
+                true
+              )
+              .then(
+                ()=>endCurrentSession(true)
+              );
+
+            }
+
+            updatePlayerUI();
+
+          }
+
+        }
+
+      }
+    );
+
+}
+
+
+/* ============================================================
+   PLAYER POSITION
+   ============================================================ */
+
+function getPlayerPosition(){
+
+  try{
+
+    if(
+      state.playerType==="html5" &&
+      state.currentPlayer
+    ){
+
+      return Number(
+        state.currentPlayer.currentTime
+      ) || 0;
+
+    }
+
+
+    if(
+      state.playerType==="youtube" &&
+      state.currentPlayer &&
+      typeof state.currentPlayer
+        .getCurrentTime ===
+        "function"
+    ){
+
+      return Number(
+        state.currentPlayer
+          .getCurrentTime()
+      ) || 0;
+
+    }
+
+  }catch(error){
+
+    console.warn(
+      "Player position:",
+      error
+    );
+
+  }
+
+  return 0;
+
+}
+
+
+/* ============================================================
+   HEARTBEAT LOOP
+   ============================================================ */
+
+function startHeartbeatLoop(){
+
+  if(
+    state.heartbeatTimer
+  ){
+
+    return;
+
+  }
+
+
+  state.heartbeatTimer =
+    setInterval(
+      ()=>{
+        if(
+          state.playerPlaying
+        ){
+
+          heartbeat();
+
+        }
+
+        updatePlayerUI();
+
+      },
+      15000
+    );
+
+}
+
+
+/* ============================================================
+   SECURE HEARTBEAT
+   ============================================================ */
+
+async function heartbeat(
+  force=false,
+  completed=false
+){
+
+  if(
+    !state.user ||
+    !state.currentSession
+  ){
+
+    return;
+
+  }
+
+
+  const position =
+    getPlayerPosition();
+
+
+  if(
+    !force &&
+    Math.abs(
+      position -
+      state.lastHeartbeatPosition
+    ) < 1
+  ){
+
+    return;
+
+  }
+
+
+  state.lastHeartbeatPosition =
+    Math.max(
+      state.lastHeartbeatPosition,
+      position
+    );
+
+
+  const {
+    data,
+    error
+  } =
+    await db.rpc(
+      "cr_member_watch_heartbeat",
+      {
+
+        p_session_id:
+          state.currentSession,
+
+        p_position_seconds:
+          position,
+
+        p_duration_seconds:
+          state.playerDuration
+            ? Math.floor(
+                state.playerDuration
+              )
+            : null,
+
+        p_completed:
+          completed
+
+      }
+    );
+
+
+  if(error){
+
+    console.error(
+      "Heartbeat:",
+      error
+    );
+
+    return;
+
+  }
+
+
+  if(data){
+
+    const delta =
+      Number(
+        data.delta_seconds || 0
+      );
+
+    const points =
+      Number(
+        data.points_awarded || 0
+      );
+
+
+    state.sessionBaseSeconds +=
+      delta;
+
+    state.sessionPoints +=
+      points;
+
+
+    if(delta>0){
+
+      updateMemberFromHeartbeat(
+        delta,
+        points
+      );
+
+    }
+
+  }
+
+
+  updatePlayerUI();
+
+}
+
+
+/* ============================================================
+   LOCAL MEMBER COUNTERS
+   ============================================================ */
+
+function updateMemberFromHeartbeat(
+  seconds,
+  points
+){
+
+  if(!state.member)
+    return;
+
+
+  state.member.watch_seconds =
+    Number(
+      state.member.watch_seconds||0
+    ) +
+    Number(seconds||0);
+
+
+  state.member.lifetime_points =
+    Number(
+      state.member.lifetime_points ??
+      state.member.points ??
+      0
+    ) +
+    Number(points||0);
+
+
+  state.member.points =
+    Number(
+      state.member.points||0
+    ) +
+    Number(points||0);
+
+
+  const month =
+    new Date();
+
+  const currentMonth =
+    month.getFullYear()+"-"+
+    String(
+      month.getMonth()+1
+    ).padStart(2,"0");
+
+
+  if(
+    state.member.points_month &&
+    String(
+      state.member.points_month
+    ).startsWith(currentMonth)
+  ){
+
+    state.member.monthly_points =
+      Number(
+        state.member.monthly_points||0
+      ) +
+      Number(points||0);
+
+    state.member.monthly_watch_seconds =
+      Number(
+        state.member.monthly_watch_seconds||0
+      ) +
+      Number(seconds||0);
+
+  }
+
+
+  updateStats();
+
+}
+
+
+/* ============================================================
+   END SESSION
+   ============================================================ */
+
+async function endCurrentSession(
+  completed=false
+){
+
+  if(
+    !state.currentSession
+  ){
+
+    return;
+
+  }
+
+
+  const sessionId =
+    state.currentSession;
+
+
+  const position =
+    getPlayerPosition();
+
+
+  try{
+
+    const {
+      data,
+      error
+    } =
+      await db.rpc(
+        "cr_member_end_watch_session",
+        {
+
+          p_session_id:
+            sessionId,
+
+          p_position_seconds:
+            position,
+
+          p_completed:
+            completed
+
+        }
+      );
+
+
+    if(error){
+
+      console.warn(
+        "End session:",
+        error.message
+      );
+
+    }
+
+
+    if(data){
+
+      const points =
+        Number(
+          data.points_awarded||0
+        );
+
+      if(points){
+
+        state.sessionPoints +=
+          points;
+
+      }
+
+    }
+
+  }catch(error){
+
+    console.warn(
+      error
+    );
+
+  }
+
+  state.currentSession=null;
+
+  state.currentPlayer=null;
+
+  state.playerPlaying=false;
+
+  state.playerType=null;
+
+  state.playerDuration=0;
+
+  state.sessionBaseSeconds=0;
+
+  state.lastReportedPosition=0;
+
+  state.lastHeartbeatPosition=0;
+
+  state.currentContent=null;
+
+  updatePlayerUI();
+
+  loadLeaderboard();
+
+  loadMemberFresh();
+
+}
+
+
+/* ============================================================
+   STOP TRACKING
+   ============================================================ */
+
+async function stopTracking(){
+
+  if(
+    state.heartbeatTimer
+  ){
+
+    clearInterval(
+      state.heartbeatTimer
+    );
+
+    state.heartbeatTimer=null;
+
+  }
+
+
+  if(
+    state.currentSession
+  ){
+
+    await heartbeat(
+      true,
+      false
+    );
+
+    await endCurrentSession(
+      false
+    );
+
+  }
+
+}
+
+
+/* ============================================================
+   PAGE VISIBILITY
+   ============================================================ */
+
+document.addEventListener(
+  "visibilitychange",
+  async()=>{
+
+    if(
+      document.hidden
+    ){
+
+      await heartbeat(
+        true,
+        false
+      );
+
+    }
+
+  }
+);
+
+
+/* ============================================================
+   BEFORE UNLOAD
+   ============================================================ */
+
+window.addEventListener(
+  "beforeunload",
+  ()=>{
+
+    if(
+      state.currentSession
+    ){
+
+      /*
+       * The final normal heartbeat is sent whenever
+       * possible. The database session remains valid
+       * if the browser closes unexpectedly.
+       */
+      heartbeat(
+        true,
+        false
+      );
+
+    }
+
+  }
+);
+
+
+/* ============================================================
+   PLAYER UI
+   ============================================================ */
+
+function updatePlayerUI(){
+
+  const position =
+    getPlayerPosition();
+
+  const duration =
+    state.playerDuration || 0;
+
+
+  if(
+    state.playerPlaying
+  ){
+
+    $("#watchDot")
+      .classList
+      .add("active");
+
+    $("#watchState")
+      .textContent =
+        "Watching • tracking";
+
+  }else{
+
+    $("#watchDot")
+      .classList
+      .remove("active");
+
+    $("#watchState")
+      .textContent =
+        state.currentSession
+          ? "Paused • session saved"
+          : "Player idle";
+
+  }
+
+
+  $("#sessionTime")
+    .textContent =
+      formatSeconds(
+        state.sessionBaseSeconds
+      );
+
+
+  $("#verifiedTime")
+    .textContent =
+      formatSeconds(
+        state.sessionBaseSeconds
+      );
+
+
+  $("#sessionPoints")
+    .textContent =
+      Number(
+        state.sessionPoints||0
+      ).toLocaleString();
+
+
+  $("#playerPoints")
+    .textContent =
+      Number(
+        state.member?.lifetime_points ??
+        state.member?.points ??
+        0
+      ).toLocaleString();
+
+
+  const percent =
+    duration > 0
+      ? Math.min(
+          100,
+          (
+            position /
+            duration
+          )*100
+        )
+      : 0;
+
+
+  $("#watchProgress")
+    .style.width =
+      percent+"%";
+
+}
+
+
+/* ============================================================
+   REFRESH MEMBER
+   ============================================================ */
+
+async function loadMemberFresh(){
+
+  if(!state.user)
+    return;
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("cr_members")
+      .select("*")
+      .eq(
+        "user_id",
+        state.user.id
+      )
+      .maybeSingle();
+
+  if(
+    error ||
+    !data
+  ){
+
+    return;
+
+  }
+
+  state.member=data;
+
+  updateStats();
+
+  renderDashboard();
+
+  renderProfile();
+
+}
+
+
+/* ============================================================
+   SESSION COUNT
+   ============================================================ */
+
+async function loadMySessions(){
+
+  if(!state.user){
+
+    state.sessionCount=0;
+
+    updateStats();
+
+    return;
+
+  }
+
+
+  const {
+    count
+  } =
+    await db
+      .from("cr_video_watch_sessions")
+      .select(
+        "id",
+        {
+          count:"exact",
+          head:true
+        }
+      )
+      .eq(
+        "user_id",
+        state.user.id
+      );
+
+
+  state.sessionCount =
+    Number(count||0);
+
+  updateStats();
+
+}
+
+
+/* ============================================================
+   LEADERBOARD
+   ============================================================ */
+
+async function loadLeaderboard(){
+
+  const {
+    data,
+    error
+  } =
+    await db.rpc(
+      "cr_member_leaderboard",
+      {
+        p_limit:50
+      }
+    );
+
+
+  if(error){
+
+    $("#leaderboardView")
+      .innerHTML =
+        `
+          <div class="notice bad">
+            ${esc(
+              error.message
+            )}
+          </div>
+        `;
+
+    return;
+
+  }
+
+
+  const rows =
+    data || [];
+
+
+  renderLeaderboard(
+    rows
+  );
+
+
+  if(
+    state.user
+  ){
+
+    const me =
+      rows.find(
+        row =>
+          row.user_id ===
+          state.user.id
+      );
+
+    if(me){
+
+      $("#myRankView")
+        .innerHTML =
+          `
+            <div class="item">
+
+              <div class="member-line">
+
+                <div class="rank top">
+                  #${me.rank}
+                </div>
+
+                <div>
+
+                  <strong>
+                    ${esc(
+                      me.display_name ||
+                      me.username ||
+                      "Member"
+                    )}
+                  </strong>
+
+                  <div class="muted">
+                    @${esc(
+                      me.username ||
+                      "member"
+                    )}
+                  </div>
+
+                </div>
+
+              </div>
+
+              <hr style="
+                border:0;
+                border-top:1px solid var(--line);
+                margin:15px 0;
+              ">
+
+              <div class="grid">
+
+                <div>
+                  <small class="muted">
+                    Lifetime Points
+                  </small>
+
+                  <h3 class="points">
+                    ${Number(
+                      me.lifetime_points||0
+                    ).toLocaleString()}
+                  </h3>
+                </div>
+
+                <div>
+                  <small class="muted">
+                    Monthly Points
+                  </small>
+
+                  <h3>
+                    ${Number(
+                      me.monthly_points||0
+                    ).toLocaleString()}
+                  </h3>
+                </div>
+
+                <div>
+                  <small class="muted">
+                    Watch Hours
+                  </small>
+
+                  <h3>
+                    ${Number(
+                      me.watch_hours||0
+                    ).toFixed(1)}
+                  </h3>
+                </div>
+
+                <div>
+                  <small class="muted">
+                    Monthly Rank
+                  </small>
+
+                  <h3>
+                    #${me.monthly_rank || "—"}
+                  </h3>
+                </div>
+
+              </div>
+
+            </div>
+          `;
+
+    }else{
+
+      $("#myRankView")
+        .innerHTML =
+          `
+            <div class="notice">
+              Keep watching and earning
+              CrowPoints to appear in the
+              active leaderboard.
+            </div>
+          `;
+
+    }
+
+  }else{
+
+    $("#myRankView")
+      .innerHTML =
+        `
+          <div class="notice">
+            Login to see your personal rank.
+          </div>
+        `;
+
+  }
+
+}
+
+
+function renderLeaderboard(
+  rows
+){
+
+  if(!rows.length){
+
+    $("#leaderboardView")
+      .innerHTML =
+        `
+          <div class="notice">
+            No active members found.
+          </div>
+        `;
+
+    return;
+
+  }
+
+
+  $("#leaderboardView")
+    .innerHTML =
+      rows
+        .map(
+          row => `
+
+            <div
+              class="item"
+              style="margin-bottom:8px;">
+
+              <div class="between">
+
+                <div class="member-line">
+
+                  <div
+                    class="rank ${
+                      Number(row.rank)<=3
+                        ? "top"
+                        : ""
+                    }">
+
+                    #${row.rank}
+
+                  </div>
+
+                  <img
+                    class="member-avatar"
+                    src="${
+                      esc(
+                        row.avatar_url ||
+                        createAvatar(
+                          row.display_name ||
+                          row.username ||
+                          "C"
+                        )
+                      )
+                    }"
+                    alt="">
+
+                  <div>
+
+                    <strong>
+                      ${esc(
+                        row.display_name ||
+                        row.username ||
+                        "Member"
+                      )}
+                    </strong>
+
+                    <div class="muted">
+                      @${esc(
+                        row.username ||
+                        "member"
+                      )}
+                    </div>
+
+                  </div>
+
+                </div>
+
+                <div style="text-align:right">
+
+                  <div class="points">
+                    ${Number(
+                      row.lifetime_points||0
+                    ).toLocaleString()}
+                  </div>
+
+                  <small class="muted">
+                    CrowPoints
+                  </small>
+
+                </div>
+
+              </div>
+
+              <div class="row"
+                   style="margin-top:10px">
+
+                <span class="badge">
+                  ${Number(
+                    row.watch_hours||0
+                  ).toFixed(1)} watch hrs
+                </span>
+
+                <span class="badge">
+                  ${Number(
+                    row.monthly_points||0
+                  ).toLocaleString()}
+                  monthly
+                </span>
+
+                <span class="badge">
+                  #${row.monthly_rank || "—"}
+                  monthly rank
+                </span>
+
+              </div>
+
+            </div>
+
+          `
+        )
+        .join("");
+
+}
+
+
+/* ============================================================
+   PROFILE
+   ============================================================ */
+
 function renderProfile(){
- const m=state.member;
- if(!m){$("#profileCard").innerHTML="<div class='empty'>Log in to manage your profile.</div>";return}
- $("#profileCard").innerHTML=`
- <div class="between"><div><h3>${esc(m.display_name||m.username||"Member")}</h3><p class="muted">@${esc(m.username||"member")}</p></div>${badge(m.role||"member")}</div>
- <p>${esc(m.bio||"Welcome to the CrowRules member community.")}</p>
- <div class="row">${badge(m.membership_tier||"free")}${badge(m.membership_status||"active")}</div>
- <div class="row" style="margin-top:12px"><button class="btn primary" onclick="editProfile()">Edit Profile</button><button class="btn" onclick="recordActivity('profile_view')">Record Activity</button></div>`;
-}
-async function renderReward(){
- const box=$("#rewardView");if(!state.user){box.innerHTML="Log in to see rewards.";return}
- const r=await safeSelect("member_rewards","*",(q)=>q.eq("user_id",uid()).maybeSingle());
- if(r.error||!r.data){box.innerHTML=`<div class="notice">Rewards record not available yet. Your member record remains the source of truth for CrowPoints.</div>`;return}
- const x=r.data,badges=Array.isArray(x.badges)?x.badges:[];
- box.innerHTML=`<div class="grid two"><div class="item"><small class="muted">Level</small><div class="kpi">${Number(x.level||1)}</div></div><div class="item"><small class="muted">Reward Points</small><div class="kpi">${Number(x.points||0).toLocaleString()}</div></div><div class="item"><small class="muted">Reward Watch Minutes</small><div class="kpi">${Number(x.watch_minutes||0).toLocaleString()}</div></div><div class="item"><small class="muted">Badges</small><p>${badges.length?badges.map(b=>badge(typeof b==="string"?b:b.label||"badge")).join(" "):"No badges yet."}</p></div></div>`;
-}
-function editProfile(){
- if(!state.user)return toast("Log in first.",false);
- const m=state.member||{};
- openModal("Edit Profile",`<form id="profileForm">
- <div class="field"><label>Display name</label><input id="pDisplay" maxlength="100" value="${esc(m.display_name||"")}"></div>
- <div class="field"><label>Username</label><input id="pUsername" maxlength="60" value="${esc(m.username||"")}"></div>
- <div class="field"><label>Avatar URL</label><input id="pAvatar" type="url" value="${esc(m.avatar_url||"")}"></div>
- <div class="field"><label>Bio</label><textarea id="pBio" maxlength="1000">${esc(m.bio||"")}</textarea></div>
- <button class="btn primary">Save Profile</button></form>`);
- $("#profileForm").onsubmit=saveProfile;
-}
-async function saveProfile(e){
- e.preventDefault();if(!state.user)return;
- const display_name=$("#pDisplay").value.trim(),username=$("#pUsername").value.trim(),avatar_url=$("#pAvatar").value.trim(),bio=$("#pBio").value.trim();
- const p=await db.from("cr_profiles").upsert({id:uid(),display_name,username,avatar_url,bio,updated_at:new Date().toISOString()});
- if(p.error){toast(errText(p.error),false);return}
- const memberPayload={display_name,username,avatar_url,bio,updated_at:new Date().toISOString()};
- const m=await db.from("cr_members").update(memberPayload).eq("user_id",uid());
- if(m.error)console.warn(m.error);
- state.member={...state.member,...memberPayload};
- closeModal();toast("Profile updated.");renderProfile();updateStats();
+
+  const m =
+    state.member;
+
+  if(!m){
+
+    $("#profileCard")
+      .innerHTML =
+        `
+          <div class="notice">
+            Login to view your profile.
+          </div>
+        `;
+
+    return;
+
+  }
+
+
+  $("#profileCard")
+    .innerHTML =
+      `
+
+        <div class="between">
+
+          <div class="member-line">
+
+            <img
+              class="member-avatar"
+              src="${
+                esc(
+                  m.avatar_url ||
+                  createAvatar(
+                    m.display_name ||
+                    m.username ||
+                    "C"
+                  )
+                )
+              }"
+              alt="">
+
+            <div>
+
+              <h3>
+                ${esc(
+                  m.display_name ||
+                  m.username ||
+                  "Member"
+                )}
+              </h3>
+
+              <div class="muted">
+                @${esc(
+                  m.username ||
+                  "member"
+                )}
+              </div>
+
+            </div>
+
+          </div>
+
+          ${badge(
+            m.role ||
+            "member"
+          )}
+
+        </div>
+
+        <p>
+          ${esc(
+            m.bio ||
+            "Welcome to the CrowRules member community."
+          )}
+        </p>
+
+        <div class="row">
+
+          <span class="badge">
+            ${esc(
+              m.membership_tier ||
+              "free"
+            )}
+          </span>
+
+          <span class="badge active">
+            active
+          </span>
+
+        </div>
+
+        <hr style="
+          border:0;
+          border-top:1px solid var(--line);
+          margin:16px 0;
+        ">
+
+        <div class="grid">
+
+          <div>
+
+            <small class="muted">
+              Lifetime Points
+            </small>
+
+            <h3 class="points">
+              ${Number(
+                m.lifetime_points ??
+                m.points ??
+                0
+              ).toLocaleString()}
+            </h3>
+
+          </div>
+
+          <div>
+
+            <small class="muted">
+              Watch Hours
+            </small>
+
+            <h3>
+              ${(
+                Number(
+                  m.watch_seconds||0
+                )/3600
+              ).toFixed(1)}
+            </h3>
+
+          </div>
+
+        </div>
+
+      `;
+
 }
 
-async function renderWatch(){
- const box=$("#watchView");if(!state.user){box.innerHTML="<div class='notice'>Log in to see your watch history.</div>";return}
- let r=await safeSelect("cr_member_watch_summary","*",(q)=>q.eq("user_id",uid()).order("watched_at",{ascending:false}).limit(12));
- let rows=r.data||[];
- if(!rows.length){
-   const fallback=await safeSelect("cr_member_watch_history","*",(q)=>q.eq("user_id",uid()).order("watched_at",{ascending:false}).limit(12));
-   rows=fallback.data||[];
- }
- if(!rows.length){box.innerHTML="<div class='empty'>No watch history yet. Start watching CrowRules content to build your history.</div>";return}
- box.innerHTML=`<div class="grid">${rows.map(x=>{
-   const watched=Number(x.watched_seconds??x.progress_seconds??0),dur=Number(x.duration_seconds||0),pct=dur?Math.min(100,watched/dur*100):0;
-   return `<article class="item media-card"><img class="thumb" src="${esc(x.thumbnail_url||"")}" onerror="this.style.display='none'" alt=""><div class="between"><h3>${esc(x.title||x.content_title||"Untitled")}</h3>${x.completed?badge("completed"):badge("in progress")}</div><p class="muted">${dur?Math.floor(watched/60)+" / "+Math.floor(dur/60)+" min":"Position "+Math.floor(watched/60)+" min"} • ${fmtDate(x.watched_at||x.updated_at)}</p><div class="progress"><i style="width:${pct}%"></i></div></article>`;
- }).join("")}</div>`;
+
+/* ============================================================
+   ACTIVITY
+   ============================================================ */
+
+async function renderActivity(){
+
+  if(!state.user){
+
+    $("#activityList")
+      .textContent=
+        "Login to view activity.";
+
+    return;
+
+  }
+
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("cr_member_activity")
+      .select("*")
+      .eq(
+        "user_id",
+        state.user.id
+      )
+      .order(
+        "created_at",
+        {ascending:false}
+      )
+      .limit(10);
+
+
+  if(error){
+
+    $("#activityList")
+      .innerHTML =
+        `
+          <div class="notice">
+            ${esc(
+              error.message
+            )}
+          </div>
+        `;
+
+    return;
+
+  }
+
+
+  $("#activityList")
+    .innerHTML =
+      data?.length
+        ? data.map(
+            row => `
+              <div
+                class="item"
+                style="margin-bottom:8px;">
+
+                <strong>
+                  ${esc(
+                    row.activity_type ||
+                    "Activity"
+                  )}
+                </strong>
+
+                <div class="muted">
+                  ${fmtDate(
+                    row.created_at
+                  )}
+                </div>
+
+              </div>
+            `
+          ).join("")
+        : "No activity yet.";
+
 }
 
-async function renderLibrary(){
- const box=$("#libraryView");if(!state.user){box.innerHTML="<div class='notice'>Log in to use your library.</div>";return}
- if(state.libraryTab==="favorites"){
-   const r=await safeSelect("cr_member_favorites","*",(q)=>q.eq("user_id",uid()).order("created_at",{ascending:false}).limit(50));
-   const rows=r.data||[];
-   box.innerHTML=rows.length?`<div class="grid">${rows.map(x=>`<article class="item"><h3>${esc(x.item_type||"Favorite")}</h3><p>${esc(x.item_id)}</p><small class="muted">${fmtDate(x.created_at)}</small><div class="row" style="margin-top:8px"><button class="btn danger" onclick="removeFavorite('${esc(x.id)}')">Remove</button></div></article>`).join("")}</div>`:"<div class='empty'>No favorites yet.</div>";
- }else{
-   const r=await safeSelect("member_my_list","*",(q)=>q.eq("user_id",uid()).order("created_at",{ascending:false}).limit(50));
-   const rows=r.data||[];
-   box.innerHTML=rows.length?`<div class="grid">${rows.map(x=>`<article class="item">${x.thumbnail_url?`<img class="thumb" src="${esc(x.thumbnail_url)}" alt="">`:""}<h3>${esc(x.title||"Saved show")}</h3><small class="muted">${fmtDate(x.created_at)}</small><div class="row" style="margin-top:8px"><button class="btn danger" onclick="removeMyList('${esc(x.id)}')">Remove</button></div></article>`).join("")}</div>`:"<div class='empty'>Your My List is empty.</div>";
- }
-}
-async function removeFavorite(id){if(!uid())return;const r=await db.from("cr_member_favorites").delete().eq("id",id).eq("user_id",uid());if(r.error)return toast(errText(r.error),false);toast("Removed from favorites.");renderLibrary()}
-async function removeMyList(id){if(!uid())return;const r=await db.from("member_my_list").delete().eq("id",id).eq("user_id",uid());if(r.error)return toast(errText(r.error),false);toast("Removed from My List.");renderLibrary()}
 
-async function renderLeaderboard(){
- const box=$("#leaderboardView");
- const r=await safeSelect("cr_member_monthly_leaderboard","*",(q)=>q.order("monthly_points",{ascending:false}).limit(25));
- if(r.error||!r.data?.length){box.innerHTML=`<div class="notice">${r.error?esc(errText(r.error)):"Leaderboard is waiting for member activity."}</div>`;return}
- box.innerHTML=`<div class="tablewrap"><table><thead><tr><th>#</th><th>Member</th><th>Monthly Points</th><th>Lifetime</th><th>Watch</th></tr></thead><tbody>${r.data.map((x,i)=>`<tr><td>${i+1}</td><td><b>${esc(x.display_name||x.username||"Member")}</b><div class="muted">@${esc(x.username||"member")}</div></td><td><b>${Number(x.monthly_points||0).toLocaleString()}</b></td><td>${Number(x.lifetime_points||0).toLocaleString()}</td><td>${(Number(x.monthly_watch_seconds||0)/3600).toFixed(1)}h</td></tr>`).join("")}</tbody></table></div>`;
-}
-
-async function renderApplications(){
- const box=$("#applicationsView");
- if(state.appTab==="mine"){
-   if(!state.user){box.innerHTML="<div class='notice'>Log in to view applications.</div>";return}
-   const [a,b,c]=await Promise.all([
-    safeSelect("podcaster_applications","*",(q)=>q.eq("user_id",uid()).order("created_at",{ascending:false})),
-    safeSelect("cr_podcaster_applications","*",(q)=>q.eq("user_id",uid()).order("created_at",{ascending:false})),
-    safeSelect("creator_applications","*",(q)=>q.eq("user_id",uid()).order("created_at",{ascending:false}))
-   ]);
-   const rows=[
-    ...(a.data||[]).map(x=>({...x,_table:"podcaster_applications",_name:x.podcast_name,_desc:x.podcast_concept})),
-    ...(b.data||[]).map(x=>({...x,_table:"cr_podcaster_applications",_name:x.show_name,_desc:x.show_description})),
-    ...(c.data||[]).map(x=>({...x,_table:"creator_applications",_name:x.display_name,_desc:x.proposal}))
-   ];
-   box.innerHTML=appCards(rows,false);
- }else if(state.appTab==="submit"){
-   if(!state.user){box.innerHTML="<div class='notice'>Log in first.</div>";return}
-   box.innerHTML=`<div class="card"><h3>Creator / Podcaster Application</h3><p class="muted">Submit a creator proposal using the existing CrowRules application table.</p><form id="creatorAppForm">
-   <div class="grid two"><div class="field"><label>Show / Creator Name</label><input id="aName" required maxlength="150"></div><div class="field"><label>Genre</label><select id="aGenre"><option>talk</option><option>drama</option><option>horror</option><option>sports</option><option>gaming</option><option>documentary</option><option>other</option></select></div></div>
-   <div class="field"><label>Description / Proposal</label><textarea id="aDesc" required maxlength="5000"></textarea></div>
-   <div class="field"><label>Portfolio / Sample URL</label><input id="aUrl" type="url"></div>
-   <button class="btn primary">Submit Application</button></form></div>`;
-   $("#creatorAppForm").onsubmit=submitCreatorApplication;
- }else{
-   if(!state.admin){box.innerHTML="<div class='notice'>Admin/staff access is required for review.</div>";return}
-   const [a,b,c]=await Promise.all([
-    safeSelect("podcaster_applications","*",(q)=>q.order("created_at",{ascending:false}).limit(100)),
-    safeSelect("cr_podcaster_applications","*",(q)=>q.order("created_at",{ascending:false}).limit(100)),
-    state.appTab==="sports"?safeSelect("cr_sports_show_creator_applications","*",(q)=>q.order("created_at",{ascending:false}).limit(100)):Promise.resolve({data:[]})
-   ]);
-   const rows=[...(a.data||[]).map(x=>({...x,_table:"podcaster_applications",_name:x.podcast_name,_desc:x.podcast_concept})),...(b.data||[]).map(x=>({...x,_table:"cr_podcaster_applications",_name:x.show_name,_desc:x.show_description})),...(c.data||[]).map(x=>({...x,_table:"cr_sports_show_creator_applications",_name:x.show_name,_desc:x.show_description}))];
-   box.innerHTML=appCards(rows,true);
- }
-}
-function appCards(rows,review){
- if(!rows.length)return"<div class='empty'>No applications found.</div>";
- return `<div class="grid">${rows.map(x=>`<article class="item"><div class="between"><div><h3>${esc(x._name||"Application")}</h3><small class="muted">${esc(x.host_name||x.full_name||x.creator_name||x.display_name||x.email||"Applicant")}</small></div>${badge(x.status)}</div><p>${esc(x._desc||x.proposal||"")}</p><small class="muted">${fmtDate(x.created_at)}</small>${review?`<div class="row" style="margin-top:10px"><button class="btn ok" onclick="reviewApplication('${esc(x._table)}','${esc(x.id)}','approved')">Accept</button><button class="btn danger" onclick="reviewApplication('${esc(x._table)}','${esc(x.id)}','rejected')">Decline</button><button class="btn warn" onclick="reviewApplication('${esc(x._table)}','${esc(x.id)}','reviewing')">Reviewing</button></div>`:""}</article>`).join("")}</div>`;
-}
-async function submitCreatorApplication(e){
- e.preventDefault();if(!uid())return;
- const payload={user_id:uid(),display_name:$("#aName").value.trim(),handle:$("#aName").value.trim().toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,""),email:state.user.email||null,creator_type:$("#aGenre").value,bio:$("#aDesc").value.trim(),portfolio_url:$("#aUrl").value.trim()||null,status:"pending"};
- const r=await db.from("creator_applications").insert(payload);
- if(r.error){toast(errText(r.error),false);return}
- toast("Creator application submitted.");state.appTab="mine";$$("[data-app-tab]").forEach(x=>x.classList.toggle("active",x.dataset.appTab==="mine"));renderApplications();
-}
-async function reviewApplication(table,id,status){
- if(!state.admin)return toast("Admin access required.",false);
- const notes=prompt("Optional admin notes:")||null;
- const patch={status,admin_notes:notes,reviewed_by:uid(),reviewed_at:new Date().toISOString()};
- const r=await db.from(table).update(patch).eq("id",id);
- if(r.error)return toast(errText(r.error),false);
- await recordAdminAudit("application_"+status,table,id,{status,notes});
- toast("Application "+status+".");renderApplications();
-}
-
-async function renderSuggestions(){
- const box=$("#suggestionsView");
- if(!state.user){box.innerHTML="<div class='notice'>Log in to view or submit suggestions.</div>";return}
- let q=db.from("cr_member_suggestions").select("*").order("created_at",{ascending:false}).limit(100);
- if(!state.admin)q=q.eq("user_id",uid());
- const r=await q;
- if(r.error){box.innerHTML=`<div class="notice bad">${esc(errText(r.error))}</div>`;return}
- const rows=r.data||[];
- box.innerHTML=rows.length?`<div class="grid">${rows.map(x=>`<article class="item"><div class="between"><h3>${esc(x.title)}</h3>${badge(x.status)}</div><p>${esc(x.suggestion)}</p><small class="muted">${esc(x.category||"General")} • ${fmtDate(x.created_at)}</small>${x.admin_response?`<p><b>Admin:</b> ${esc(x.admin_response)}</p>`:""}${state.admin?`<div class="row" style="margin-top:9px"><button class="btn ok" onclick="reviewSuggestion('${esc(x.id)}','accepted')">Accept</button><button class="btn danger" onclick="reviewSuggestion('${esc(x.id)}','declined')">Decline</button><button class="btn warn" onclick="reviewSuggestion('${esc(x.id)}','reviewing')">Reviewing</button></div>`:""}</article>`).join("")}</div>`:"<div class='empty'>No suggestions found.</div>";
-}
-function suggestionForm(){
- if(!state.user)return toast("Log in first.",false);
- openModal("Submit Suggestion",`<form id="suggestionForm">
- <div class="field"><label>Title</label><input id="sTitle" required maxlength="180"></div>
- <div class="field"><label>Category</label><select id="sCat"><option>show</option><option>podcast</option><option>sports</option><option>gaming</option><option>community</option><option>website</option><option>other</option></select></div>
- <div class="field"><label>Suggestion</label><textarea id="sBody" required maxlength="5000"></textarea></div>
- <button class="btn primary">Submit Suggestion</button></form>`);
- $("#suggestionForm").onsubmit=async e=>{e.preventDefault();const r=await db.from("cr_member_suggestions").insert({user_id:uid(),member_id:state.member?.id||null,title:$("#sTitle").value.trim(),suggestion:$("#sBody").value.trim(),category:$("#sCat").value,status:"pending"});if(r.error)return toast(errText(r.error),false);closeModal();toast("Suggestion submitted.");renderSuggestions()};
-}
-async function reviewSuggestion(id,status){
- if(!state.admin)return;
- const response=prompt("Optional admin response:")||null;
- const r=await db.from("cr_member_suggestions").update({status,admin_response:response,updated_at:new Date().toISOString()}).eq("id",id);
- if(r.error)return toast(errText(r.error),false);
- await recordAdminAudit("suggestion_"+status,"cr_member_suggestions",id,{status,response});
- toast("Suggestion updated.");renderSuggestions();
-}
-
-async function renderCommunity(){
- const cv=$("#communityView"),pv=$("#postsView");
- if(!state.user){cv.innerHTML="<div class='notice'>Log in for private CrowSpace features.</div>";pv.innerHTML="<div class='empty'>Log in to see community posts.</div>";return}
- const [p,f,g,posts]=await Promise.all([
-  countRows("crowspace_posts",q=>q.eq("author_id",uid())),
-  countRows("crowspace_friendships",q=>q.or(`requester_id.eq.${uid()},addressee_id.eq.${uid()}`)),
-  countRows("crowspace_group_members",q=>q.eq("user_id",uid())),
-  safeSelect("crowspace_posts","*",(q)=>q.order("created_at",{ascending:false}).limit(8))
- ]);
- cv.innerHTML=[["Posts",p.count||0],["Friends",f.count||0],["Groups",g.count||0],["Role",state.member?.role||"member"]].map(x=>`<div class="item"><small class="muted">${x[0]}</small><div class="kpi">${esc(x[1])}</div></div>`).join("");
- const rows=posts.data||[];
- pv.innerHTML=rows.length?rows.map(x=>`<div class="item" style="margin-bottom:8px"><b>${esc(x.body||"Community post")}</b><div class="muted">${fmtDate(x.created_at)}</div></div>`).join(""):"<div class='empty'>No recent posts.</div>";
-}
-function openChat(){
- if(!state.user)return toast("Log in first.",false);
- openModal("CrowSpace Chat",`<div id="chatRooms"><div class="empty">Loading rooms…</div></div>`);
- loadChatRooms();
-}
-async function loadChatRooms(){
- const box=$("#chatRooms");const r=await safeSelect("cr_member_chat_rooms","*",(q)=>q.eq("is_active",true).order("sort_order"));
- if(r.error||!r.data?.length){box.innerHTML=`<div class="notice">${r.error?esc(errText(r.error)):"No active chat rooms."}</div>`;return}
- box.innerHTML=`<div class="grid">${r.data.map(x=>`<article class="item"><h3>${esc(x.icon||"💬")} ${esc(x.name)}</h3><p>${esc(x.description||"")}</p><button class="btn primary" onclick="openRoom('${esc(x.id)}','${esc(x.name)}')">Open Room</button></article>`).join("")}</div>`;
-}
-async function openRoom(id,name){
- openModal(name,`<div id="chatMessages" style="max-height:55vh;overflow:auto"><div class="empty">Loading…</div></div><form id="chatForm" class="row" style="margin-top:10px"><input id="chatInput" required maxlength="2000" placeholder="Write a message…" style="flex:1"><button class="btn primary">Send</button></form>`);
- await loadRoomMessages(id);
- $("#chatForm").onsubmit=async e=>{e.preventDefault();const message=$("#chatInput").value.trim();if(!message)return;const r=await db.from("cr_member_chat").insert({room_id:id,user_id:uid(),member_id:state.member?.id||null,message});if(r.error)return toast(errText(r.error),false);$("#chatInput").value="";loadRoomMessages(id)};
-}
-async function loadRoomMessages(room){
- const r=await safeSelect("cr_member_chat","*",(q)=>q.eq("room_id",room).is("deleted_at",null).order("created_at",{ascending:true}).limit(100));
- const box=$("#chatMessages");if(!box)return;
- box.innerHTML=(r.data||[]).length?(r.data||[]).map(x=>`<div class="item" style="margin-bottom:7px"><b>${x.user_id===uid()?"You":"Member"}</b><p>${esc(x.message)}</p><small class="muted">${fmtDate(x.created_at)}</small></div>`).join(""):"<div class='empty'>No messages yet.</div>";
- box.scrollTop=box.scrollHeight;
-}
-
-async function renderContent(){
- const v=$("#contentView");
- let r,rows=[],title="content";
- if(state.contentTab==="shows"){
-   r=await safeSelect("cr_original_productions","*",(q)=>q.eq("is_published",true).order("sort_order"));
-   rows=r.data||[];title="shows";
- }else if(state.contentTab==="episodes"){
-   r=await safeSelect("cr_episodes","*",(q)=>q.eq("is_published",true).order("release_date",{ascending:false}).limit(40));
-   rows=r.data||[];title="episodes";
- }else if(state.contentTab==="schedule"){
-   r=await safeSelect("cr_schedule","*",(q)=>q.eq("is_published",true).order("start_at").limit(40));
-   rows=r.data||[];title="schedule";
- }else if(state.contentTab==="news"){
-   r=await safeSelect("cr_news","*",(q)=>q.eq("status","published").order("published_at",{ascending:false}).limit(40));
-   rows=r.data||[];title="news";
- }else{
-   r=await safeSelect("sports_videos","*",(q)=>q.eq("is_published",true).order("published_at",{ascending:false}).limit(40));
-   rows=r.data||[];title="sports";
- }
- if(r.error){v.innerHTML=`<div class="notice bad">${esc(errText(r.error))}</div>`;return}
- if(!rows.length){v.innerHTML=`<div class="empty">No published ${esc(title)} records are visible to this session.</div>`;return}
- v.innerHTML=`<div class="grid">${rows.map(x=>{
-   const thumb=x.thumbnail_url||x.image_url||x.featured_image_url||"";
-   const link=x.video_url||x.youtube_url||x.youtube_id||x.source_url||"";
-   return `<article class="item media-card">${thumb?`<img class="thumb" src="${esc(thumb)}" onerror="this.style.display='none'" alt="">`:""}<div class="between"><h3>${esc(x.title||x.name||"Untitled")}</h3>${badge(x.status||"published")}</div><p>${esc(x.description||x.excerpt||x.content||"")}</p><small class="muted">${fmtDate(x.release_date||x.start_at||x.published_at||x.created_at)}</small>${link?`<div class="row" style="margin-top:9px"><button class="btn primary" onclick="openContent('${esc(x.id||"")}','${esc(x.title||x.name||"Content")}','${esc(link)}','${esc(state.contentTab)}')">Open</button></div>`:""}</article>`;
- }).join("")}</div>`;
-}
-function openContent(id,title,link,type){
- if(/^https?:\\/\\//i.test(link)&&(/youtube\\.com|youtu\\.be/i.test(link))){
-   const m=link.match(/[?&]v=([^&]+)/)||link.match(/youtu\\.be\\/([^?]+)/)||null;const vid=m?.[1]||link;
-   openModal(title,`<div style="aspect-ratio:16/9"><iframe src="https://www.youtube.com/embed/${esc(vid)}?rel=0" style="width:100%;height:100%;border:0;border-radius:12px" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div>`);
- }else if(/^https?:\\/\\//i.test(link))window.open(link,"_blank","noopener,noreferrer");
- else toast("No playable URL was found.",false);
- if(uid())recordActivity("content_open",{content_id:id,title,type});
-}
+/* ============================================================
+   NOTIFICATIONS
+   ============================================================ */
 
 async function renderNotifications(){
- const box=$("#notificationsView");if(!state.user){box.innerHTML="<div class='notice'>Log in to see notifications.</div>";return}
- const r=await safeSelect("cr_member_notifications","*",(q)=>q.eq("user_id",uid()).order("created_at",{ascending:false}).limit(50));
- if(r.error){box.innerHTML=`<div class="notice bad">${esc(errText(r.error))}</div>`;return}
- box.innerHTML=(r.data||[]).length?(r.data||[]).map(x=>`<div class="item" style="margin-bottom:8px"><div class="between"><h3>${esc(x.title)}</h3>${badge(x.is_read?"read":"new")}</div><p>${esc(x.message||"")}</p><small class="muted">${fmtDate(x.created_at)}</small>${!x.is_read?`<button class="btn" style="margin-top:7px" onclick="markNotification('${esc(x.id)}')">Mark read</button>`:""}</div>`).join(""):"<div class='empty'>No notifications.</div>";
-}
-async function markNotification(id){const r=await db.from("cr_member_notifications").update({is_read:true,read_at:new Date().toISOString()}).eq("id",id).eq("user_id",uid());if(r.error)return toast(errText(r.error),false);renderNotifications()}
-async function markAllNotifications(){if(!uid())return;const r=await db.from("cr_member_notifications").update({is_read:true,read_at:new Date().toISOString()}).eq("user_id",uid()).eq("is_read",false);if(r.error)return toast(errText(r.error),false);toast("Notifications marked read.");renderNotifications()}
 
-async function recordActivity(type,metadata={}){
- if(!uid())return;
- try{await db.from("cr_member_activity").insert({member_id:state.member?.id||null,user_id:uid(),activity_type:type,metadata});}catch(e){}
-}
-async function recordAdminAudit(action,table,id,details={}){
- if(!uid())return;
- try{await db.from("cr_admin_audit_log").insert({user_id:uid(),action,target_table:table,target_id:String(id),metadata:details});}catch(e){}
- try{await db.from("cr_admin_v51_audit_log").insert({actor_user_id:uid(),action,resource:table,target_id:String(id),details});}catch(e){}
+  if(!state.user){
+
+    $("#notificationsView")
+      .innerHTML =
+        `
+          <div class="notice">
+            Login to view notifications.
+          </div>
+        `;
+
+    return;
+
+  }
+
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("cr_member_notifications")
+      .select("*")
+      .eq(
+        "user_id",
+        state.user.id
+      )
+      .order(
+        "created_at",
+        {ascending:false}
+      )
+      .limit(20);
+
+
+  if(error){
+
+    $("#notificationsView")
+      .innerHTML =
+        `
+          <div class="notice bad">
+            ${esc(
+              error.message
+            )}
+          </div>
+        `;
+
+    return;
+
+  }
+
+
+  $("#notificationsView")
+    .innerHTML =
+      data?.length
+        ? data.map(
+            row => `
+
+              <div
+                class="item"
+                style="margin-bottom:9px;">
+
+                <div class="between">
+
+                  <h3>
+                    ${esc(
+                      row.title ||
+                      "Notification"
+                    )}
+                  </h3>
+
+                  ${badge(
+                    row.is_read
+                      ? "read"
+                      : "new"
+                  )}
+
+                </div>
+
+                <p>
+                  ${esc(
+                    row.message ||
+                    ""
+                  )}
+                </p>
+
+                <small class="muted">
+                  ${fmtDate(
+                    row.created_at
+                  )}
+                </small>
+
+              </div>
+
+            `
+          ).join("")
+        :
+          `
+            <div class="notice">
+              No notifications.
+            </div>
+          `;
+
 }
 
-async function loadTables(){
- const box=$("#tableCards");box.innerHTML="<div class='notice'>Checking tables permitted to the current browser session…</div>";
- const results=await Promise.all(TABLES.map(async t=>{const r=await countRows(t);return{t,count:r.count,error:r.error?.message||null}}));
- state.cache=Object.fromEntries(results.map(x=>[x.t,x]));renderTableCards();
-}
-function renderTableCards(){
- const term=($("#tableSearch").value||"").toLowerCase();
- const rows=Object.values(state.cache).filter(x=>x.t.toLowerCase().includes(term));
- $("#tableCards").innerHTML=rows.map(x=>`<article class="item"><div class="between"><h3>${esc(x.t)}</h3>${badge(x.error?"blocked":"available")}</div><p>${x.error?esc(x.error):`${Number(x.count||0).toLocaleString()} visible rows.`}</p>${!x.error?`<button class="btn" onclick="previewTable('${esc(x.t)}')">Preview</button>`:""}</article>`).join("")||"<div class='empty'>No matching tables.</div>";
-}
-async function previewTable(t){
- const r=await safeSelect(t,"*",(q)=>q.limit(20));
- if(r.error)return toast(errText(r.error),false);
- const data=r.data||[],cols=Object.keys(data[0]||{});
- openModal(t,`<div class="tablewrap"><table><thead><tr>${cols.map(k=>`<th>${esc(k)}</th>`).join("")}</tr></thead><tbody>${data.map(row=>`<tr>${cols.map(k=>`<td>${esc(typeof row[k]==="object"?JSON.stringify(row[k]):row[k])}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`);
+
+/* ============================================================
+   APPLICATIONS
+   ============================================================ */
+
+async function renderApplications(){
+
+  const box =
+    $("#applicationsView");
+
+
+  if(
+    state.appTab==="mine"
+  ){
+
+    if(!state.user){
+
+      box.innerHTML =
+        `
+          <div class="notice">
+            Login to view your applications.
+          </div>
+        `;
+
+      return;
+
+    }
+
+
+    const [
+      a,
+      b
+    ] =
+      await Promise.all([
+
+        db
+          .from(
+            "podcaster_applications"
+          )
+          .select("*")
+          .eq(
+            "user_id",
+            state.user.id
+          )
+          .order(
+            "created_at",
+            {ascending:false}
+          ),
+
+        db
+          .from(
+            "cr_podcaster_applications"
+          )
+          .select("*")
+          .eq(
+            "user_id",
+            state.user.id
+          )
+          .order(
+            "created_at",
+            {ascending:false}
+          )
+
+      ]);
+
+
+    const rows=[
+
+      ...(a.data||[])
+        .map(
+          x => ({
+            ...x,
+            _table:
+              "podcaster_applications",
+            _name:
+              x.podcast_name
+          })
+        ),
+
+      ...(b.data||[])
+        .map(
+          x => ({
+            ...x,
+            _table:
+              "cr_podcaster_applications",
+            _name:
+              x.show_name
+          })
+        )
+
+    ];
+
+
+    box.innerHTML =
+      applicationCards(
+        rows,
+        false
+      );
+
+    return;
+
+  }
+
+
+  if(
+    !state.admin
+  ){
+
+    box.innerHTML =
+      `
+        <div class="notice">
+          Admin/staff access is required.
+        </div>
+      `;
+
+    return;
+
+  }
+
+
+  if(
+    state.appTab==="sports"
+  ){
+
+    const {
+      data,
+      error
+    } =
+      await db
+        .from(
+          "cr_sports_show_creator_applications"
+        )
+        .select("*")
+        .order(
+          "created_at",
+          {ascending:false}
+        )
+        .limit(100);
+
+
+    box.innerHTML =
+      error
+        ? `
+          <div class="notice bad">
+            ${esc(
+              error.message
+            )}
+          </div>
+        `
+        :
+        applicationCards(
+          (data||[])
+            .map(
+              x=>({
+                ...x,
+                _table:
+                  "cr_sports_show_creator_applications",
+                _name:
+                  x.show_name
+              })
+            ),
+          true
+        );
+
+    return;
+
+  }
+
+
+  const [
+    a,
+    b
+  ] =
+    await Promise.all([
+
+      db
+        .from(
+          "podcaster_applications"
+        )
+        .select("*")
+        .order(
+          "created_at",
+          {ascending:false}
+        )
+        .limit(100),
+
+      db
+        .from(
+          "cr_podcaster_applications"
+        )
+        .select("*")
+        .order(
+          "created_at",
+          {ascending:false}
+        )
+        .limit(100)
+
+    ]);
+
+
+  box.innerHTML =
+    applicationCards(
+
+      [
+
+        ...(a.data||[])
+          .map(
+            x=>({
+              ...x,
+              _table:
+                "podcaster_applications",
+              _name:
+                x.podcast_name
+            })
+          ),
+
+        ...(b.data||[])
+          .map(
+            x=>({
+              ...x,
+              _table:
+                "cr_podcaster_applications",
+              _name:
+                x.show_name
+            })
+          )
+
+      ],
+
+      true
+
+    );
+
 }
 
-$("#loginBtn").onclick=()=>openModal("Login",`<form id="loginForm"><div class="field"><label>Email</label><input id="email" type="email" autocomplete="email" required></div><div class="field"><label>Password</label><input id="password" type="password" autocomplete="current-password" required></div><button class="btn primary">Login</button></form><p class="muted">Use your existing CrowRules Supabase Auth account.</p>`);
-document.addEventListener("submit",async e=>{if(e.target.id!=="loginForm")return;e.preventDefault();const r=await db.auth.signInWithPassword({email:$("#email").value,password:$("#password").value});if(r.error)return toast(errText(r.error),false);closeModal();toast("Logged in.")});
-$("#logoutBtn").onclick=async()=>{await db.auth.signOut();toast("Logged out.")};
-$("#refreshAll").onclick=async()=>{toast("Refreshing…");if(state.user)await refreshAll();else renderGuest()};
-$("#newSuggestion").onclick=suggestionForm;$("#refreshSuggestions").onclick=renderSuggestions;
-$("#refreshLeaderboard").onclick=renderLeaderboard;$("#refreshNotifications").onclick=renderNotifications;$("#markNotifications").onclick=markAllNotifications;
-$("#loadTables").onclick=loadTables;$("#tableSearch").oninput=renderTableCards;
-$("#openChat").onclick=openChat;
 
-$$("[data-app-tab]").forEach(b=>b.onclick=()=>{$$("[data-app-tab]").forEach(x=>x.classList.remove("active"));b.classList.add("active");state.appTab=b.dataset.appTab;renderApplications()});
-$$("[data-content-tab]").forEach(b=>b.onclick=()=>{$$("[data-content-tab]").forEach(x=>x.classList.remove("active"));b.classList.add("active");state.contentTab=b.dataset.contentTab;renderContent()});
-$$("[data-library-tab]").forEach(b=>b.onclick=()=>{$$("[data-library-tab]").forEach(x=>x.classList.remove("active"));b.classList.add("active");state.libraryTab=b.dataset.libraryTab;renderLibrary()});
+function applicationCards(
+  rows,
+  review
+){
 
-start();
-loadTables();
+  if(!rows.length){
+
+    return `
+      <div class="notice">
+        No applications found.
+      </div>
+    `;
+
+  }
+
+
+  return `
+    <div class="grid">
+
+      ${rows.map(
+        x=>`
+
+          <article class="item">
+
+            <div class="between">
+
+              <div>
+
+                <h3>
+                  ${esc(
+                    x._name ||
+                    "Untitled Application"
+                  )}
+                </h3>
+
+                <small>
+                  ${esc(
+                    x._host ||
+                    x.full_name ||
+                    x.host_name ||
+                    x.creator_name ||
+                    "Applicant"
+                  )}
+                </small>
+
+              </div>
+
+              ${badge(
+                x.status
+              )}
+
+            </div>
+
+            <p>
+              <b>Category:</b>
+              ${esc(
+                x.category ||
+                x.sport ||
+                "—"
+              )}
+            </p>
+
+            <p>
+              ${esc(
+                x.podcast_concept ||
+                x.show_description ||
+                ""
+              )}
+            </p>
+
+            <p class="muted">
+              ${fmtDate(
+                x.created_at
+              )}
+            </p>
+
+            ${
+              review
+                ? `
+
+                  <div class="row">
+
+                    <button
+                      class="btn ok"
+                      onclick="
+                        reviewApplication(
+                          '${esc(x._table)}',
+                          '${esc(x.id)}',
+                          'approved'
+                        )
+                      ">
+                      Accept
+                    </button>
+
+                    <button
+                      class="btn danger"
+                      onclick="
+                        reviewApplication(
+                          '${esc(x._table)}',
+                          '${esc(x.id)}',
+                          'rejected'
+                        )
+                      ">
+                      Decline
+                    </button>
+
+                    <button
+                      class="btn warn"
+                      onclick="
+                        reviewApplication(
+                          '${esc(x._table)}',
+                          '${esc(x.id)}',
+                          'reviewing'
+                        )
+                      ">
+                      Reviewing
+                    </button>
+
+                  </div>
+
+                `
+                : ""
+            }
+
+          </article>
+
+        `
+      ).join("")}
+
+    </div>
+  `;
+
+}
+
+
+/* ============================================================
+   APPLICATION REVIEW
+   ============================================================ */
+
+async function reviewApplication(
+  table,
+  id,
+  status
+){
+
+  if(!state.admin){
+
+    toast(
+      "Admin access required.",
+      false
+    );
+
+    return;
+
+  }
+
+
+  const notes =
+    prompt(
+      `Optional admin notes for ${status}:`
+    ) || null;
+
+
+  const patch={
+    status
+  };
+
+
+  if(
+    table ===
+    "podcaster_applications"
+  ){
+
+    patch.reviewed_by =
+      state.user.id;
+
+    patch.reviewed_at =
+      new Date()
+        .toISOString();
+
+    patch.admin_notes =
+      notes;
+
+  }else{
+
+    patch.admin_notes =
+      notes;
+
+  }
+
+
+  const {
+    error
+  } =
+    await db
+      .from(table)
+      .update(patch)
+      .eq("id",id);
+
+
+  if(error){
+
+    toast(
+      error.message,
+      false
+    );
+
+    return;
+
+  }
+
+
+  toast(
+    `Application ${status}.`
+  );
+
+  renderApplications();
+
+}
+
+
+/* ============================================================
+   SUGGESTIONS
+   ============================================================ */
+
+async function renderSuggestions(){
+
+  const box =
+    $("#suggestionsView");
+
+
+  let query =
+    db
+      .from("cr_member_suggestions")
+      .select("*")
+      .order(
+        "created_at",
+        {ascending:false}
+      )
+      .limit(100);
+
+
+  if(!state.admin){
+
+    query =
+      query.eq(
+        "user_id",
+        state.user?.id ||
+        "00000000-0000-0000-0000-000000000000"
+      );
+
+  }
+
+
+  const {
+    data,
+    error
+  } =
+    await query;
+
+
+  if(error){
+
+    box.innerHTML =
+      `
+        <div class="notice bad">
+          ${esc(
+            error.message
+          )}
+        </div>
+      `;
+
+    return;
+
+  }
+
+
+  if(!data?.length){
+
+    box.innerHTML =
+      `
+        <div class="notice">
+          No suggestions found.
+        </div>
+      `;
+
+    return;
+
+  }
+
+
+  box.innerHTML =
+    `
+      <div class="grid">
+
+        ${data.map(
+          x=>`
+
+            <article class="item">
+
+              <div class="between">
+
+                <h3>
+                  ${esc(
+                    x.title
+                  )}
+                </h3>
+
+                ${badge(
+                  x.status
+                )}
+
+              </div>
+
+              <p>
+                ${esc(
+                  x.suggestion
+                )}
+              </p>
+
+              <small class="muted">
+                ${esc(
+                  x.category
+                )}
+                •
+                ${fmtDate(
+                  x.created_at
+                )}
+              </small>
+
+              ${
+                x.admin_response
+                  ? `
+                    <p>
+                      <b>
+                        Admin response:
+                      </b>
+                      ${esc(
+                        x.admin_response
+                      )}
+                    </p>
+                  `
+                  : ""
+              }
+
+              ${
+                state.admin
+                  ? `
+
+                    <div
+                      class="row"
+                      style="margin-top:10px">
+
+                      <button
+                        class="btn ok"
+                        onclick="
+                          reviewSuggestion(
+                            '${esc(x.id)}',
+                            'accepted'
+                          )
+                        ">
+                        Accept
+                      </button>
+
+                      <button
+                        class="btn danger"
+                        onclick="
+                          reviewSuggestion(
+                            '${esc(x.id)}',
+                            'declined'
+                          )
+                        ">
+                        Decline
+                      </button>
+
+                      <button
+                        class="btn warn"
+                        onclick="
+                          reviewSuggestion(
+                            '${esc(x.id)}',
+                            'reviewing'
+                          )
+                        ">
+                        Reviewing
+                      </button>
+
+                    </div>
+
+                  `
+                  : ""
+              }
+
+            </article>
+
+          `
+        ).join("")}
+
+      </div>
+    `;
+
+}
+
+
+/* ============================================================
+   SUGGESTION FORM
+   ============================================================ */
+
+function suggestionForm(){
+
+  if(!state.user){
+
+    toast(
+      "Login first.",
+      false
+    );
+
+    return;
+
+  }
+
+
+  openModal(
+
+    "Submit a Suggestion",
+
+    `
+
+      <form id="suggestionForm">
+
+        <div class="field">
+
+          <label>
+            Title
+          </label>
+
+          <input
+            id="sTitle"
+            required
+            maxlength="180">
+
+        </div>
+
+        <div class="field">
+
+          <label>
+            Category
+          </label>
+
+          <select id="sCat">
+
+            <option>show</option>
+            <option>podcast</option>
+            <option>sports</option>
+            <option>gaming</option>
+            <option>community</option>
+            <option>website</option>
+            <option>other</option>
+
+          </select>
+
+        </div>
+
+        <div class="field">
+
+          <label>
+            Suggestion
+          </label>
+
+          <textarea
+            id="sBody"
+            required
+            maxlength="5000"></textarea>
+
+        </div>
+
+        <button
+          class="btn primary">
+          Submit Suggestion
+        </button>
+
+      </form>
+
+    `
+  );
+
+
+  $("#suggestionForm")
+    .onsubmit =
+      async event=>{
+
+        event.preventDefault();
+
+
+        const {
+          error
+        } =
+          await db
+            .from(
+              "cr_member_suggestions"
+            )
+            .insert({
+
+              user_id:
+                state.user.id,
+
+              member_id:
+                state.member?.id ||
+                null,
+
+              title:
+                $("#sTitle").value,
+
+              suggestion:
+                $("#sBody").value,
+
+              category:
+                $("#sCat").value,
+
+              status:
+                "pending"
+
+            });
+
+
+        if(error){
+
+          toast(
+            error.message,
+            false
+          );
+
+          return;
+
+        }
+
+
+        closeModal();
+
+        toast(
+          "Suggestion submitted."
+        );
+
+        renderSuggestions();
+
+      };
+
+}
+
+
+async function reviewSuggestion(
+  id,
+  status
+){
+
+  if(!state.admin)
+    return;
+
+
+  const response =
+    prompt(
+      `Optional response for ${status}:`
+    ) || null;
+
+
+  const {
+    error
+  } =
+    await db
+      .from(
+        "cr_member_suggestions"
+      )
+      .update({
+
+        status,
+
+        admin_response:
+          response,
+
+        updated_at:
+          new Date()
+            .toISOString()
+
+      })
+      .eq(
+        "id",
+        id
+      );
+
+
+  if(error){
+
+    toast(
+      error.message,
+      false
+    );
+
+    return;
+
+  }
+
+
+  toast(
+    `Suggestion ${status}.`
+  );
+
+  renderSuggestions();
+
+}
+
+
+/* ============================================================
+   COMMUNITY
+   ============================================================ */
+
+async function renderCommunity(){
+
+  if(!state.user){
+
+    $("#communityView")
+      .innerHTML =
+        `
+          <div class="notice">
+            Login for your CrowSpace activity.
+          </div>
+        `;
+
+    return;
+
+  }
+
+
+  const [
+    posts,
+    friends,
+    groups
+  ] =
+    await Promise.all([
+
+      db
+        .from("crowspace_posts")
+        .select(
+          "*",
+          {
+            count:"exact",
+            head:true
+          }
+        )
+        .eq(
+          "author_id",
+          state.user.id
+        ),
+
+      db
+        .from("crowspace_friendships")
+        .select(
+          "*",
+          {
+            count:"exact",
+            head:true
+          }
+        )
+        .or(
+          `requester_id.eq.${state.user.id},addressee_id.eq.${state.user.id}`
+        ),
+
+      db
+        .from("crowspace_group_members")
+        .select(
+          "*",
+          {
+            count:"exact",
+            head:true
+          }
+        )
+        .eq(
+          "user_id",
+          state.user.id
+        )
+
+    ]);
+
+
+  $("#communityView")
+    .innerHTML = [
+
+      [
+        "Posts",
+        posts.count||0,
+        "CrowSpace posts"
+      ],
+
+      [
+        "Friends",
+        friends.count||0,
+        "Friend connections"
+      ],
+
+      [
+        "Groups",
+        groups.count||0,
+        "Group memberships"
+      ],
+
+      [
+        "Profile",
+        "Ready",
+        "CrowSpace profile"
+      ]
+
+    ]
+    .map(
+      x=>`
+
+        <div class="item">
+
+          <small class="muted">
+            ${esc(x[0])}
+          </small>
+
+          <h3>
+            ${esc(x[1])}
+          </h3>
+
+          <p>
+            ${esc(x[2])}
+          </p>
+
+        </div>
+
+      `
+    )
+    .join("");
+
+}
+
+
+/* ============================================================
+   CONTENT
+   ============================================================ */
+
+async function renderContent(){
+
+  const box =
+    $("#contentView");
+
+
+  let table="";
+  let rows=[];
+
+
+  try{
+
+    if(
+      state.contentTab==="shows"
+    ){
+
+      table=
+        "cr_original_productions";
+
+      const {
+        data
+      } =
+        await db
+          .from(table)
+          .select("*")
+          .eq(
+            "is_published",
+            true
+          )
+          .order(
+            "sort_order"
+          );
+
+      rows=data||[];
+
+    }
+
+
+    if(
+      state.contentTab==="episodes"
+    ){
+
+      table="cr_episodes";
+
+      const {
+        data
+      } =
+        await db
+          .from(table)
+          .select("*")
+          .eq(
+            "is_published",
+            true
+          )
+          .order(
+            "release_date",
+            {ascending:false}
+          )
+          .limit(30);
+
+      rows=data||[];
+
+    }
+
+
+    if(
+      state.contentTab==="schedule"
+    ){
+
+      table="cr_schedule";
+
+      const {
+        data
+      } =
+        await db
+          .from(table)
+          .select("*")
+          .order(
+            "start_at"
+          )
+          .limit(30);
+
+      rows=data||[];
+
+    }
+
+
+    if(
+      state.contentTab==="news"
+    ){
+
+      table="cr_news";
+
+      const {
+        data
+      } =
+        await db
+          .from(table)
+          .select("*")
+          .eq(
+            "is_published",
+            true
+          )
+          .order(
+            "published_at",
+            {ascending:false}
+          )
+          .limit(30);
+
+      rows=data||[];
+
+    }
+
+
+    if(
+      state.contentTab==="sports"
+    ){
+
+      table="sports_videos";
+
+      const {
+        data
+      } =
+        await db
+          .from(table)
+          .select("*")
+          .eq(
+            "is_published",
+            true
+          )
+          .order(
+            "published_at",
+            {ascending:false}
+          )
+          .limit(30);
+
+      rows=data||[];
+
+    }
+
+
+    box.innerHTML =
+      rows.length
+        ?
+          `
+            <div class="grid">
+
+              ${rows.map(
+                x=>`
+
+                  <article class="item">
+
+                    <h3>
+                      ${esc(
+                        x.title ||
+                        x.name ||
+                        "Untitled"
+                      )}
+                    </h3>
+
+                    <p>
+                      ${esc(
+                        x.description ||
+                        x.excerpt ||
+                        ""
+                      )}
+                    </p>
+
+                    <small class="muted">
+                      ${fmtDate(
+                        x.release_date ||
+                        x.start_at ||
+                        x.published_at ||
+                        x.created_at
+                      )}
+                    </small>
+
+                  </article>
+
+                `
+              ).join("")}
+
+            </div>
+          `
+        :
+          `
+            <div class="notice">
+              No published content available.
+            </div>
+          `;
+
+  }catch(error){
+
+    box.innerHTML =
+      `
+        <div class="notice bad">
+          ${esc(
+            error.message
+          )}
+        </div>
+      `;
+
+  }
+
+}
+
+
+/* ============================================================
+   DATABASE TABLE CENTER
+   ============================================================ */
+
+async function loadAllTables(){
+
+  const box =
+    $("#tableCards");
+
+  box.innerHTML =
+    `
+      <div class="notice">
+        Loading available tables...
+      </div>
+    `;
+
+
+  const results =
+    await Promise.all(
+
+      TABLES.map(
+        async table=>{
+
+          try{
+
+            const {
+              count,
+              error
+            } =
+              await db
+                .from(table)
+                .select(
+                  "*",
+                  {
+                    count:"exact",
+                    head:true
+                  }
+                );
+
+            return {
+
+              table,
+
+              count,
+
+              error:
+                error?.message ||
+                null
+
+            };
+
+          }catch(error){
+
+            return {
+
+              table,
+
+              count:null,
+
+              error:
+                String(error)
+
+            };
+
+          }
+
+        }
+      )
+
+    );
+
+
+  state.cache =
+    Object.fromEntries(
+      results.map(
+        row => [
+          row.table,
+          row
+        ]
+      )
+    );
+
+
+  renderTableCards(
+    results
+  );
+
+}
+
+
+function renderTableCards(
+  results
+){
+
+  const term =
+    (
+      $("#tableSearch")
+        .value ||
+      ""
+    )
+    .toLowerCase();
+
+
+  const rows =
+    results.filter(
+      row =>
+        row.table
+          .toLowerCase()
+          .includes(term)
+    );
+
+
+  $("#tableCards")
+    .innerHTML =
+      rows
+        .map(
+          row=>`
+
+            <article class="item">
+
+              <div class="between">
+
+                <h3>
+                  ${esc(
+                    row.table
+                  )}
+                </h3>
+
+                ${badge(
+                  row.error
+                    ? "blocked"
+                    : "available"
+                )}
+
+              </div>
+
+              <p>
+                ${
+                  row.error
+                    ? esc(
+                        row.error
+                      )
+                    :
+                      `${
+                        row.count ??
+                        0
+                      } rows visible`
+                }
+              </p>
+
+              ${
+                !row.error
+                  ? `
+                    <button
+                      class="btn"
+                      onclick="
+                        previewTable(
+                          '${esc(row.table)}'
+                        )
+                      ">
+                      Preview
+                    </button>
+                  `
+                  : ""
+              }
+
+            </article>
+
+          `
+        )
+        .join("");
+
+}
+
+
+async function previewTable(
+  table
+){
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from(table)
+      .select("*")
+      .limit(20);
+
+
+  if(error){
+
+    toast(
+      error.message,
+      false
+    );
+
+    return;
+
+  }
+
+
+  const columns =
+    Object.keys(
+      data?.[0] || {}
+    );
+
+
+  openModal(
+
+    table,
+
+    `
+
+      <div class="tablewrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              ${
+                columns
+                  .map(
+                    col =>
+                      `<th>${esc(col)}</th>`
+                  )
+                  .join("")
+              }
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            ${
+              (data||[])
+                .map(
+                  row => `
+
+                    <tr>
+
+                      ${
+                        columns
+                          .map(
+                            col => `
+
+                              <td>
+                                ${esc(
+                                  typeof row[col] ===
+                                    "object"
+                                    ? JSON.stringify(
+                                        row[col]
+                                      )
+                                    : row[col]
+                                )}
+                              </td>
+
+                            `
+                          )
+                          .join("")
+                      }
+
+                    </tr>
+
+                  `
+                )
+                .join("")
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    `
+
+  );
+
+}
+
+
+/* ============================================================
+   LOGIN
+   ============================================================ */
+
+$("#loginBtn")
+  .onclick=()=>{
+
+    openModal(
+
+      "Member Login",
+
+      `
+
+        <form id="loginForm">
+
+          <div class="field">
+
+            <label>
+              Email
+            </label>
+
+            <input
+              id="email"
+              type="email"
+              required>
+
+          </div>
+
+          <div class="field">
+
+            <label>
+              Password
+            </label>
+
+            <input
+              id="password"
+              type="password"
+              required>
+
+          </div>
+
+          <button
+            class="btn primary">
+            Login
+          </button>
+
+        </form>
+
+        <p class="muted">
+          Use your existing CrowRules
+          Supabase Auth account.
+        </p>
+
+      `
+
+    );
+
+  };
+
+
+document.addEventListener(
+  "submit",
+  async event=>{
+
+    if(
+      event.target.id !==
+      "loginForm"
+    ){
+
+      return;
+
+    }
+
+
+    event.preventDefault();
+
+
+    const {
+      error
+    } =
+      await db.auth
+        .signInWithPassword({
+
+          email:
+            $("#email").value,
+
+          password:
+            $("#password").value
+
+        });
+
+
+    if(error){
+
+      toast(
+        error.message,
+        false
+      );
+
+      return;
+
+    }
+
+
+    closeModal();
+
+    toast(
+      "Logged in successfully."
+    );
+
+  }
+);
+
+
+/* ============================================================
+   LOGOUT
+   ============================================================ */
+
+$("#logoutBtn")
+  .onclick=async()=>{
+
+    await stopTracking();
+
+    const {
+      error
+    } =
+      await db.auth.signOut();
+
+    if(error){
+
+      toast(
+        error.message,
+        false
+      );
+
+      return;
+
+    }
+
+    toast(
+      "Logged out."
+    );
+
+  };
+
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
+$("#newSuggestion")
+  .onclick =
+    suggestionForm;
+
+$("#refreshSuggestions")
+  .onclick =
+    renderSuggestions;
+
+$("#refreshContent")
+  .onclick =
+    loadWatchableContent;
+
+$("#refreshBoard")
+  .onclick =
+    loadLeaderboard;
+
+$("#lifetimeBoard")
+  .onclick = ()=>{
+
+    state.leaderboardMode=
+      "lifetime";
+
+    loadLeaderboard();
+
+  };
+
+$("#monthlyBoard")
+  .onclick = ()=>{
+
+    state.leaderboardMode=
+      "monthly";
+
+    loadLeaderboard();
+
+  };
+
+
+$("#loadAll")
+  .onclick =
+    loadAllTables;
+
+
+$("#tableSearch")
+  .oninput=()=>{
+
+    renderTableCards(
+      Object.values(
+        state.cache
+      )
+    );
+
+  };
+
+
+/* ============================================================
+   APPLICATION TABS
+   ============================================================ */
+
+$$("[data-app-tab]")
+  .forEach(button=>{
+
+    button.onclick=()=>{
+
+      $$("[data-app-tab]")
+        .forEach(
+          item =>
+            item.classList
+              .remove("active")
+        );
+
+      button.classList
+        .add("active");
+
+      state.appTab =
+        button.dataset.appTab;
+
+      renderApplications();
+
+    };
+
+  });
+
+
+/* ============================================================
+   CONTENT TABS
+   ============================================================ */
+
+$$("[data-content-tab]")
+  .forEach(button=>{
+
+    button.onclick=()=>{
+
+      $$("[data-content-tab]")
+        .forEach(
+          item =>
+            item.classList
+              .remove("active")
+        );
+
+      button.classList
+        .add("active");
+
+      state.contentTab =
+        button.dataset.contentTab;
+
+      renderContent();
+
+    };
+
+  });
+
+
+/* ============================================================
+   PAGE START
+   ============================================================ */
+
+initialize();
+
+loadAllTables();
+
+
+/* ============================================================
+   SAFETY TIMER
+   ============================================================ */
+
+/*
+ * Refresh member statistics every 60 seconds.
+ * The server remains the source of truth.
+ */
+
+setInterval(
+  ()=>{
+
+    if(
+      state.user &&
+      !state.currentSession
+    ){
+
+      loadMemberFresh();
+
+      loadMySessions();
+
+    }
+
+  },
+  60000
+);
+
+
+/* ============================================================
+   PERIODIC LEADERBOARD REFRESH
+   ============================================================ */
+
+setInterval(
+  ()=>{
+
+    loadLeaderboard();
+
+  },
+  60000
+);
+
 </script>
+
 </body>
 </html>
