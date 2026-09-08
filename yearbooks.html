@@ -1,0 +1,2491 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080808">
+
+<title>CrowRules Yearbooks — School Video & Digital Yearbooks</title>
+
+<meta name="description"
+content="CrowRules Yearbooks is a future digital and video yearbook platform for elementary schools, middle schools, high schools, classes, seniors, sports, activities, clubs, memories and school archives.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --bg:#070707;
+  --bg2:#0d0d0d;
+  --panel:#111;
+  --panel2:#151515;
+  --red:#e50914;
+  --red2:#ff2633;
+  --red3:#7d0008;
+  --white:#f5f5f5;
+  --muted:#929292;
+  --line:rgba(255,255,255,.09);
+  --line-red:rgba(229,9,20,.35);
+  --shadow:0 25px 70px rgba(0,0,0,.55);
+  --radius:18px;
+  --max:1380px;
+}
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+html{
+  scroll-behavior:smooth;
+  background:var(--bg);
+}
+
+body{
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 50% -10%,rgba(229,9,20,.13),transparent 35%),
+    linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px),
+    var(--bg);
+  background-size:auto,44px 44px,44px 44px,auto;
+  color:var(--white);
+  font-family:Montserrat,Arial,sans-serif;
+  overflow-x:hidden;
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:999;
+  opacity:.035;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent 2px,
+      #fff 3px,
+      transparent 4px
+    );
+}
+
+a{
+  color:inherit;
+  text-decoration:none;
+}
+
+button,
+input,
+select,
+textarea{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+.container{
+  width:min(calc(100% - 40px),var(--max));
+  margin:auto;
+}
+
+.top-alert{
+  background:
+    linear-gradient(90deg,transparent,rgba(229,9,20,.15),transparent),
+    #090909;
+  border-bottom:1px solid var(--line-red);
+  padding:10px 20px;
+  text-align:center;
+  font-family:Orbitron,sans-serif;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:#ff6269;
+}
+
+.top-alert span{
+  color:#fff;
+}
+
+header{
+  position:sticky;
+  top:0;
+  z-index:100;
+  backdrop-filter:blur(18px);
+  background:rgba(7,7,7,.88);
+  border-bottom:1px solid var(--line);
+}
+
+.nav{
+  min-height:76px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:30px;
+}
+
+.logo{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-shrink:0;
+}
+
+.logo-mark{
+  width:42px;
+  height:42px;
+  display:grid;
+  place-items:center;
+  background:var(--red);
+  color:#fff;
+  font-family:Orbitron,sans-serif;
+  font-weight:900;
+  clip-path:polygon(14% 0,100% 0,86% 100%,0 100%);
+  box-shadow:0 0 25px rgba(229,9,20,.28);
+}
+
+.logo-text{
+  font-family:Orbitron,sans-serif;
+  font-weight:900;
+  font-size:17px;
+  letter-spacing:1px;
+}
+
+.logo-text small{
+  display:block;
+  margin-top:2px;
+  color:var(--red2);
+  font-family:Montserrat,sans-serif;
+  font-size:8px;
+  letter-spacing:2px;
+  font-weight:800;
+}
+
+.nav-links{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+}
+
+.nav-links a{
+  padding:10px 11px;
+  color:#aaa;
+  font-size:11px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.7px;
+  transition:.2s;
+}
+
+.nav-links a:hover,
+.nav-links a.active{
+  color:#fff;
+}
+
+.nav-links a.active{
+  border-bottom:2px solid var(--red);
+}
+
+.nav-cta{
+  padding:12px 17px;
+  background:var(--red);
+  color:#fff!important;
+  font-family:Orbitron,sans-serif;
+  font-size:10px!important;
+  letter-spacing:1px!important;
+  clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);
+}
+
+.menu{
+  display:none;
+  border:1px solid var(--line);
+  background:#111;
+  color:#fff;
+  padding:11px 13px;
+}
+
+.hero{
+  position:relative;
+  min-height:720px;
+  display:flex;
+  align-items:center;
+  overflow:hidden;
+}
+
+.hero::before{
+  content:"";
+  position:absolute;
+  width:700px;
+  height:700px;
+  right:-280px;
+  top:-150px;
+  border:1px solid rgba(229,9,20,.14);
+  transform:rotate(25deg);
+  box-shadow:
+    0 0 0 80px rgba(229,9,20,.02),
+    0 0 0 160px rgba(229,9,20,.015);
+}
+
+.hero-grid{
+  display:grid;
+  grid-template-columns:1.1fr .9fr;
+  gap:70px;
+  align-items:center;
+}
+
+.eyebrow{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  padding:7px 11px;
+  border:1px solid var(--line-red);
+  background:rgba(229,9,20,.05);
+  color:#ff5c64;
+  font-family:Orbitron,sans-serif;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  margin-bottom:22px;
+}
+
+.eyebrow::before{
+  content:"";
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--red);
+  box-shadow:0 0 14px var(--red);
+}
+
+h1{
+  font-family:Orbitron,sans-serif;
+  font-size:clamp(42px,6vw,82px);
+  line-height:.98;
+  letter-spacing:-3px;
+  max-width:850px;
+}
+
+h1 span{
+  color:var(--red);
+  text-shadow:0 0 35px rgba(229,9,20,.25);
+}
+
+.hero-copy{
+  max-width:700px;
+  margin-top:25px;
+  color:#b8b8b8;
+  font-size:17px;
+  line-height:1.8;
+}
+
+.hero-copy strong{
+  color:#fff;
+}
+
+.hero-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  margin-top:32px;
+}
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:50px;
+  padding:0 20px;
+  border:1px solid var(--line);
+  background:#111;
+  color:#fff;
+  font-family:Orbitron,sans-serif;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  transition:.2s;
+}
+
+.btn:hover{
+  transform:translateY(-2px);
+  border-color:#555;
+}
+
+.btn-primary{
+  background:var(--red);
+  border-color:var(--red);
+}
+
+.btn-primary:hover{
+  background:var(--red2);
+}
+
+.hero-art{
+  min-height:470px;
+  position:relative;
+  display:grid;
+  place-items:center;
+}
+
+.yearbook-cover{
+  width:min(330px,70vw);
+  aspect-ratio:3/4;
+  position:relative;
+  padding:28px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.04),transparent 40%),
+    #0c0c0c;
+  border:1px solid rgba(255,255,255,.15);
+  box-shadow:
+    35px 35px 80px rgba(0,0,0,.7),
+    0 0 60px rgba(229,9,20,.09);
+  transform:rotate(-4deg);
+}
+
+.yearbook-cover::before{
+  content:"";
+  position:absolute;
+  inset:13px;
+  border:1px solid rgba(229,9,20,.35);
+  pointer-events:none;
+}
+
+.cover-top{
+  font-family:Orbitron,sans-serif;
+  font-size:10px;
+  letter-spacing:3px;
+  color:#aaa;
+}
+
+.cover-title{
+  font-family:Orbitron,sans-serif;
+  font-size:45px;
+  line-height:.9;
+  font-weight:900;
+}
+
+.cover-title span{
+  color:var(--red);
+}
+
+.cover-school{
+  font-size:10px;
+  color:#888;
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+
+.cover-year{
+  font-family:Orbitron,sans-serif;
+  font-size:80px;
+  color:transparent;
+  -webkit-text-stroke:1px rgba(255,255,255,.2);
+}
+
+.cover-lines{
+  position:absolute;
+  left:-50px;
+  right:-50px;
+  bottom:85px;
+  height:1px;
+  background:var(--red);
+  box-shadow:0 -15px 0 rgba(229,9,20,.25),0 15px 0 rgba(229,9,20,.12);
+}
+
+.section{
+  padding:105px 0;
+  position:relative;
+}
+
+.section-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:end;
+  gap:30px;
+  margin-bottom:42px;
+}
+
+.section-kicker{
+  color:var(--red2);
+  font-family:Orbitron,sans-serif;
+  font-size:10px;
+  letter-spacing:3px;
+  font-weight:800;
+  text-transform:uppercase;
+  margin-bottom:12px;
+}
+
+h2{
+  font-family:Orbitron,sans-serif;
+  font-size:clamp(29px,4vw,48px);
+  line-height:1.05;
+  letter-spacing:-1.5px;
+}
+
+.section-intro{
+  max-width:600px;
+  color:#969696;
+  line-height:1.7;
+  font-size:14px;
+}
+
+.future-banner{
+  border:1px solid var(--line-red);
+  background:
+    linear-gradient(110deg,rgba(229,9,20,.1),transparent 60%),
+    #0d0d0d;
+  padding:24px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  margin-bottom:55px;
+}
+
+.future-banner strong{
+  display:block;
+  font-family:Orbitron,sans-serif;
+  font-size:13px;
+  letter-spacing:1.5px;
+  margin-bottom:7px;
+}
+
+.future-banner p{
+  color:#999;
+  font-size:13px;
+  line-height:1.6;
+}
+
+.future-tag{
+  flex-shrink:0;
+  padding:10px 13px;
+  border:1px solid var(--red);
+  color:#ff5962;
+  font-family:Orbitron,sans-serif;
+  font-size:9px;
+  letter-spacing:1.5px;
+  font-weight:800;
+}
+
+.school-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+}
+
+.school-card{
+  min-height:320px;
+  position:relative;
+  overflow:hidden;
+  padding:28px;
+  border:1px solid var(--line);
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.025),transparent),
+    var(--panel);
+  transition:.25s;
+}
+
+.school-card:hover{
+  transform:translateY(-5px);
+  border-color:var(--line-red);
+}
+
+.school-number{
+  font-family:Orbitron,sans-serif;
+  color:rgba(255,255,255,.09);
+  font-size:70px;
+  font-weight:900;
+  position:absolute;
+  right:18px;
+  top:4px;
+}
+
+.school-icon{
+  width:58px;
+  height:58px;
+  display:grid;
+  place-items:center;
+  margin-bottom:35px;
+  border:1px solid var(--line-red);
+  color:var(--red2);
+  font-family:Orbitron,sans-serif;
+  font-size:13px;
+  font-weight:900;
+}
+
+.school-card h3{
+  font-family:Orbitron,sans-serif;
+  font-size:21px;
+  margin-bottom:13px;
+}
+
+.school-card p{
+  color:#909090;
+  line-height:1.7;
+  font-size:13px;
+}
+
+.school-card .future-label{
+  position:absolute;
+  bottom:22px;
+  left:28px;
+  color:#666;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+
+.feature-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:15px;
+}
+
+.feature-card{
+  min-height:205px;
+  padding:24px;
+  background:#101010;
+  border:1px solid var(--line);
+  position:relative;
+  overflow:hidden;
+}
+
+.feature-card::after{
+  content:"";
+  position:absolute;
+  width:70px;
+  height:70px;
+  right:-35px;
+  bottom:-35px;
+  border:1px solid rgba(229,9,20,.3);
+  transform:rotate(45deg);
+}
+
+.feature-icon{
+  color:var(--red2);
+  font-family:Orbitron,sans-serif;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:2px;
+  margin-bottom:32px;
+}
+
+.feature-card h3{
+  font-family:Orbitron,sans-serif;
+  font-size:15px;
+  margin-bottom:10px;
+}
+
+.feature-card p{
+  color:#858585;
+  line-height:1.6;
+  font-size:12px;
+}
+
+.concept-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+}
+
+.concept-card{
+  padding:30px;
+  min-height:300px;
+  border:1px solid var(--line);
+  background:
+    radial-gradient(circle at 90% 10%,rgba(229,9,20,.1),transparent 30%),
+    #101010;
+  position:relative;
+}
+
+.concept-label{
+  font-family:Orbitron,sans-serif;
+  color:#666;
+  font-size:9px;
+  letter-spacing:2px;
+  font-weight:800;
+  text-transform:uppercase;
+  margin-bottom:55px;
+}
+
+.concept-card h3{
+  font-family:Orbitron,sans-serif;
+  font-size:21px;
+  margin-bottom:12px;
+}
+
+.concept-card p{
+  color:#919191;
+  font-size:13px;
+  line-height:1.7;
+}
+
+.concept-year{
+  position:absolute;
+  right:25px;
+  bottom:20px;
+  color:rgba(229,9,20,.18);
+  font-family:Orbitron,sans-serif;
+  font-size:52px;
+  font-weight:900;
+}
+
+.edition-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+}
+
+.edition{
+  min-height:370px;
+  padding:28px;
+  border:1px solid var(--line);
+  background:#0f0f0f;
+  position:relative;
+}
+
+.edition.featured{
+  border-color:var(--line-red);
+  background:
+    linear-gradient(145deg,rgba(229,9,20,.09),transparent 50%),
+    #0f0f0f;
+}
+
+.edition-number{
+  font-family:Orbitron,sans-serif;
+  color:var(--red);
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:2px;
+}
+
+.edition-year{
+  font-family:Orbitron,sans-serif;
+  font-size:72px;
+  line-height:1;
+  margin:35px 0 18px;
+  color:#fff;
+}
+
+.edition h3{
+  font-family:Orbitron,sans-serif;
+  font-size:21px;
+  margin-bottom:12px;
+}
+
+.edition p{
+  color:#888;
+  font-size:13px;
+  line-height:1.7;
+}
+
+.edition-status{
+  position:absolute;
+  left:28px;
+  bottom:28px;
+  font-family:Orbitron,sans-serif;
+  color:#777;
+  font-size:9px;
+  letter-spacing:1.5px;
+}
+
+.edition-status span{
+  color:var(--red2);
+}
+
+.archive-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:15px;
+}
+
+.archive-card{
+  padding:25px;
+  border-left:2px solid var(--red);
+  background:#101010;
+  min-height:155px;
+}
+
+.archive-code{
+  font-family:Orbitron,sans-serif;
+  color:#555;
+  font-size:9px;
+  letter-spacing:2px;
+  margin-bottom:25px;
+}
+
+.archive-card h3{
+  font-family:Orbitron,sans-serif;
+  font-size:14px;
+  margin-bottom:9px;
+}
+
+.archive-card p{
+  color:#777;
+  font-size:11px;
+  line-height:1.6;
+}
+
+.interest{
+  padding:95px 0;
+  background:
+    radial-gradient(circle at 15% 50%,rgba(229,9,20,.13),transparent 30%),
+    #0a0a0a;
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+}
+
+.interest-grid{
+  display:grid;
+  grid-template-columns:.85fr 1.15fr;
+  gap:70px;
+  align-items:start;
+}
+
+.interest-copy h2{
+  max-width:600px;
+}
+
+.interest-copy p{
+  margin-top:20px;
+  color:#999;
+  line-height:1.8;
+  font-size:14px;
+}
+
+.interest-points{
+  display:grid;
+  gap:12px;
+  margin-top:30px;
+}
+
+.interest-point{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  color:#aaa;
+  font-size:12px;
+}
+
+.interest-point b{
+  color:var(--red);
+}
+
+.form{
+  padding:30px;
+  background:#111;
+  border:1px solid var(--line);
+  box-shadow:var(--shadow);
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.field.full{
+  grid-column:1/-1;
+}
+
+.field label{
+  color:#aaa;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+
+.field input,
+.field select,
+.field textarea{
+  width:100%;
+  border:1px solid #292929;
+  outline:none;
+  background:#090909;
+  color:#fff;
+  padding:13px 14px;
+  border-radius:0;
+  transition:.2s;
+}
+
+.field textarea{
+  min-height:130px;
+  resize:vertical;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus{
+  border-color:var(--red);
+  box-shadow:0 0 0 2px rgba(229,9,20,.08);
+}
+
+.honeypot{
+  position:absolute!important;
+  left:-9999px!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+
+.form-bottom{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  margin-top:18px;
+}
+
+.form-note{
+  color:#666;
+  font-size:10px;
+  line-height:1.5;
+}
+
+.form-message{
+  display:none;
+  margin-top:15px;
+  padding:13px;
+  border:1px solid var(--line);
+  font-size:12px;
+  line-height:1.5;
+}
+
+.form-message.show{
+  display:block;
+}
+
+.form-message.success{
+  border-color:rgba(0,200,100,.4);
+  color:#7ff0b3;
+}
+
+.form-message.error{
+  border-color:rgba(229,9,20,.45);
+  color:#ff6d74;
+}
+
+.timeline{
+  position:relative;
+  max-width:950px;
+  margin:auto;
+}
+
+.timeline::before{
+  content:"";
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:24px;
+  width:1px;
+  background:linear-gradient(var(--red),transparent);
+}
+
+.timeline-item{
+  position:relative;
+  padding-left:75px;
+  margin-bottom:45px;
+}
+
+.timeline-dot{
+  position:absolute;
+  left:17px;
+  top:4px;
+  width:15px;
+  height:15px;
+  background:var(--red);
+  border:4px solid var(--bg);
+  box-shadow:0 0 0 1px var(--red);
+}
+
+.timeline-year{
+  color:var(--red2);
+  font-family:Orbitron,sans-serif;
+  font-size:11px;
+  letter-spacing:2px;
+  margin-bottom:8px;
+}
+
+.timeline-item h3{
+  font-family:Orbitron,sans-serif;
+  font-size:20px;
+  margin-bottom:9px;
+}
+
+.timeline-item p{
+  color:#858585;
+  font-size:13px;
+  line-height:1.7;
+}
+
+.cta{
+  text-align:center;
+  padding:115px 0;
+  background:
+    linear-gradient(rgba(229,9,20,.04),rgba(229,9,20,.01)),
+    #080808;
+}
+
+.cta h2{
+  max-width:800px;
+  margin:auto;
+}
+
+.cta p{
+  max-width:650px;
+  margin:20px auto 30px;
+  color:#888;
+  line-height:1.7;
+  font-size:14px;
+}
+
+footer{
+  border-top:1px solid var(--line);
+  background:#050505;
+  padding:55px 0 30px;
+}
+
+.footer-grid{
+  display:grid;
+  grid-template-columns:1.4fr 1fr 1fr 1fr;
+  gap:45px;
+}
+
+.footer-brand p{
+  max-width:350px;
+  color:#666;
+  line-height:1.7;
+  font-size:12px;
+  margin-top:18px;
+}
+
+.footer-col h4{
+  font-family:Orbitron,sans-serif;
+  font-size:10px;
+  letter-spacing:2px;
+  margin-bottom:18px;
+}
+
+.footer-col a{
+  display:block;
+  color:#666;
+  font-size:11px;
+  margin:10px 0;
+  transition:.2s;
+}
+
+.footer-col a:hover{
+  color:#fff;
+}
+
+.footer-bottom{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  margin-top:50px;
+  padding-top:20px;
+  border-top:1px solid var(--line);
+  color:#444;
+  font-size:10px;
+}
+
+.loading{
+  color:#666;
+  font-size:12px;
+}
+
+.live-status{
+  margin-top:14px;
+  color:#666;
+  font-size:11px;
+}
+
+@media(max-width:1100px){
+  .nav-links{
+    display:none;
+    position:absolute;
+    left:20px;
+    right:20px;
+    top:75px;
+    padding:15px;
+    background:#0d0d0d;
+    border:1px solid var(--line);
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .nav-links.open{
+    display:flex;
+  }
+
+  .nav-links a{
+    padding:14px;
+  }
+
+  .menu{
+    display:block;
+  }
+
+  .nav-cta{
+    display:none!important;
+  }
+
+  .hero-grid,
+  .interest-grid{
+    grid-template-columns:1fr;
+  }
+
+  .hero{
+    min-height:auto;
+    padding:90px 0;
+  }
+
+  .hero-art{
+    min-height:400px;
+  }
+
+  .feature-grid,
+  .archive-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .footer-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media(max-width:760px){
+  .container{
+    width:min(calc(100% - 28px),var(--max));
+  }
+
+  .top-alert{
+    font-size:8px;
+    letter-spacing:1px;
+  }
+
+  h1{
+    font-size:44px;
+    letter-spacing:-2px;
+  }
+
+  .section{
+    padding:75px 0;
+  }
+
+  .section-head{
+    display:block;
+  }
+
+  .section-intro{
+    margin-top:18px;
+  }
+
+  .future-banner{
+    display:block;
+  }
+
+  .future-tag{
+    display:inline-block;
+    margin-top:18px;
+  }
+
+  .school-grid,
+  .concept-grid,
+  .edition-grid{
+    grid-template-columns:1fr;
+  }
+
+  .feature-grid,
+  .archive-grid{
+    grid-template-columns:1fr;
+  }
+
+  .form-grid{
+    grid-template-columns:1fr;
+  }
+
+  .field.full{
+    grid-column:auto;
+  }
+
+  .form-bottom{
+    align-items:stretch;
+    flex-direction:column;
+  }
+
+  .form-bottom .btn{
+    width:100%;
+  }
+
+  .footer-grid{
+    grid-template-columns:1fr;
+  }
+
+  .footer-bottom{
+    flex-direction:column;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="top-alert">
+  <span>FUTURE PROJECT</span> — CrowRules Yearbooks is currently in development
+</div>
+
+<header>
+  <div class="container nav">
+
+    <a href="home.html" class="logo">
+      <div class="logo-mark">CR</div>
+      <div class="logo-text">
+        CROWRULES
+        <small>YEARBOOKS</small>
+      </div>
+    </a>
+
+    <nav class="nav-links" id="navLinks">
+      <a href="home.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="brands.html">Brands</a>
+      <a href="studios.html">Studios</a>
+      <a href="shows.html">Shows</a>
+      <a href="creators.html">Creators</a>
+      <a href="yearbooks.html" class="active">Yearbooks</a>
+      <a href="business.html">Business</a>
+      <a href="#school-interest" class="nav-cta">School Interest</a>
+    </nav>
+
+    <button class="menu" id="menuButton" type="button" aria-label="Open navigation">
+      MENU
+    </button>
+
+  </div>
+</header>
+
+<main>
+
+<section class="hero">
+  <div class="container hero-grid">
+
+    <div>
+      <div class="eyebrow">
+        School Video + Digital Yearbooks
+      </div>
+
+      <h1>
+        REMEMBER<br>
+        <span>EVERYTHING.</span>
+      </h1>
+
+      <p class="hero-copy">
+        <strong>CrowRules Yearbooks</strong> is a planned future platform
+        for schools to preserve an entire school year — not just in printed
+        pages, but through <strong>video, photography, stories, activities,
+        sports, classes, clubs, milestones and memories.</strong>
+      </p>
+
+      <div class="hero-actions">
+        <a href="#school-interest" class="btn btn-primary">
+          Tell Us About Your School
+        </a>
+
+        <a href="#school-levels" class="btn">
+          Explore The Concept
+        </a>
+      </div>
+
+      <div class="live-status">
+        STATUS: <strong style="color:#ff4b55;">NOT YET AVAILABLE</strong>
+        · FUTURE PLATFORM
+      </div>
+    </div>
+
+    <div class="hero-art">
+
+      <div class="yearbook-cover">
+
+        <div class="cover-top">
+          CROWRULES ENTERTAINMENT
+        </div>
+
+        <div>
+          <div class="cover-title">
+            THE<br>
+            <span>YEAR</span>
+          </div>
+
+          <div class="cover-school">
+            School Video & Digital Yearbook
+          </div>
+        </div>
+
+        <div class="cover-year">
+          20
+        </div>
+
+        <div class="cover-lines"></div>
+
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<section class="section">
+
+  <div class="container">
+
+    <div class="future-banner">
+
+      <div>
+        <strong>FUTURE PROJECT — CURRENTLY IN DEVELOPMENT</strong>
+
+        <p>
+          CrowRules Yearbooks is being designed as a future school-focused
+          digital archive. The school features shown below are concepts and
+          are not currently available for schools to order or publish.
+        </p>
+      </div>
+
+      <div class="future-tag">
+        DEVELOPMENT
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<section class="section" id="school-levels">
+
+  <div class="container">
+
+    <div class="section-head">
+      <div>
+        <div class="section-kicker">01 / School Levels</div>
+        <h2>Built For Every<br>Stage Of School.</h2>
+      </div>
+
+      <p class="section-intro">
+        The future CrowRules Yearbooks platform is designed around the
+        different experiences students have at different stages of their
+        education.
+      </p>
+    </div>
+
+    <div class="school-grid">
+
+      <article class="school-card">
+        <div class="school-number">01</div>
+        <div class="school-icon">EL</div>
+
+        <h3>Elementary School</h3>
+
+        <p>
+          Capture classroom memories, field trips, school events,
+          performances, clubs, artwork, teachers, friendships and the
+          milestones that make the elementary years special.
+        </p>
+
+        <div class="future-label">
+          Future School Edition
+        </div>
+      </article>
+
+      <article class="school-card">
+        <div class="school-number">02</div>
+        <div class="school-icon">MS</div>
+
+        <h3>Middle School</h3>
+
+        <p>
+          A future middle-school edition could bring together classes,
+          activities, athletics, clubs, student voices, performances,
+          school traditions and the moments between childhood and high
+          school.
+        </p>
+
+        <div class="future-label">
+          Future School Edition
+        </div>
+      </article>
+
+      <article class="school-card">
+        <div class="school-number">03</div>
+        <div class="school-icon">HS</div>
+
+        <h3>High School</h3>
+
+        <p>
+          Preserve an entire high-school experience with senior memories,
+          sports, activities, clubs, performances, student stories,
+          milestones, traditions and graduation.
+        </p>
+
+        <div class="future-label">
+          Future School Edition
+        </div>
+      </article>
+
+    </div>
+
+  </div>
+
+</section>
+
+<section class="section" id="features">
+
+  <div class="container">
+
+    <div class="section-head">
+      <div>
+        <div class="section-kicker">02 / The Platform</div>
+        <h2>More Than A<br>Printed Yearbook.</h2>
+      </div>
+
+      <p class="section-intro">
+        The goal is to turn a school year into a living digital memory
+        archive that can combine traditional yearbook content with modern
+        video and interactive media.
+      </p>
+    </div>
+
+    <div class="feature-grid">
+
+      <article class="feature-card">
+        <div class="feature-icon">01 / VIDEO</div>
+        <h3>School Video Yearbooks</h3>
+        <p>
+          A future video edition could bring the entire school year to life
+          through interviews, performances, events and student-created
+          stories.
+        </p>
+      </article>
+
+      <article class="feature-card">
+        <div class="feature-icon">02 / DIGITAL</div>
+        <h3>Interactive Yearbooks</h3>
+        <p>
+          Digital pages could connect photographs, stories, videos,
+          galleries and school memories into one interactive experience.
+        </p>
+      </article>
+
+      <article class="feature-card">
+        <div class="feature-icon">03 / CLASS</div>
+        <h3>Class Yearbooks</h3>
+        <p>
+          Future editions could support individual classes, grade levels,
+          graduating classes and special class projects.
+        </p>
+      </article>
+
+      <article class="feature-card">
+        <div class="feature-icon">04 / SENIOR</div>
+        <h3>Senior & Graduation</h3>
+        <p>
+          Preserve the final year through senior memories, graduation,
+          messages, activities and milestone moments.
+        </p>
+      </article>
+
+      <article class="feature-card">
+        <div class="feature-icon">05 / SPORTS</div>
+        <h3>Sports & Athletics</h3>
+        <p>
+          A future edition could include teams, seasons, championships,
+          tournaments, coaches, photos and highlight videos.
+        </p>
+      </article>
+
+      <article class="feature-card">
+        <div class="feature-icon">06 / CLUBS</div>
+        <h3>Clubs & Organizations</h3>
+        <p>
+          Capture the groups, organizations, student leadership and
+          activities that make each school unique.
+        </p>
+      </article>
+
+      <article class="feature-card">
+        <div class="feature-icon">07 / PEOPLE</div>
+        <h3>Student & Staff Spotlights</h3>
+        <p>
+          Future profiles could celebrate students, teachers, staff,
+          coaches and other members of the school community.
+        </p>
+      </article>
+
+      <article class="feature-card">
+        <div class="feature-icon">08 / ARCHIVE</div>
+        <h3>School Memory Archive</h3>
+        <p>
+          Preserve school traditions, milestones, photographs, videos and
+          important moments beyond a single printed book.
+        </p>
+      </article>
+
+    </div>
+
+  </div>
+
+</section>
+
+<section class="section">
+
+  <div class="container">
+
+    <div class="section-head">
+      <div>
+        <div class="section-kicker">03 / Concept Editions</div>
+        <h2>Imagine The<br>School Edition.</h2>
+      </div>
+
+      <p class="section-intro">
+        These are conceptual examples showing how CrowRules Yearbooks could
+        eventually be adapted to different school environments. They are
+        not current school clients or active editions.
+      </p>
+    </div>
+
+    <div class="concept-grid">
+
+      <article class="concept-card">
+        <div class="concept-label">Concept / Elementary</div>
+
+        <h3>Growing Up</h3>
+
+        <p>
+          A playful digital memory of the school year featuring classrooms,
+          artwork, performances, field trips, friendships, teachers and
+          special events.
+        </p>
+
+        <div class="concept-year">EL</div>
+      </article>
+
+      <article class="concept-card">
+        <div class="concept-label">Concept / Middle School</div>
+
+        <h3>Finding Your Voice</h3>
+
+        <p>
+          A future edition focused on activities, athletics, clubs,
+          performances, student stories, classroom experiences and the
+          transition into high school.
+        </p>
+
+        <div class="concept-year">MS</div>
+      </article>
+
+      <article class="concept-card">
+        <div class="concept-label">Concept / High School</div>
+
+        <h3>The Year That Defined Us</h3>
+
+        <p>
+          A future high-school experience combining senior memories,
+          sports, clubs, performances, milestones, traditions and
+          graduation.
+        </p>
+
+        <div class="concept-year">HS</div>
+      </article>
+
+    </div>
+
+  </div>
+
+</section>
+
+<section class="section" id="editions">
+
+  <div class="container">
+
+    <div class="section-head">
+      <div>
+        <div class="section-kicker">04 / CrowRules Archive</div>
+        <h2>The CrowRules<br>Yearbook.</h2>
+      </div>
+
+      <p class="section-intro">
+        Alongside the future school platform, CrowRules Entertainment will
+        maintain its own annual digital archive documenting the growth of
+        the CrowRules universe.
+      </p>
+    </div>
+
+    <div class="edition-grid" id="editionGrid">
+
+      <article class="edition featured">
+        <div class="edition-number">EDITION 01</div>
+        <div class="edition-year">2026</div>
+        <h3>The Beginning</h3>
+        <p>
+          The planned first CrowRules annual archive documenting the
+          beginning of the next chapter.
+        </p>
+        <div class="edition-status">
+          STATUS: <span>FUTURE</span>
+        </div>
+      </article>
+
+      <article class="edition">
+        <div class="edition-number">EDITION 02</div>
+        <div class="edition-year">2027</div>
+        <h3>The Expansion</h3>
+        <p>
+          A planned archive documenting the growth of CrowRules
+          Entertainment and its expanding creative network.
+        </p>
+        <div class="edition-status">
+          STATUS: <span>FUTURE</span>
+        </div>
+      </article>
+
+      <article class="edition">
+        <div class="edition-number">EDITION 03</div>
+        <div class="edition-year">2028</div>
+        <h3>The Network</h3>
+        <p>
+          A planned future edition focused on the wider CrowRules
+          entertainment network and its creators, productions and projects.
+        </p>
+        <div class="edition-status">
+          STATUS: <span>FUTURE</span>
+        </div>
+      </article>
+
+    </div>
+
+    <div id="editionStatus" class="loading" style="margin-top:20px;"></div>
+
+  </div>
+
+</section>
+
+<section class="section">
+
+  <div class="container">
+
+    <div class="section-head">
+      <div>
+        <div class="section-kicker">05 / School Memory System</div>
+        <h2>One Year.<br>Every Memory.</h2>
+      </div>
+
+      <p class="section-intro">
+        A future school project could organize a complete school year into
+        connected sections instead of forcing every memory into a few
+        printed pages.
+      </p>
+    </div>
+
+    <div class="archive-grid">
+
+      <article class="archive-card">
+        <div class="archive-code">PEOPLE / 001</div>
+        <h3>Students & Staff</h3>
+        <p>People who made the year what it was.</p>
+      </article>
+
+      <article class="archive-card">
+        <div class="archive-code">CLASS / 002</div>
+        <h3>Classes</h3>
+        <p>Grade levels, classrooms and class memories.</p>
+      </article>
+
+      <article class="archive-card">
+        <div class="archive-code">SPORT / 003</div>
+        <h3>Sports</h3>
+        <p>Teams, seasons, athletes and school pride.</p>
+      </article>
+
+      <article class="archive-card">
+        <div class="archive-code">CLUB / 004</div>
+        <h3>Clubs</h3>
+        <p>Organizations, activities and student leadership.</p>
+      </article>
+
+      <article class="archive-card">
+        <div class="archive-code">MEDIA / 005</div>
+        <h3>Photos & Video</h3>
+        <p>Visual memories from across the school year.</p>
+      </article>
+
+      <article class="archive-card">
+        <div class="archive-code">EVENT / 006</div>
+        <h3>Events</h3>
+        <p>Assemblies, performances, dances and celebrations.</p>
+      </article>
+
+      <article class="archive-card">
+        <div class="archive-code">VOICE / 007</div>
+        <h3>Messages</h3>
+        <p>Future memories, messages and reflections.</p>
+      </article>
+
+      <article class="archive-card">
+        <div class="archive-code">MILE / 008</div>
+        <h3>Milestones</h3>
+        <p>Graduation, achievements and moments worth remembering.</p>
+      </article>
+
+    </div>
+
+  </div>
+
+</section>
+
+<section class="interest" id="school-interest">
+
+  <div class="container interest-grid">
+
+    <div class="interest-copy">
+
+      <div class="section-kicker">
+        06 / School Interest
+      </div>
+
+      <h2>
+        Want To Help Shape The Future?
+      </h2>
+
+      <p>
+        CrowRules Yearbooks is not currently accepting school orders.
+        However, schools, educators, administrators and community partners
+        can register their interest and help us understand what a future
+        school yearbook platform should look like.
+      </p>
+
+      <div class="interest-points">
+
+        <div class="interest-point">
+          <b>01</b>
+          Elementary school
+        </div>
+
+        <div class="interest-point">
+          <b>02</b>
+          Middle school
+        </div>
+
+        <div class="interest-point">
+          <b>03</b>
+          High school
+        </div>
+
+        <div class="interest-point">
+          <b>04</b>
+          Digital & video yearbooks
+        </div>
+
+        <div class="interest-point">
+          <b>05</b>
+          School archives & partnerships
+        </div>
+
+      </div>
+
+    </div>
+
+    <form class="form" id="interestForm">
+
+      <div class="form-grid">
+
+        <div class="field">
+          <label for="name">Your Name</label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            maxlength="120"
+            autocomplete="name"
+            required
+            placeholder="Your name">
+        </div>
+
+        <div class="field">
+          <label for="school">School Name</label>
+          <input
+            id="school"
+            name="school"
+            type="text"
+            maxlength="200"
+            autocomplete="organization"
+            required
+            placeholder="School name">
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            maxlength="320"
+            autocomplete="email"
+            required
+            placeholder="you@example.com">
+        </div>
+
+        <div class="field">
+          <label for="interestType">I'm Interested In</label>
+
+          <select id="interestType" name="interest_type" required>
+            <option value="">Select one</option>
+            <option value="school_yearbook">
+              School Digital Yearbook
+            </option>
+            <option value="school_video">
+              School Video Yearbook
+            </option>
+            <option value="digital_archive">
+              Digital School Archive
+            </option>
+            <option value="partnership">
+              Partnership
+            </option>
+            <option value="other">
+              Other
+            </option>
+          </select>
+        </div>
+
+        <div class="field full">
+          <label for="message">Tell Us About Your School</label>
+
+          <textarea
+            id="message"
+            name="message"
+            maxlength="5000"
+            placeholder="Tell us what you would want a future CrowRules Yearbook to include..."></textarea>
+        </div>
+
+        <div class="field honeypot">
+          <label for="website">Website</label>
+          <input
+            id="website"
+            name="website"
+            type="text"
+            tabindex="-1"
+            autocomplete="off">
+        </div>
+
+      </div>
+
+      <div class="form-bottom">
+
+        <div class="form-note">
+          This form submits a school-interest request only.
+          It does not create an order or commitment.
+        </div>
+
+        <button
+          class="btn btn-primary"
+          id="submitButton"
+          type="submit">
+          Submit Interest
+        </button>
+
+      </div>
+
+      <div
+        class="form-message"
+        id="formMessage"
+        role="status"
+        aria-live="polite">
+      </div>
+
+    </form>
+
+  </div>
+
+</section>
+
+<section class="section">
+
+  <div class="container">
+
+    <div class="section-head">
+      <div>
+        <div class="section-kicker">07 / Archive Timeline</div>
+        <h2>Where The<br>Archive Goes.</h2>
+      </div>
+
+      <p class="section-intro">
+        CrowRules Yearbooks is intended to preserve not only individual
+        school years, but the history of the larger CrowRules ecosystem.
+      </p>
+    </div>
+
+    <div class="timeline">
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-year">2026</div>
+        <h3>The Beginning</h3>
+        <p>
+          The planned first CrowRules annual archive and the beginning of
+          the Yearbooks platform concept.
+        </p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-year">2027</div>
+        <h3>The Expansion</h3>
+        <p>
+          The planned next chapter as CrowRules expands its entertainment,
+          creator, media and community projects.
+        </p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-year">2028</div>
+        <h3>The Network</h3>
+        <p>
+          A planned future archive documenting the larger CrowRules network
+          and its growing collection of projects.
+        </p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-year">FUTURE</div>
+        <h3>School Archives</h3>
+        <p>
+          The long-term vision is to eventually bring the same preservation
+          philosophy to schools, classes and communities.
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<section class="cta">
+
+  <div class="container">
+
+    <div class="section-kicker">
+      CROW RULES YEARBOOKS
+    </div>
+
+    <h2>
+      Don't Just Move On.<br>
+      Preserve The Year.
+    </h2>
+
+    <p>
+      The future of yearbooks can be more than a book.
+      It can become a permanent digital memory of the people,
+      stories and moments that made a school year matter.
+    </p>
+
+    <a href="#school-interest" class="btn btn-primary">
+      Join The School Interest List
+    </a>
+
+  </div>
+
+</section>
+
+</main>
+
+<footer>
+
+  <div class="container">
+
+    <div class="footer-grid">
+
+      <div class="footer-brand">
+
+        <a href="home.html" class="logo">
+          <div class="logo-mark">CR</div>
+
+          <div class="logo-text">
+            CROWRULES
+            <small>ENTERTAINMENT</small>
+          </div>
+        </a>
+
+        <p>
+          CrowRules Entertainment is building an independent creative
+          network spanning television, studios, creators, sports,
+          podcasting, records, digital media and future school yearbooks.
+        </p>
+
+      </div>
+
+      <div class="footer-col">
+
+        <h4>EXPLORE</h4>
+
+        <a href="home.html">Home</a>
+        <a href="tv.html">CrowRules TV</a>
+        <a href="studios.html">Studios</a>
+        <a href="shows.html">Shows</a>
+        <a href="creators.html">Creators</a>
+
+      </div>
+
+      <div class="footer-col">
+
+        <h4>NETWORK</h4>
+
+        <a href="sports.html">Sports</a>
+        <a href="podcasting.html">Podcasting</a>
+        <a href="records.html">Records</a>
+        <a href="digital.html">Digital</a>
+        <a href="events.html">Events</a>
+
+      </div>
+
+      <div class="footer-col">
+
+        <h4>COMPANY</h4>
+
+        <a href="about.html">About</a>
+        <a href="business.html">Business</a>
+        <a href="partners.html">Partners</a>
+        <a href="press.html">Press</a>
+        <a href="careers.html">Careers</a>
+
+      </div>
+
+    </div>
+
+    <div class="footer-bottom">
+
+      <div>
+        © 2026 CrowRules Entertainment
+      </div>
+
+      <div>
+        CROW RULES YEARBOOKS · FUTURE PROJECT
+      </div>
+
+    </div>
+
+  </div>
+
+</footer>
+
+<script>
+/* ============================================================
+   CROW RULES YEARBOOKS
+   SUPABASE CONFIGURATION
+   ============================================================ */
+
+const SUPABASE_URL =
+  "https://cevylpnoexugwgygvtgu.supabase.co";
+
+/*
+  Replace this placeholder with the project's PUBLIC
+  publishable/anon key.
+
+  NEVER place a service_role or secret key in this file.
+*/
+const SUPABASE_ANON_KEY =
+  "YOUR_SUPABASE_ANON_OR_PUBLISHABLE_KEY";
+
+let supabaseClient = null;
+
+if(
+  window.supabase &&
+  SUPABASE_ANON_KEY &&
+  !SUPABASE_ANON_KEY.includes("YOUR_SUPABASE")
+){
+  supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY,
+    {
+      auth:{
+        persistSession:true,
+        autoRefreshToken:true,
+        detectSessionInUrl:true
+      }
+    }
+  );
+}
+
+
+/* ============================================================
+   MOBILE NAVIGATION
+   ============================================================ */
+
+const menuButton = document.getElementById("menuButton");
+const navLinks = document.getElementById("navLinks");
+
+menuButton.addEventListener("click",()=>{
+  navLinks.classList.toggle("open");
+});
+
+document.querySelectorAll(".nav-links a").forEach(link=>{
+  link.addEventListener("click",()=>{
+    navLinks.classList.remove("open");
+  });
+});
+
+
+/* ============================================================
+   LOAD PUBLISHED CROW RULES EDITIONS
+   ============================================================ */
+
+async function loadPublishedEditions(){
+
+  const status = document.getElementById("editionStatus");
+
+  if(!supabaseClient){
+    status.textContent =
+      "ARCHIVE DATABASE CONNECTION NOT CONFIGURED — SHOWING PLANNED EDITIONS.";
+    return;
+  }
+
+  try{
+
+    const {
+      data,
+      error
+    } = await supabaseClient
+      .from("yearbook_editions")
+      .select(`
+        id,
+        edition_key,
+        year,
+        edition_number,
+        title,
+        slug,
+        subtitle,
+        description,
+        cover_image_url,
+        archive_url,
+        status,
+        is_featured,
+        sort_order
+      `)
+      .eq("status","published")
+      .order("year",{ascending:false})
+      .order("edition_number",{ascending:false});
+
+    if(error){
+      console.error("Yearbook edition query failed:",error);
+
+      status.textContent =
+        "PLANNED EDITIONS SHOWN — PUBLISHED ARCHIVE DATA IS NOT AVAILABLE YET.";
+
+      return;
+    }
+
+    if(!data || data.length === 0){
+
+      status.textContent =
+        "NO PUBLISHED EDITIONS YET — FUTURE EDITIONS ARE SHOWN ABOVE.";
+
+      return;
+    }
+
+    renderPublishedEditions(data);
+
+  }catch(error){
+
+    console.error(error);
+
+    status.textContent =
+      "PLANNED EDITIONS SHOWN — ARCHIVE DATABASE IS NOT CURRENTLY AVAILABLE.";
+
+  }
+}
+
+
+function renderPublishedEditions(editions){
+
+  const grid = document.getElementById("editionGrid");
+
+  if(!editions.length){
+    return;
+  }
+
+  grid.innerHTML = "";
+
+  editions.forEach((edition,index)=>{
+
+    const article = document.createElement("article");
+
+    article.className =
+      "edition" +
+      (edition.is_featured ? " featured" : "");
+
+    const safeYear =
+      escapeHTML(edition.year ?? "");
+
+    const safeNumber =
+      escapeHTML(
+        String(edition.edition_number ?? index + 1)
+          .padStart(2,"0")
+      );
+
+    const safeTitle =
+      escapeHTML(edition.title ?? "Untitled Edition");
+
+    const safeDescription =
+      escapeHTML(
+        edition.description ||
+        edition.subtitle ||
+        "Published CrowRules Yearbook edition."
+      );
+
+    article.innerHTML = `
+
+      <div class="edition-number">
+        EDITION ${safeNumber}
+      </div>
+
+      <div class="edition-year">
+        ${safeYear}
+      </div>
+
+      <h3>
+        ${safeTitle}
+      </h3>
+
+      <p>
+        ${safeDescription}
+      </p>
+
+      <div class="edition-status">
+        STATUS: <span>PUBLISHED</span>
+      </div>
+
+    `;
+
+    grid.appendChild(article);
+
+  });
+
+  document.getElementById("editionStatus").textContent =
+    `${editions.length} published CrowRules Yearbook edition${editions.length === 1 ? "" : "s"} available in the archive.`;
+}
+
+
+/* ============================================================
+   SCHOOL CATALOG
+   ============================================================ */
+
+async function loadPublicSchools(){
+
+  if(!supabaseClient){
+    return;
+  }
+
+  try{
+
+    const {
+      data,
+      error
+    } = await supabaseClient
+      .from("school_profiles")
+      .select(`
+        id,
+        name,
+        district,
+        city,
+        state,
+        school_level,
+        description
+      `)
+      .eq("is_active",true)
+      .order("name");
+
+    if(error){
+      console.warn(
+        "Public school catalog unavailable:",
+        error
+      );
+      return;
+    }
+
+    /*
+      The current project intentionally has no active public
+      schools. This function is ready for future public
+      school profiles without requiring a page rewrite.
+    */
+
+    if(data && data.length){
+      console.info(
+        "Public school profiles available:",
+        data.length
+      );
+    }
+
+  }catch(error){
+
+    console.warn(error);
+
+  }
+}
+
+
+/* ============================================================
+   SCHOOL INTEREST FORM
+   ============================================================ */
+
+const interestForm =
+  document.getElementById("interestForm");
+
+const submitButton =
+  document.getElementById("submitButton");
+
+const formMessage =
+  document.getElementById("formMessage");
+
+
+function showFormMessage(type,message){
+
+  formMessage.className =
+    "form-message show " + type;
+
+  formMessage.textContent =
+    message;
+}
+
+
+interestForm.addEventListener("submit",async event=>{
+
+  event.preventDefault();
+
+  const formData =
+    new FormData(interestForm);
+
+  const honeypot =
+    String(
+      formData.get("website") || ""
+    ).trim();
+
+  /*
+    Silent anti-spam response.
+  */
+  if(honeypot){
+    interestForm.reset();
+
+    showFormMessage(
+      "success",
+      "Thank you. Your interest has been recorded."
+    );
+
+    return;
+  }
+
+  if(!supabaseClient){
+
+    showFormMessage(
+      "error",
+      "The school-interest database is not configured on this page yet. Please add the public Supabase publishable/anon key before submitting."
+    );
+
+    return;
+  }
+
+  const name =
+    String(formData.get("name") || "").trim();
+
+  const schoolName =
+    String(formData.get("school") || "").trim();
+
+  const email =
+    String(formData.get("email") || "").trim();
+
+  const interestType =
+    String(formData.get("interest_type") || "").trim();
+
+  const message =
+    String(formData.get("message") || "").trim();
+
+  if(
+    name.length < 2 ||
+    name.length > 120
+  ){
+    showFormMessage(
+      "error",
+      "Please enter your name."
+    );
+    return;
+  }
+
+  if(
+    schoolName.length < 2 ||
+    schoolName.length > 200
+  ){
+    showFormMessage(
+      "error",
+      "Please enter the school name."
+    );
+    return;
+  }
+
+  if(
+    email.length < 5 ||
+    email.length > 320 ||
+    !email.includes("@")
+  ){
+    showFormMessage(
+      "error",
+      "Please enter a valid email address."
+    );
+    return;
+  }
+
+  const validInterestTypes = [
+    "school_yearbook",
+    "school_video",
+    "digital_archive",
+    "partnership",
+    "other"
+  ];
+
+  if(
+    !validInterestTypes.includes(interestType)
+  ){
+    showFormMessage(
+      "error",
+      "Please select what you are interested in."
+    );
+    return;
+  }
+
+  if(message.length > 5000){
+
+    showFormMessage(
+      "error",
+      "Your message is too long."
+    );
+
+    return;
+  }
+
+  submitButton.disabled = true;
+
+  submitButton.textContent =
+    "SUBMITTING...";
+
+  formMessage.className =
+    "form-message";
+
+  try{
+
+    const {
+      error
+    } = await supabaseClient
+      .from("yearbook_interest")
+      .insert({
+        name:name,
+        school_name:schoolName,
+        email:email,
+        interest_type:interestType,
+        message:message || null
+      });
+
+    if(error){
+
+      console.error(
+        "School interest submission failed:",
+        error
+      );
+
+      showFormMessage(
+        "error",
+        "We couldn't submit your request right now. Please try again."
+      );
+
+      return;
+    }
+
+    interestForm.reset();
+
+    showFormMessage(
+      "success",
+      "Thank you. Your school interest has been submitted to CrowRules Yearbooks."
+    );
+
+  }catch(error){
+
+    console.error(error);
+
+    showFormMessage(
+      "error",
+      "Something went wrong while submitting your request."
+    );
+
+  }finally{
+
+    submitButton.disabled = false;
+
+    submitButton.textContent =
+      "SUBMIT INTEREST";
+
+  }
+
+});
+
+
+/* ============================================================
+   ESCAPE HTML
+   ============================================================ */
+
+function escapeHTML(value){
+
+  return String(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+
+}
+
+
+/* ============================================================
+   INITIALIZE
+   ============================================================ */
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+  loadPublishedEditions();
+
+  loadPublicSchools();
+
+});
+
+</script>
+
+</body>
+</html>
