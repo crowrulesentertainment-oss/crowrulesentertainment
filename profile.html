@@ -1,1881 +1,1857 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-
-<title>CrowRules Profile</title>
-
-<meta
-  name="description"
-  content="Your universal CrowRules profile, membership and CrowPoints dashboard."
->
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<link
-  href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Orbitron:wght@500;600;700;800&display=swap"
-  rel="stylesheet"
->
-
-<!-- IMPORTANT: Correct Supabase package name -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-:root{
-  --bg:#05060a;
-  --bg2:#080a10;
-  --panel:#0d1018;
-  --panel2:#111521;
-  --line:#252b3a;
-  --text:#f5f7fb;
-  --muted:#98a2b5;
-  --cyan:#39e7ff;
-  --purple:#a66cff;
-  --red:#ff4059;
-  --green:#45e59b;
-  --shadow:0 24px 70px rgba(0,0,0,.48);
-}
-
-*{
-  box-sizing:border-box;
-}
-
-html{
-  scroll-behavior:smooth;
-}
-
-body{
-  margin:0;
-  min-height:100vh;
-  color:var(--text);
-  background:
-    radial-gradient(
-      circle at 10% 0%,
-      rgba(57,231,255,.10),
-      transparent 30%
-    ),
-    radial-gradient(
-      circle at 90% 10%,
-      rgba(166,108,255,.12),
-      transparent 30%
-    ),
-    linear-gradient(180deg,var(--bg),var(--bg2));
-  font-family:Montserrat,Arial,sans-serif;
-}
-
-a{
-  color:inherit;
-  text-decoration:none;
-}
-
-button,
-input,
-textarea{
-  font:inherit;
-}
-
-button{
-  cursor:pointer;
-}
-
-/* =========================================================
-   HEADER
-========================================================= */
-
-header{
-  position:sticky;
-  top:0;
-  z-index:100;
-  border-bottom:1px solid var(--line);
-  background:rgba(5,6,10,.88);
-  backdrop-filter:blur(18px);
-}
-
-.nav{
-  width:min(1200px,100%);
-  margin:auto;
-  min-height:68px;
-  padding:12px 20px;
-  display:flex;
-  align-items:center;
-  gap:20px;
-}
-
-.brand{
-  font-family:Orbitron,sans-serif;
-  font-size:19px;
-  font-weight:800;
-  letter-spacing:.04em;
-  white-space:nowrap;
-}
-
-.brand span{
-  color:var(--cyan);
-}
-
-.navlinks{
-  margin-left:auto;
-  display:flex;
-  align-items:center;
-  gap:7px;
-  flex-wrap:wrap;
-}
-
-.navlinks a,
-.navlinks button{
-  border:1px solid transparent;
-  border-radius:10px;
-  padding:9px 12px;
-  color:var(--muted);
-  background:transparent;
-}
-
-.navlinks a:hover,
-.navlinks button:hover{
-  color:#fff;
-  border-color:var(--line);
-  background:rgba(255,255,255,.035);
-}
-
-/* =========================================================
-   MAIN
-========================================================= */
-
-main{
-  width:min(1200px,100%);
-  margin:auto;
-  padding:45px 20px 80px;
-}
-
-.hero{
-  display:grid;
-  grid-template-columns:1fr auto;
-  gap:25px;
-  align-items:end;
-  margin-bottom:25px;
-}
-
-.eyebrow{
-  color:var(--cyan);
-  font-family:Orbitron,sans-serif;
-  font-size:11px;
-  font-weight:700;
-  letter-spacing:.18em;
-  text-transform:uppercase;
-}
-
-.hero h1{
-  margin:9px 0;
-  font-family:Orbitron,sans-serif;
-  font-size:clamp(34px,6vw,58px);
-  line-height:1.05;
-}
-
-.hero p{
-  max-width:720px;
-  margin:0;
-  color:var(--muted);
-  line-height:1.75;
-}
-
-.account-status{
-  border:1px solid var(--line);
-  border-radius:12px;
-  padding:11px 14px;
-  color:var(--muted);
-  background:var(--panel);
-  font-size:12px;
-  white-space:nowrap;
-}
-
-/* =========================================================
-   NOTICES
-========================================================= */
-
-.notice{
-  display:none;
-  margin-bottom:20px;
-  padding:13px 15px;
-  border-radius:11px;
-  font-size:13px;
-  line-height:1.55;
-}
-
-.notice.show{
-  display:block;
-}
-
-.notice.error{
-  color:#ffb4bf;
-  border:1px solid rgba(255,64,89,.32);
-  background:rgba(255,64,89,.08);
-}
-
-.notice.ok{
-  color:#a9f5d0;
-  border:1px solid rgba(69,229,155,.28);
-  background:rgba(69,229,155,.07);
-}
-
-/* =========================================================
-   GRID
-========================================================= */
-
-.grid{
-  display:grid;
-  grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);
-  gap:20px;
-}
-
-.card{
-  border:1px solid var(--line);
-  border-radius:18px;
-  padding:24px;
-  background:
-    linear-gradient(
-      180deg,
-      rgba(17,21,33,.96),
-      rgba(9,11,18,.96)
-    );
-  box-shadow:var(--shadow);
-}
-
-.card + .card{
-  margin-top:20px;
-}
-
-.card h2{
-  margin:0 0 18px;
-  font-family:Orbitron,sans-serif;
-  font-size:17px;
-}
-
-/* =========================================================
-   PROFILE
-========================================================= */
-
-.profile-head{
-  display:flex;
-  align-items:center;
-  gap:20px;
-}
-
-.avatar{
-  width:98px;
-  height:98px;
-  flex:0 0 98px;
-  overflow:hidden;
-  display:grid;
-  place-items:center;
-  border:2px solid var(--cyan);
-  border-radius:50%;
-  background:
-    radial-gradient(
-      circle at 30% 20%,
-      rgba(57,231,255,.25),
-      transparent 40%
-    ),
-    linear-gradient(135deg,#111827,#24133d);
-  color:#fff;
-  font-family:Orbitron,sans-serif;
-  font-size:27px;
-  font-weight:800;
-}
-
-.avatar img{
-  width:100%;
-  height:100%;
-  display:block;
-  object-fit:cover;
-}
-
-.name{
-  font-size:27px;
-  font-weight:900;
-  line-height:1.2;
-}
-
-.username{
-  margin-top:5px;
-  color:var(--cyan);
-  font-size:13px;
-  font-weight:600;
-}
-
-.badges{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  margin-top:12px;
-}
-
-.badge{
-  display:inline-flex;
-  align-items:center;
-  border:1px solid rgba(57,231,255,.24);
-  border-radius:999px;
-  padding:6px 10px;
-  background:rgba(57,231,255,.07);
-  color:#dffaff;
-  font-size:10px;
-  font-weight:900;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-}
-
-.badge.purple{
-  border-color:rgba(166,108,255,.27);
-  background:rgba(166,108,255,.08);
-  color:#e5d6ff;
-}
-
-/* =========================================================
-   STATS
-========================================================= */
-
-.stats{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-  margin-top:23px;
-}
-
-.stat{
-  border:1px solid var(--line);
-  border-radius:13px;
-  padding:15px;
-  background:var(--panel2);
-}
-
-.stat strong{
-  display:block;
-  font-size:23px;
-  font-weight:900;
-}
-
-.stat span{
-  display:block;
-  margin-top:4px;
-  color:var(--muted);
-  font-size:10px;
-  font-weight:700;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-}
-
-/* =========================================================
-   FORM
-========================================================= */
-
-.form-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:14px;
-}
-
-.field{
-  display:flex;
-  flex-direction:column;
-  gap:7px;
-}
-
-.field.full{
-  grid-column:1/-1;
-}
-
-.field label{
-  color:var(--muted);
-  font-size:11px;
-  font-weight:800;
-}
-
-.field input,
-.field textarea{
-  width:100%;
-  border:1px solid var(--line);
-  border-radius:11px;
-  outline:none;
-  padding:12px 13px;
-  color:#fff;
-  background:#070910;
-}
-
-.field input:focus,
-.field textarea:focus{
-  border-color:var(--cyan);
-  box-shadow:0 0 0 3px rgba(57,231,255,.08);
-}
-
-.field textarea{
-  min-height:115px;
-  resize:vertical;
-}
-
-.actions{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-top:17px;
-}
-
-.btn{
-  border:1px solid var(--line);
-  border-radius:11px;
-  padding:11px 15px;
-  color:#fff;
-  background:#111522;
-  font-weight:800;
-}
-
-.btn:hover{
-  border-color:#3a4255;
-}
-
-.btn.primary{
-  border-color:transparent;
-  background:
-    linear-gradient(
-      90deg,
-      #137d91,
-      #6742a8
-    );
-}
-
-.btn.danger{
-  border-color:rgba(255,64,89,.35);
-  color:#ff9baa;
-}
-
-/* =========================================================
-   MEMBERSHIP
-========================================================= */
-
-.plan{
-  border:1px solid var(--line);
-  border-radius:14px;
-  padding:17px;
-  background:rgba(255,255,255,.025);
-}
-
-.plan-top{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:15px;
-}
-
-.plan-name{
-  font-family:Orbitron,sans-serif;
-  font-size:15px;
-  font-weight:800;
-}
-
-.price{
-  font-size:24px;
-  font-weight:900;
-}
-
-.price small{
-  color:var(--muted);
-  font-size:11px;
-  font-weight:500;
-}
-
-.plan p{
-  margin:12px 0 0;
-  color:var(--muted);
-  font-size:12px;
-  line-height:1.65;
-}
-
-/* =========================================================
-   SITES
-========================================================= */
-
-.sites{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:9px;
-}
-
-.site{
-  border:1px solid var(--line);
-  border-radius:10px;
-  padding:11px;
-  color:var(--muted);
-  background:rgba(255,255,255,.018);
-  font-size:11px;
-}
-
-.site b{
-  display:block;
-  margin-bottom:3px;
-  color:#fff;
-  font-size:12px;
-}
-
-/* =========================================================
-   ACCOUNT INFORMATION
-========================================================= */
-
-.account-row{
-  display:flex;
-  justify-content:space-between;
-  gap:15px;
-  padding:11px 0;
-  border-bottom:1px solid rgba(255,255,255,.06);
-  font-size:12px;
-}
-
-.account-row:last-child{
-  border-bottom:0;
-}
-
-.account-row span:first-child{
-  color:var(--muted);
-}
-
-.account-row span:last-child{
-  text-align:right;
-  overflow-wrap:anywhere;
-}
-
-/* =========================================================
-   FOOTER
-========================================================= */
-
-footer{
-  border-top:1px solid var(--line);
-  padding:25px 20px;
-  color:var(--muted);
-  font-size:11px;
-  text-align:center;
-}
-
-/* =========================================================
-   STATES
-========================================================= */
-
-.loading{
-  opacity:.55;
-  pointer-events:none;
-}
-
-.hidden{
-  display:none!important;
-}
-
-/* =========================================================
-   RESPONSIVE
-========================================================= */
-
-@media(max-width:850px){
-
-  .grid{
-    grid-template-columns:1fr;
-  }
-
-  .hero{
-    grid-template-columns:1fr;
-  }
-
-  .account-status{
-    justify-self:start;
-  }
-
-}
-
-@media(max-width:600px){
-
-  .nav{
-    padding:12px 14px;
-  }
-
-  .navlinks{
-    display:none;
-  }
-
-  main{
-    padding:30px 14px 60px;
-  }
-
-  .card{
-    padding:18px;
-  }
-
-  .profile-head{
-    align-items:flex-start;
-  }
-
-  .avatar{
-    width:78px;
-    height:78px;
-    flex-basis:78px;
-    font-size:22px;
-  }
-
-  .name{
-    font-size:21px;
-  }
-
-  .stats{
-    grid-template-columns:1fr;
-  }
-
-  .form-grid{
-    grid-template-columns:1fr;
-  }
-
-  .field.full{
-    grid-column:auto;
-  }
-
-  .sites{
-    grid-template-columns:1fr;
-  }
-
-}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>My Profile | CrowRules Entertainment</title>
+
+  <meta
+    name="description"
+    content="Manage your universal CrowRules Entertainment profile, membership, CrowPoints and access across the CrowRules universe."
+  >
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Orbitron:wght@500;600;700;800;900&display=swap"
+    rel="stylesheet"
+  >
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root{
+      --bg:#05070b;
+      --bg2:#090d14;
+      --panel:#0d121b;
+      --panel2:#111824;
+      --line:rgba(255,255,255,.09);
+      --text:#f5f7fb;
+      --muted:#9aa7b8;
+      --cyan:#00e5ff;
+      --purple:#9b5cff;
+      --red:#ff304f;
+      --green:#42e695;
+      --gold:#ffc857;
+      --shadow:0 20px 70px rgba(0,0,0,.45);
+      --radius:18px;
+      --max:1240px;
+    }
+
+    *{
+      box-sizing:border-box;
+    }
+
+    html{
+      scroll-behavior:smooth;
+    }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 15% 10%,rgba(0,229,255,.09),transparent 28%),
+        radial-gradient(circle at 85% 20%,rgba(155,92,255,.10),transparent 30%),
+        radial-gradient(circle at 50% 100%,rgba(255,48,79,.06),transparent 35%),
+        var(--bg);
+      font-family:Montserrat,Arial,sans-serif;
+    }
+
+    a{
+      color:inherit;
+      text-decoration:none;
+    }
+
+    button,
+    input,
+    textarea{
+      font:inherit;
+    }
+
+    button{
+      cursor:pointer;
+    }
+
+    .container{
+      width:min(calc(100% - 32px),var(--max));
+      margin:auto;
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:100;
+      backdrop-filter:blur(18px);
+      background:rgba(5,7,11,.88);
+      border-bottom:1px solid var(--line);
+    }
+
+    .nav{
+      min-height:72px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+
+    .brand-mark{
+      width:42px;
+      height:42px;
+      display:grid;
+      place-items:center;
+      border:1px solid rgba(0,229,255,.45);
+      border-radius:12px;
+      background:
+        linear-gradient(135deg,rgba(0,229,255,.12),rgba(155,92,255,.12));
+      color:var(--cyan);
+      font-family:Orbitron,sans-serif;
+      font-weight:900;
+      box-shadow:0 0 28px rgba(0,229,255,.10);
+    }
+
+    .brand-text{
+      min-width:0;
+    }
+
+    .brand-name{
+      font-family:Orbitron,sans-serif;
+      font-weight:900;
+      letter-spacing:.03em;
+      white-space:nowrap;
+    }
+
+    .brand-sub{
+      color:var(--muted);
+      font-size:.68rem;
+      letter-spacing:.13em;
+      text-transform:uppercase;
+      margin-top:2px;
+    }
+
+    .nav-links{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .nav-links a{
+      padding:9px 12px;
+      border-radius:10px;
+      color:#cbd5e1;
+      font-size:.82rem;
+      font-weight:700;
+      transition:.2s ease;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active{
+      color:white;
+      background:rgba(255,255,255,.06);
+    }
+
+    .nav-links a.active{
+      box-shadow:inset 0 -2px 0 var(--cyan);
+    }
+
+    .hero{
+      padding:70px 0 35px;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:7px 11px;
+      border:1px solid rgba(0,229,255,.22);
+      border-radius:999px;
+      color:var(--cyan);
+      background:rgba(0,229,255,.06);
+      font-size:.72rem;
+      font-weight:800;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+    }
+
+    .hero h1{
+      margin:18px 0 12px;
+      font-family:Orbitron,sans-serif;
+      font-size:clamp(2rem,5vw,4rem);
+      line-height:1.05;
+      letter-spacing:-.04em;
+    }
+
+    .hero h1 span{
+      color:var(--cyan);
+    }
+
+    .hero p{
+      max-width:760px;
+      margin:0;
+      color:var(--muted);
+      line-height:1.8;
+      font-size:1rem;
+    }
+
+    .status{
+      margin-top:24px;
+      padding:12px 15px;
+      display:none;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:rgba(255,255,255,.035);
+      color:#dbe5f2;
+      font-size:.88rem;
+    }
+
+    .status.show{
+      display:block;
+    }
+
+    .status.error{
+      border-color:rgba(255,48,79,.35);
+      background:rgba(255,48,79,.08);
+      color:#ffb8c2;
+    }
+
+    .status.success{
+      border-color:rgba(66,230,149,.3);
+      background:rgba(66,230,149,.07);
+      color:#b9f5d5;
+    }
+
+    .grid{
+      display:grid;
+      gap:20px;
+    }
+
+    .profile-layout{
+      grid-template-columns:1.05fr .95fr;
+      align-items:start;
+    }
+
+    .card{
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.015)),
+        var(--panel);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .card-head{
+      padding:22px 24px;
+      border-bottom:1px solid var(--line);
+    }
+
+    .card-head h2{
+      margin:0 0 6px;
+      font-family:Orbitron,sans-serif;
+      font-size:1rem;
+      letter-spacing:.04em;
+    }
+
+    .card-head p{
+      margin:0;
+      color:var(--muted);
+      font-size:.82rem;
+      line-height:1.6;
+    }
+
+    .card-body{
+      padding:24px;
+    }
+
+    .identity{
+      display:flex;
+      gap:20px;
+      align-items:center;
+      margin-bottom:24px;
+    }
+
+    .avatar{
+      width:96px;
+      height:96px;
+      flex:0 0 96px;
+      border-radius:24px;
+      overflow:hidden;
+      border:1px solid rgba(0,229,255,.28);
+      background:
+        radial-gradient(circle at 30% 20%,rgba(0,229,255,.22),transparent 45%),
+        radial-gradient(circle at 70% 80%,rgba(155,92,255,.22),transparent 45%),
+        #0a0f17;
+      display:grid;
+      place-items:center;
+      font-family:Orbitron,sans-serif;
+      font-size:1.7rem;
+      font-weight:900;
+      color:var(--cyan);
+    }
+
+    .avatar img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .identity h2{
+      margin:0 0 7px;
+      font-size:1.35rem;
+    }
+
+    .username{
+      color:var(--muted);
+      margin-bottom:10px;
+    }
+
+    .badges{
+      display:flex;
+      gap:7px;
+      flex-wrap:wrap;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      padding:6px 9px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      font-size:.68rem;
+      font-weight:800;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+    }
+
+    .badge.membership{
+      color:var(--cyan);
+      border-color:rgba(0,229,255,.25);
+    }
+
+    .badge.role{
+      color:#d6c5ff;
+      border-color:rgba(155,92,255,.25);
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:10px;
+    }
+
+    .stat{
+      padding:16px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:rgba(255,255,255,.025);
+    }
+
+    .stat-label{
+      color:var(--muted);
+      font-size:.68rem;
+      text-transform:uppercase;
+      letter-spacing:.1em;
+      font-weight:800;
+    }
+
+    .stat-value{
+      margin-top:7px;
+      font-family:Orbitron,sans-serif;
+      font-size:1.15rem;
+      font-weight:800;
+    }
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:7px;
+    }
+
+    .field.full{
+      grid-column:1/-1;
+    }
+
+    label{
+      color:#cbd5e1;
+      font-size:.75rem;
+      font-weight:800;
+      letter-spacing:.04em;
+    }
+
+    input,
+    textarea{
+      width:100%;
+      border:1px solid var(--line);
+      outline:none;
+      color:white;
+      background:#080d14;
+      border-radius:11px;
+      padding:12px 13px;
+      transition:.2s ease;
+    }
+
+    input:focus,
+    textarea:focus{
+      border-color:rgba(0,229,255,.45);
+      box-shadow:0 0 0 3px rgba(0,229,255,.07);
+    }
+
+    textarea{
+      min-height:120px;
+      resize:vertical;
+      line-height:1.6;
+    }
+
+    input[readonly]{
+      color:#8290a3;
+      cursor:not-allowed;
+    }
+
+    .hint{
+      color:#6f7d8f;
+      font-size:.7rem;
+      line-height:1.5;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:20px;
+    }
+
+    .btn{
+      display:inline-flex;
+      justify-content:center;
+      align-items:center;
+      min-height:43px;
+      padding:0 16px;
+      border-radius:11px;
+      border:1px solid var(--line);
+      color:white;
+      background:rgba(255,255,255,.05);
+      font-weight:800;
+      font-size:.78rem;
+      transition:.2s ease;
+    }
+
+    .btn:hover{
+      transform:translateY(-1px);
+      background:rgba(255,255,255,.08);
+    }
+
+    .btn-primary{
+      border-color:rgba(0,229,255,.38);
+      background:linear-gradient(135deg,rgba(0,229,255,.18),rgba(155,92,255,.14));
+      color:white;
+    }
+
+    .btn-danger{
+      border-color:rgba(255,48,79,.28);
+      color:#ff9daa;
+      background:rgba(255,48,79,.07);
+    }
+
+    .info-list{
+      display:grid;
+      gap:0;
+    }
+
+    .info-row{
+      display:flex;
+      justify-content:space-between;
+      gap:20px;
+      padding:14px 0;
+      border-bottom:1px solid var(--line);
+    }
+
+    .info-row:last-child{
+      border-bottom:0;
+    }
+
+    .info-label{
+      color:var(--muted);
+      font-size:.75rem;
+    }
+
+    .info-value{
+      text-align:right;
+      font-weight:700;
+      font-size:.8rem;
+      word-break:break-word;
+    }
+
+    .membership-box{
+      padding:20px;
+      border-radius:16px;
+      border:1px solid rgba(0,229,255,.18);
+      background:
+        radial-gradient(circle at 100% 0%,rgba(0,229,255,.10),transparent 45%),
+        rgba(0,229,255,.025);
+    }
+
+    .membership-name{
+      font-family:Orbitron,sans-serif;
+      font-size:1.3rem;
+      font-weight:900;
+    }
+
+    .membership-price{
+      margin-top:7px;
+      font-size:.9rem;
+      color:var(--cyan);
+      font-weight:800;
+    }
+
+    .membership-description{
+      margin:13px 0 0;
+      color:var(--muted);
+      font-size:.8rem;
+      line-height:1.7;
+    }
+
+    .sites-section{
+      margin:20px 0 60px;
+    }
+
+    .sites-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+    }
+
+    .site-card{
+      min-height:120px;
+      padding:17px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      border:1px solid var(--line);
+      border-radius:15px;
+      background:
+        linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,255,255,.01));
+      transition:.2s ease;
+    }
+
+    .site-card:hover{
+      transform:translateY(-3px);
+      border-color:rgba(0,229,255,.24);
+      background:rgba(0,229,255,.035);
+    }
+
+    .site-title{
+      font-family:Orbitron,sans-serif;
+      font-size:.78rem;
+      font-weight:800;
+    }
+
+    .site-desc{
+      color:var(--muted);
+      font-size:.68rem;
+      line-height:1.5;
+      margin-top:8px;
+    }
+
+    .site-arrow{
+      margin-top:14px;
+      color:var(--cyan);
+      font-size:.72rem;
+      font-weight:800;
+    }
+
+    footer{
+      border-top:1px solid var(--line);
+      padding:30px 0 45px;
+      color:#697789;
+      font-size:.72rem;
+      text-align:center;
+    }
+
+    .loading{
+      opacity:.65;
+      pointer-events:none;
+    }
+
+    @media(max-width:950px){
+      .profile-layout{
+        grid-template-columns:1fr;
+      }
+
+      .sites-grid{
+        grid-template-columns:repeat(3,1fr);
+      }
+    }
+
+    @media(max-width:700px){
+      .nav{
+        padding:10px 0;
+        align-items:flex-start;
+        flex-direction:column;
+      }
+
+      .nav-links{
+        width:100%;
+        justify-content:flex-start;
+        overflow-x:auto;
+        flex-wrap:nowrap;
+        padding-bottom:2px;
+      }
+
+      .hero{
+        padding-top:45px;
+      }
+
+      .form-grid{
+        grid-template-columns:1fr;
+      }
+
+      .field.full{
+        grid-column:auto;
+      }
+
+      .stats{
+        grid-template-columns:1fr;
+      }
+
+      .sites-grid{
+        grid-template-columns:1fr 1fr;
+      }
+
+      .identity{
+        align-items:flex-start;
+      }
+    }
+
+    @media(max-width:430px){
+      .container{
+        width:min(calc(100% - 22px),var(--max));
+      }
+
+      .card-body,
+      .card-head{
+        padding:18px;
+      }
+
+      .sites-grid{
+        grid-template-columns:1fr;
+      }
+
+      .avatar{
+        width:78px;
+        height:78px;
+        flex-basis:78px;
+        border-radius:19px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<header>
+<header class="topbar">
+  <div class="container nav">
 
-<nav class="nav">
+    <a class="brand" href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/" aria-label="CrowRules Entertainment Home">
+      <div class="brand-mark">CR</div>
 
-<a class="brand" href="/">
-  <span>CROW</span>RULES
-</a>
+      <div class="brand-text">
+        <div class="brand-name">CrowRules</div>
+        <div class="brand-sub">Entertainment Universe</div>
+      </div>
+    </a>
 
-<div class="navlinks">
+    <nav class="nav-links" aria-label="Main navigation">
 
-<a href="/">Home</a>
+      <a
+        href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/"
+      >
+        Home
+      </a>
 
-<a href="/membership.html">
-  Membership
-</a>
+      <a
+        href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/membership.html"
+      >
+        Membership
+      </a>
 
-<a href="/profile.html">
-  Profile
-</a>
+      <a
+        class="active"
+        href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/profile.html"
+      >
+        Profile
+      </a>
 
-<button id="signOutBtn" type="button">
-  Sign Out
-</button>
+      <a href="#" id="signOutTop">
+        Sign Out
+      </a>
 
-</div>
-
-</nav>
-
+    </nav>
+  </div>
 </header>
 
 
 <main>
 
-<section class="hero">
+  <section class="hero">
+    <div class="container">
 
-<div>
+      <div class="eyebrow">
+        UNIVERSAL CROWRULES ACCOUNT
+      </div>
 
-<div class="eyebrow">
-  Universal CrowRules Account
-</div>
+      <h1>
+        Your <span>CrowRules</span> Profile
+      </h1>
 
-<h1>
-  My Profile
-</h1>
+      <p>
+        One account. One profile. One CrowRules identity across the entire
+        CrowRules Entertainment universe.
+      </p>
 
-<p>
-  One CrowRules identity across the entire CrowRules universe.
-  Manage your profile, membership and CrowPoints from one place.
-</p>
+      <div id="status" class="status"></div>
 
-</div>
+    </div>
+  </section>
 
-<div
-  class="account-status"
-  id="accountStatus"
->
-  Checking account…
-</div>
 
-</section>
+  <section class="container">
 
+    <div class="grid profile-layout">
 
-<div
-  id="notice"
-  class="notice"
-></div>
 
+      <!-- PROFILE -->
+      <article class="card">
 
-<section
-  id="app"
-  class="loading"
->
+        <div class="card-head">
+          <h2>Profile</h2>
+          <p>
+            Your universal CrowRules member identity.
+          </p>
+        </div>
 
-<div class="grid">
+        <div class="card-body">
 
+          <div class="identity">
 
-<!-- =====================================================
-     LEFT COLUMN
-====================================================== -->
+            <div class="avatar" id="avatar">
+              CR
+            </div>
 
-<div>
+            <div>
 
+              <h2 id="profileName">
+                Loading...
+              </h2>
 
-<!-- PROFILE CARD -->
+              <div class="username" id="profileUsername">
+                @loading
+              </div>
 
-<div class="card">
+              <div class="badges">
 
-<div class="profile-head">
+                <span
+                  class="badge membership"
+                  id="membershipBadge"
+                >
+                  CROW
+                </span>
 
-<div
-  class="avatar"
-  id="avatar"
->
-  CR
-</div>
+                <span
+                  class="badge role"
+                  id="roleBadge"
+                >
+                  MEMBER
+                </span>
 
-<div>
+              </div>
 
-<div
-  class="name"
-  id="displayName"
->
-  CrowRules Member
-</div>
+            </div>
 
-<div
-  class="username"
-  id="username"
->
-  @member
-</div>
+          </div>
 
-<div class="badges">
 
-<span
-  class="badge"
-  id="membershipBadge"
->
-  CROW
-</span>
+          <div class="stats">
 
-<span
-  class="badge purple"
-  id="roleBadge"
->
-  Member
-</span>
+            <div class="stat">
 
-</div>
+              <div class="stat-label">
+                CrowPoints
+              </div>
 
-</div>
+              <div
+                class="stat-value"
+                id="pointsValue"
+              >
+                0
+              </div>
 
-</div>
+            </div>
 
+            <div class="stat">
 
-<div class="stats">
+              <div class="stat-label">
+                Multiplier
+              </div>
 
-<div class="stat">
+              <div
+                class="stat-value"
+                id="multiplierValue"
+              >
+                1×
+              </div>
 
-<strong id="points">
-  0
-</strong>
+            </div>
 
-<span>
-  CrowPoints
-</span>
+            <div class="stat">
 
-</div>
+              <div class="stat-label">
+                Level
+              </div>
 
+              <div
+                class="stat-value"
+                id="levelValue"
+              >
+                1
+              </div>
 
-<div class="stat">
+            </div>
 
-<strong id="multiplier">
-  1×
-</strong>
+          </div>
 
-<span>
-  Points Multiplier
-</span>
+        </div>
 
-</div>
+      </article>
 
 
-<div class="stat">
+      <!-- ACCOUNT -->
+      <article class="card">
 
-<strong id="level">
-  1
-</strong>
+        <div class="card-head">
+          <h2>Account Information</h2>
+          <p>
+            Authentication and membership information.
+          </p>
+        </div>
 
-<span>
-  Membership Level
-</span>
+        <div class="card-body">
 
-</div>
+          <div class="info-list">
 
-</div>
+            <div class="info-row">
+              <div class="info-label">
+                Email
+              </div>
 
-</div>
+              <div
+                class="info-value"
+                id="emailValue"
+              >
+                —
+              </div>
+            </div>
 
 
-<!-- EDIT PROFILE -->
+            <div class="info-row">
+              <div class="info-label">
+                Account Status
+              </div>
 
-<div class="card">
+              <div
+                class="info-value"
+                id="statusValue"
+              >
+                —
+              </div>
+            </div>
 
-<h2>
-  Edit Profile
-</h2>
 
-<form id="profileForm">
+            <div class="info-row">
+              <div class="info-label">
+                Member Since
+              </div>
 
-<div class="form-grid">
+              <div
+                class="info-value"
+                id="memberSince"
+              >
+                —
+              </div>
+            </div>
 
 
-<div class="field">
+            <div class="info-row">
+              <div class="info-label">
+                Membership
+              </div>
 
-<label for="firstName">
-  First Name
-</label>
+              <div
+                class="info-value"
+                id="accountMembership"
+              >
+                —
+              </div>
+            </div>
 
-<input
-  id="firstName"
-  type="text"
-  autocomplete="given-name"
-  maxlength="80"
->
+          </div>
 
-</div>
+          <div class="actions">
 
+            <a
+              class="btn"
+              href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/membership.html"
+            >
+              View Membership
+            </a>
 
-<div class="field">
+            <button
+              class="btn btn-danger"
+              id="signOutButton"
+              type="button"
+            >
+              Sign Out
+            </button>
 
-<label for="lastName">
-  Last Name
-</label>
+          </div>
 
-<input
-  id="lastName"
-  type="text"
-  autocomplete="family-name"
-  maxlength="80"
->
+        </div>
 
-</div>
+      </article>
 
 
-<div class="field">
+      <!-- EDIT PROFILE -->
+      <article class="card">
 
-<label for="profileUsername">
-  Username
-</label>
+        <div class="card-head">
+          <h2>Edit Profile</h2>
+          <p>
+            Update the profile shared across CrowRules sites.
+          </p>
+        </div>
 
-<input
-  id="profileUsername"
-  type="text"
-  autocomplete="username"
-  maxlength="32"
->
+        <div class="card-body">
 
-</div>
+          <form id="profileForm">
 
+            <div class="form-grid">
 
-<div class="field">
+              <div class="field">
 
-<label for="profileDisplayName">
-  Display Name
-</label>
+                <label for="firstName">
+                  First Name
+                </label>
 
-<input
-  id="profileDisplayName"
-  type="text"
-  autocomplete="nickname"
-  maxlength="100"
->
+                <input
+                  id="firstName"
+                  name="firstName"
+                  type="text"
+                  maxlength="80"
+                  autocomplete="given-name"
+                >
 
-</div>
+              </div>
 
 
-<div class="field full">
+              <div class="field">
 
-<label for="bio">
-  Bio
-</label>
+                <label for="lastName">
+                  Last Name
+                </label>
 
-<textarea
-  id="bio"
-  maxlength="1000"
-  placeholder="Tell the CrowRules community about yourself."
-></textarea>
+                <input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  maxlength="80"
+                  autocomplete="family-name"
+                >
 
-</div>
+              </div>
 
 
-<div class="field full">
+              <div class="field">
 
-<label for="avatarUrl">
-  Avatar Image URL
-</label>
+                <label for="username">
+                  Username
+                </label>
 
-<input
-  id="avatarUrl"
-  type="url"
-  maxlength="1000"
-  placeholder="https://example.com/avatar.jpg"
->
+                <input
+                  id="username"
+                  name="username"
+                  type="text"
+                  maxlength="32"
+                  autocomplete="username"
+                  spellcheck="false"
+                >
 
-</div>
+                <div class="hint">
+                  3–32 characters. Letters, numbers, dots, underscores and hyphens.
+                </div>
 
+              </div>
 
-</div>
 
+              <div class="field">
 
-<div class="actions">
+                <label for="displayName">
+                  Display Name
+                </label>
 
-<button
-  class="btn primary"
-  type="submit"
-  id="saveProfileBtn"
->
-  Save Profile
-</button>
+                <input
+                  id="displayName"
+                  name="displayName"
+                  type="text"
+                  maxlength="100"
+                >
 
-</div>
+              </div>
 
-</form>
 
-</div>
+              <div class="field full">
 
+                <label for="avatarUrl">
+                  Avatar URL
+                </label>
 
-<!-- ACCOUNT -->
+                <input
+                  id="avatarUrl"
+                  name="avatarUrl"
+                  type="url"
+                  maxlength="500"
+                  placeholder="https://..."
+                >
 
-<div class="card">
+                <div class="hint">
+                  Use a public HTTPS image URL.
+                </div>
 
-<h2>
-  Account
-</h2>
+              </div>
 
-<div class="account-row">
 
-<span>
-  Email
-</span>
+              <div class="field full">
 
-<span id="email">
-  —
-</span>
+                <label for="bio">
+                  Bio
+                </label>
 
-</div>
+                <textarea
+                  id="bio"
+                  name="bio"
+                  maxlength="1000"
+                  placeholder="Tell the CrowRules community a little about yourself..."
+                ></textarea>
 
+              </div>
 
-<div class="account-row">
+            </div>
 
-<span>
-  Account Status
-</span>
 
-<span id="memberStatus">
-  —
-</span>
+            <div class="actions">
 
-</div>
+              <button
+                class="btn btn-primary"
+                id="saveButton"
+                type="submit"
+              >
+                Save Profile
+              </button>
 
+              <button
+                class="btn"
+                id="resetButton"
+                type="button"
+              >
+                Reset
+              </button>
 
-<div class="account-row">
+            </div>
 
-<span>
-  Member Since
-</span>
+          </form>
 
-<span id="memberSince">
-  —
-</span>
+        </div>
 
-</div>
+      </article>
 
-</div>
 
-</div>
+      <!-- MEMBERSHIP -->
+      <article class="card">
 
+        <div class="card-head">
+          <h2>Membership</h2>
+          <p>
+            Your CrowRules membership and billing controls.
+          </p>
+        </div>
 
-<!-- =====================================================
-     RIGHT COLUMN
-====================================================== -->
+        <div class="card-body">
 
-<aside>
+          <div class="membership-box">
 
+            <div
+              class="membership-name"
+              id="planName"
+            >
+              CROW
+            </div>
 
-<!-- MEMBERSHIP -->
+            <div
+              class="membership-price"
+              id="planPrice"
+            >
+              Free
+            </div>
 
-<div class="card">
+            <p
+              class="membership-description"
+              id="planDescription"
+            >
+              Your universal CrowRules membership.
+            </p>
 
-<h2>
-  Membership
-</h2>
+            <div class="actions">
 
-<div class="plan">
+              <a
+                class="btn"
+                href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/membership.html"
+              >
+                Explore Plans
+              </a>
 
-<div class="plan-top">
+              <button
+                class="btn btn-primary"
+                id="manageMembership"
+                type="button"
+                style="display:none"
+              >
+                Manage Membership
+              </button>
 
-<div
-  class="plan-name"
-  id="planName"
->
-  CROW
-</div>
+            </div>
 
-<div
-  class="price"
-  id="planPrice"
->
-  $0<small>/mo</small>
-</div>
+          </div>
 
-</div>
+        </div>
 
+      </article>
 
-<p id="planDescription">
-  Your free universal CrowRules membership.
-</p>
+    </div>
 
 
-<div class="actions">
+    <!-- CROWRULES UNIVERSE -->
+    <section class="sites-section">
 
-<a
-  class="btn primary"
-  href="/membership.html"
->
-  Manage Membership
-</a>
+      <article class="card">
 
-<button
-  class="btn hidden"
-  id="portalBtn"
-  type="button"
->
-  Billing Portal
-</button>
+        <div class="card-head">
+          <h2>The CrowRules Universe</h2>
 
-</div>
+          <p>
+            Your account connects you to every CrowRules destination.
+          </p>
+        </div>
 
-</div>
+        <div class="card-body">
 
-</div>
+          <div class="sites-grid">
 
+            <a
+              class="site-card"
+              href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/"
+            >
+              <div>
+                <div class="site-title">
+                  CrowRules Entertainment
+                </div>
 
-<!-- CROWRULES UNIVERSE -->
+                <div class="site-desc">
+                  The central CrowRules universe.
+                </div>
+              </div>
 
-<div class="card">
+              <div class="site-arrow">
+                ENTER →
+              </div>
+            </a>
 
-<h2>
-  CrowRules Universe
-</h2>
 
-<div
-  class="sites"
-  id="sites"
-></div>
+            <a
+              class="site-card"
+              href="https://crowrulesentertainment-oss.github.io/crowrulestv/"
+            >
+              <div>
+                <div class="site-title">
+                  CrowRules TV
+                </div>
 
-</div>
+                <div class="site-desc">
+                  Live television, channels, shows and events.
+                </div>
+              </div>
 
+              <div class="site-arrow">
+                ENTER →
+              </div>
+            </a>
 
-<!-- CROWPOINTS -->
 
-<div class="card">
+            <a
+              class="site-card"
+              href="https://crowrulesentertainment-oss.github.io/podcasting/"
+            >
+              <div>
+                <div class="site-title">
+                  CrowRules Podcasting
+                </div>
 
-<h2>
-  CrowPoints
-</h2>
+                <div class="site-desc">
+                  Podcasts, creators and audio programming.
+                </div>
+              </div>
 
-<div class="account-row">
+              <div class="site-arrow">
+                ENTER →
+              </div>
+            </a>
 
-<span>
-  Lifetime
-</span>
 
-<span id="lifetimePoints">
-  0
-</span>
+            <a
+              class="site-card"
+              href="https://crowrulesentertainment-oss.github.io/dreamscapes/"
+            >
+              <div>
+                <div class="site-title">
+                  Dreamscapes
+                </div>
 
-</div>
+                <div class="site-desc">
+                  Bringing stories and dreams to life.
+                </div>
+              </div>
 
-<div class="account-row">
+              <div class="site-arrow">
+                ENTER →
+              </div>
+            </a>
 
-<span>
-  Multiplier
-</span>
 
-<span id="pointsMultiplier">
-  1×
-</span>
+            <a
+              class="site-card"
+              href="https://crowrulesentertainment-oss.github.io/sports/"
+            >
+              <div>
+                <div class="site-title">
+                  CrowRules Sports
+                </div>
 
-</div>
+                <div class="site-desc">
+                  Scores, leagues, games and CrowRules sports.
+                </div>
+              </div>
 
-<p
-  style="
-    color:var(--muted);
-    font-size:11px;
-    line-height:1.65;
-    margin:15px 0 0;
-  "
->
-  CrowPoints can be used throughout participating
-  CrowRules experiences as your account activity grows.
-</p>
+              <div class="site-arrow">
+                ENTER →
+              </div>
+            </a>
 
-</div>
 
-
-</aside>
-
-</div>
-
-</section>
+            <a
+              class="site-card"
+              href="https://crowrulesentertainment-oss.github.io/crowspace/"
+            >
+              <div>
+                <div class="site-title">
+                  CrowSpace
+                </div>
+
+                <div class="site-desc">
+                  The community and social side of CrowRules.
+                </div>
+              </div>
+
+              <div class="site-arrow">
+                ENTER →
+              </div>
+            </a>
+
+
+            <a
+              class="site-card"
+              href="https://crowrulesentertainment-oss.github.io/memorials/"
+            >
+              <div>
+                <div class="site-title">
+                  CrowRules Memorials
+                </div>
+
+                <div class="site-desc">
+                  Remembering lives and legacies.
+                </div>
+              </div>
+
+              <div class="site-arrow">
+                ENTER →
+              </div>
+            </a>
+
+
+            <a
+              class="site-card"
+              href="https://crowrulesentertainment-oss.github.io/spectrum/"
+            >
+              <div>
+                <div class="site-title">
+                  Spectrum Awards
+                </div>
+
+                <div class="site-desc">
+                  Recognition across the CrowRules universe.
+                </div>
+              </div>
+
+              <div class="site-arrow">
+                ENTER →
+              </div>
+            </a>
+
+
+            <a
+              class="site-card"
+              href="https://crowrulesentertainment-oss.github.io/yearbooks/"
+            >
+              <div>
+                <div class="site-title">
+                  CrowRules Yearbooks
+                </div>
+
+                <div class="site-desc">
+                  Preserve the history of CrowRules.
+                </div>
+              </div>
+
+              <div class="site-arrow">
+                ENTER →
+              </div>
+            </a>
+
+
+            <a
+              class="site-card"
+              href="https://crowrulesentertainment-oss.github.io/records/"
+            >
+              <div>
+                <div class="site-title">
+                  CrowRules Records
+                </div>
+
+                <div class="site-desc">
+                  Music, artists and future releases.
+                </div>
+              </div>
+
+              <div class="site-arrow">
+                ENTER →
+              </div>
+            </a>
+
+
+            <a
+              class="site-card"
+              href="https://crowrulesentertainment-oss.github.io/holidays/"
+            >
+              <div>
+                <div class="site-title">
+                  CrowRules Holidays
+                </div>
+
+                <div class="site-desc">
+                  Seasonal programming and celebrations.
+                </div>
+              </div>
+
+              <div class="site-arrow">
+                ENTER →
+              </div>
+            </a>
+
+
+            <a
+              class="site-card"
+              href="https://crowrulesentertainment-oss.github.io/members/"
+            >
+              <div>
+                <div class="site-title">
+                  Members
+                </div>
+
+                <div class="site-desc">
+                  The universal CrowRules member community.
+                </div>
+              </div>
+
+              <div class="site-arrow">
+                ENTER →
+              </div>
+            </a>
+
+
+            <a
+              class="site-card"
+              href="https://crowrulesentertainment-oss.github.io/creators/"
+            >
+              <div>
+                <div class="site-title">
+                  Creators
+                </div>
+
+                <div class="site-desc">
+                  Tools and resources for CrowRules creators.
+                </div>
+              </div>
+
+              <div class="site-arrow">
+                ENTER →
+              </div>
+            </a>
+
+          </div>
+
+        </div>
+
+      </article>
+
+    </section>
+
+  </section>
 
 </main>
 
 
 <footer>
 
-© <span id="year"></span>
-CrowRules Entertainment · One company. One universe.
+  <div class="container">
+
+    <div>
+      © <span id="year"></span> CrowRules Entertainment
+    </div>
+
+    <div style="margin-top:7px;">
+      One company. One universe.
+    </div>
+
+  </div>
 
 </footer>
 
 
 <script>
 
-/* =========================================================
-   CROWRULES / SUPABASE CONFIGURATION
-========================================================= */
+  /* =========================================================
+     CROWRULES CONFIGURATION
+  ========================================================= */
 
-const SUPABASE_URL =
-  "https://cevylpnoexugwgygvtgu.supabase.co";
+  const SUPABASE_URL =
+    "https://cevylpnoexugwgygvtgu.supabase.co";
 
-const SUPABASE_KEY =
-  "sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";
-
-
-const supabaseClient =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+  const SUPABASE_KEY =
+    "sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";
 
 
-/* =========================================================
-   SITE DIRECTORY
-========================================================= */
+  const HOME_URL =
+    "https://crowrulesentertainment-oss.github.io/crowrulesentertainment/";
 
-const SITES = [
+  const LOGIN_URL =
+    "https://crowrulesentertainment-oss.github.io/crowrulesentertainment/login.html";
 
-  ["Entertainment","entertainment"],
+  const MEMBERSHIP_URL =
+    "https://crowrulesentertainment-oss.github.io/crowrulesentertainment/membership.html";
 
-  ["TV","tv"],
-
-  ["Podcasting","podcasting"],
-
-  ["Dreamscapes","dreamscapes"],
-
-  ["Sports","sports"],
-
-  ["CrowSpace","crowspace"],
-
-  ["Memorials","memorials"],
-
-  ["Spectrum","spectrum"],
-
-  ["Yearbooks","yearbooks"],
-
-  ["Records","records"],
-
-  ["Holidays","holidays"],
-
-  ["Members","members"],
-
-  ["Creators","creators"]
-
-];
+  const PROFILE_URL =
+    "https://crowrulesentertainment-oss.github.io/crowrulesentertainment/profile.html";
 
 
-/* =========================================================
-   HELPERS
-========================================================= */
-
-const $ = id =>
-  document.getElementById(id);
-
-
-function showNotice(
-  message,
-  type = "error"
-){
-
-  const notice =
-    $("notice");
-
-  notice.textContent =
-    message;
-
-  notice.className =
-    "notice show " + type;
-
-}
+  const supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY,
+      {
+        auth:{
+          persistSession:true,
+          autoRefreshToken:true,
+          detectSessionInUrl:true
+        }
+      }
+    );
 
 
-function clearNotice(){
+  /* =========================================================
+     DOM HELPERS
+  ========================================================= */
 
-  $("notice").textContent = "";
+  const $ = id => document.getElementById(id);
 
-  $("notice").className =
-    "notice";
-
-}
+  const statusBox = $("status");
 
 
-function initials(name){
+  function showStatus(message,type=""){
 
-  const value =
-    String(name || "CR")
-      .trim();
+    statusBox.textContent = message;
 
-  if(!value){
-    return "CR";
+    statusBox.className = "status show";
+
+    if(type){
+      statusBox.classList.add(type);
+    }
+
   }
 
-  return value
-    .split(/\s+/)
-    .slice(0,2)
-    .map(part => part.charAt(0))
-    .join("")
-    .toUpperCase();
 
-}
+  function clearStatus(){
 
+    statusBox.textContent = "";
 
-function escapeHtml(value){
+    statusBox.className = "status";
 
-  return String(value || "")
-    .replace(/[&<>"']/g, char => {
-
-      const map = {
-
-        "&":"&amp;",
-        "<":"&lt;",
-        ">":"&gt;",
-        "\"":"&quot;",
-        "'":"&#039;"
-
-      };
-
-      return map[char];
-
-    });
-
-}
-
-
-function formatMoney(cents){
-
-  const amount =
-    Number(cents || 0);
-
-  if(amount === 0){
-    return "$0";
   }
 
-  return "$" +
-    (amount / 100)
-      .toFixed(0);
 
-}
+  function escapeHtml(value){
 
+    return String(value ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
 
-function formatDate(value){
-
-  if(!value){
-    return "—";
   }
 
-  const date =
-    new Date(value);
 
-  if(
-    Number.isNaN(
-      date.getTime()
-    )
-  ){
-    return "—";
+  function formatDate(value){
+
+    if(!value){
+      return "—";
+    }
+
+    const date = new Date(value);
+
+    if(Number.isNaN(date.getTime())){
+      return "—";
+    }
+
+    return date.toLocaleDateString(
+      undefined,
+      {
+        year:"numeric",
+        month:"long",
+        day:"numeric"
+      }
+    );
+
   }
 
-  return date.toLocaleDateString(
-    undefined,
-    {
-      year:"numeric",
-      month:"short",
-      day:"numeric"
+
+  function formatMoney(cents){
+
+    const amount =
+      Number(cents || 0) / 100;
+
+    if(amount === 0){
+      return "Free";
     }
-  );
 
-}
+    return new Intl.NumberFormat(
+      "en-US",
+      {
+        style:"currency",
+        currency:"USD"
+      }
+    ).format(amount) + "/month";
 
-
-/* =========================================================
-   LOAD PROFILE
-========================================================= */
-
-async function loadProfile(){
-
-  clearNotice();
-
-  try{
-
-    const {
-      data:{
-        user
-      },
-      error:userError
-    } =
-      await supabaseClient
-        .auth
-        .getUser();
+  }
 
 
-    if(
-      userError ||
-      !user
-    ){
+  function safeExternalHttpUrl(value){
 
-      $("accountStatus")
-        .textContent =
-        "Not signed in";
+    if(!value){
+      return "";
+    }
 
-      $("app")
-        .classList
-        .add("hidden");
+    try{
 
-      showNotice(
-        "Please sign in to your CrowRules account. Redirecting to login…"
-      );
+      const url =
+        new URL(value);
 
-      setTimeout(() => {
+      if(
+        url.protocol !== "https:" &&
+        url.protocol !== "http:"
+      ){
+        return "";
+      }
 
-        const next =
-          encodeURIComponent(
-            location.pathname +
-            location.search
-          );
+      return url.href;
 
-        location.href =
-          "/login.html?next=" +
-          next;
+    }catch{
 
-      },900);
-
-      return;
+      return "";
 
     }
 
+  }
 
-    $("email")
-      .textContent =
-      user.email || "—";
-
-
-    $("accountStatus")
-      .textContent =
-      "Signed in";
-
-
-    /*
-     * Make sure every authenticated user
-     * has the universal CROW membership.
-     *
-     * This is idempotent.
-     */
-
-    const {
-      error:membershipEnsureError
-    } =
-      await supabaseClient
-        .rpc(
-          "ensure_crow_membership"
-        );
 
+  /* =========================================================
+     AUTH REDIRECT
+  ========================================================= */
 
-    if(
-      membershipEnsureError
-    ){
+  function loginRedirect(){
 
-      console.warn(
-        "ensure_crow_membership:",
-        membershipEnsureError
-      );
+    const current =
+      window.location.href;
 
-    }
+    const next =
+      encodeURIComponent(current);
 
+    window.location.replace(
+      LOGIN_URL + "?next=" + next
+    );
 
-    /*
-     * Load universal member record
-     * and membership simultaneously.
-     */
+  }
 
-    const [
-      memberResult,
-      membershipResult
-    ] =
-      await Promise.all([
 
-        supabaseClient
-          .from("members")
-          .select(
-            [
-              "user_id",
-              "first_name",
-              "last_name",
-              "username",
-              "email",
-              "membership_type",
-              "role",
-              "status",
-              "points",
-              "bio",
-              "avatar_url",
-              "display_name",
-              "created_at"
-            ].join(",")
-          )
-          .eq(
-            "user_id",
-            user.id
-          )
-          .maybeSingle(),
+  /* =========================================================
+     PROFILE DATA
+  ========================================================= */
 
-        supabaseClient
-          .rpc(
-            "get_my_membership"
-          )
+  let currentUser = null;
+  let currentMember = null;
+  let currentMembership = null;
 
-      ]);
 
+  function getInitials(member){
 
-    const {
-      data:member,
-      error:memberError
-    } =
-      memberResult;
+    const first =
+      (member?.first_name || "")
+        .trim()
+        .charAt(0);
 
+    const last =
+      (member?.last_name || "")
+        .trim()
+        .charAt(0);
 
-    const {
-      data:membership,
-      error:membershipError
-    } =
-      membershipResult;
+    const display =
+      (member?.display_name || "")
+        .trim()
+        .charAt(0);
 
+    return (
+      (first + last) ||
+      display ||
+      "CR"
+    ).toUpperCase();
 
-    if(memberError){
+  }
 
-      showNotice(
-        "Your account loaded, but the universal profile could not be read: " +
-        memberError.message
-      );
 
-      return;
-
-    }
-
-
-    if(membershipError){
-
-      console.warn(
-        "Membership lookup:",
-        membershipError
-      );
-
-    }
-
-
-    const m =
-      member || {};
-
-
-    const plan =
-      membership || {};
-
-
-    /*
-     * Determine display name.
-     */
-
-    const name =
-      m.display_name ||
-      [
-        m.first_name,
-        m.last_name
-      ]
-      .filter(Boolean)
-      .join(" ") ||
-      user.email?.split("@")[0] ||
-      "CrowRules Member";
-
-
-    /*
-     * Main profile.
-     */
-
-    $("displayName")
-      .textContent =
-      name;
-
-
-    $("username")
-      .textContent =
-      "@" +
-      (
-        m.username ||
-        "member"
-      );
-
-
-    $("membershipBadge")
-      .textContent =
-      (
-        plan.plan_key ||
-        "crow"
-      )
-      .toUpperCase();
-
-
-    $("roleBadge")
-      .textContent =
-      m.role ||
-      "Member";
-
-
-    /*
-     * CrowPoints.
-     */
-
-    const points =
-      Number(
-        m.points || 0
-      );
-
-
-    const multiplier =
-      Number(
-        plan.crowpoints_multiplier || 1
-      );
-
-
-    $("points")
-      .textContent =
-      points.toLocaleString();
-
-
-    $("lifetimePoints")
-      .textContent =
-      points.toLocaleString();
-
-
-    $("multiplier")
-      .textContent =
-      multiplier + "×";
-
-
-    $("pointsMultiplier")
-      .textContent =
-      multiplier + "×";
-
-
-    $("level")
-      .textContent =
-      plan.level || 1;
-
-
-    /*
-     * Form values.
-     */
-
-    $("firstName")
-      .value =
-      m.first_name || "";
-
-
-    $("lastName")
-      .value =
-      m.last_name || "";
-
-
-    $("profileUsername")
-      .value =
-      m.username || "";
-
-
-    $("profileDisplayName")
-      .value =
-      m.display_name ||
-      name;
-
-
-    $("bio")
-      .value =
-      m.bio || "";
-
-
-    $("avatarUrl")
-      .value =
-      m.avatar_url || "";
-
-
-    /*
-     * Avatar.
-     */
+  function renderAvatar(member){
 
     const avatar =
       $("avatar");
 
+    const imageUrl =
+      safeExternalHttpUrl(
+        member?.avatar_url
+      );
 
-    if(m.avatar_url){
+    if(imageUrl){
 
-      avatar.innerHTML =
-        `
-        <img
-          src="${escapeHtml(m.avatar_url)}"
-          alt="CrowRules profile avatar"
-          referrerpolicy="no-referrer"
-        >
-        `;
+      avatar.innerHTML = "";
+
+      const img =
+        document.createElement("img");
+
+      img.src = imageUrl;
+
+      img.alt =
+        member?.display_name ||
+        "CrowRules profile";
+
+      img.referrerPolicy =
+        "no-referrer";
+
+      img.onerror = () => {
+
+        avatar.textContent =
+          getInitials(member);
+
+      };
+
+      avatar.appendChild(img);
 
     }else{
 
       avatar.textContent =
-        initials(name);
+        getInitials(member);
 
     }
-
-
-    /*
-     * Membership display.
-     */
-
-    $("planName")
-      .textContent =
-      (
-        plan.plan_name ||
-        plan.plan_key ||
-        "CROW"
-      )
-      .toUpperCase();
-
-
-    $("planPrice")
-      .innerHTML =
-      formatMoney(
-        plan.price_cents || 0
-      ) +
-      "<small>/mo</small>";
-
-
-    const planKey =
-      String(
-        plan.plan_key || "crow"
-      ).toLowerCase();
-
-
-    const descriptions = {
-
-      crow:
-        "Your free universal CrowRules membership.",
-
-      crowner:
-        "CROWNER membership with 2× CrowPoints.",
-
-      creator:
-        "CREATOR membership with 3× CrowPoints.",
-
-      founder:
-        "FOUNDER membership with 5× CrowPoints."
-
-    };
-
-
-    $("planDescription")
-      .textContent =
-      descriptions[planKey] ||
-      "Your universal CrowRules membership.";
-
-
-    /*
-     * Stripe Billing Portal is
-     * only relevant to paid plans.
-     */
-
-    if(
-      [
-        "crowner",
-        "creator",
-        "founder"
-      ].includes(planKey)
-    ){
-
-      $("portalBtn")
-        .classList
-        .remove("hidden");
-
-    }else{
-
-      $("portalBtn")
-        .classList
-        .add("hidden");
-
-    }
-
-
-    /*
-     * Account information.
-     */
-
-    $("memberStatus")
-      .textContent =
-      m.status ||
-      "Active";
-
-
-    $("memberSince")
-      .textContent =
-      formatDate(
-        m.created_at ||
-        user.created_at
-      );
-
-
-    /*
-     * Connected CrowRules sites.
-     */
-
-    $("sites").innerHTML =
-      SITES
-        .map(
-          ([siteName]) => `
-            <div class="site">
-              <b>${escapeHtml(siteName)}</b>
-              Universal account connected
-            </div>
-          `
-        )
-        .join("");
-
-
-    $("app")
-      .classList
-      .remove("loading");
-
-
-  }catch(error){
-
-    console.error(
-      "Profile load error:",
-      error
-    );
-
-    showNotice(
-      "Something went wrong while loading your CrowRules profile."
-    );
 
   }
 
-}
+
+  function renderProfile(){
+
+    const member =
+      currentMember || {};
+
+    const membership =
+      currentMembership || {};
+
+    const displayName =
+      member.display_name ||
+      [
+        member.first_name,
+        member.last_name
+      ]
+      .filter(Boolean)
+      .join(" ") ||
+      currentUser?.email?.split("@")[0] ||
+      "CrowRules Member";
 
 
-/* =========================================================
-   SAVE PROFILE
-========================================================= */
-
-$("profileForm")
-  .addEventListener(
-    "submit",
-    async event => {
-
-      event.preventDefault();
-
-      clearNotice();
+    $("profileName").textContent =
+      displayName;
 
 
+    $("profileUsername").textContent =
+      member.username
+        ? "@" + member.username
+        : "@crowrulesmember";
+
+
+    $("membershipBadge").textContent =
+      (
+        membership.plan_name ||
+        member.membership_type ||
+        "CROW"
+      ).toUpperCase();
+
+
+    $("roleBadge").textContent =
+      (
+        member.role ||
+        "Member"
+      ).toUpperCase();
+
+
+    $("pointsValue").textContent =
+      Number(member.points || 0)
+        .toLocaleString();
+
+
+    $("multiplierValue").textContent =
+      `${Number(membership.crowpoints_multiplier || 1)}×`;
+
+
+    $("levelValue").textContent =
+      Number(membership.level || 1);
+
+
+    $("emailValue").textContent =
+      currentUser?.email ||
+      member.email ||
+      "—";
+
+
+    $("statusValue").textContent =
+      member.status ||
+      membership.status ||
+      "Active";
+
+
+    $("memberSince").textContent =
+      formatDate(
+        member.created_at ||
+        currentUser?.created_at
+      );
+
+
+    $("accountMembership").textContent =
+      membership.plan_name ||
+      member.membership_type ||
+      "CROW";
+
+
+    $("planName").textContent =
+      membership.plan_name ||
+      "CROW";
+
+
+    $("planPrice").textContent =
+      formatMoney(
+        membership.price_cents
+      );
+
+
+    $("planDescription").textContent =
+      membership.description ||
+      "Your universal CrowRules membership.";
+
+
+    renderAvatar(member);
+
+  }
+
+
+  /* =========================================================
+     LOAD DATA
+  ========================================================= */
+
+  async function loadProfile(){
+
+    clearStatus();
+
+    try{
+
+      /*
+       * getUser() verifies the current user against
+       * Supabase Auth.
+       */
       const {
-        data:{
-          user
-        }
+        data: userData,
+        error: userError
       } =
-        await supabaseClient
-          .auth
-          .getUser();
+        await supabaseClient.auth.getUser();
 
-
-      if(!user){
-
-        showNotice(
-          "Your session has expired. Please sign in again."
-        );
-
-        return;
-
+      if(userError){
+        throw userError;
       }
 
-
-      const firstName =
-        $("firstName")
-          .value
-          .trim();
+      currentUser =
+        userData?.user || null;
 
 
-      const lastName =
-        $("lastName")
-          .value
-          .trim();
+      if(!currentUser){
 
-
-      const username =
-        $("profileUsername")
-          .value
-          .trim()
-          .toLowerCase();
-
-
-      const displayName =
-        $("profileDisplayName")
-          .value
-          .trim();
-
-
-      const bio =
-        $("bio")
-          .value
-          .trim();
-
-
-      const avatarUrl =
-        $("avatarUrl")
-          .value
-          .trim();
-
-
-      /*
-       * Username validation.
-       */
-
-      if(
-        username &&
-        !/^[a-z0-9][a-z0-9_.-]{2,31}$/
-          .test(username)
-      ){
-
-        showNotice(
-          "Username must be 3–32 characters and use only letters, numbers, periods, underscores or hyphens."
-        );
+        loginRedirect();
 
         return;
 
@@ -1883,203 +1859,216 @@ $("profileForm")
 
 
       /*
-       * Avatar URL validation.
+       * Ensure every authenticated CrowRules account
+       * has a free universal membership if needed.
        */
+      const {
+        error: ensureError
+      } =
+        await supabaseClient.rpc(
+          "ensure_crow_membership"
+        );
 
-      if(avatarUrl){
+      if(ensureError){
 
-        try{
-
-          const url =
-            new URL(
-              avatarUrl
-            );
-
-          if(
-            ![
-              "http:",
-              "https:"
-            ].includes(
-              url.protocol
-            )
-          ){
-
-            throw new Error(
-              "Invalid protocol"
-            );
-
-          }
-
-        }catch{
-
-          showNotice(
-            "Please enter a valid HTTPS or HTTP avatar image URL."
-          );
-
-          return;
-
-        }
+        console.warn(
+          "ensure_crow_membership:",
+          ensureError
+        );
 
       }
 
 
-      const saveButton =
-        $("saveProfileBtn");
+      /*
+       * Load member + membership together.
+       */
+      const [
+        memberResult,
+        membershipResult
+      ] =
+        await Promise.all([
 
-
-      saveButton.disabled =
-        true;
-
-
-      saveButton.textContent =
-        "Saving…";
-
-
-      try{
-
-        /*
-         * Update only the authenticated
-         * member's own row.
-         *
-         * RLS must enforce user_id ownership.
-         */
-
-        const {
-          error
-        } =
-          await supabaseClient
+          supabaseClient
             .from("members")
-            .update({
-
-              first_name:
-                firstName || null,
-
-              last_name:
-                lastName || null,
-
-              username:
-                username || null,
-
-              display_name:
-                displayName || null,
-
-              bio:
-                bio || null,
-
-              avatar_url:
-                avatarUrl || null
-
-            })
+            .select(
+              [
+                "user_id",
+                "first_name",
+                "last_name",
+                "username",
+                "email",
+                "membership_type",
+                "role",
+                "status",
+                "points",
+                "bio",
+                "avatar_url",
+                "display_name",
+                "created_at"
+              ].join(",")
+            )
             .eq(
               "user_id",
-              user.id
-            );
+              currentUser.id
+            )
+            .maybeSingle(),
+
+          supabaseClient
+            .rpc(
+              "get_my_membership"
+            )
+
+        ]);
 
 
-        if(error){
+      if(memberResult.error){
 
-          /*
-           * A duplicate username is commonly
-           * returned as a database constraint error.
-           */
-
-          if(
-            /duplicate|unique/i
-              .test(
-                error.message || ""
-              )
-          ){
-
-            showNotice(
-              "That username is already in use. Please choose another username."
-            );
-
-          }else{
-
-            showNotice(
-              "Profile could not be saved: " +
-              error.message
-            );
-
-          }
-
-          return;
-
-        }
-
-
-        showNotice(
-          "Your universal CrowRules profile has been saved.",
-          "ok"
-        );
-
-
-        await loadProfile();
-
-
-      }finally{
-
-        saveButton.disabled =
-          false;
-
-        saveButton.textContent =
-          "Save Profile";
+        throw memberResult.error;
 
       }
 
+
+      if(membershipResult.error){
+
+        throw membershipResult.error;
+
+      }
+
+
+      currentMember =
+        memberResult.data || null;
+
+
+      const membershipRows =
+        membershipResult.data || [];
+
+
+      currentMembership =
+        Array.isArray(membershipRows)
+          ? (
+              membershipRows[0] ||
+              null
+            )
+          : membershipRows;
+
+
+      if(!currentMember){
+
+        showStatus(
+          "Your account exists, but your CrowRules profile record could not be loaded.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      populateForm();
+
+      renderProfile();
+
+      configureMembershipButton();
+
+    }catch(error){
+
+      console.error(error);
+
+      showStatus(
+        error?.message ||
+        "Unable to load your CrowRules profile.",
+        "error"
+      );
+
     }
-  );
+
+  }
 
 
-/* =========================================================
-   STRIPE BILLING PORTAL
-========================================================= */
+  /* =========================================================
+     FORM
+  ========================================================= */
 
-$("portalBtn")
-  .addEventListener(
-    "click",
-    async () => {
+  function populateForm(){
 
-      clearNotice();
+    const member =
+      currentMember || {};
 
-
-      const button =
-        $("portalBtn");
+    $("firstName").value =
+      member.first_name || "";
 
 
-      button.disabled =
-        true;
+    $("lastName").value =
+      member.last_name || "";
 
 
-      button.textContent =
-        "Opening…";
+    $("username").value =
+      member.username || "";
 
 
-      try{
+    $("displayName").value =
+      member.display_name || "";
 
-        const {
-          data,
-          error
-        } =
-          await supabaseClient
-            .functions
-            .invoke(
-              "membership-portal"
-            );
+
+    $("avatarUrl").value =
+      member.avatar_url || "";
+
+
+    $("bio").value =
+      member.bio || "";
+
+  }
+
+
+  $("profileForm")
+    .addEventListener(
+      "submit",
+      async event => {
+
+        event.preventDefault();
+
+        if(!currentUser){
+          loginRedirect();
+          return;
+        }
+
+        const firstName =
+          $("firstName").value.trim();
+
+        const lastName =
+          $("lastName").value.trim();
+
+        const username =
+          $("username")
+            .value
+            .trim()
+            .toLowerCase();
+
+        const displayName =
+          $("displayName")
+            .value
+            .trim();
+
+        const avatarUrl =
+          $("avatarUrl")
+            .value
+            .trim();
+
+        const bio =
+          $("bio")
+            .value
+            .trim();
 
 
         if(
-          error ||
-          !data?.url
+          username &&
+          !/^[a-z0-9][a-z0-9_.-]{2,31}$/
+            .test(username)
         ){
 
-          console.error(
-            "Portal error:",
-            error
-          );
-
-          showNotice(
-            "The Stripe billing portal could not be opened."
+          showStatus(
+            "Username must be 3–32 characters and use only letters, numbers, dots, underscores or hyphens.",
+            "error"
           );
 
           return;
@@ -2087,97 +2076,335 @@ $("portalBtn")
         }
 
 
-        window.location.href =
-          data.url;
+        if(avatarUrl){
+
+          const safeUrl =
+            safeExternalHttpUrl(
+              avatarUrl
+            );
+
+          if(!safeUrl){
+
+            showStatus(
+              "Avatar URL must use HTTP or HTTPS.",
+              "error"
+            );
+
+            return;
+
+          }
+
+        }
 
 
-      }finally{
+        const button =
+          $("saveButton");
 
-        button.disabled =
-          false;
+        button.disabled = true;
 
         button.textContent =
-          "Billing Portal";
+          "Saving...";
+
+
+        try{
+
+          const {
+            error
+          } =
+            await supabaseClient
+              .from("members")
+              .update({
+
+                first_name:
+                  firstName || null,
+
+                last_name:
+                  lastName || null,
+
+                username:
+                  username || null,
+
+                display_name:
+                  displayName || null,
+
+                avatar_url:
+                  avatarUrl || null,
+
+                bio:
+                  bio || null,
+
+                updated_at:
+                  new Date().toISOString()
+
+              })
+              .eq(
+                "user_id",
+                currentUser.id
+              );
+
+
+          if(error){
+
+            throw error;
+
+          }
+
+
+          currentMember = {
+            ...currentMember,
+
+            first_name:
+              firstName || null,
+
+            last_name:
+              lastName || null,
+
+            username:
+              username || null,
+
+            display_name:
+              displayName || null,
+
+            avatar_url:
+              avatarUrl || null,
+
+            bio:
+              bio || null
+
+          };
+
+
+          renderProfile();
+
+          showStatus(
+            "Your CrowRules profile has been saved.",
+            "success"
+          );
+
+        }catch(error){
+
+          console.error(error);
+
+          showStatus(
+            error?.message ||
+            "Unable to save your profile.",
+            "error"
+          );
+
+        }finally{
+
+          button.disabled = false;
+
+          button.textContent =
+            "Save Profile";
+
+        }
 
       }
+    );
+
+
+  $("resetButton")
+    .addEventListener(
+      "click",
+      () => {
+
+        populateForm();
+
+        clearStatus();
+
+      }
+    );
+
+
+  /* =========================================================
+     STRIPE MEMBERSHIP PORTAL
+  ========================================================= */
+
+  function configureMembershipButton(){
+
+    const membership =
+      currentMembership || {};
+
+    const paid =
+      Number(
+        membership.price_cents || 0
+      ) > 0;
+
+
+    const button =
+      $("manageMembership");
+
+
+    if(!paid){
+
+      button.style.display =
+        "none";
+
+      return;
 
     }
-  );
 
 
-/* =========================================================
-   SIGN OUT
-========================================================= */
+    button.style.display =
+      "inline-flex";
 
-$("signOutBtn")
-  .addEventListener(
-    "click",
-    async () => {
+
+    button.onclick =
+      openMembershipPortal;
+
+  }
+
+
+  async function openMembershipPortal(){
+
+    const button =
+      $("manageMembership");
+
+    button.disabled = true;
+
+    button.textContent =
+      "Opening...";
+
+
+    try{
 
       const {
+        data,
         error
       } =
-        await supabaseClient
-          .auth
-          .signOut();
+        await supabaseClient.functions.invoke(
+          "membership-portal"
+        );
 
 
       if(error){
 
-        showNotice(
-          "Could not sign out: " +
-          error.message
+        throw error;
+
+      }
+
+
+      if(!data?.url){
+
+        throw new Error(
+          "Stripe Billing Portal URL was not returned."
         );
 
-        return;
+      }
+
+
+      window.location.assign(
+        data.url
+      );
+
+    }catch(error){
+
+      console.error(error);
+
+      showStatus(
+        error?.message ||
+        "Unable to open Stripe Billing Portal.",
+        "error"
+      );
+
+      button.disabled = false;
+
+      button.textContent =
+        "Manage Membership";
+
+    }
+
+  }
+
+
+  /* =========================================================
+     SIGN OUT
+  ========================================================= */
+
+  async function signOut(){
+
+    try{
+
+      const {
+        error
+      } =
+        await supabaseClient.auth.signOut();
+
+      if(error){
+
+        throw error;
 
       }
 
 
-      window.location.href =
-        "/login.html";
+      window.location.replace(
+        LOGIN_URL
+      );
+
+    }catch(error){
+
+      console.error(error);
+
+      showStatus(
+        error?.message ||
+        "Unable to sign out.",
+        "error"
+      );
+
+    }
+
+  }
+
+
+  $("signOutButton")
+    .addEventListener(
+      "click",
+      signOut
+    );
+
+
+  $("signOutTop")
+    .addEventListener(
+      "click",
+      event => {
+
+        event.preventDefault();
+
+        signOut();
+
+      }
+    );
+
+
+  /* =========================================================
+     AUTH STATE
+  ========================================================= */
+
+  supabaseClient.auth.onAuthStateChange(
+    (event, session) => {
+
+      if(event === "SIGNED_OUT"){
+
+        window.location.replace(
+          LOGIN_URL
+        );
+
+      }
 
     }
   );
 
 
-/* =========================================================
-   AUTH STATE
-========================================================= */
+  /* =========================================================
+     INITIALIZE
+  ========================================================= */
 
-supabaseClient
-  .auth
-  .onAuthStateChange(
-    (event) => {
-
-      if(
-        event === "SIGNED_OUT"
-      ){
-
-        window.location.href =
-          "/login.html";
-
-      }
-
-    }
-  );
+  $("year").textContent =
+    new Date().getFullYear();
 
 
-/* =========================================================
-   YEAR
-========================================================= */
-
-$("year")
-  .textContent =
-  new Date()
-    .getFullYear();
-
-
-/* =========================================================
-   START
-========================================================= */
-
-loadProfile();
+  loadProfile();
 
 </script>
 
