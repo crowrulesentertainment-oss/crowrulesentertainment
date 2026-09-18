@@ -2,6 +2,7 @@
 
 <html lang="en">
 <head>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#050505">
@@ -22,7 +23,12 @@ content="CrowRules Entertainment — The Next Chapter. Back Deck Live #005 and t
   rel="stylesheet"
 >
 
+<!-- Supabase -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
+
 :root{
   --bg:#050505;
   --panel:#090909;
@@ -33,7 +39,6 @@ content="CrowRules Entertainment — The Next Chapter. Back Deck Live #005 and t
   --line:rgba(255,255,255,.08);
   --red:#ff1b1b;
   --red-soft:rgba(255,27,27,.14);
-  --red-glow:rgba(255,0,0,.28);
 }
 
 *{
@@ -111,6 +116,10 @@ body::after{
     );
 }
 
+body.membership-open{
+  overflow:hidden;
+}
+
 .vignette{
   position:fixed;
   inset:0;
@@ -126,7 +135,7 @@ body::after{
 }
 
 /* =========================================================
-   CINEMATIC INTRO
+   INTRO
 ========================================================= */
 
 .intro{
@@ -150,7 +159,6 @@ body::after{
 
 .intro-inner{
   width:min(800px,90%);
-  text-align:center;
 }
 
 .intro-kicker{
@@ -168,7 +176,6 @@ body::after{
   font-weight:900;
   line-height:.95;
   letter-spacing:.08em;
-  text-transform:uppercase;
   text-shadow:
     0 0 20px rgba(255,0,0,.16),
     0 0 60px rgba(255,0,0,.08);
@@ -192,7 +199,6 @@ body::after{
       var(--red),
       transparent
     );
-  box-shadow:0 0 14px rgba(255,0,0,.35);
 }
 
 .intro-status{
@@ -212,12 +218,6 @@ body::after{
   font-size:8px;
   letter-spacing:.2em;
   cursor:pointer;
-}
-
-.skip-intro:hover{
-  color:#fff;
-  border-color:rgba(255,27,27,.55);
-  background:rgba(255,0,0,.05);
 }
 
 /* =========================================================
@@ -258,7 +258,6 @@ header{
   font-size:clamp(22px,4vw,38px);
   font-weight:900;
   letter-spacing:.08em;
-  line-height:1;
 }
 
 .logo span{
@@ -273,7 +272,7 @@ header{
 }
 
 /* =========================================================
-   UNIVERSAL MEMBERSHIP BUTTON
+   MEMBERSHIP BUTTON
 ========================================================= */
 
 .membership-bar{
@@ -281,7 +280,6 @@ header{
   margin:22px auto 0;
   display:flex;
   justify-content:center;
-  align-items:center;
 }
 
 .membership-button{
@@ -289,7 +287,7 @@ header{
   align-items:center;
   justify-content:center;
   gap:10px;
-  min-width:180px;
+  min-width:190px;
   padding:13px 24px;
   border:1px solid rgba(255,27,27,.5);
   background:
@@ -304,17 +302,11 @@ header{
   font-weight:700;
   letter-spacing:.2em;
   cursor:pointer;
-  box-shadow:
-    0 0 20px rgba(255,0,0,.08),
-    inset 0 0 20px rgba(255,0,0,.025);
-  transition:
-    transform .25s ease,
-    border-color .25s ease,
-    box-shadow .25s ease,
-    background .25s ease;
+  transition:.25s ease;
 }
 
-.membership-button:hover{
+.membership-button:hover,
+.membership-button[aria-expanded="true"]{
   transform:translateY(-2px);
   border-color:var(--red);
   background:
@@ -324,19 +316,12 @@ header{
       rgba(255,0,0,.06)
     );
   box-shadow:
-    0 0 30px rgba(255,0,0,.2),
-    0 0 60px rgba(255,0,0,.06);
-}
-
-.membership-button:focus-visible{
-  outline:2px solid var(--red);
-  outline-offset:4px;
+    0 0 30px rgba(255,0,0,.2);
 }
 
 .membership-dot{
   width:7px;
   height:7px;
-  flex:0 0 7px;
   border-radius:50%;
   background:var(--red);
   box-shadow:0 0 12px var(--red);
@@ -357,9 +342,7 @@ header{
   opacity:0;
   visibility:hidden;
   pointer-events:none;
-  transition:
-    opacity .3s ease,
-    visibility .3s ease;
+  transition:.3s ease;
 }
 
 .membership-overlay.open{
@@ -372,6 +355,7 @@ header{
   width:min(470px,94vw);
   height:100%;
   overflow-y:auto;
+  overscroll-behavior:contain;
   background:
     linear-gradient(
       180deg,
@@ -383,7 +367,9 @@ header{
     -25px 0 80px rgba(0,0,0,.65),
     -10px 0 50px rgba(255,0,0,.05);
   transform:translateX(100%);
-  transition:transform .35s cubic-bezier(.22,.61,.36,1);
+  transition:
+    transform .35s cubic-bezier(.22,.61,.36,1);
+  text-align:center;
 }
 
 .membership-overlay.open .membership-panel{
@@ -397,7 +383,6 @@ header{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:20px;
   padding:20px;
   border-bottom:1px solid var(--line);
   background:rgba(7,7,7,.96);
@@ -420,19 +405,11 @@ header{
   background:transparent;
   color:#aaa;
   font-size:20px;
-  line-height:1;
   cursor:pointer;
-}
-
-.membership-close:hover{
-  color:#fff;
-  border-color:var(--red);
-  background:rgba(255,0,0,.08);
 }
 
 .membership-content{
   padding:36px 24px 50px;
-  text-align:center;
 }
 
 .membership-logo{
@@ -452,7 +429,6 @@ header{
   font-family:Orbitron,sans-serif;
   font-size:24px;
   font-weight:900;
-  color:#fff;
   box-shadow:0 0 35px rgba(255,0,0,.08);
 }
 
@@ -467,7 +443,6 @@ header{
   margin-top:14px;
   font-family:Orbitron,sans-serif;
   font-size:22px;
-  line-height:1.2;
 }
 
 .membership-muted{
@@ -501,15 +476,9 @@ header{
   letter-spacing:.16em;
   text-decoration:none;
   cursor:pointer;
-  transition:
-    border-color .2s ease,
-    background .2s ease,
-    color .2s ease,
-    transform .2s ease;
 }
 
 .membership-action:hover{
-  transform:translateY(-1px);
   border-color:rgba(255,27,27,.45);
   background:rgba(255,0,0,.055);
   color:#fff;
@@ -547,8 +516,8 @@ header{
   border-bottom:1px solid var(--line);
 }
 
-.member-avatar-fallback,
-.member-avatar{
+.member-avatar,
+.member-avatar-fallback{
   width:58px;
   height:58px;
   flex:0 0 58px;
@@ -565,7 +534,6 @@ header{
   font-family:Orbitron,sans-serif;
   font-size:15px;
   font-weight:800;
-  color:#fff;
 }
 
 .member-display-name{
@@ -573,7 +541,6 @@ header{
   font-size:12px;
   font-weight:700;
   letter-spacing:.08em;
-  color:#fff;
 }
 
 .member-email{
@@ -612,7 +579,6 @@ header{
   color:#555;
   font-family:Orbitron,sans-serif;
   font-size:7px;
-  line-height:1.5;
   letter-spacing:.13em;
 }
 
@@ -621,7 +587,6 @@ header{
   margin-top:9px;
   font-family:Orbitron,sans-serif;
   font-size:22px;
-  color:#fff;
 }
 
 .access-box{
@@ -719,7 +684,6 @@ main{
 
 .hero-copy strong{
   color:#ddd;
-  font-weight:700;
 }
 
 .chapter-line{
@@ -749,9 +713,6 @@ main{
       rgba(255,255,255,.025),
       rgba(255,255,255,.008)
     );
-  box-shadow:
-    inset 0 0 50px rgba(255,255,255,.012),
-    0 20px 80px rgba(0,0,0,.3);
 }
 
 .event-label{
@@ -766,8 +727,6 @@ main{
   margin-top:14px;
   font-family:Orbitron,sans-serif;
   font-size:clamp(20px,4vw,34px);
-  font-weight:800;
-  letter-spacing:.05em;
 }
 
 .event-description{
@@ -781,7 +740,6 @@ main{
 .countdown{
   display:flex;
   justify-content:center;
-  align-items:stretch;
   flex-wrap:wrap;
   gap:10px;
   margin:30px auto 0;
@@ -803,7 +761,6 @@ main{
   font-family:Orbitron,sans-serif;
   font-size:28px;
   font-weight:800;
-  line-height:1;
 }
 
 .time-label{
@@ -826,7 +783,6 @@ main{
 
 .event-note.live{
   color:var(--red);
-  text-shadow:0 0 16px rgba(255,0,0,.25);
 }
 
 .event-actions{
@@ -846,13 +802,7 @@ main{
   font-size:9px;
   font-weight:700;
   letter-spacing:.17em;
-  text-decoration:none;
   cursor:pointer;
-}
-
-.watch-button:hover{
-  border-color:var(--red);
-  background:rgba(255,0,0,.1);
 }
 
 /* =========================================================
@@ -886,7 +836,7 @@ footer{
 }
 
 /* =========================================================
-   BACK DECK THEATER
+   THEATER
 ========================================================= */
 
 .modal{
@@ -902,9 +852,6 @@ footer{
   opacity:0;
   visibility:hidden;
   pointer-events:none;
-  transition:
-    opacity .35s ease,
-    visibility .35s ease;
 }
 
 .modal.open{
@@ -919,9 +866,6 @@ footer{
   overflow:auto;
   border:1px solid rgba(255,27,27,.28);
   background:#050505;
-  box-shadow:
-    0 0 70px rgba(0,0,0,.8),
-    0 0 60px rgba(255,0,0,.08);
 }
 
 .modal-header{
@@ -929,7 +873,6 @@ footer{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:20px;
   padding:12px 16px;
   border-bottom:1px solid var(--line);
 }
@@ -939,7 +882,6 @@ footer{
   font-size:10px;
   font-weight:700;
   letter-spacing:.18em;
-  text-align:left;
 }
 
 .close-modal{
@@ -1025,10 +967,6 @@ footer{
     padding:10px;
   }
 
-  .modal-header{
-    padding:10px;
-  }
-
 }
 
 @media(prefers-reduced-motion:reduce){
@@ -1042,6 +980,7 @@ footer{
   }
 
 }
+
 </style>
 
 </head>
@@ -1051,7 +990,7 @@ footer{
 <div class="vignette"></div>
 
 <!-- =======================================================
-     CINEMATIC INTRO
+     INTRO
 ======================================================= -->
 
 <div class="intro" id="intro">
@@ -1101,14 +1040,12 @@ footer{
   </div>
 
   <div class="logo">
-    CROW<span>[RULES]</span>
+    CROW<span>RULES</span>
   </div>
 
   <div class="logo-sub">
     ENTERTAINMENT
   </div>
-
-  <!-- UNIVERSAL MEMBERSHIP -->
 
   <div class="membership-bar">
 
@@ -1118,6 +1055,7 @@ footer{
   type="button"
   aria-label="Open CrowRules Membership"
   aria-expanded="false"
+  aria-controls="membershipOverlay"
 >
 
   <span class="membership-dot"></span>
@@ -1133,7 +1071,7 @@ footer{
 </header>
 
 <!-- =======================================================
-     UNIVERSAL MEMBERSHIP DRAWER
+     UNIVERSAL MEMBERSHIP
 ======================================================= -->
 
 <div
@@ -1226,7 +1164,7 @@ footer{
 
   <div
     id="signedInView"
-    style="display:none;"
+    hidden
   >
 
     <div class="member-profile">
@@ -1309,7 +1247,7 @@ footer{
           <div
             id="sportsAccessItem"
             class="access-item"
-            style="display:none;"
+            hidden
           >
             CrowRules Sports
           </div>
@@ -1317,7 +1255,7 @@ footer{
           <div
             id="dreamscapesAccessItem"
             class="access-item"
-            style="display:none;"
+            hidden
           >
             Dreamscapes
           </div>
@@ -1325,7 +1263,7 @@ footer{
           <div
             id="memorialsAccessItem"
             class="access-item"
-            style="display:none;"
+            hidden
           >
             Memorials
           </div>
@@ -1416,12 +1354,9 @@ footer{
 
   </section>
 
-  <!-- BACK DECK LIVE #005 -->
+  <!-- BACK DECK LIVE -->
 
-  <section
-    class="event"
-    id="back-deck-event"
-  >
+  <section class="event">
 
 <div class="event-label">
   NEXT LIVE EVENT
@@ -1442,51 +1377,23 @@ footer{
 >
 
   <div class="time-box">
-    <div
-      class="time-value"
-      id="bd-days"
-    >
-      00
-    </div>
-    <div class="time-label">
-      DAYS
-    </div>
+    <div class="time-value" id="bd-days">00</div>
+    <div class="time-label">DAYS</div>
   </div>
 
   <div class="time-box">
-    <div
-      class="time-value"
-      id="bd-hours"
-    >
-      00
-    </div>
-    <div class="time-label">
-      HOURS
-    </div>
+    <div class="time-value" id="bd-hours">00</div>
+    <div class="time-label">HOURS</div>
   </div>
 
   <div class="time-box">
-    <div
-      class="time-value"
-      id="bd-minutes"
-    >
-      00
-    </div>
-    <div class="time-label">
-      MINUTES
-    </div>
+    <div class="time-value" id="bd-minutes">00</div>
+    <div class="time-label">MINUTES</div>
   </div>
 
   <div class="time-box">
-    <div
-      class="time-value"
-      id="bd-seconds"
-    >
-      00
-    </div>
-    <div class="time-label">
-      SECONDS
-    </div>
+    <div class="time-value" id="bd-seconds">00</div>
+    <div class="time-label">SECONDS</div>
   </div>
 
 </div>
@@ -1540,63 +1447,23 @@ footer{
 >
 
   <div class="time-box">
-
-    <div
-      class="time-value"
-      id="launch-days"
-    >
-      00
-    </div>
-
-    <div class="time-label">
-      DAYS
-    </div>
-
+    <div class="time-value" id="launch-days">00</div>
+    <div class="time-label">DAYS</div>
   </div>
 
   <div class="time-box">
-
-    <div
-      class="time-value"
-      id="launch-hours"
-    >
-      00
-    </div>
-
-    <div class="time-label">
-      HOURS
-    </div>
-
+    <div class="time-value" id="launch-hours">00</div>
+    <div class="time-label">HOURS</div>
   </div>
 
   <div class="time-box">
-
-    <div
-      class="time-value"
-      id="launch-minutes"
-    >
-      00
-    </div>
-
-    <div class="time-label">
-      MINUTES
-    </div>
-
+    <div class="time-value" id="launch-minutes">00</div>
+    <div class="time-label">MINUTES</div>
   </div>
 
   <div class="time-box">
-
-    <div
-      class="time-value"
-      id="launch-seconds"
-    >
-      00
-    </div>
-
-    <div class="time-label">
-      SECONDS
-    </div>
-
+    <div class="time-value" id="launch-seconds">00</div>
+    <div class="time-label">SECONDS</div>
   </div>
 
 </div>
@@ -1633,7 +1500,7 @@ footer{
 </footer>
 
 <!-- =======================================================
-     BACK DECK LIVE THEATER
+     BACK DECK THEATER
 ======================================================= -->
 
 <div
@@ -1694,382 +1561,1141 @@ footer{
 
 </div>
 
-<!-- =======================================================
-     UNIVERSAL CROWRULES MEMBERSHIP ENGINE
-======================================================= -->
-
-<script
-  src="/js/crowrules-membership.js?v=20260918.3"
-  defer
-></script>
-
-<!-- =======================================================
-     PAGE ENGINE
-======================================================= -->
-
 <script>
-(() => {
 
-  "use strict";
+/* =========================================================
+   CROWRULES SUPABASE CONFIGURATION
+========================================================= */
 
-  const BACK_DECK_EVENT =
-    new Date(
-      "2026-09-19T15:00:00-07:00"
-    ).getTime();
+const SUPABASE_URL =
+  "https://zauxdqyssratvzmomozf.supabase.co";
 
-  const OFFICIAL_LAUNCH =
-    new Date(
-      "2026-12-18T00:00:00-08:00"
-    ).getTime();
+/*
+ * IMPORTANT:
+ * Use your Supabase publishable key here.
+ *
+ * Do NOT put a service_role/secret key here.
+ */
+const SUPABASE_PUBLISHABLE_KEY =
+  "YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY";
 
-  const intro =
-    document.getElementById("intro");
+const {
+  createClient
+} = window.supabase;
 
-  const skipIntro =
-    document.getElementById("skip-intro");
-
-  const theaterModal =
-    document.getElementById("theater-modal");
-
-  const openTheater =
-    document.getElementById("open-theater");
-
-  const closeTheater =
-    document.getElementById("close-theater");
-
-  const backDeckNote =
-    document.getElementById("back-deck-note");
-
-  const launchNote =
-    document.getElementById("launch-note");
-
-  let theaterOpened =
-    sessionStorage.getItem(
-      "crowrules_back_deck_theater_opened"
-    ) === "1";
-
-  let launchRedirected = false;
-
-  /* =====================================================
-     INTRO
-  ===================================================== */
-
-  function closeIntro(){
-
-    if(!intro){
-      return;
+const supabaseClient =
+  createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY,
+    {
+      auth:{
+        persistSession:true,
+        autoRefreshToken:true,
+        detectSessionInUrl:true
+      }
     }
-
-    intro.classList.add("hidden");
-
-    window.setTimeout(() => {
-      intro.remove();
-    },1000);
-
-  }
-
-  skipIntro?.addEventListener(
-    "click",
-    closeIntro
   );
 
-  window.setTimeout(
-    closeIntro,
-    3600
+/* =========================================================
+   MEMBERSHIP UI
+========================================================= */
+
+const membershipButton =
+  document.getElementById(
+    "membershipButton"
   );
 
-  /* =====================================================
-     COUNTDOWN
-  ===================================================== */
+const membershipButtonText =
+  document.getElementById(
+    "membershipButtonText"
+  );
 
-  function pad(value){
-    return String(value).padStart(2,"0");
-  }
+const membershipOverlay =
+  document.getElementById(
+    "membershipOverlay"
+  );
 
-  function updateCountdown(
-    target,
-    ids,
-    note,
-    liveText
+const membershipPanel =
+  document.getElementById(
+    "membershipPanel"
+  );
+
+const membershipClose =
+  document.getElementById(
+    "membershipClose"
+  );
+
+const signedOutView =
+  document.getElementById(
+    "signedOutView"
+  );
+
+const signedInView =
+  document.getElementById(
+    "signedInView"
+  );
+
+const googleSignIn =
+  document.getElementById(
+    "googleSignIn"
+  );
+
+const signOutButton =
+  document.getElementById(
+    "signOutButton"
+  );
+
+const authMessage =
+  document.getElementById(
+    "authMessage"
+  );
+
+const signedInMessage =
+  document.getElementById(
+    "signedInMessage"
+  );
+
+let membershipLastFocus = null;
+let membershipIsOpen = false;
+
+function openMembership(){
+
+  membershipLastFocus =
+    document.activeElement;
+
+  membershipIsOpen = true;
+
+  membershipOverlay.classList.add(
+    "open"
+  );
+
+  membershipOverlay.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+  membershipButton.setAttribute(
+    "aria-expanded",
+    "true"
+  );
+
+  document.body.classList.add(
+    "membership-open"
+  );
+
+  window.setTimeout(() => {
+    membershipClose.focus();
+  },50);
+
+}
+
+function closeMembership(){
+
+  membershipIsOpen = false;
+
+  membershipOverlay.classList.remove(
+    "open"
+  );
+
+  membershipOverlay.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+  membershipButton.setAttribute(
+    "aria-expanded",
+    "false"
+  );
+
+  document.body.classList.remove(
+    "membership-open"
+  );
+
+  if(
+    membershipLastFocus &&
+    typeof membershipLastFocus.focus ===
+      "function"
   ){
 
-    let distance =
-      target - Date.now();
+    window.setTimeout(() => {
+      membershipLastFocus.focus();
+    },50);
 
-    if(distance <= 0){
+  }
+
+}
+
+membershipButton.addEventListener(
+  "click",
+  () => {
+
+    if(membershipIsOpen){
+      closeMembership();
+    }else{
+      openMembership();
+    }
+
+  }
+);
+
+membershipClose.addEventListener(
+  "click",
+  closeMembership
+);
+
+membershipOverlay.addEventListener(
+  "click",
+  event => {
+
+    if(
+      event.target ===
+      membershipOverlay
+    ){
+
+      closeMembership();
+
+    }
+
+  }
+);
+
+membershipPanel.addEventListener(
+  "click",
+  event => {
+    event.stopPropagation();
+  }
+);
+
+/* =========================================================
+   AUTH MESSAGE
+========================================================= */
+
+function setAuthMessage(
+  message,
+  signedIn = false
+){
+
+  const element =
+    signedIn
+      ? signedInMessage
+      : authMessage;
+
+  if(element){
+    element.textContent =
+      message || "";
+  }
+
+}
+
+/* =========================================================
+   PROFILE HELPERS
+========================================================= */
+
+function getDisplayName(user){
+
+  return (
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
+    user?.email?.split("@")[0] ||
+    "CROWNER"
+  );
+
+}
+
+function getAvatar(user){
+
+  return (
+    user?.user_metadata?.avatar_url ||
+    user?.user_metadata?.picture ||
+    ""
+  );
+
+}
+
+function renderAvatar(user){
+
+  const container =
+    document.getElementById(
+      "memberAvatarContainer"
+    );
+
+  if(!container){
+    return;
+  }
+
+  const avatar =
+    getAvatar(user);
+
+  if(avatar){
+
+    const img =
+      document.createElement("img");
+
+    img.className =
+      "member-avatar";
+
+    img.alt =
+      getDisplayName(user);
+
+    img.src =
+      avatar;
+
+    img.referrerPolicy =
+      "no-referrer";
+
+    img.onerror = () => {
+
+      container.innerHTML = `
+        <div class="member-avatar-fallback">
+          CR
+        </div>
+      `;
+
+    };
+
+    container.replaceChildren(
+      img
+    );
+
+  }else{
+
+    container.innerHTML = `
+      <div class="member-avatar-fallback">
+        CR
+      </div>
+    `;
+
+  }
+
+}
+
+/* =========================================================
+   SIGNED-IN UI
+========================================================= */
+
+function renderSignedOut(){
+
+  signedOutView.hidden =
+    false;
+
+  signedInView.hidden =
+    true;
+
+  membershipButtonText.textContent =
+    "CROWNER";
+
+  setAuthMessage("");
+
+}
+
+function renderSignedIn(user){
+
+  signedOutView.hidden =
+    true;
+
+  signedInView.hidden =
+    false;
+
+  membershipButtonText.textContent =
+    "CROWNER";
+
+  document.getElementById(
+    "memberDisplayName"
+  ).textContent =
+    getDisplayName(user);
+
+  document.getElementById(
+    "memberEmail"
+  ).textContent =
+    user.email || "";
+
+  renderAvatar(user);
+
+  setAuthMessage(
+    "",
+    true
+  );
+
+}
+
+/* =========================================================
+   LOAD MEMBERSHIP DATA
+========================================================= */
+
+async function loadMembershipData(user){
+
+  /*
+   * These lookups are deliberately isolated.
+   * If a particular table is not exposed to
+   * the browser or has RLS denying access,
+   * authentication still works.
+   */
+
+  try{
+
+    const profileResult =
+      await supabaseClient
+        .from("cr_profiles")
+        .select("*")
+        .eq("id",user.id)
+        .maybeSingle();
+
+    if(
+      !profileResult.error &&
+      profileResult.data
+    ){
+
+      const profile =
+        profileResult.data;
+
+      const displayName =
+        profile.display_name ||
+        profile.full_name ||
+        getDisplayName(user);
 
       document.getElementById(
-        ids.days
-      ).textContent = "00";
+        "memberDisplayName"
+      ).textContent =
+        displayName;
 
-      document.getElementById(
-        ids.hours
-      ).textContent = "00";
+      if(profile.avatar_url){
 
-      document.getElementById(
-        ids.minutes
-      ).textContent = "00";
+        const container =
+          document.getElementById(
+            "memberAvatarContainer"
+          );
 
-      document.getElementById(
-        ids.seconds
-      ).textContent = "00";
+        const img =
+          document.createElement("img");
 
-      if(note){
+        img.className =
+          "member-avatar";
 
-        note.textContent =
-          liveText;
+        img.alt =
+          displayName;
 
-        note.classList.add("live");
+        img.src =
+          profile.avatar_url;
+
+        container.replaceChildren(
+          img
+        );
 
       }
 
-      return true;
+      if(profile.plan){
+
+        document.getElementById(
+          "memberPlan"
+        ).textContent =
+          String(
+            profile.plan
+          ).toUpperCase();
+
+      }
+
+      /*
+       * Optional access fields.
+       */
+      if(profile.sports_access){
+
+        document.getElementById(
+          "sportsAccessItem"
+        ).hidden = false;
+
+      }
+
+      if(profile.dreamscapes_access){
+
+        document.getElementById(
+          "dreamscapesAccessItem"
+        ).hidden = false;
+
+      }
+
+      if(profile.memorials_access){
+
+        document.getElementById(
+          "memorialsAccessItem"
+        ).hidden = false;
+
+      }
+
     }
 
-    const days =
-      Math.floor(
-        distance /
-        (1000 * 60 * 60 * 24)
-      );
+  }catch(error){
 
-    distance -=
-      days *
-      1000 *
-      60 *
-      60 *
-      24;
-
-    const hours =
-      Math.floor(
-        distance /
-        (1000 * 60 * 60)
-      );
-
-    distance -=
-      hours *
-      1000 *
-      60 *
-      60;
-
-    const minutes =
-      Math.floor(
-        distance /
-        (1000 * 60)
-      );
-
-    distance -=
-      minutes *
-      1000 *
-      60;
-
-    const seconds =
-      Math.floor(
-        distance /
-        1000
-      );
-
-    document.getElementById(
-      ids.days
-    ).textContent =
-      pad(days);
-
-    document.getElementById(
-      ids.hours
-    ).textContent =
-      pad(hours);
-
-    document.getElementById(
-      ids.minutes
-    ).textContent =
-      pad(minutes);
-
-    document.getElementById(
-      ids.seconds
-    ).textContent =
-      pad(seconds);
-
-    return false;
-  }
-
-  /* =====================================================
-     BACK DECK THEATER
-  ===================================================== */
-
-  function openTheaterModal(){
-
-    if(!theaterModal){
-      return;
-    }
-
-    theaterModal.classList.add("open");
-
-    document.body.style.overflow =
-      "hidden";
-
-    theaterOpened = true;
-
-    sessionStorage.setItem(
-      "crowrules_back_deck_theater_opened",
-      "1"
+    console.warn(
+      "CrowRules profile lookup:",
+      error
     );
 
   }
 
-  function closeTheaterModal(){
+  /*
+   * Try the existing CrowPoints summary
+   * structure without breaking auth if the
+   * table is unavailable.
+   */
 
-    if(!theaterModal){
-      return;
+  try{
+
+    const result =
+      await supabaseClient
+        .from("watch_points_summary")
+        .select("*")
+        .eq("user_id",user.id)
+        .maybeSingle();
+
+    if(
+      !result.error &&
+      result.data
+    ){
+
+      const row =
+        result.data;
+
+      const lifetime =
+        row.lifetime_points ??
+        row.total_points ??
+        row.crowpoints ??
+        0;
+
+      const monthly =
+        row.monthly_points ??
+        row.monthly_crowpoints ??
+        0;
+
+      document.getElementById(
+        "lifetimePoints"
+      ).textContent =
+        Number(lifetime).toLocaleString();
+
+      document.getElementById(
+        "monthlyPoints"
+      ).textContent =
+        Number(monthly).toLocaleString();
+
     }
 
-    theaterModal.classList.remove("open");
+  }catch(error){
+
+    console.warn(
+      "CrowPoints lookup:",
+      error
+    );
+
+  }
+
+}
+
+/* =========================================================
+   GOOGLE LOGIN
+========================================================= */
+
+googleSignIn.addEventListener(
+  "click",
+  async () => {
+
+    googleSignIn.disabled =
+      true;
+
+    googleSignIn.textContent =
+      "CONNECTING...";
+
+    setAuthMessage(
+      "Connecting to Google..."
+    );
+
+    try{
+
+      const {
+        error
+      } =
+      await supabaseClient.auth
+        .signInWithOAuth({
+          provider:"google",
+          options:{
+            redirectTo:
+              window.location.href.split("#")[0]
+          }
+        });
+
+      if(error){
+        throw error;
+      }
+
+    }catch(error){
+
+      console.error(error);
+
+      setAuthMessage(
+        error?.message ||
+        "Google sign-in could not be started."
+      );
+
+      googleSignIn.disabled =
+        false;
+
+      googleSignIn.textContent =
+        "CONTINUE WITH GOOGLE";
+
+    }
+
+  }
+);
+
+/* =========================================================
+   SIGN OUT
+========================================================= */
+
+signOutButton.addEventListener(
+  "click",
+  async () => {
+
+    signOutButton.disabled =
+      true;
+
+    signOutButton.textContent =
+      "SIGNING OUT...";
+
+    try{
+
+      const {
+        error
+      } =
+      await supabaseClient.auth
+        .signOut();
+
+      if(error){
+        throw error;
+      }
+
+      renderSignedOut();
+
+      closeMembership();
+
+    }catch(error){
+
+      console.error(error);
+
+      setAuthMessage(
+        error?.message ||
+        "Sign out failed.",
+        true
+      );
+
+    }finally{
+
+      signOutButton.disabled =
+        false;
+
+      signOutButton.textContent =
+        "SIGN OUT";
+
+    }
+
+  }
+);
+
+/* =========================================================
+   SESSION INITIALIZATION
+========================================================= */
+
+async function initializeMembership(){
+
+  try{
+
+    const {
+      data,
+      error
+    } =
+    await supabaseClient.auth
+      .getSession();
+
+    if(error){
+      throw error;
+    }
+
+    const session =
+      data?.session;
+
+    if(session?.user){
+
+      renderSignedIn(
+        session.user
+      );
+
+      await loadMembershipData(
+        session.user
+      );
+
+    }else{
+
+      renderSignedOut();
+
+    }
+
+  }catch(error){
+
+    console.error(
+      "CrowRules auth initialization:",
+      error
+    );
+
+    renderSignedOut();
+
+  }
+
+}
+
+supabaseClient.auth
+  .onAuthStateChange(
+    async (
+      event,
+      session
+    ) => {
+
+      if(session?.user){
+
+        renderSignedIn(
+          session.user
+        );
+
+        /*
+         * Avoid blocking the auth event
+         * unnecessarily.
+         */
+        setTimeout(() => {
+
+          loadMembershipData(
+            session.user
+          );
+
+        },0);
+
+      }else{
+
+        renderSignedOut();
+
+      }
+
+    }
+  );
+
+initializeMembership();
+
+/* =========================================================
+   INTRO
+========================================================= */
+
+const intro =
+  document.getElementById(
+    "intro"
+  );
+
+document.getElementById(
+  "skip-intro"
+).addEventListener(
+  "click",
+  closeIntro
+);
+
+function closeIntro(){
+
+  if(!intro){
+    return;
+  }
+
+  intro.classList.add(
+    "hidden"
+  );
+
+  setTimeout(() => {
+
+    if(intro.parentNode){
+      intro.remove();
+    }
+
+  },1000);
+
+}
+
+setTimeout(
+  closeIntro,
+  3600
+);
+
+/* =========================================================
+   COUNTDOWN
+========================================================= */
+
+const BACK_DECK_EVENT =
+  new Date(
+    "2026-09-19T15:00:00-07:00"
+  ).getTime();
+
+const OFFICIAL_LAUNCH =
+  new Date(
+    "2026-12-18T00:00:00-08:00"
+  ).getTime();
+
+function pad(value){
+
+  return String(value)
+    .padStart(2,"0");
+
+}
+
+function updateCountdown(
+  target,
+  ids,
+  note,
+  liveText
+){
+
+  let distance =
+    target - Date.now();
+
+  if(distance <= 0){
+
+    document.getElementById(
+      ids.days
+    ).textContent = "00";
+
+    document.getElementById(
+      ids.hours
+    ).textContent = "00";
+
+    document.getElementById(
+      ids.minutes
+    ).textContent = "00";
+
+    document.getElementById(
+      ids.seconds
+    ).textContent = "00";
+
+    if(note){
+
+      note.textContent =
+        liveText;
+
+      note.classList.add(
+        "live"
+      );
+
+    }
+
+    return true;
+
+  }
+
+  const days =
+    Math.floor(
+      distance /
+      86400000
+    );
+
+  distance -=
+    days * 86400000;
+
+  const hours =
+    Math.floor(
+      distance /
+      3600000
+    );
+
+  distance -=
+    hours * 3600000;
+
+  const minutes =
+    Math.floor(
+      distance /
+      60000
+    );
+
+  distance -=
+    minutes * 60000;
+
+  const seconds =
+    Math.floor(
+      distance /
+      1000
+    );
+
+  document.getElementById(
+    ids.days
+  ).textContent =
+    pad(days);
+
+  document.getElementById(
+    ids.hours
+  ).textContent =
+    pad(hours);
+
+  document.getElementById(
+    ids.minutes
+  ).textContent =
+    pad(minutes);
+
+  document.getElementById(
+    ids.seconds
+  ).textContent =
+    pad(seconds);
+
+  return false;
+
+}
+
+/* =========================================================
+   THEATER
+========================================================= */
+
+const theaterModal =
+  document.getElementById(
+    "theater-modal"
+  );
+
+const openTheater =
+  document.getElementById(
+    "open-theater"
+  );
+
+const closeTheater =
+  document.getElementById(
+    "close-theater"
+  );
+
+function openTheaterModal(){
+
+  if(membershipIsOpen){
+    closeMembership();
+  }
+
+  theaterModal.classList.add(
+    "open"
+  );
+
+  document.body.style.overflow =
+    "hidden";
+
+}
+
+function closeTheaterModal(){
+
+  theaterModal.classList.remove(
+    "open"
+  );
+
+  if(!membershipIsOpen){
 
     document.body.style.overflow =
       "";
 
   }
 
-  openTheater?.addEventListener(
-    "click",
-    openTheaterModal
-  );
+}
 
-  closeTheater?.addEventListener(
-    "click",
-    closeTheaterModal
-  );
+openTheater.addEventListener(
+  "click",
+  openTheaterModal
+);
 
-  theaterModal?.addEventListener(
-    "click",
-    event => {
+closeTheater.addEventListener(
+  "click",
+  closeTheaterModal
+);
 
-      if(
-        event.target === theaterModal
-      ){
-        closeTheaterModal();
-      }
+theaterModal.addEventListener(
+  "click",
+  event => {
 
-    }
-  );
+    if(
+      event.target ===
+      theaterModal
+    ){
 
-  document.addEventListener(
-    "keydown",
-    event => {
-
-      if(event.key === "Escape"){
-        closeTheaterModal();
-      }
+      closeTheaterModal();
 
     }
-  );
 
-  /* =====================================================
-     OFFICIAL LAUNCH
-  ===================================================== */
+  }
+);
 
-  function redirectToOfficialSite(){
+/* =========================================================
+   ESCAPE
+========================================================= */
 
-    if(launchRedirected){
+document.addEventListener(
+  "keydown",
+  event => {
+
+    if(
+      event.key !== "Escape"
+    ){
       return;
     }
 
-    launchRedirected = true;
+    if(membershipIsOpen){
 
-    if(launchNote){
+      closeMembership();
 
-      launchNote.textContent =
-        "CROWRULES ENTERTAINMENT — OFFICIALLY LIVE";
+    }else{
 
-      launchNote.classList.add("live");
-
-    }
-
-    window.setTimeout(() => {
-
-      window.location.replace(
-        "home.html"
-      );
-
-    },250);
-
-  }
-
-  /* =====================================================
-     TICK
-  ===================================================== */
-
-  function tick(){
-
-    const backDeckLive =
-      updateCountdown(
-        BACK_DECK_EVENT,
-        {
-          days:"bd-days",
-          hours:"bd-hours",
-          minutes:"bd-minutes",
-          seconds:"bd-seconds"
-        },
-        backDeckNote,
-        "BACK DECK LIVE #005 — NOW PLAYING"
-      );
-
-    if(
-      backDeckLive &&
-      !theaterOpened &&
-      Date.now() < OFFICIAL_LAUNCH
-    ){
-
-      openTheaterModal();
-
-    }
-
-    const launchReached =
-      updateCountdown(
-        OFFICIAL_LAUNCH,
-        {
-          days:"launch-days",
-          hours:"launch-hours",
-          minutes:"launch-minutes",
-          seconds:"launch-seconds"
-        },
-        launchNote,
-        "CROWRULES ENTERTAINMENT — OFFICIALLY LIVE"
-      );
-
-    if(launchReached){
-
-      redirectToOfficialSite();
+      closeTheaterModal();
 
     }
 
   }
+);
 
-  /* =====================================================
-     POST-LAUNCH CHECK
-  ===================================================== */
+/* =========================================================
+   LAUNCH REDIRECT
+========================================================= */
 
-  if(
-    Date.now() >= OFFICIAL_LAUNCH
-  ){
+let launchRedirected =
+  false;
 
-    redirectToOfficialSite();
+function redirectToOfficialSite(){
 
+  if(launchRedirected){
     return;
   }
 
+  launchRedirected =
+    true;
+
+  const launchNote =
+    document.getElementById(
+      "launch-note"
+    );
+
+  if(launchNote){
+
+    launchNote.textContent =
+      "CROWRULES ENTERTAINMENT — OFFICIALLY LIVE";
+
+    launchNote.classList.add(
+      "live"
+    );
+
+  }
+
+  setTimeout(() => {
+
+    window.location.replace(
+      "home.html"
+    );
+
+  },250);
+
+}
+
+/* =========================================================
+   PAGE TICK
+========================================================= */
+
+let theaterAutoOpened =
+  sessionStorage.getItem(
+    "crowrules_back_deck_theater_opened"
+  ) === "1";
+
+function tick(){
+
+  const backDeckLive =
+    updateCountdown(
+      BACK_DECK_EVENT,
+      {
+        days:"bd-days",
+        hours:"bd-hours",
+        minutes:"bd-minutes",
+        seconds:"bd-seconds"
+      },
+      document.getElementById(
+        "back-deck-note"
+      ),
+      "BACK DECK LIVE #005 — NOW PLAYING"
+    );
+
+  if(
+    backDeckLive &&
+    !theaterAutoOpened &&
+    Date.now() <
+      OFFICIAL_LAUNCH
+  ){
+
+    theaterAutoOpened =
+      true;
+
+    sessionStorage.setItem(
+      "crowrules_back_deck_theater_opened",
+      "1"
+    );
+
+    openTheaterModal();
+
+  }
+
+  const launchReached =
+    updateCountdown(
+      OFFICIAL_LAUNCH,
+      {
+        days:"launch-days",
+        hours:"launch-hours",
+        minutes:"launch-minutes",
+        seconds:"launch-seconds"
+      },
+      document.getElementById(
+        "launch-note"
+      ),
+      "CROWRULES ENTERTAINMENT — OFFICIALLY LIVE"
+    );
+
+  if(launchReached){
+
+    redirectToOfficialSite();
+
+  }
+
+}
+
+/* =========================================================
+   POST-LAUNCH
+========================================================= */
+
+if(
+  Date.now() >=
+  OFFICIAL_LAUNCH
+){
+
+  redirectToOfficialSite();
+
+}else{
+
   tick();
 
-  window.setInterval(
+  setInterval(
     tick,
     1000
   );
 
-  document.addEventListener(
-    "visibilitychange",
-    () => {
+}
+
+/* =========================================================
+   TAB / WINDOW RECHECK
+========================================================= */
+
+document.addEventListener(
+  "visibilitychange",
+  () => {
+
+    if(
+      !document.hidden
+    ){
 
       if(
-        !document.hidden &&
-        Date.now() >= OFFICIAL_LAUNCH
+        Date.now() >=
+        OFFICIAL_LAUNCH
       ){
 
         redirectToOfficialSite();
@@ -2081,47 +2707,50 @@ footer{
       }
 
     }
-  );
 
-  window.addEventListener(
-    "focus",
-    () => {
+  }
+);
 
-      if(
-        Date.now() >= OFFICIAL_LAUNCH
-      ){
+window.addEventListener(
+  "focus",
+  () => {
 
-        redirectToOfficialSite();
+    if(
+      Date.now() >=
+      OFFICIAL_LAUNCH
+    ){
 
-      }else{
+      redirectToOfficialSite();
 
-        tick();
+    }else{
 
-      }
-
-    }
-  );
-
-  window.addEventListener(
-    "pageshow",
-    () => {
-
-      if(
-        Date.now() >= OFFICIAL_LAUNCH
-      ){
-
-        redirectToOfficialSite();
-
-      }else{
-
-        tick();
-
-      }
+      tick();
 
     }
-  );
 
-})();
+  }
+);
+
+window.addEventListener(
+  "pageshow",
+  () => {
+
+    if(
+      Date.now() >=
+      OFFICIAL_LAUNCH
+    ){
+
+      redirectToOfficialSite();
+
+    }else{
+
+      tick();
+
+    }
+
+  }
+);
+
 </script>
 
 </body>
