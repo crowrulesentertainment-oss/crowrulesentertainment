@@ -170,12 +170,15 @@ async function renderBusinessActivity(inquiryCount,partnershipCount){
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
 async function checkAdmin(user){
  if(!user)return false;
- // Admin authorization is deliberately based on the database role, not editable user metadata.
- const {data,error}=await db.from("members").select("id,role,status,display_name,email").eq("user_id",user.id).maybeSingle();
+ // Preferred authorization source: Supabase app_metadata, which is not user-editable.
+ const tokenRole=String(user.app_metadata?.role||"").toLowerCase();
+ if(["owner","super_admin","admin","administrator"].includes(tokenRole))return true;
+ // Fallback to the members role when RLS permits the authenticated admin to read it.
+ const {data,error}=await db.from("members").select("id,role,status").eq("user_id",user.id).maybeSingle();
  if(error){console.warn("Admin membership check:",error);return false}
  const role=String(data?.role||"").toLowerCase();
  const status=String(data?.status||"").toLowerCase();
- return ["owner","admin","administrator"].includes(role) && status!=="suspended" && status!=="banned";
+ return ["owner","super_admin","admin","administrator"].includes(role) && !["suspended","banned"].includes(status);
 }
 async function handleAuth(){
  const {data:{session}}=await db.auth.getSession();
