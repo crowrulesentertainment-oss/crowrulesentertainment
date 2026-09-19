@@ -168,6 +168,90 @@ async function renderBusinessActivity(inquiryCount,partnershipCount){
  ]);
 }
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
+
+async function adminApi(action, payload={}) {
+ const {data, error}=await db.functions.invoke("crowrules-admin-api",{body:{action,...payload}});
+ if(error) {
+  let msg=error.message||"Admin API request failed.";
+  try { if(error.context){ const detail=await error.context.json(); msg=detail.error||detail.message||msg; } } catch {}
+  throw new Error(msg);
+ }
+ if(!data?.ok) throw new Error(data?.error||"Admin API request failed.");
+ return data;
+}
+let dataRows=[];
+function renderDataRows(rows){
+ dataRows=rows||[];
+ const head=$("dataHead"), body=$("dataBody");
+ if(!head||!body)return;
+ const cols=[...new Set(dataRows.flatMap(r=>Object.keys(r)))].slice(0,10);
+ head.innerHTML="<tr>"+cols.map(c=>"<th>"+esc(c)+"</th>").join("")+"<th>EDIT</th></tr>";
+ body.innerHTML=dataRows.map((row,i)=>"<tr>"+cols.map(c=>"<td>"+esc(typeof row[c]==="object"?JSON.stringify(row[c]):row[c]??"—")+"</td>").join("")+"<td><button class='btn' data-row-index='"+i+"'>Edit</button></td></tr>").join("")||"<tr><td colspan='11'>No records returned.</td></tr>";
+ body.querySelectorAll("[data-row-index]").forEach(b=>b.onclick=()=>selectDataRow(Number(b.dataset.rowIndex)));
+}
+function selectDataRow(i){
+ const row=dataRows[i]; if(!row)return;
+ $("dataEditor").value=JSON.stringify(row,null,2);
+ const keys=["id","user_id","site_key","slug","channel_key","episode_key","show_key","podcast_id","member_id"].filter(k=>row[k]!==undefined);
+ const filters={}; if(keys[0]) filters[keys[0]]=row[keys[0]];
+ $("dataFilters").value=JSON.stringify(filters);
+ $("dataSave").textContent="Insert";
+ $("dataMessage").textContent="Record loaded for editing.";
+}
+async function loadDataTables(){
+ try{
+  const result=await adminApi("tables");
+  const select=$("dataTableSelect");
+  select.innerHTML=result.tables.map(t=>"<option value='"+esc(t)+"'>"+esc(t)+" ("+(result.counts[t]??"—")+")</option>").join("");
+  await loadDataRows();
+ }catch(e){ $("dataMessage").textContent=e.message; toast(e.message); }
+}
+async function loadDataRows(){
+ const table=$("dataTableSelect").value;
+ if(!table)return;
+ try{
+  const result=await adminApi("list",{table,limit:100});
+  renderDataRows(result.rows);
+  $("dataMessage").textContent="Loaded "+result.rows.length+" records from "+table+".";
+ }catch(e){$("dataMessage").textContent=e.message;toast(e.message);}
+}
+function clearDataEditor(){
+ $("dataEditor").value="";
+ $("dataFilters").value="";
+ $("dataMessage").textContent="Ready for a new record.";
+}
+async function saveDataRecord(){
+ try{
+  const table=$("dataTableSelect").value;
+  const data=JSON.parse($("dataEditor").value||"{}");
+  await adminApi("insert",{table,data});
+  toast("Record inserted.");
+  await loadDataRows();
+  clearDataEditor();
+ }catch(e){toast(e.message);$("dataMessage").textContent=e.message;}
+}
+async function updateDataRecord(){
+ try{
+  const table=$("dataTableSelect").value, filters=JSON.parse($("dataFilters").value||"{}"), data=JSON.parse($("dataEditor").value||"{}");
+  await adminApi("update",{table,filters,data});
+  toast("Record updated.");
+  await loadDataRows();
+ }catch(e){toast(e.message);$("dataMessage").textContent=e.message;}
+}
+async function deleteDataRecord(){
+ if(!confirm("Delete this record? This cannot be undone."))return;
+ try{
+  const table=$("dataTableSelect").value, filters=JSON.parse($("dataFilters").value||"{}");
+  await adminApi("delete",{table,filters});
+  toast("Record deleted.");
+  await loadDataRows();
+  clearDataEditor();
+ }catch(e){toast(e.message);$("dataMessage").textContent=e.message;}
+}
+async function refreshAdminSession(){
+ try{ await db.auth.refreshSession(); }catch(e){ console.warn("Session refresh:",e.message); }
+}
+
 async function checkAdmin(user){
  if(!user)return false;
  // Preferred authorization source: Supabase app_metadata, which is not user-editable.
@@ -189,7 +273,7 @@ async function handleAuth(){
 function unlock(user){
  currentUser=user;$("authGate").classList.add("hidden");
  $("ownerName").textContent=(user.email||"OWNER").split("@")[0].toUpperCase().slice(0,16);
- renderSystem();loadCounts().catch(console.error);
+ renderSystem();loadCounts().catch(console.error); loadDataTables().catch(console.error);
 }
 async function signInGoogle(){
  $("authMessage").textContent="Opening Google sign-in…";
@@ -209,6 +293,7 @@ function wire(){
  $("refresh").onclick=()=>{toast("Refreshing Supabase data…");loadCounts()};
  $("ownerButton").onclick=async()=>{if(currentUser){await db.auth.signOut();location.reload()}};
  $("episodeRefresh").onclick=renderEpisodeData;
+  if($("dataLoad")){ $("dataLoad").onclick=loadDataRows; $("dataTableSelect").onchange=loadDataRows; $("dataNew").onclick=clearDataEditor; $("dataSave").onclick=saveDataRecord; $("dataUpdate").onclick=updateDataRecord; $("dataDelete").onclick=deleteDataRecord; }
  $("episodeSearch").oninput=e=>{const q=e.target.value.toLowerCase();document.querySelectorAll("#episodeTable tr").forEach(r=>r.style.display=r.textContent.toLowerCase().includes(q)?"":"none")};
  $("googleLogin").onclick=signInGoogle;$("emailLogin").onclick=signInEmail;
  document.addEventListener("click",e=>{
@@ -220,6 +305,7 @@ async function init(){
  renderStats();renderDivisions();renderDivisions("showsGrid");renderQuick();renderActivity();renderCards("contentCards",cardSets.content);renderCards("creatorCards",cardSets.creator);renderCards("tvCards",cardSets.tv);renderCards("mediaCards",cardSets.media);renderCards("businessCards",cardSets.business);renderCards("sportsCards",cardSets.sports);renderPipeline();renderSystem();
  $("year").textContent=new Date().getFullYear();nav();wire();
  db=window.supabase.createClient(CONFIG.supabaseUrl,CONFIG.supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+ await refreshAdminSession();
  db.auth.onAuthStateChange(async(_event,session)=>{
   if(session?.user){if(await checkAdmin(session.user))unlock(session.user);else{$("authMessage").textContent="Authenticated, but this account is not an owner/admin.";await db.auth.signOut()}}
   else $("authGate").classList.remove("hidden");
