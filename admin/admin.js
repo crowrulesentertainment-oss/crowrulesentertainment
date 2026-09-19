@@ -113,7 +113,7 @@ async function loadCounts(){
   members,creators,content,liveEvents,activeMembers,watchHistory,memorials,featuredMemorials,memorialImages,
   podcasts,episodes,podcastLive,podcastRows,businessInquiries,partnerships,channels,schedule,watchStats,ideas,collabs
  ]=await Promise.all([
-  count("members"),count("creators"),count("cr_content"),count("live_events"),
+  count("members"),count("creators"),count("episodes"),count("schedule_items",q=>q.eq("is_active",true)),
   count("members",q=>q.eq("status","active")),count("membership_watch_history"),
   count("celebrity_memorials_2026"),count("celebrity_memorials_2026",q=>q.eq("is_featured",true)),
   count("celebrity_memorials_2026",q=>q.not("image_url","is",null)),
@@ -122,9 +122,9 @@ async function loadCounts(){
   count("business_inquiries"),count("business_partnerships"),count("tv_channels"),count("schedule_items"),
   count("cr_tv_watch_events"),count("dreams"),count("dream_creator_collaborations")
  ]);
- setStats("stats",[["MEMBERS",members??"—"],["CREATORS",creators??"—"],["CONTENT",content??"—"],["LIVE EVENTS",liveEvents??"—"]]);
+ setStats("stats",[["MEMBERS",members??"—"],["CREATORS",creators??"—"],["EPISODES",content??"—"],["ACTIVE SCHEDULE",liveEvents??"—"]]);
  setStats("memberStats",[["MEMBERS",members??"—"],["ACTIVE",activeMembers??"—"],["CROWPOINTS","LIVE"],["WATCH EVENTS",watchHistory??"—"]]);
- setStats("analyticsStats",[["CONTENT",content??"—"],["WATCH EVENTS",watchStats??"—"],["ACTIVE USERS",activeMembers??"—"],["LIVE EVENTS",liveEvents??"—"]]);
+ setStats("analyticsStats",[["EPISODES",content??"—"],["WATCH EVENTS",watchStats??"—"],["ACTIVE USERS",activeMembers??"—"],["ACTIVE SCHEDULE",liveEvents??"—"]]);
  setStats("memorialStats",[["MEMORIALS",memorials??"—"],["FEATURED",featuredMemorials??"—"],["2026 DEATHS",memorials??"—"],["WITH IMAGES",memorialImages??"—"]]);
  setStats("podcastStats",[["PODCASTS",podcasts??"—"],["EPISODES",episodes??"—"],["TOTAL PLAYS",podcastRows.reduce((n,x)=>n+Number(x.total_plays||0),0)],["LIVE",podcastLive??"—"]]);
  setStats("dreamStats",[["DREAMS",ideas??"—"],["IN DEVELOPMENT","LIVE"],["COLLABORATORS",collabs??"—"],["PITCH READY","LIVE"]]);
