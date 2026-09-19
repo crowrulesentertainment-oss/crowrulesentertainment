@@ -296,6 +296,7 @@ function wire(){
   if($("dataLoad")){ $("dataLoad").onclick=loadDataRows; $("dataTableSelect").onchange=loadDataRows; $("dataNew").onclick=clearDataEditor; $("dataSave").onclick=saveDataRecord; $("dataUpdate").onclick=updateDataRecord; $("dataDelete").onclick=deleteDataRecord; }
  $("episodeSearch").oninput=e=>{const q=e.target.value.toLowerCase();document.querySelectorAll("#episodeTable tr").forEach(r=>r.style.display=r.textContent.toLowerCase().includes(q)?"":"none")};
  $("googleLogin").onclick=signInGoogle;$("emailLogin").onclick=signInEmail;
+  if($("roleSave")) $("roleSave").onclick=async()=>{try{const member_id=$("roleMemberId").value.trim(),role=$("roleValue").value; if(!member_id)throw new Error("Enter a member ID."); await adminApi("set_member_role",{member_id,role}); $("roleMessage").textContent="Role updated and Auth metadata synchronized."; toast("Member role updated.");}catch(e){$("roleMessage").textContent=e.message;toast(e.message);}};
  document.addEventListener("click",e=>{
   const go=e.target.closest("[data-go]");if(go){activate(go.dataset.go);return}
   const t=e.target.closest("[data-toast]");if(t)toast(t.dataset.toast);
