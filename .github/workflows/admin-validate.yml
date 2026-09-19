@@ -1,0 +1,31 @@
+name: CrowRules Admin Validation
+on:
+  push:
+    branches: [main]
+    paths:
+      - "admin/**"
+      - ".github/workflows/admin-validate.yml"
+  pull_request:
+    paths:
+      - "admin/**"
+      - ".github/workflows/admin-validate.yml"
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Validate admin files
+        run: |
+          test -f admin/index.html
+          test -f admin/admin.css
+          test -f admin/admin.js
+          grep -q "CROWRULES" admin/index.html
+          grep -q "CONFIG" admin/admin.js
+      - name: Secret safety scan
+        run: |
+          if grep -RniE "service_role|sb_secret_|SUPABASE_SERVICE_ROLE" admin; then
+            echo "Potential privileged Supabase secret detected in admin/"
+            exit 1
+          fi
+          echo "Browser admin secret scan passed."
