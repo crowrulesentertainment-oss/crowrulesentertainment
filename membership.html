@@ -98,8 +98,8 @@ function features(value){if(Array.isArray(value))return value;try{return JSON.pa
 function showCheckoutBanner(){const q=new URLSearchParams(location.search),v=q.get("checkout"),el=document.getElementById("checkoutBanner");if(!v)return;el.classList.remove("hidden");el.textContent=v==="success"?"Your Stripe checkout completed. Your membership status will appear here after the membership webhook finishes processing.":"Checkout was cancelled. No membership change was made."}
 
 async function loadPlans(){
- const r=await supabase.from("membership_plans").select("id,plan_key,name,level,price_cents,billing_interval,description,features,is_active,is_featured,crowpoints_multiplier").eq("is_active",true).order("sort_order");
- if(r.error){plansEl.innerHTML='<div class="panel">Membership plans are temporarily unavailable.</div>';return}
+ const r=await supabase.rpc("get_public_membership_plans");
+ if(r.error){console.error("Membership plan load failed:",r.error);plansEl.innerHTML='<div class="panel"><strong>Membership plans could not be loaded.</strong><br><small>'+esc(r.error.message||"Supabase membership service error")+"</small></div>";return}
  plansEl.innerHTML=r.data.map(p=>`<article class="plan ${p.is_featured?"featured":""}">
  ${p.is_featured?'<span class="plan-badge">MOST FEATURED</span>':''}
  <h3>${esc(p.name)}</h3><div class="price">${money(p.price_cents)} ${p.billing_interval==="month"?'<small>/ MONTH</small>':''}</div>
