@@ -71,7 +71,7 @@
 </div>
 
 <div id="connectedUniverse" class="hidden">
-<div class="section-title"><h2>CONNECTED CROWRULES SITES</h2><p>Your universal account is designed to travel with you throughout the CrowRules ecosystem.</p></div>
+<div class="section-title"><h2>CONNECTED CROWRULES SITES</h2><p>Live links to the active CrowRules destinations connected to your universal account.</p></div>
 <div class="site-grid" id="siteGrid"></div>
 <div class="section-title"><h2>YOUR ACCESS</h2><p>Entitlements returned by the universal membership system.</p></div>
 <div class="entitlements" id="entitlementGrid"></div>
@@ -158,7 +158,8 @@ async function renderAccount(){
  document.getElementById("multiplierStat").textContent=planMultiplier;
  document.getElementById("statusStat").textContent=current?.status||"active";
  document.getElementById("manageBilling").style.display=current&&current.plan_key!=="crow"?"inline-flex":"none";
- document.getElementById("siteGrid").innerHTML=(sites.data||[]).map(s=>'<a class="site" href="'+esc(s.site_url||"#")+'"><strong>'+esc(s.site_name||s.site_key)+'</strong><span>'+esc(s.site_key)+'</span></a>').join("");
+ const seenSites=new Set();
+ document.getElementById("siteGrid").innerHTML=(sites.data||[]).filter(s=>s.is_active&&s.site_url&&!seenSites.has(s.site_url)&&seenSites.add(s.site_url)).map(s=>'<a class="site" href="'+esc(s.site_url)+'" target="_blank" rel="noopener"><strong>'+esc(s.site_name||s.site_key)+'</strong><span>OPEN SITE ↗</span></a>').join("");
  try{
   const r=await fetch(FUNCTION_BASE+"/membership-status",{headers:{Authorization:"Bearer "+session.access_token,"apikey":SUPABASE_KEY}});
   const j=await r.json();
