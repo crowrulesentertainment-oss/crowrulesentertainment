@@ -32,7 +32,7 @@
 const SUPABASE_URL="https://cevylpnoexugwgygvtgu.supabase.co";
 const SUPABASE_KEY="sb_publishable_AdfM5y6RqF3tbvEVzDZSg_JuGTQLD-";
 const {createClient}=supabase;
-const sb=createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,flowType:"pkce"}});
+const sb=createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:"pkce"}});
 const API=SUPABASE_URL+"/functions/v1/crowrules-admin-api";
 const DIVISIONS=[
  {name:"Universal Membership",tag:"CORE",tables:["members","membership_profiles","membership_subscriptions","membership_sites"],desc:"Accounts, memberships, entitlements and the connected CrowRules identity.",links:["../membership.html","../admin/contact.html"]},
@@ -49,7 +49,7 @@ let counts={};let loadedRows=[];
 function esc(v){return String(v??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 function toast(msg){const e=document.getElementById("toast");e.textContent=msg;e.classList.remove("hidden");clearTimeout(window.__toast);window.__toast=setTimeout(()=>e.classList.add("hidden"),3200)}
 async function invoke(action,extra={}){const {data:{session}}=await sb.auth.getSession();if(!session)throw new Error("Session expired. Please sign in again.");const res=await fetch(API,{method:"POST",headers:{Authorization:"Bearer "+session.access_token,"Content-Type":"application/json","apikey":SUPABASE_KEY},body:JSON.stringify({action,...extra})});const body=await res.json().catch(()=>({error:"Invalid server response"}));if(!res.ok||body.ok===false)throw new Error(body.error||"Admin request failed.");return body}
-async function boot(){const {data:{user}}=await sb.auth.getUser();if(!user){showLogin();return}try{const h=await invoke("health");document.getElementById("userEmail").textContent=user.email||"ADMINISTRATOR";document.getElementById("userRole").textContent=(h.role||"admin").toUpperCase();document.getElementById("login").classList.add("hidden");document.getElementById("app").classList.remove("hidden");await refreshAll()}catch(e){document.getElementById("loginError").textContent=e.message;await sb.auth.signOut();showLogin()}}
+async function boot(){const {data:{session}}=await sb.auth.getSession();if(!session){showLogin();return}try{const {data:{user},error:userError}=await sb.auth.getUser();if(userError||!user)throw new Error(userError?.message||"No authenticated user.");const h=await invoke("health");document.getElementById("userEmail").textContent=user.email||"ADMINISTRATOR";document.getElementById("userRole").textContent=(h.role||"admin").toUpperCase();document.getElementById("login").classList.add("hidden");document.getElementById("app").classList.remove("hidden");await refreshAll()}catch(e){document.getElementById("loginError").textContent=e.message;await sb.auth.signOut();showLogin()}}
 function showLogin(){document.getElementById("login").classList.remove("hidden");document.getElementById("app").classList.add("hidden")}
 async function refreshAll(){const data=await invoke("tables");counts=data.counts||{};renderMetrics();renderDivisions();renderLinks();renderTableSelect();toast("Universe data refreshed")}
 function renderMetrics(){const total=Object.values(counts).reduce((a,b)=>a+(typeof b==="number"?b:0),0);const known=Object.values(counts).filter(v=>typeof v==="number").length;document.getElementById("metrics").innerHTML=[["DIVISIONS",DIVISIONS.length],["TRACKED TABLES",known],["TOTAL ROWS",total.toLocaleString()],["ADMIN API","ONLINE"]].map(x=>'<div class="metric"><div class="n">'+esc(x[1])+'</div><div class="l">'+esc(x[0])+'</div></div>').join("")}
@@ -67,7 +67,7 @@ document.getElementById("refresh").onclick=()=>refreshAll().catch(e=>toast(e.mes
 document.getElementById("health").onclick=async()=>{try{const h=await invoke("health");toast("Authorized as "+String(h.role).toUpperCase())}catch(e){toast(e.message)}};
 document.getElementById("logout").onclick=async()=>{await sb.auth.signOut();showLogin()};
 document.getElementById("loginForm").onsubmit=async e=>{e.preventDefault();const err=document.getElementById("loginError");err.textContent="Authenticating…";const {error}=await sb.auth.signInWithPassword({email:document.getElementById("email").value,password:document.getElementById("password").value});if(error){err.textContent=error.message;return}err.textContent="";await boot()};
-sb.auth.onAuthStateChange((event)=>{if(event==="SIGNED_OUT")showLogin()});
+sb.auth.onAuthStateChange((event,session)=>{if(event==="SIGNED_OUT"){showLogin()}else if((event==="INITIAL_SESSION"||event==="SIGNED_IN"||event==="TOKEN_REFRESHED")&&session){boot()}});
 boot();
 </script>
 </body>
