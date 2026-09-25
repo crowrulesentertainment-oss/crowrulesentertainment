@@ -10,7 +10,7 @@
 </style>
 </head>
 <body><div class="bg"></div><div class="shell">
-<header class="top"><div><div class="eyebrow">CROWRULES ENTERTAINMENT // ADMIN</div><div class="title">CONTACT COMMAND CENTER</div><div class="muted">Partnerships · Sponsorships · Creators · Production · Community</div></div><button onclick="location.href='../contact.html'">OPEN PUBLIC CONTACT →</button></header>
+<div id="login" class="card" style="max-width:520px;margin:12vh auto;display:none"><div class="eyebrow">CROWRULES ENTERTAINMENT // SECURE ADMIN</div><div class="title" style="font-size:1.7rem">SIGN IN</div><p class="muted">Administrator access is required to view contact inquiries.</p><form id="loginForm"><input id="email" type="email" placeholder="Admin email" required style="width:100%;margin:8px 0"><input id="password" type="password" placeholder="Password" required style="width:100%;margin:8px 0"><button class="primary" style="width:100%;margin-top:8px">SIGN IN →</button><div id="loginStatus" class="muted" style="margin-top:12px"></div></form></div><div id="app" style="display:none"><header class="top"><div><div class="eyebrow">CROWRULES ENTERTAINMENT // ADMIN</div><div class="title">CONTACT COMMAND CENTER</div><div class="muted">Partnerships · Sponsorships · Creators · Production · Community</div></div><button onclick="location.href='../contact.html'">OPEN PUBLIC CONTACT →</button></header>
 <section class="grid">
 <div class="card"><div class="kicker">TOTAL</div><div class="metric" id="total">—</div></div>
 <div class="card"><div class="kicker">NEW</div><div class="metric" id="new">—</div></div>
@@ -22,10 +22,15 @@
 <div class="table-wrap"><table class="table"><thead><tr><th>DATE</th><th>CONTACT</th><th>TYPE</th><th>ORGANIZATION</th><th>EMAIL</th><th>NOTIFICATION</th></tr></thead><tbody id="rows"></tbody></table></div><div id="empty" class="empty hidden">No inquiries match the current filters.</div></main>
 <aside class="card detail" id="detail"><div class="kicker">SELECT AN INQUIRY</div><h2>Contact details appear here.</h2><p class="muted">Use the filters or select a row to inspect an inquiry.</p></aside>
 </div></div>
+</div>
 <script type="module">
 import{createClient}from"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-const supabase=createClient("https://cevylpnoexugwgygvtgu.supabase.co","sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-");
+const supabase=createClient("https://cevylpnoexugwgygvtgu.supabase.co","sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-",{auth:{persistSession:true,autoRefreshToken:true}});
 const $=id=>document.getElementById(id);let rows=[],selected=null;
+async function adminCall(action,extra={}){const {data:{session}}=await supabase.auth.getSession();if(!session)throw new Error("Not signed in");const {data,error}=await supabase.functions.invoke("crowrules-admin-api",{body:{action,...extra}});if(error)throw error;if(!data?.ok)throw new Error(data?.error||"Admin request failed");return data;}
+async function boot(){const {data:{session}}=await supabase.auth.getSession();if(!session){$("login").style.display="block";return}try{await adminCall("health");$("app").style.display="block";await load()}catch(e){$("login").style.display="block";$("loginStatus").textContent=e.message||"Administrator access required."}}
+$("loginForm").addEventListener("submit",async e=>{e.preventDefault();$("loginStatus").textContent="Signing in…";const {error}=await supabase.auth.signInWithPassword({email:$("email").value,password:$("password").value});if(error){$("loginStatus").textContent=error.message;return}location.reload()});
+
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function fmt(v){return v?new Date(v).toLocaleString():"—"}
 function render(){
@@ -35,7 +40,8 @@ function render(){
  $("empty").classList.toggle("hidden",filtered.length>0);
  document.querySelectorAll("tr[data-id]").forEach(el=>el.onclick=()=>show(el.dataset.id));
 }
-function show(id){selected=rows.find(x=>x.id===id);if(!selected)return;$("detail").innerHTML=`<div class="kicker">INQUIRY</div><h2>${esc(selected.name)}</h2><div class="detail-row"><small>REFERENCE</small>${esc(String(selected.id).slice(0,8).toUpperCase())}</div><div class="detail-row"><small>EMAIL</small><a href="mailto:${encodeURIComponent(selected.email)}" style="color:#79eaff">${esc(selected.email)}</a></div><div class="detail-row"><small>PHONE</small>${esc(selected.phone||"Not provided")}</div><div class="detail-row"><small>ORGANIZATION</small>${esc(selected.organization||"Not provided")}</div><div class="detail-row"><small>TYPE</small>${esc(selected.partnership_type)}</div><div class="detail-row"><small>RECEIVED</small>${esc(fmt(selected.created_at))}</div><div class="detail-row"><small>NOTIFICATION</small><span class="pill ${esc(selected.notification_status)}">${esc(selected.notification_status)}</span></div><div class="detail-row"><small>MESSAGE</small><div class="message">${esc(selected.message)}</div></div><div class="actions"><a class="btn" href="mailto:${encodeURIComponent(selected.email)}?subject=${encodeURIComponent("Re: CrowRules inquiry")}" style="text-decoration:none"><button class="primary">REPLY BY EMAIL →</button></a>${selected.notification_status==="failed"?'<button id="retry" class="primary">RETRY NOTIFICATION</button>':""}</div>`;
+function show(id){selected=rows.find(xasync function load(){try{const d=await adminCall("list",{table:"partner_inquiries",limit:500});rows=d.rows||[];$("total").textContent=rows.length;$("new").textContent=rows.filter(x=>x.status==="new").length;$("sent").textContent=rows.filter(x=>x.notification_status==="sent").length;$("attention").textContent=rows.filter(x=>["failed","pending"].includes(x.notification_status)).length;render()}catch(e){$("rows").innerHTML='<tr><td colspan="6">'+esc(e.message||"Unable to load inquiries.")+'</td></tr>'}}
+d_at))}</div><div class="detail-row"><small>NOTIFICATION</small><span class="pill ${esc(selected.notification_status)}">${esc(selected.notification_status)}</span></div><div class="detail-row"><small>MESSAGE</small><div class="message">${esc(selected.message)}</div></div><div class="actions"><a class="btn" href="mailto:${encodeURIComponent(selected.email)}?subject=${encodeURIComponent("Re: CrowRules inquiry")}" style="text-decoration:none"><button class="primary">REPLY BY EMAIL →</button></a>${selected.notification_status==="failed"?'<button id="retry" class="primary">RETRY NOTIFICATION</button>':""}</div>`;
  const retry=$("retry");if(retry)retry.onclick=async()=>{retry.disabled=true;retry.textContent="RETRYING…";const r=await supabase.functions.invoke("notify-crowrules-contact",{body:{id:selected.id}});if(r.error){alert("Retry failed. Check the notification error in Supabase.");retry.disabled=false;retry.textContent="RETRY NOTIFICATION"}else{await load();show(selected.id)}};
 }
 async function load(){
@@ -43,5 +49,6 @@ async function load(){
  if(error){$("rows").innerHTML='<tr><td colspan="6">Unable to load inquiries. Admin access or RLS needs to be configured.</td></tr>';return}
  rows=data||[];$("total").textContent=rows.length;$("new").textContent=rows.filter(x=>x.status==="new").length;$("sent").textContent=rows.filter(x=>x.notification_status==="sent").length;$("attention").textContent=rows.filter(x=>["failed","pending"].includes(x.notification_status)).length;render();
 }
-["search","type","status"].forEach(id=>$(id).addEventListener("input",render));$("refresh").onclick=load;load();
+["search","type","status"].forEach(id=>$(id).addEventListener("input",render));$("refresh").onclick=load;supabase.auth.onAuthStateChange((_e,s)=>{if(!s)location.reload()});boot();
+</script></body></html>
 </script></body></html>
