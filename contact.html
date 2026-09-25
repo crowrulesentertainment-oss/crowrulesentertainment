@@ -62,7 +62,7 @@
 </div>
 <button class="btn" id="sendBtn" type="submit">SEND INQUIRY →</button>
 <div class="status" id="formStatus" role="status" aria-live="polite"></div>
-<p class="helper">Please do not include passwords, payment information, or other sensitive information.</p>
+<p class="helper">Please do not include passwords, payment information, or other sensitive information. A confirmation reference is generated after your inquiry is saved.</p>
 </form></div>
 
 <aside class="side-stack">
@@ -96,10 +96,25 @@ e.preventDefault();
 if(!f.checkValidity()){f.reportValidity();return}
 st.textContent="SENDING…";btn.disabled=true;btn.textContent="SENDING…";
 const x=Object.fromEntries(new FormData(f));
-const combinedMessage=(x.phone?"Phone: "+x.phone+"\n\n":"")+x.message;
-const r=await s.from("partner_inquiries").insert({name:x.name,organization:x.organization||null,email:x.email,partnership_type:x.partnership_type,message:combinedMessage,status:"new"});
-if(r.error){st.textContent="Unable to send right now. Please try again.";btn.disabled=false;btn.textContent="SEND INQUIRY →";return}
-st.textContent="INQUIRY RECEIVED · THANK YOU";f.reset();count.textContent="0";btn.disabled=false;btn.textContent="SEND INQUIRY →";
+const payload={
+  name:x.name.trim(),
+  organization:x.organization?.trim()||null,
+  email:x.email.trim(),
+  phone:x.phone?.trim()||null,
+  partnership_type:x.partnership_type,
+  message:x.message.trim(),
+  status:"new",
+  notification_status:"pending"
+};
+const r=await s.from("partner_inquiries").insert(payload).select("id").single();
+if(r.error){
+  st.textContent="Unable to send right now. Please try again.";
+  btn.disabled=false;btn.textContent="SEND INQUIRY →";
+  return;
+}
+const ref=String(r.data.id).slice(0,8).toUpperCase();
+st.innerHTML="INQUIRY RECEIVED · THANK YOU<br><span style='font-weight:500;opacity:.7'>Reference #"+ref+" · Your message is now in the CrowRules contact pipeline.</span>";
+f.reset();count.textContent="0";btn.disabled=false;btn.textContent="SEND INQUIRY →";
 });
 </script>
 <footer><div class="counter">VISITORS · <strong data-visitor-count>—</strong></div><div style="margin-top:12px">CROWRULES ENTERTAINMENT · TACOMA, WASHINGTON · ONE COMPANY. ONE UNIVERSE.</div></footer>
