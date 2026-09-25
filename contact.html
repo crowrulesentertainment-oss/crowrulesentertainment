@@ -82,8 +82,8 @@ const q=new URLSearchParams(location.search).get("interest"); if(q&&[...f.partne
 msg.addEventListener("input",()=>count.textContent=msg.value.length);
 f.addEventListener("submit",async e=>{e.preventDefault();if(!f.checkValidity()){f.reportValidity();return}st.textContent="SENDING…";btn.disabled=true;btn.textContent="SENDING…";
 const x=Object.fromEntries(new FormData(f));const payload={name:x.name.trim(),organization:x.organization?.trim()||null,email:x.email.trim(),phone:x.phone?.trim()||null,partnership_type:String(x.partnership_type||"").trim(),message:x.message.trim(),status:"new",notification_status:"pending"};
-const r=await s.from("partner_inquiries").insert(payload).select("id").single();if(r.error){st.textContent="Unable to send right now. Please try again.";btn.disabled=false;btn.textContent="SEND INQUIRY →";return}
-const ref=String(r.data.id).slice(0,8).toUpperCase();const n=await s.functions.invoke("notify-crowrules-contact",{body:{id:r.data.id}});
+const r=await s.rpc("submit_partner_inquiry",{p_name:payload.name,p_organization:payload.organization,p_email:payload.email,p_phone:payload.phone,p_partnership_type:payload.partnership_type,p_message:payload.message});if(r.error){st.textContent="Unable to send right now. "+(r.error.message||"Please try again.");btn.disabled=false;btn.textContent="SEND INQUIRY →";return}
+const ref=String(r.data).slice(0,8).toUpperCase();const n=await s.functions.invoke("notify-crowrules-contact",{body:{id:r.data}});
 if(n.error){st.innerHTML="INQUIRY RECEIVED · THANK YOU<br><span style='font-weight:500;opacity:.7'>Reference #"+ref+" · Saved successfully. Email notification is pending.</span>"}else{st.innerHTML="INQUIRY RECEIVED · THANK YOU<br><span style='font-weight:500;opacity:.7'>Reference #"+ref+" · CrowRules has been notified.</span>"}
 f.reset();count.textContent="0";btn.disabled=false;btn.textContent="SEND INQUIRY →";});
 </script>
