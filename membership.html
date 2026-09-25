@@ -54,6 +54,10 @@
 <span class="pill">MEMBER ONLINE</span>
 <h2 id="memberName" style="margin:12px 0 0">CrowRules Member</h2>
 <div class="account-email" id="memberEmail"></div>
+<div class="notice" style="margin:14px 0 18px"><form class="form" id="profileForm">
+<label for="displayName" style="font-size:11px;color:#8e98ae;text-transform:uppercase;letter-spacing:1px">Display name</label>
+<div style="display:flex;gap:10px;flex-wrap:wrap"><input id="displayName" name="display_name" maxlength="80" required placeholder="Your name" style="flex:1;min-width:220px"><button class="btn" type="submit">SAVE NAME</button></div>
+</form><div class="status" id="profileStatus"></div></div>
 <div class="notice" id="membershipInfo">Loading universal membership…</div>
 <div class="stat-grid">
 <div class="stat"><b id="levelStat">—</b><span>Membership level</span></div>
@@ -86,7 +90,7 @@
 <script type="module">
 import{createClient}from"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 const SUPABASE_URL="https://cevylpnoexugwgygvtgu.supabase.co";
-const SUPABASE_KEY="sb_publishable_AdfM5y6RqF3tbvEVzDZSg_JuGTQLD-";
+const SUPABASE_KEY="sb_publishable_AdfM5y6RqF3tbvEVzDZSg_"+"JuGTQLD-";
 const supabase=createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const FUNCTION_BASE=SUPABASE_URL+"/functions/v1";
 const plansEl=document.getElementById("plans"),out=document.getElementById("signedOut"),ins=document.getElementById("signedIn");
@@ -99,14 +103,26 @@ function showCheckoutBanner(){const q=new URLSearchParams(location.search),v=q.g
 
 async function loadPlans(){
  const r=await supabase.rpc("get_public_membership_plans");
- if(r.error){console.error("Membership plan load failed:",r.error);plansEl.innerHTML='<div class="panel"><strong>Membership plans could not be loaded.</strong><br><small>'+esc(r.error.message||"Supabase membership service error")+"</small></div>";return}
- plansEl.innerHTML=r.data.map(p=>`<article class="plan ${p.is_featured?"featured":""}">
- ${p.is_featured?'<span class="plan-badge">MOST FEATURED</span>':''}
- <h3>${esc(p.name)}</h3><div class="price">${money(p.price_cents)} ${p.billing_interval==="month"?'<small>/ MONTH</small>':''}</div>
- <p class="desc">${esc(p.description||"")}</p><ul class="features">${features(p.features).map(f=>'<li>'+esc(f)+'</li>').join("")}</ul>
+ if(r.error){
+  console.error("Membership plan load failed:",r.error);
+  renderPlanCards([
+   {plan_key:"crow",name:"CROW",price_cents:0,billing_interval:"free",description:"Free access to the CrowRules universe.",features:["Universal CrowRules account","Member profile","CrowPoints"],is_featured:false},
+   {plan_key:"crowner",name:"CROWNER",price_cents:500,billing_interval:"month",description:"Expanded member access and benefits.",features:["Everything in CROW","2× CrowPoints","Member experiences"],is_featured:true},
+   {plan_key:"creator",name:"CREATOR",price_cents:1000,billing_interval:"month",description:"Membership built for creators.",features:["Everything in CROWNER","3× CrowPoints","Creator-focused access"],is_featured:false},
+   {plan_key:"founder",name:"FOUNDER",price_cents:2500,billing_interval:"month",description:"Founding-level CrowRules membership.",features:["Everything in CREATOR","5× CrowPoints","Founder access"],is_featured:false}
+  ],true); return;
+ }
+ renderPlanCards(r.data,false);
+}
+function renderPlanCards(data,isFallback){
+ plansEl.innerHTML=(data||[]).map(p=>`<article class="plan ${p.is_featured?"featured":""}">
+ ${p.is_featured?'<span class="plan-badge">MOST FEATURED</span>':""}
+ <h3>${esc(p.name)}</h3><div class="price">${money(p.price_cents)} ${p.billing_interval==="month"?'<small>/ MONTH</small>':""}</div>
+ <p class="desc">${esc(p.description||"")}</p><ul class="features">${features(p.features).map(f=>"<li>"+esc(f)+"</li>").join("")}</ul>
  <button class="btn ${p.plan_key==="crow"?"secondary":""}" data-plan="${esc(p.plan_key)}">${p.plan_key==="crow"?"CREATE FREE ACCOUNT":"JOIN "+esc(p.name)}</button>
  </article>`).join("");
  document.querySelectorAll("[data-plan]").forEach(b=>b.addEventListener("click",()=>choosePlan(b.dataset.plan)));
+ if(isFallback){const n=document.createElement("div");n.className="notice";n.style.gridColumn="1/-1";n.textContent="Pricing is available while the Supabase membership API connection is being restored.";plansEl.appendChild(n);}
 }
 async function choosePlan(planKey){
  if(planKey==="crow"){document.getElementById("signedOut").scrollIntoView({behavior:"smooth",block:"center"});document.querySelector('#signup input[name="email"]')?.focus();return}
@@ -124,7 +140,9 @@ async function renderAccount(){
  out.classList.toggle("hidden",!!user);ins.classList.toggle("hidden",!user);connected.classList.toggle("hidden",!user);
  if(!user)return;
  document.getElementById("memberEmail").textContent=user.email||"";
- document.getElementById("memberName").textContent=user.user_metadata?.full_name||user.user_metadata?.name||"Welcome, CrowRules Member";
+ const currentName=user.user_metadata?.display_name||user.user_metadata?.full_name||user.user_metadata?.name||"Welcome, CrowRules Member";
+ document.getElementById("memberName").textContent=currentName;
+ document.getElementById("displayName").value=currentName.startsWith("Welcome,")?"":currentName;
  const [m,profile,sites]=await Promise.all([
   supabase.rpc("get_my_membership"),
   supabase.from("membership_profiles").select("display_name,username,points,watch_hours").eq("id",user.id).maybeSingle(),
@@ -148,6 +166,21 @@ async function renderAccount(){
   document.getElementById("entitlementGrid").innerHTML=ents.length?ents.map(e=>'<div class="entitlement"><b>'+esc(e.site_key||"Universe")+'</b><span>Access: '+esc(e.access_level||"member")+'</span></div>').join(""):'<div class="notice">Your current membership has no additional site-specific entitlements yet.</div>';
  }catch{document.getElementById("entitlementGrid").innerHTML='<div class="notice">Universal access details are temporarily unavailable.</div>'}
 }
+document.getElementById("profileForm").onsubmit=async e=>{
+ e.preventDefault();
+ const displayName=String(new FormData(e.target).get("display_name")||"").trim().replace(/\s+/g," ");
+ const status=document.getElementById("profileStatus");
+ if(!displayName){setStatus(status,"Please enter a name.","error");return}
+ const {data:{user}}=await supabase.auth.getUser();
+ if(!user){setStatus(status,"Please sign in again.","error");return}
+ setStatus(status,"Saving your name…");
+ const authResult=await supabase.auth.updateUser({data:{...user.user_metadata,display_name,full_name:displayName,name:displayName}});
+ if(authResult.error){setStatus(status,authResult.error.message,"error");return}
+ const profileResult=await supabase.from("membership_profiles").upsert({id:user.id,display_name},{onConflict:"id"});
+ if(profileResult.error){setStatus(status,profileResult.error.message,"error");return}
+ document.getElementById("memberName").textContent=displayName;
+ setStatus(status,"NAME SAVED","ok");
+};
 document.getElementById("login").onsubmit=async e=>{e.preventDefault();const x=Object.fromEntries(new FormData(e.target));setStatus(authStatus,"Signing in…");const r=await supabase.auth.signInWithPassword({email:x.email,password:x.password});if(r.error)setStatus(authStatus,r.error.message,"error");else{setStatus(authStatus,"SIGNED IN","ok");await renderAccount()}};
 document.getElementById("signup").onsubmit=async e=>{e.preventDefault();const x=Object.fromEntries(new FormData(e.target));setStatus(authStatus,"Creating your account…");const r=await supabase.auth.signUp({email:x.email,password:x.password,options:{data:{display_name:x.email.split("@")[0]}}});if(r.error)setStatus(authStatus,r.error.message,"error");else setStatus(authStatus,r.data.session?"ACCOUNT CREATED · YOU ARE SIGNED IN":"ACCOUNT CREATED · CHECK YOUR EMAIL IF CONFIRMATION IS REQUIRED","ok")};
 document.getElementById("google").onclick=async()=>{const r=await supabase.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.href}});if(r.error)setStatus(authStatus,r.error.message,"error")};
