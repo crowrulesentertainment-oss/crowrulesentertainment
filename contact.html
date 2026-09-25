@@ -113,7 +113,12 @@ if(r.error){
   return;
 }
 const ref=String(r.data.id).slice(0,8).toUpperCase();
-st.innerHTML="INQUIRY RECEIVED · THANK YOU<br><span style='font-weight:500;opacity:.7'>Reference #"+ref+" · Your message is now in the CrowRules contact pipeline.</span>";
+const n=await s.functions.invoke("notify-crowrules-contact",{body:{id:r.data.id}});
+if(n.error){
+  st.innerHTML="INQUIRY RECEIVED · THANK YOU<br><span style='font-weight:500;opacity:.7'>Reference #"+ref+" · Saved successfully. Email notification is pending.</span>";
+}else{
+  st.innerHTML="INQUIRY RECEIVED · THANK YOU<br><span style='font-weight:500;opacity:.7'>Reference #"+ref+" · CrowRules has been notified.</span>";
+}
 f.reset();count.textContent="0";btn.disabled=false;btn.textContent="SEND INQUIRY →";
 });
 </script>
