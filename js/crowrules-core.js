@@ -1,4 +1,0 @@
-(()=>{const $=s=>document.querySelector(s);const nav=$('#crMobileNav'),btn=$('#crMenu');if(btn&&nav){btn.addEventListener('click',()=>{nav.hidden=!nav.hidden;btn.textContent=nav.hidden?'MENU':'CLOSE'});nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nav.hidden=true;btn.textContent='MENU'}))}
-const io='IntersectionObserver'in window?new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting&&e.target.classList.add('visible')),{threshold:.08}):null;if(io)document.querySelectorAll('.reveal').forEach(e=>io.observe(e));else document.querySelectorAll('.reveal').forEach(e=>e.classList.add('visible'));
-document.querySelectorAll('[data-year]').forEach(e=>e.textContent=new Date().getFullYear());
-})();
