@@ -66,8 +66,22 @@ document.getElementById("tableSearch").oninput=()=>renderRows(loadedRows);
 document.getElementById("refresh").onclick=()=>refreshAll().catch(e=>toast(e.message));
 document.getElementById("health").onclick=async()=>{try{const h=await invoke("health");toast("Authorized as "+String(h.role).toUpperCase())}catch(e){toast(e.message)}};
 document.getElementById("logout").onclick=async()=>{await sb.auth.signOut();showLogin()};
-document.getElementById("loginForm").onsubmit=async e=>{e.preventDefault();const err=document.getElementById("loginError");err.textContent="Authenticating…";const {error}=await sb.auth.signInWithPassword({email:document.getElementById("email").value,password:document.getElementById("password").value});if(error){err.textContent=error.message;return}err.textContent="";await boot()};
-sb.auth.onAuthStateChange((event,session)=>{if(event==="SIGNED_OUT"){showLogin()}else if((event==="INITIAL_SESSION"||event==="SIGNED_IN"||event==="TOKEN_REFRESHED")&&session){boot()}});
+document.getElementById("loginForm").onsubmit=async e=>{
+ e.preventDefault();
+ const err=document.getElementById("loginError");
+ err.textContent="Authenticating…";
+ const {data,error}=await sb.auth.signInWithPassword({email:document.getElementById("email").value.trim(),password:document.getElementById("password").value});
+ if(error){err.textContent="Supabase sign-in failed: "+error.message;return}
+ if(!data?.session){err.textContent="Supabase sign-in succeeded but returned no session.";return}
+ err.textContent="";
+ await boot(data.session);
+};
+sb.auth.onAuthStateChange((event,session)=>{
+ if(event==="SIGNED_OUT"){showLogin()}
+ else if(event==="INITIAL_SESSION"&&session){boot(session)}
+ else if(event==="TOKEN_REFRESHED"&&session&&!booting){/* session refreshed; no second bootstrap needed */}
+ else if(event==="SIGNED_IN"&&session&&!booting){boot(session)}
+});
 boot();
 </script>
 </body>
