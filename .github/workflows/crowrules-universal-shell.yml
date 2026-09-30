@@ -21,7 +21,8 @@ jobs:
           for p in Path('.').rglob('*.html'):
               if '.git' in p.parts: continue
               s=p.read_text(encoding='utf-8')
-              if SCRIPT in s: continue
+              # Remove every historical CrowRules sitewide loader, regardless of version.
+              s=re.sub(r'<script[^>]+crowrules-sitewide\.js\?v=[^"\\']+[^>]*></script>\\s*', '', s, flags=re.I)
               if re.search(r'</head>',s,re.I):
                   s=re.sub(r'</head>',tag+'</head>',s,count=1,flags=re.I)
                   p.write_text(s,encoding='utf-8')
