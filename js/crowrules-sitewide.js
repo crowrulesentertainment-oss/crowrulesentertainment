@@ -87,7 +87,7 @@ function css(){
 .cr-sw-menu a:hover,.cr-sw-menu button:hover,.cr-sw-menu a:focus-visible,.cr-sw-menu button:focus-visible{background:#78efff0d;outline:none}
 .cr-sw-menu a.cr-sw-current{background:#78efff12;color:#78efff}
 .cr-sw-membership{border-color:#78efff44!important;background:linear-gradient(135deg,#087e98aa,#654bb3aa)!important;color:#fff!important}
-.cr-sw-account{margin-left:auto;color:#fff;padding:8px 10px;border:1px solid #78efff33;border-radius:8px;background:transparent;font:800 10px Arial;white-space:nowrap;cursor:pointer}
+.cr-sw-close{color:#cbd5e1;padding:8px 9px;border:1px solid #78efff22;border-radius:8px;background:transparent;font:900 13px Arial;line-height:1;cursor:pointer;flex:none}.cr-sw-close:hover,.cr-sw-close:focus-visible{color:#fff;border-color:#78efff55;background:#78efff0d;outline:none}\n.cr-sw-account{margin-left:auto;color:#fff;padding:8px 10px;border:1px solid #78efff33;border-radius:8px;background:transparent;font:800 10px Arial;white-space:nowrap;cursor:pointer}
 .cr-sw-account:hover,.cr-sw-account:focus-visible{background:#78efff0d;outline:none}
 .cr-sw-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#6affaa;box-shadow:0 0 8px #6affaa;margin-right:6px}
 .cr-sw-dot.offline{background:#ffb86b;box-shadow:0 0 8px #ffb86b}
@@ -97,7 +97,7 @@ function css(){
 .cr-sw-account-menu a:hover,.cr-sw-account-menu button:hover{background:#78efff0d}
 .cr-sw-account-menu .membership-link{color:#78efff}.cr-sw-divider{height:1px;background:#ffffff12;margin:3px 4px}
 .cr-sw-status{padding:8px 9px 5px;color:#8fa2b8;font:700 9px Arial;line-height:1.4}
-body{scroll-padding-top:70px}
+body{scroll-padding-top:70px}.cr-sitewide.cr-sw-hidden{display:none}.cr-sw-reopen{position:fixed;top:10px;right:10px;z-index:99998;display:none;padding:8px 11px;border:1px solid #78efff44;border-radius:9px;background:rgba(3,4,10,.96);color:#78efff;font:800 10px Arial;cursor:pointer;box-shadow:0 10px 30px #0008}.cr-sw-reopen:hover,.cr-sw-reopen:focus-visible{background:#78efff12;color:#fff;outline:none}.cr-sw-nav-closed{scroll-padding-top:20px}
 @media(max-width:850px){.cr-sw-in{flex-wrap:wrap}.cr-sw-nav{order:3;flex-basis:100%;overflow-x:auto;overflow-y:visible;padding-bottom:2px;scrollbar-width:none}.cr-sw-nav::-webkit-scrollbar{display:none}.cr-sw-account{margin-left:auto}.cr-sw-drop>button{font-size:9px;padding:7px 8px}.cr-sw-brand{font-size:13px}}
 @media(max-width:520px){.cr-sw-in{padding:6px 9px}.cr-sw-brand{font-size:12px}.cr-sw-account{font-size:9px;padding:7px 8px}.cr-sw-account-menu{right:9px;top:56px;width:calc(100vw - 18px)}}
 `;
@@ -163,15 +163,15 @@ function mount(state){
  if(!bar){
   bar=document.createElement('div');
   bar.className='cr-sitewide';
-  bar.innerHTML='<div class="cr-sw-in"><a class="cr-sw-brand" href="'+CONFIG.home+'">CROW<b>RULES</b></a><nav class="cr-sw-nav" aria-label="CrowRules universal navigation"></nav><button class="cr-sw-account" id="cr-sw-account" type="button" aria-haspopup="true" aria-expanded="false"><span class="cr-sw-dot"></span><span>CONNECTING</span></button></div>';
+  bar.innerHTML='<div class="cr-sw-in"><a class="cr-sw-brand" href="'+CONFIG.home+'">CROW<b>RULES</b></a><nav class="cr-sw-nav" aria-label="CrowRules universal navigation"></nav><button class="cr-sw-close" id="cr-sw-close" type="button" aria-label="Close Universal CrowRules Membership navigation" title="Close navigation">×</button><button class="cr-sw-account" id="cr-sw-account" type="button" aria-haspopup="true" aria-expanded="false"><span class="cr-sw-dot"></span><span>CONNECTING</span></button></div>';
   document.body.prepend(bar);
  }
- const nav=bar.querySelector('.cr-sw-nav');
+ const nav=bar.querySelector('.cr-sw-nav');\n const reopen=(()=>{let r=document.querySelector('.cr-sw-reopen');if(!r){r=document.createElement('button');r.className='cr-sw-reopen';r.id='cr-sw-reopen';r.type='button';r.textContent='CROWRULES MENU';r.setAttribute('aria-label','Reopen Universal CrowRules Membership navigation');document.body.appendChild(r)}return r})();\n const closed=localStorage.getItem('crowrules-sitewide-nav-closed')==='1';\n bar.classList.toggle('cr-sw-hidden',closed);document.body.classList.toggle('cr-sw-nav-closed',closed);reopen.style.display=closed?'block':'none';\n reopen.onclick=()=>{localStorage.removeItem('crowrules-sitewide-nav-closed');bar.classList.remove('cr-sw-hidden');document.body.classList.remove('cr-sw-nav-closed');reopen.style.display='none';};
  nav.innerHTML=NAV_GROUPS.map(g=>'<div class="cr-sw-drop"><button type="button" aria-haspopup="true" aria-expanded="false">'+esc(g.label)+' <span class="chev" aria-hidden="true">▾</span></button><div class="cr-sw-menu" role="menu"><div class="cr-sw-heading">'+esc(g.label)+'</div>'+g.items.map(x=>menuLink(x[0],x[1])).join('')+'</div></div>').join('')
   +'<div class="cr-sw-drop"><button class="cr-sw-membership" type="button" aria-haspopup="true" aria-expanded="false">MEMBERSHIP <span class="chev" aria-hidden="true">▾</span></button><div class="cr-sw-menu" role="menu"><div class="cr-sw-heading">UNIVERSAL MEMBERSHIP</div>'+menuLink('Membership Home',CONFIG.membership)+menuLink('Membership Plans',CONFIG.membership+'#plans')+menuLink('Benefits',CONFIG.membership+'#benefits')+menuLink('FAQ',CONFIG.membership+'#faq')+menuLink('My Account',CONFIG.crowspace+'account.html')+'</div></div>';
  wireDropdowns(nav);
 
- const btn=bar.querySelector('#cr-sw-account');
+ const closeBtn=bar.querySelector('#cr-sw-close');\n closeBtn.onclick=()=>{bar.classList.add('cr-sw-hidden');document.body.classList.add('cr-sw-nav-closed');localStorage.setItem('crowrules-sitewide-nav-closed','1');document.querySelector('.cr-sw-account-menu')?.classList.remove('open')};\n const btn=bar.querySelector('#cr-sw-account');
  const signed=!!state.user;
  btn.innerHTML='<span class="cr-sw-dot'+(state.error?' offline':'')+'"></span><span>'+esc(signed?'MEMBER':state.error?'OFFLINE':'LOG IN / JOIN')+'</span>';
  btn.setAttribute('aria-label',signed?'Open CrowRules account menu':'Open CrowRules login menu');
