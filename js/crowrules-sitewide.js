@@ -1,4 +1,4 @@
-/* CrowRules Sitewide Universal Shell V4
+/* CrowRules Sitewide Universal Shell V5
  * One Account. One Universe.
  * Universal navigation + membership + resilient Supabase auth bridge.
  * Browser-safe, duplicate-loader resistant, bounded startup, accessible menus.
@@ -6,8 +6,8 @@
 (function(){
 'use strict';
 
-if(window.__CrowRulesSitewideV4Booted)return;
-window.__CrowRulesSitewideV4Booted=true;
+if(window.__CrowRulesSitewideV5Booted)return;
+window.__CrowRulesSitewideV5Booted=true;
 
 const CONFIG={
   supabaseUrl:'https://cevylpnoexugwgygvtgu.supabase.co',
@@ -80,14 +80,15 @@ function css(){
 .cr-sw-drop{position:relative;flex:none}.cr-sw-drop>button{color:#cbd5e1;padding:8px 10px;border:1px solid transparent;border-radius:8px;background:transparent;font:800 10px Arial;white-space:nowrap;cursor:pointer}
 .cr-sw-drop>button:hover,.cr-sw-drop.open>button{border-color:#78efff33;background:#78efff0d;color:#fff}
 .cr-sw-drop>button .chev{font-size:9px;color:#78efff;margin-left:3px}
-.cr-sw-menu{position:fixed;z-index:100002;min-width:210px;max-width:calc(100vw - 20px);padding:7px;background:rgba(7,11,22,.99);border:1px solid #78efff55;border-radius:12px;display:none;gap:3px;box-shadow:0 20px 60px #000b;max-height:calc(100vh - 80px);overflow:auto}
+.cr-sw-menu{position:fixed;z-index:100002;min-width:210px;max-width:calc(100vw - 20px);padding:7px;background:rgba(7,11,22,.99);border:1px solid #78efff55;border-radius:12px;display:none;gap:3px;box-shadow:0 20px 60px #000b;max-height:calc(100vh - 80px);overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .cr-sw-drop.open>.cr-sw-menu{display:grid}
 .cr-sw-menu .cr-sw-heading{padding:6px 9px 4px;color:#78efff;font-size:8px;letter-spacing:.15em}
 .cr-sw-menu a,.cr-sw-menu button{display:block;width:100%;padding:10px 9px;border:0;border-radius:8px;background:transparent;color:#fff;text-align:left;text-decoration:none;cursor:pointer;font:700 10px Arial}
 .cr-sw-menu a:hover,.cr-sw-menu button:hover,.cr-sw-menu a:focus-visible,.cr-sw-menu button:focus-visible{background:#78efff0d;outline:none}
 .cr-sw-menu a.cr-sw-current{background:#78efff12;color:#78efff}
 .cr-sw-membership{border-color:#78efff44!important;background:linear-gradient(135deg,#087e98aa,#654bb3aa)!important;color:#fff!important}
-.cr-sw-close{color:#cbd5e1;padding:8px 9px;border:1px solid #78efff22;border-radius:8px;background:transparent;font:900 13px Arial;line-height:1;cursor:pointer;flex:none}.cr-sw-close:hover,.cr-sw-close:focus-visible{color:#fff;border-color:#78efff55;background:#78efff0d;outline:none}\n.cr-sw-account{margin-left:auto;color:#fff;padding:8px 10px;border:1px solid #78efff33;border-radius:8px;background:transparent;font:800 10px Arial;white-space:nowrap;cursor:pointer}
+.cr-sw-close{color:#cbd5e1;padding:8px 9px;border:1px solid #78efff22;border-radius:8px;background:transparent;font:900 13px Arial;line-height:1;cursor:pointer;flex:none}.cr-sw-close:hover,.cr-sw-close:focus-visible{color:#fff;border-color:#78efff55;background:#78efff0d;outline:none}
+.cr-sw-account{margin-left:auto;color:#fff;padding:8px 10px;border:1px solid #78efff33;border-radius:8px;background:transparent;font:800 10px Arial;white-space:nowrap;cursor:pointer}
 .cr-sw-account:hover,.cr-sw-account:focus-visible{background:#78efff0d;outline:none}
 .cr-sw-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#6affaa;box-shadow:0 0 8px #6affaa;margin-right:6px}
 .cr-sw-dot.offline{background:#ffb86b;box-shadow:0 0 8px #ffb86b}
@@ -127,7 +128,7 @@ function wireDropdowns(nav){
    e.stopPropagation();
    const p=btn.parentElement,open=p.classList.contains('open');
    closeDrops(p);p.classList.toggle('open',!open);btn.setAttribute('aria-expanded',String(!open));
-   if(!open)positionDrop(p);
+   if(!open){requestAnimationFrame(()=>positionDrop(p));}
   };
   btn.onkeydown=e=>{
    if(e.key==='Escape'){closeDrops();btn.focus()}
@@ -166,12 +167,18 @@ function mount(state){
   bar.innerHTML='<div class="cr-sw-in"><a class="cr-sw-brand" href="'+CONFIG.home+'">CROW<b>RULES</b></a><nav class="cr-sw-nav" aria-label="CrowRules universal navigation"></nav><button class="cr-sw-close" id="cr-sw-close" type="button" aria-label="Close Universal CrowRules Membership navigation" title="Close navigation">×</button><button class="cr-sw-account" id="cr-sw-account" type="button" aria-haspopup="true" aria-expanded="false"><span class="cr-sw-dot"></span><span>CONNECTING</span></button></div>';
   document.body.prepend(bar);
  }
- const nav=bar.querySelector('.cr-sw-nav');\n const reopen=(()=>{let r=document.querySelector('.cr-sw-reopen');if(!r){r=document.createElement('button');r.className='cr-sw-reopen';r.id='cr-sw-reopen';r.type='button';r.textContent='CROWRULES MENU';r.setAttribute('aria-label','Reopen Universal CrowRules Membership navigation');document.body.appendChild(r)}return r})();\n const closed=localStorage.getItem('crowrules-sitewide-nav-closed')==='1';\n bar.classList.toggle('cr-sw-hidden',closed);document.body.classList.toggle('cr-sw-nav-closed',closed);reopen.style.display=closed?'block':'none';\n reopen.onclick=()=>{localStorage.removeItem('crowrules-sitewide-nav-closed');bar.classList.remove('cr-sw-hidden');document.body.classList.remove('cr-sw-nav-closed');reopen.style.display='none';};
+ const nav=bar.querySelector('.cr-sw-nav');
+ const reopen=(()=>{let r=document.querySelector('.cr-sw-reopen');if(!r){r=document.createElement('button');r.className='cr-sw-reopen';r.id='cr-sw-reopen';r.type='button';r.textContent='CROWRULES MENU';r.setAttribute('aria-label','Reopen Universal CrowRules Membership navigation');document.body.appendChild(r)}return r})();
+ const closed=localStorage.getItem('crowrules-sitewide-nav-closed')==='1';
+ bar.classList.toggle('cr-sw-hidden',closed);document.body.classList.toggle('cr-sw-nav-closed',closed);reopen.style.display=closed?'block':'none';
+ reopen.onclick=()=>{localStorage.removeItem('crowrules-sitewide-nav-closed');bar.classList.remove('cr-sw-hidden');document.body.classList.remove('cr-sw-nav-closed');reopen.style.display='none';};
  nav.innerHTML=NAV_GROUPS.map(g=>'<div class="cr-sw-drop"><button type="button" aria-haspopup="true" aria-expanded="false">'+esc(g.label)+' <span class="chev" aria-hidden="true">▾</span></button><div class="cr-sw-menu" role="menu"><div class="cr-sw-heading">'+esc(g.label)+'</div>'+g.items.map(x=>menuLink(x[0],x[1])).join('')+'</div></div>').join('')
   +'<div class="cr-sw-drop"><button class="cr-sw-membership" type="button" aria-haspopup="true" aria-expanded="false">MEMBERSHIP <span class="chev" aria-hidden="true">▾</span></button><div class="cr-sw-menu" role="menu"><div class="cr-sw-heading">UNIVERSAL MEMBERSHIP</div>'+menuLink('Membership Home',CONFIG.membership)+menuLink('Membership Plans',CONFIG.membership+'#plans')+menuLink('Benefits',CONFIG.membership+'#benefits')+menuLink('FAQ',CONFIG.membership+'#faq')+menuLink('My Account',CONFIG.crowspace+'account.html')+'</div></div>';
  wireDropdowns(nav);
 
- const closeBtn=bar.querySelector('#cr-sw-close');\n closeBtn.onclick=()=>{bar.classList.add('cr-sw-hidden');document.body.classList.add('cr-sw-nav-closed');localStorage.setItem('crowrules-sitewide-nav-closed','1');document.querySelector('.cr-sw-account-menu')?.classList.remove('open')};\n const btn=bar.querySelector('#cr-sw-account');
+ const closeBtn=bar.querySelector('#cr-sw-close');
+ closeBtn.onclick=()=>{bar.classList.add('cr-sw-hidden');document.body.classList.add('cr-sw-nav-closed');localStorage.setItem('crowrules-sitewide-nav-closed','1');document.querySelector('.cr-sw-account-menu')?.classList.remove('open')};
+ const btn=bar.querySelector('#cr-sw-account');
  const signed=!!state.user;
  btn.innerHTML='<span class="cr-sw-dot'+(state.error?' offline':'')+'"></span><span>'+esc(signed?'MEMBER':state.error?'OFFLINE':'LOG IN / JOIN')+'</span>';
  btn.setAttribute('aria-label',signed?'Open CrowRules account menu':'Open CrowRules login menu');
@@ -199,6 +206,7 @@ function installGlobalEvents(){
  const reposition=()=>document.querySelectorAll('.cr-sw-drop.open').forEach(positionDrop);
  window.addEventListener('resize',reposition,{passive:true});
  window.addEventListener('scroll',reposition,{passive:true});
+ window.addEventListener('orientationchange',()=>setTimeout(reposition,50),{passive:true});
 }
 
 async function boot(){
