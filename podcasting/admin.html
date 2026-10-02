@@ -135,6 +135,11 @@
 </div>
 </section>
 
+<section class="card wide" id="mediaLibraryCard">
+<div class="toolbar"><div><strong>MEDIA LIBRARY</strong><div class="label" style="margin-top:5px">Reusable podcast audio, video and artwork assets</div></div><button id="mediaReload" class="btn">Reload</button></div>
+<div id="mediaLibrary" class="media-library"><div class="empty">Loading media…</div></div>
+</section>
+
 <section class="card wide">
 <div class="toolbar"><div><strong>EPISODE MANAGEMENT</strong><div class="label" style="margin-top:5px">Search, edit status, publish or remove episodes</div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="episodeSearch" placeholder="Search episodes…" style="width:220px"><button id="episodeReload" class="btn">Reload</button></div></div>
 <div id="episodeList" class="list"><div class="empty">Loading episodes…</div></div>
@@ -323,6 +328,19 @@ $('episodeList').addEventListener('click',async e=>{
 });
 let studioEpisodeId=null;
 function localDateTimeValue(iso){if(!iso)return '';const d=new Date(iso);if(Number.isNaN(d.getTime()))return '';const p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes())}
+async function loadMediaLibrary(){
+ const el=$('mediaLibrary');el.innerHTML='<div class="empty">Loading media…</div>';
+ const {data:{user}}=await db.auth.getUser();if(!user){el.innerHTML='<div class="empty">Sign in required.</div>';return}
+ const rows=[];
+ for(const bucket of ['podcast-audio','cr-podcast-artwork']){
+  const {data,error}=await db.storage.from(bucket).list(user.id+'/episodes',{limit:100,sortBy:{column:'created_at',order:'desc'}});
+  if(error)continue;
+  for(const x of (data||[])){if(x.name)rows.push({bucket,name:x.name,meta:x,kind:bucket==='podcast-audio'?'media':'artwork'})}
+ }
+ if(!rows.length){el.innerHTML='<div class="empty">No uploaded assets found yet.</div>';return}
+ el.innerHTML=rows.map((r,i)=>{const path=user.id+'/episodes/'+r.name;const url=db.storage.from(r.bucket).getPublicUrl(path).data.publicUrl;const size=r.meta.metadata?.size||'';return '<div class="media-item"><div><strong>'+escapeHtml(r.name)+'</strong><div class="small">'+escapeHtml(r.bucket)+(size?' • '+Number(size).toLocaleString()+' bytes':'')+'</div></div><div class="media-actions"><button class="btn media-attach" data-url="'+escapeHtml(url)+'" data-kind="'+r.kind+'">Attach</button><a class="btn" href="'+url+'" target="_blank" rel="noopener">Open</a></div></div>'}).join('');
+ el.querySelectorAll('.media-attach').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.kind==='artwork')$('studioThumb').value=b.dataset.url;else if(/\.(mp4|webm|mov)$/i.test(b.dataset.url))$('studioVideo').value=b.dataset.url;else $('studioAudio').value=b.dataset.url;renderStudioPreview();toast('Media attached to Episode Studio.');}));
+}
 function openStudio(ep){
  studioEpisodeId=ep.id;
  $('studioEmpty').hidden=true;$('studioPanel').hidden=false;
@@ -339,7 +357,7 @@ function openStudio(ep){
  $('studioProduct').value=ep.monetization_product_id||'';$('studioNotes').value=ep.show_notes||'';$('studioTranscript').value=ep.transcript||'';
  $('studioChapters').value=JSON.stringify(ep.chapters||[],null,2);
  renderStudioPreview();drawExistingWaveform();
- $('studioCard').scrollIntoView({behavior:'smooth',block:'start'});
+ loadMediaLibrary();$('studioCard').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function formatDuration(seconds){seconds=Math.max(0,Math.round(Number(seconds)||0));const h=Math.floor(seconds/3600),m=Math.floor((seconds%3600)/60),s=seconds%60;return (h?h+':':'')+String(m).padStart(h?'2':'1','0')+':'+String(s).padStart(2,'0')}
 async function inspectAudioFile(file){
@@ -416,7 +434,7 @@ $('studioDelete').addEventListener('click',async()=>{if(!studioEpisodeId)return;
 ['studioTitleInput','studioSeason','studioNumber','studioStatusInput','studioDescriptionInput','studioAudio','studioVideo','studioThumb'].forEach(id=>$(id).addEventListener('input',renderStudioPreview));
 ['studioStatusInput'].forEach(id=>$(id).addEventListener('change',renderStudioPreview));
 $('studioClose').addEventListener('click',()=>{studioEpisodeId=null;$('studioPanel').hidden=true;$('studioEmpty').hidden=false;$('studioPreviewCard').hidden=true});
-$('episodeSearch').addEventListener('input',renderEpisodes); $('episodeReload').addEventListener('click',loadEpisodes);
+$('episodeSearch').addEventListener('input',renderEpisodes); $('episodeReload').addEventListener('click',loadEpisodes);$('mediaReload').addEventListener('click',loadMediaLibrary);
 $('refresh').addEventListener('click',async()=>{if(!window.__crAdminAccess){await start();return;}await Promise.all([refreshCounts(),loadLists(),loadEpisodes()]);toast('Dashboard refreshed','Current Supabase data loaded')});
 db.auth.onAuthStateChange((event)=>{
  if(['SIGNED_IN','SIGNED_OUT','USER_UPDATED'].includes(event)) setTimeout(start,0);
