@@ -153,8 +153,11 @@ function menuLink(label,url){
 
 function renderAccount(menu,u,status){
  const signed=!!u;
+ const onPodcasting=location.pathname.includes('/podcasting/');
+ const profileUrl=onPodcasting?'https://crowrulesentertainment-oss.github.io/podcasting/member-profile.html':CONFIG.crowspace+'profile.html';
+ const accountUrl=onPodcasting?'https://crowrulesentertainment-oss.github.io/podcasting/account.html':CONFIG.crowspace+'account.html';
  menu.innerHTML=signed
-  ? '<a class="membership-link" href="'+CONFIG.membership+'">✦ Membership Center</a><a href="'+CONFIG.crowspace+'profile.html">◉ My Profile</a><a href="'+CONFIG.crowspace+'account.html">⚙ Account</a><a href="'+CONFIG.crowspace+'settings.html">◌ Settings</a><div class="cr-sw-status">Signed in as '+esc(u.email||u.user_metadata?.display_name||'CrowRules member')+'</div><div class="cr-sw-divider"></div><button id="cr-sw-out" type="button">↪ Sign Out</button>'
+  ? '<a class="membership-link" href="'+CONFIG.membership+'">✦ Membership Center</a><a href="'+profileUrl+'">◉ My Profile</a><a href="'+accountUrl+'">⚙ Account</a><a href="'+CONFIG.crowspace+'settings.html">◌ Settings</a><div class="cr-sw-status">Signed in as '+esc(u.email||u.user_metadata?.display_name||'CrowRules member')+'</div><div class="cr-sw-divider"></div><button id="cr-sw-out" type="button">↪ Sign Out</button>'
   : '<a class="membership-link" href="'+CONFIG.membership+'">✦ Explore Membership</a><a href="'+CONFIG.crowspace+'login.html">Log In</a><a href="'+CONFIG.crowspace+'signup.html">Create Universal Account</a><div class="cr-sw-status">'+esc(status||'Universal account ready')+'</div>';
 }
 
