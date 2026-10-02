@@ -54,6 +54,11 @@
 </form>
 </section>
 
+<section class="card wide">
+<div class="toolbar"><div><strong>EPISODE MANAGEMENT</strong><div class="label" style="margin-top:5px">Search, edit status, publish or remove episodes</div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="episodeSearch" placeholder="Search episodes…" style="width:220px"><button id="episodeReload" class="btn">Reload</button></div></div>
+<div id="episodeList" class="list"><div class="empty">Loading episodes…</div></div>
+</section>
+
 <div class="layout">
 <section class="card">
 <div class="toolbar"><div><strong>LIVE ACTIVITY</strong><div class="label" style="margin-top:5px">INSERT • UPDATE • DELETE</div></div><button id="refresh" class="btn">Refresh now</button></div>
@@ -121,6 +126,19 @@ async function loadEpisodePodcasts(){
  podcastsCache=r.data||[];
  sel.innerHTML='<option value="">Choose a podcast…</option>'+podcastsCache.map(p=>'<option value="'+escapeHtml(p.id)+'">'+escapeHtml(p.title)+'</option>').join('');
 }
+let episodesCache=[];
+async function loadEpisodes(){
+ const r=await db.from('podcast_episodes').select('id,podcast_id,title,slug,description,episode_number,season_number,published_at,duration_seconds,audio_url,video_url,thumbnail_url,show_notes,status,play_count,is_explicit,access_level,monetization_enabled,scheduled_at,created_at,updated_at').order('created_at',{ascending:false}).limit(200);
+ if(r.error){$('episodeList').innerHTML='<div class="empty error">'+escapeHtml(r.error.message)+'</div>';return}
+ episodesCache=r.data||[]; renderEpisodes();
+}
+function renderEpisodes(){
+ const q=$('episodeSearch').value.trim().toLowerCase();
+ const rows=episodesCache.filter(x=>!q||[x.title,x.status,x.slug].some(v=>String(v||'').toLowerCase().includes(q)));
+ $('episodeList').innerHTML=rows.length?rows.map(x=>{
+  const p=podcastsCache.find(p=>p.id===x.podcast_id); const state=x.status||'draft';
+  return '<div class="item"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><strong>'+escapeHtml(x.title)+'</strong><span>'+escapeHtml(p?.title||'Podcast')+' • S'+Number(x.season_number||1)+' • E'+Number(x.episode_number||0)+' • '+Number(x.play_count||0).toLocaleString()+' plays</span></div><span class="pill">'+escapeHtml(state)+'</span></div><div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:10px"><button class="btn" data-ep-action="toggle" data-id="'+x.id+'">'+(state==='published'?'UNPUBLISH':'PUBLISH')+'</button><button class="btn" data-ep-action="edit" data-id="'+x.id+'">EDIT</button><button class="btn" data-ep-action="delete" data-id="'+x.id+'">DELETE</button></div></div>'}).join(''):'<div class="empty">No episodes found.</div>';
+}
 async function loadLists(){
  const [p,m]=await Promise.all([
   db.from('podcasts').select('id,title,status,is_live,listener_count,total_plays,updated_at').order('updated_at',{ascending:false}).limit(12),
@@ -186,7 +204,7 @@ async function start(){
   if(!auth.ok){$('authMessage').textContent=auth.message;setStatus('ADMIN SIGN-IN REQUIRED',false);return;}
   $('authGate').hidden=true;
   setStatus('LOADING SUPABASE…',false);
-  await Promise.all([refreshCounts(),loadLists(),loadEpisodePodcasts()]);
+  await Promise.all([refreshCounts(),loadLists(),loadEpisodePodcasts(),loadEpisodes()]);
   await stopChannel();
   channel=subscribeAll();
  }catch(e){
@@ -205,13 +223,23 @@ $('episodeForm').addEventListener('submit',async e=>{
   const podcast=podcastsCache.find(p=>p.id===podcastId); if(!podcast)throw new Error('Choose a podcast first.');
   const slug=title.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'-'+Date.now().toString(36);
   const release=$('episodeRelease').value||null, status=$('episodeStatus').value;
-  const row={podcast_id:podcastId,title,slug,description:$('episodeDescription').value.trim()||null,episode_number:Number($('episodeNumber').value)||null,season_number:Number($('episodeSeason').value)||1,audio_url:$('episodeAudio').value.trim()||null,video_url:$('episodeVideo').value.trim()||null,thumbnail_url:$('episodeThumb').value.trim()||null,duration_seconds:Number($('episodeDuration').value)||null,show_notes:$('episodeNotes').value.trim()||null,tags:$('episodeTags').value.split(',').map(x=>x.trim()).filter(Boolean),access_level:$('episodeAccess').value,is_explicit:$('episodeExplicit').value==='true',status,is_published:status==='published',is_active:true,release_date:release, published_at:status==='published'?new Date().toISOString():null};
+  const row={podcast_id:podcastId,title,slug,description:$('episodeDescription').value.trim()||null,episode_number:Number($('episodeNumber').value)||null,season_number:Number($('episodeSeason').value)||1,audio_url:$('episodeAudio').value.trim()||null,video_url:$('episodeVideo').value.trim()||null,thumbnail_url:$('episodeThumb').value.trim()||null,duration_seconds:Number($('episodeDuration').value)||null,show_notes:$('episodeNotes').value.trim()||null,tags:$('episodeTags').value.split(',').map(x=>x.trim()).filter(Boolean),access_level:$('episodeAccess').value,is_explicit:$('episodeExplicit').value==='true',status,published_at:status==='published'?new Date().toISOString():null};
   const r=await db.from('podcast_episodes').insert(row).select('id,title').single(); if(r.error)throw r.error;
-  msg.className='small success-text'; msg.textContent='Episode created: '+r.data.title; $('episodeForm').reset(); $('episodeSeason').value='1'; $('episodeStatus').value='draft'; $('episodeAccess').value='free'; await loadLists(); toast('Episode created',r.data.title);
+  msg.className='small success-text'; msg.textContent='Episode created: '+r.data.title; $('episodeForm').reset(); $('episodeSeason').value='1'; $('episodeStatus').value='draft'; $('episodeAccess').value='free'; await Promise.all([loadLists(),loadEpisodes(),refreshCounts()]); toast('Episode created',r.data.title);
  }catch(err){msg.className='small error-text';msg.textContent=err.message||'Unable to create episode.';}
  finally{btn.disabled=false;}
 });
-$('refresh').addEventListener('click',async()=>{if(!window.__crAdminAccess){await start();return;}await Promise.all([refreshCounts(),loadLists()]);toast('Dashboard refreshed','Current Supabase data loaded')});
+$('episodeList').addEventListener('click',async e=>{
+ const b=e.target.closest('[data-ep-action]'); if(!b)return; const id=b.dataset.id, action=b.dataset.epAction, ep=episodesCache.find(x=>x.id===id); if(!ep)return;
+ try{
+  if(action==='delete'){if(!confirm('Delete this episode? This cannot be undone.'))return; const r=await db.from('podcast_episodes').delete().eq('id',id); if(r.error)throw r.error; toast('Episode deleted',ep.title)}
+  if(action==='toggle'){const next=ep.status==='published'?'draft':'published';const r=await db.from('podcast_episodes').update({status:next,published_at:next==='published'?(ep.published_at||new Date().toISOString()):null,updated_at:new Date().toISOString()}).eq('id',id).select('id,title,status').single();if(r.error)throw r.error;toast(next==='published'?'Episode published':'Episode moved to draft',ep.title)}
+  if(action==='edit'){const title=prompt('Episode title:',ep.title||'');if(title===null)return;const desc=prompt('Description:',ep.description||'');if(desc===null)return;const r=await db.from('podcast_episodes').update({title:title.trim()||ep.title,description:desc.trim()||null,updated_at:new Date().toISOString()}).eq('id',id).select('id,title').single();if(r.error)throw r.error;toast('Episode updated',r.data.title)}
+  await loadEpisodes(); await refreshCounts();
+ }catch(err){toast('Episode action failed',err.message||'Unable to update episode')}
+});
+$('episodeSearch').addEventListener('input',renderEpisodes); $('episodeReload').addEventListener('click',loadEpisodes);
+$('refresh').addEventListener('click',async()=>{if(!window.__crAdminAccess){await start();return;}await Promise.all([refreshCounts(),loadLists(),loadEpisodes()]);toast('Dashboard refreshed','Current Supabase data loaded')});
 db.auth.onAuthStateChange((event)=>{
  if(['SIGNED_IN','SIGNED_OUT','TOKEN_REFRESHED','USER_UPDATED'].includes(event)) setTimeout(start,0);
 });
