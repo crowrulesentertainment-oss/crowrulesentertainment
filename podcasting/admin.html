@@ -11,6 +11,19 @@
 </style>
 <style>.add-episode{margin-top:14px}.episode-form{margin-top:16px}.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}.form-grid .full{grid-column:1/-1}label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:0 0 6px}input,select,textarea{width:100%;box-sizing:border-box;background:#080a11;color:var(--text);border:1px solid #302b45;border-radius:10px;padding:11px;font:inherit}textarea{min-height:90px;resize:vertical}.primary{margin-top:15px;background:linear-gradient(135deg,#42d8ed,#8b61ef);border-color:transparent}.success-text{color:var(--good)}.error-text{color:var(--bad)}@media(max-width:650px){.form-grid{grid-template-columns:1fr}.form-grid .full{grid-column:auto}}</style>
 <style>.auth-gate{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:#07080df2;backdrop-filter:blur(12px);padding:20px}.auth-gate[hidden]{display:none}.auth-box{width:min(520px,100%);background:linear-gradient(145deg,#111421,#0d0f18);border:1px solid var(--line);border-radius:22px;padding:28px;box-shadow:0 30px 100px #000b}.auth-box h2{margin:18px 0 8px}.auth-box p{color:var(--muted);line-height:1.6}.auth-box .btn{margin-top:8px}</style>
+<style>
+.studio-editor{display:grid;grid-template-columns:minmax(240px,.65fr) 1.35fr;gap:18px;margin-top:16px}
+.studio-preview{position:sticky;top:16px;align-self:start}
+.studio-art{aspect-ratio:1;background:#080a11;border:1px solid #302b45;border-radius:16px;display:grid;place-items:center;overflow:hidden;color:var(--muted)}
+.studio-art img{width:100%;height:100%;object-fit:cover}
+.studio-player{margin-top:12px;border:1px solid #292440;border-radius:14px;padding:12px;background:#0b0d15}
+.studio-fields{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.studio-fields .full{grid-column:1/-1}
+.studio-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px;padding-top:14px;border-top:1px solid #292440}
+.danger{border-color:#5a2940;background:#21101a}
+.studio-preview-card{border:1px solid #242039;background:#0b0d15;border-radius:14px;padding:14px;margin-top:12px}
+@media(max-width:850px){.studio-editor{grid-template-columns:1fr}.studio-preview{position:static}.studio-fields{grid-template-columns:1fr}.studio-fields .full{grid-column:auto}}
+</style>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
 </head>
 <body>
@@ -58,9 +71,67 @@
 </section>
 
 <section class="card wide" id="studioCard">
-<div class="toolbar"><div><strong>EPISODE STUDIO</strong><div class="label" style="margin-top:5px">Preview audio, video, artwork and publishing metadata before going live</div></div><button id="studioClose" class="btn" type="button">CLEAR PREVIEW</button></div>
+<div class="toolbar">
+  <div><strong>EPISODE STUDIO</strong><div class="label" style="margin-top:5px">Full inline editor — save, preview, publish and manage an episode without browser prompts</div></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button id="studioPreview" class="btn" type="button">PREVIEW CHANGES</button>
+    <button id="studioClose" class="btn" type="button">CLOSE</button>
+  </div>
+</div>
 <div id="studioEmpty" class="empty">Select EDIT on an episode to open Studio.</div>
-<div id="studioPanel" hidden style="margin-top:15px"><div style="display:grid;grid-template-columns:minmax(220px,.7fr) 1.3fr;gap:18px"><div><div id="studioArtwork" style="aspect-ratio:1;background:#080a11;border:1px solid #302b45;border-radius:16px;display:grid;place-items:center;overflow:hidden;color:var(--muted)">NO ARTWORK</div><div id="studioMeta" class="small" style="margin-top:10px"></div></div><div><h2 id="studioTitle" style="margin:0 0 8px"></h2><p id="studioDescription" class="small"></p><div id="studioMedia"></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><span id="studioStatus" class="pill"></span><span id="studioAccess" class="pill"></span><span id="studioPlays" class="pill"></span></div><details style="margin-top:15px"><summary style="cursor:pointer;font-weight:800">Transcript & show notes</summary><pre id="studioText" style="white-space:pre-wrap;color:var(--muted);font:inherit;line-height:1.6"></pre></details></div></div></div>
+<div id="studioPanel" hidden>
+  <div class="studio-editor">
+    <div class="studio-preview">
+      <div id="studioArtwork" class="studio-art">NO ARTWORK</div>
+      <div class="studio-player">
+        <div class="label">MEDIA PREVIEW</div>
+        <div id="studioMedia"></div>
+      </div>
+      <div id="studioPreviewCard" class="studio-preview-card" hidden>
+        <div class="label">PUBLIC-FACING PREVIEW</div>
+        <h2 id="studioPreviewTitle" style="margin:8px 0 6px"></h2>
+        <p id="studioPreviewDescription" class="small"></p>
+        <div id="studioPreviewMeta" class="small"></div>
+      </div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
+        <div><h2 id="studioTitle" style="margin:0"></h2><div id="studioMeta" class="small" style="margin-top:5px"></div></div>
+        <span id="studioStatus" class="pill"></span>
+      </div>
+      <form id="studioForm" style="margin-top:16px">
+        <div class="studio-fields">
+          <div><label>Episode title</label><input id="studioTitleInput" required></div>
+          <div><label>Slug</label><input id="studioSlug" readonly title="Slug is generated and kept stable after creation"></div>
+          <div><label>Season</label><input id="studioSeason" type="number" min="1" required></div>
+          <div><label>Episode #</label><input id="studioNumber" type="number" min="1"></div>
+          <div><label>Status</label><select id="studioStatusInput"><option value="draft">Draft</option><option value="published">Published</option><option value="scheduled">Scheduled</option></select></div>
+          <div><label>Scheduled publish time</label><input id="studioScheduled" type="datetime-local"></div>
+          <div><label>Access</label><select id="studioAccessInput"><option value="free">Free</option><option value="members">Members</option><option value="premium">Premium</option></select></div>
+          <div><label>Explicit</label><select id="studioExplicit"><option value="false">No</option><option value="true">Yes</option></select></div>
+          <div class="full"><label>Description</label><textarea id="studioDescriptionInput" placeholder="What is this episode about?"></textarea></div>
+          <div><label>Audio URL</label><input id="studioAudio" type="url" placeholder="https://…"></div>
+          <div><label>Video URL</label><input id="studioVideo" type="url" placeholder="https://…"></div>
+          <div><label>Thumbnail URL</label><input id="studioThumb" type="url" placeholder="https://…"></div>
+          <div><label>Duration (seconds)</label><input id="studioDuration" type="number" min="0"></div>
+          <div><label>Tags</label><input id="studioTags" placeholder="sports, tacoma, interview"></div>
+          <div><label>Monetization</label><select id="studioMonetization"><option value="false">Off</option><option value="true">Enabled</option></select></div>
+          <div><label>Monetization product ID</label><input id="studioProduct" placeholder="Optional UUID"></div>
+          <div class="full"><label>Show notes</label><textarea id="studioNotes" style="min-height:150px"></textarea></div>
+          <div class="full"><label>Transcript</label><textarea id="studioTranscript" style="min-height:240px"></textarea></div>
+          <div class="full"><label>Chapters JSON</label><textarea id="studioChapters" style="min-height:130px" placeholder='[{"start":0,"title":"Introduction"}]'></textarea><div class="small" style="margin-top:5px">Must be valid JSON. Leave as [] if there are no chapters.</div></div>
+        </div>
+        <div class="studio-actions">
+          <button id="studioSave" class="btn primary" type="submit">SAVE CHANGES</button>
+          <button id="studioPublish" class="btn" type="button">PUBLISH</button>
+          <button id="studioDraft" class="btn" type="button">MOVE TO DRAFT</button>
+          <button id="studioDelete" class="btn danger" type="button">DELETE</button>
+          <span id="studioMsg" class="small" style="align-self:center"></span>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 </section>
 
 <section class="card wide">
@@ -231,7 +302,8 @@ $('episodeForm').addEventListener('submit',async e=>{
   const podcastId=$('episodePodcast').value, title=$('episodeTitle').value.trim();
   const podcast=podcastsCache.find(p=>p.id===podcastId); if(!podcast)throw new Error('Choose a podcast first.');
   const slug=title.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'-'+Date.now().toString(36);
-  const release=$('episodeRelease').value||null, scheduled=$('episodeScheduled').value||null, status=$('episodeStatus').value;
+  const scheduled=$('episodeScheduled').value||null, status=$('episodeStatus').value;
+  if(status==='scheduled'&&(!scheduled||new Date(scheduled).getTime()<=Date.now()))throw new Error('Scheduled status requires a future scheduled publish time.');
   const row={podcast_id:podcastId,title,slug,description:$('episodeDescription').value.trim()||null,episode_number:Number($('episodeNumber').value)||null,season_number:Number($('episodeSeason').value)||1,audio_url:$('episodeAudio').value.trim()||null,video_url:$('episodeVideo').value.trim()||null,thumbnail_url:$('episodeThumb').value.trim()||null,duration_seconds:Number($('episodeDuration').value)||null,show_notes:$('episodeNotes').value.trim()||null,transcript:$('episodeTranscript').value.trim()||null,monetization_enabled:$('episodeMonetization').value==='true',scheduled_at:status==='scheduled'&&scheduled?new Date(scheduled).toISOString():null,tags:$('episodeTags').value.split(',').map(x=>x.trim()).filter(Boolean),access_level:$('episodeAccess').value,is_explicit:$('episodeExplicit').value==='true',status,published_at:status==='published'?new Date().toISOString():null};
   const r=await db.from('podcast_episodes').insert(row).select('id,title').single(); if(r.error)throw r.error;
   msg.className='small success-text'; msg.textContent='Episode created: '+r.data.title; $('episodeForm').reset(); $('episodeSeason').value='1'; $('episodeStatus').value='draft'; $('episodeAccess').value='free'; $('episodeMonetization').value='false'; await Promise.all([loadLists(),loadEpisodes(),refreshCounts()]); toast('Episode created',r.data.title);
@@ -243,16 +315,71 @@ $('episodeList').addEventListener('click',async e=>{
  try{
   if(action==='delete'){if(!confirm('Delete this episode? This cannot be undone.'))return; const r=await db.from('podcast_episodes').delete().eq('id',id); if(r.error)throw r.error; toast('Episode deleted',ep.title)}
   if(action==='toggle'){const next=ep.status==='published'?'draft':'published';const r=await db.from('podcast_episodes').update({status:next,published_at:next==='published'?(ep.published_at||new Date().toISOString()):null,updated_at:new Date().toISOString()}).eq('id',id).select('id,title,status').single();if(r.error)throw r.error;toast(next==='published'?'Episode published':'Episode moved to draft',ep.title)}
-  if(action==='edit'){openStudio(ep);const title=prompt('Episode title:',ep.title||'');if(title===null)return;const desc=prompt('Description:',ep.description||'');if(desc===null)return;const notes=prompt('Show notes:',ep.show_notes||'');if(notes===null)return;const transcript=prompt('Transcript (optional):',ep.transcript||'');if(transcript===null)return;const r=await db.from('podcast_episodes').update({title:title.trim()||ep.title,description:desc.trim()||null,show_notes:notes.trim()||null,transcript:transcript.trim()||null,updated_at:new Date().toISOString()}).eq('id',id).select('id,title').single();if(r.error)throw r.error;toast('Episode updated',r.data.title)}
+  if(action==='edit'){openStudio(ep);return}
   await loadEpisodes(); await refreshCounts();
  }catch(err){toast('Episode action failed',err.message||'Unable to update episode')}
 });
-function openStudio(ep){$('studioEmpty').hidden=true;$('studioPanel').hidden=false;$('studioTitle').textContent=ep.title||'Untitled episode';$('studioDescription').textContent=ep.description||'No description provided.';$('studioStatus').textContent=String(ep.status||'draft').toUpperCase();$('studioAccess').textContent=String(ep.access_level||'free').toUpperCase();$('studioPlays').textContent=Number(ep.play_count||0).toLocaleString()+' PLAYS';$('studioMeta').textContent='Season '+Number(ep.season_number||1)+' • Episode '+Number(ep.episode_number||0)+' • '+(ep.is_explicit?'Explicit':'Clean');$('studioText').textContent='SHOW NOTES\n\n'+(ep.show_notes||'None')+'\n\nTRANSCRIPT\n\n'+(ep.transcript||'None');const a=ep.thumbnail_url?'<img src="'+escapeHtml(ep.thumbnail_url)+'" alt="" style="width:100%;height:100%;object-fit:cover">':'NO ARTWORK';$('studioArtwork').innerHTML=a;let media='';if(ep.audio_url)media+='<audio controls preload="none" style="width:100%;margin-top:8px" src="'+escapeHtml(ep.audio_url)+'"></audio>';if(ep.video_url)media+='<video controls preload="metadata" style="width:100%;max-height:380px;margin-top:10px;border-radius:12px" src="'+escapeHtml(ep.video_url)+'"></video>';if(!media)media='<div class="empty">No audio or video URL supplied.</div>';$('studioMedia').innerHTML=media;$('studioCard').scrollIntoView({behavior:'smooth',block:'start'})}
-$('studioClose').addEventListener('click',()=>{$('studioPanel').hidden=true;$('studioEmpty').hidden=false});
+let studioEpisodeId=null;
+function localDateTimeValue(iso){if(!iso)return '';const d=new Date(iso);if(Number.isNaN(d.getTime()))return '';const p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes())}
+function openStudio(ep){
+ studioEpisodeId=ep.id;
+ $('studioEmpty').hidden=true;$('studioPanel').hidden=false;
+ $('studioTitle').textContent=ep.title||'Untitled episode';
+ $('studioStatus').textContent=String(ep.status||'draft').toUpperCase();
+ $('studioMeta').textContent='Season '+Number(ep.season_number||1)+' • Episode '+Number(ep.episode_number||0)+' • '+(ep.is_explicit?'Explicit':'Clean')+' • '+Number(ep.play_count||0).toLocaleString()+' plays';
+ $('studioTitleInput').value=ep.title||'';$('studioSlug').value=ep.slug||'';
+ $('studioSeason').value=Number(ep.season_number||1);$('studioNumber').value=ep.episode_number??'';
+ $('studioStatusInput').value=ep.status||'draft';$('studioScheduled').value=localDateTimeValue(ep.scheduled_at);
+ $('studioAccessInput').value=ep.access_level||'free';$('studioExplicit').value=String(!!ep.is_explicit);
+ $('studioDescriptionInput').value=ep.description||'';$('studioAudio').value=ep.audio_url||'';$('studioVideo').value=ep.video_url||'';
+ $('studioThumb').value=ep.thumbnail_url||'';$('studioDuration').value=ep.duration_seconds??'';
+ $('studioTags').value=Array.isArray(ep.tags)?ep.tags.join(', '):'';$('studioMonetization').value=String(!!ep.monetization_enabled);
+ $('studioProduct').value=ep.monetization_product_id||'';$('studioNotes').value=ep.show_notes||'';$('studioTranscript').value=ep.transcript||'';
+ $('studioChapters').value=JSON.stringify(ep.chapters||[],null,2);
+ renderStudioPreview();
+ $('studioCard').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function renderStudioPreview(){
+ const title=$('studioTitleInput').value.trim()||'Untitled episode', desc=$('studioDescriptionInput').value.trim();
+ $('studioTitle').textContent=title;$('studioPreviewTitle').textContent=title;$('studioPreviewDescription').textContent=desc||'No description provided.';
+ $('studioPreviewMeta').textContent='Season '+(Number($('studioSeason').value)||1)+' • Episode '+(Number($('studioNumber').value)||0)+' • '+String($('studioStatusInput').value||'draft').toUpperCase();
+ $('studioStatus').textContent=String($('studioStatusInput').value||'draft').toUpperCase();
+ const thumb=$('studioThumb').value.trim();$('studioArtwork').innerHTML=thumb?'<img src="'+escapeHtml(thumb)+'" alt="">':'NO ARTWORK';
+ let media='';const audio=$('studioAudio').value.trim(),video=$('studioVideo').value.trim();
+ if(audio)media+='<audio controls preload="none" style="width:100%;margin-top:8px" src="'+escapeHtml(audio)+'"></audio>';
+ if(video)media+='<video controls preload="metadata" style="width:100%;max-height:300px;margin-top:10px;border-radius:12px" src="'+escapeHtml(video)+'"></video>';
+ $('studioMedia').innerHTML=media||'<div class="empty">No audio or video URL supplied.</div>';
+}
+function studioPayload(forceStatus){
+ let chapters=[];try{chapters=JSON.parse($('studioChapters').value.trim()||'[]');if(!Array.isArray(chapters))throw new Error('Chapters JSON must be an array.')}catch(e){throw new Error('Invalid chapters JSON: '+e.message)}
+ const status=forceStatus||$('studioStatusInput').value, scheduled=$('studioScheduled').value||null;
+ if(status==='scheduled'&&!scheduled)throw new Error('Scheduled status requires a scheduled publish time.');
+ if(status==='scheduled'&&new Date(scheduled).getTime()<=Date.now())throw new Error('Scheduled publish time must be in the future.');
+ if(status==='published')$('studioScheduled').value='';
+ return {title:$('studioTitleInput').value.trim(),description:$('studioDescriptionInput').value.trim()||null,episode_number:Number($('studioNumber').value)||null,season_number:Number($('studioSeason').value)||1,audio_url:$('studioAudio').value.trim()||null,video_url:$('studioVideo').value.trim()||null,thumbnail_url:$('studioThumb').value.trim()||null,duration_seconds:Number($('studioDuration').value)||null,show_notes:$('studioNotes').value.trim()||null,transcript:$('studioTranscript').value.trim()||null,monetization_enabled:$('studioMonetization').value==='true',monetization_product_id:$('studioProduct').value.trim()||null,scheduled_at:status==='scheduled'&&scheduled?new Date(scheduled).toISOString():null,tags:$('studioTags').value.split(',').map(x=>x.trim()).filter(Boolean),access_level:$('studioAccessInput').value,is_explicit:$('studioExplicit').value==='true',chapters,status,published_at:status==='published'?new Date().toISOString():null,updated_at:new Date().toISOString()};
+}
+async function saveStudio(forceStatus){
+ if(!studioEpisodeId)return;
+ const msg=$('studioMsg'),btn=$('studioSave');msg.className='small';msg.textContent='Saving…';btn.disabled=true;
+ try{
+  const payload=studioPayload(forceStatus);if(!payload.title)throw new Error('Episode title is required.');
+  const r=await db.from('podcast_episodes').update(payload).eq('id',studioEpisodeId).select('*').single();if(r.error)throw r.error;
+  episodesCache=episodesCache.map(x=>x.id===studioEpisodeId?r.data:x);renderEpisodes();openStudio(r.data);msg.className='small success-text';msg.textContent='Saved successfully.';toast(forceStatus==='published'?'Episode published':'Episode saved',r.data.title);
+ }catch(e){msg.className='small error-text';msg.textContent=e.message||'Unable to save episode.';toast('Studio save failed',msg.textContent)}
+ finally{btn.disabled=false}
+}
+$('studioForm').addEventListener('submit',e=>{e.preventDefault();saveStudio()});
+$('studioPublish').addEventListener('click',()=>saveStudio('published'));
+$('studioDraft').addEventListener('click',()=>saveStudio('draft'));
+$('studioPreview').addEventListener('click',()=>{$('studioPreviewCard').hidden=false;renderStudioPreview();$('studioPreviewCard').scrollIntoView({behavior:'smooth',block:'nearest'})});
+$('studioDelete').addEventListener('click',async()=>{if(!studioEpisodeId)return;const ep=episodesCache.find(x=>x.id===studioEpisodeId);if(!ep||!confirm('Delete "'+(ep.title||'this episode')+'"? This cannot be undone.'))return;const r=await db.from('podcast_episodes').delete().eq('id',studioEpisodeId);if(r.error){toast('Delete failed',r.error.message);return}toast('Episode deleted',ep.title);$('studioClose').click();await loadEpisodes()});
+['studioTitleInput','studioSeason','studioNumber','studioStatusInput','studioDescriptionInput','studioAudio','studioVideo','studioThumb'].forEach(id=>$(id).addEventListener('input',renderStudioPreview));
+['studioStatusInput'].forEach(id=>$(id).addEventListener('change',renderStudioPreview));
+$('studioClose').addEventListener('click',()=>{studioEpisodeId=null;$('studioPanel').hidden=true;$('studioEmpty').hidden=false;$('studioPreviewCard').hidden=true});
 $('episodeSearch').addEventListener('input',renderEpisodes); $('episodeReload').addEventListener('click',loadEpisodes);
 $('refresh').addEventListener('click',async()=>{if(!window.__crAdminAccess){await start();return;}await Promise.all([refreshCounts(),loadLists(),loadEpisodes()]);toast('Dashboard refreshed','Current Supabase data loaded')});
 db.auth.onAuthStateChange((event)=>{
- if(['SIGNED_IN','SIGNED_OUT','TOKEN_REFRESHED','USER_UPDATED'].includes(event)) setTimeout(start,0);
+ if(['SIGNED_IN','SIGNED_OUT','USER_UPDATED'].includes(event)) setTimeout(start,0);
 });
 $('retryAuth').addEventListener('click',()=>start());
 document.addEventListener('visibilitychange',async()=>{
