@@ -161,6 +161,7 @@
 <div id="authGate" class="auth-gate" hidden><div class="auth-box"><div class="brand">CROWRULES<small>PODCASTING ADMIN</small></div><h2>Administrator sign-in required</h2><p id="authMessage">Checking your CrowRules session…</p><button id="retryAuth" class="btn">Check again</button><div class="small" style="margin-top:12px">Sign in through your Universal CrowRules account, then return to this page.</div></div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/tus-js-client@4/dist/tus.min.js"></script>
 <script>
 const SUPABASE_URL='https://cevylpnoexugwgygvtgu.supabase.co';
 const SUPABASE_KEY='sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-';
@@ -371,10 +372,12 @@ async function uploadStudioFile(file,bucket,kind){
  const ext=(file.name.split('.').pop()||'bin').toLowerCase();
  const safe=(file.name.replace(/[^a-z0-9._-]+/gi,'-').replace(/^-+|-+$/g,'').slice(0,90)||('upload.'+ext));
  const path=user.id+'/episodes/'+(studioEpisodeId||'new')+'/'+Date.now()+'-'+safe;
- const {error}=await db.storage.from(bucket).upload(path,file,{contentType:file.type||undefined,upsert:false});
- if(error)throw error;
- const url=bucket==='cr-podcast-artwork'?db.storage.from(bucket).getPublicUrl(path).data.publicUrl:db.storage.from(bucket).getPublicUrl(path).data.publicUrl;
- return url;
+ const msgId=kind==='audio'?'studioAudioUpload':kind==='video'?'studioVideoUpload':'studioThumbUpload';
+ const msg=$(msgId);msg.innerHTML='<span class="upload-progress"><span></span></span><b>0%</b> Uploading…';
+ const bar=msg.querySelector('.upload-progress span'),pct=msg.querySelector('b');
+ const {data:{session}}=await db.auth.getSession();if(!session?.access_token)throw new Error('Active administrator session required.');
+ await new Promise((resolve,reject)=>{const upload=new tus.Upload(file,{endpoint:'https://cevylpnoexugwgygvtgu.storage.supabase.co/storage/v1/upload/resumable',retryDelays:[0,3000,5000,10000,20000],headers:{authorization:'Bearer '+session.access_token,apikey:SUPABASE_KEY},uploadDataDuringCreation:true,removeFingerprintOnSuccess:true,chunkSize:6*1024*1024,metadata:{bucketName:bucket,objectName:path,contentType:file.type||'application/octet-stream',cacheControl:'3600'},onError:reject,onProgress:(u,t)=>{const p=t?Math.round(u/t*100):0;bar.style.width=p+'%';pct.textContent=p+'%'},onSuccess:resolve});upload.findPreviousUploads().then(p=>{if(p.length)upload.resumeFromPreviousUpload(p[0]);upload.start()}).catch(reject)});
+ return db.storage.from(bucket).getPublicUrl(path).data.publicUrl;
 }
 async function bindStudioUpload(inputId,bucket,targetId,msgId){
  const input=$(inputId),msg=$(msgId);input.addEventListener('change',async()=>{
