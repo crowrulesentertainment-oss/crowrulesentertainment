@@ -38,6 +38,7 @@
 <div><label>Season</label><input id="episodeSeason" type="number" min="1" value="1" required></div>
 <div><label>Episode #</label><input id="episodeNumber" type="number" min="1" placeholder="Optional"></div>
 <div><label>Release date</label><input id="episodeRelease" type="date"></div>
+<div><label>Scheduled publish time</label><input id="episodeScheduled" type="datetime-local"></div>
 <div><label>Status</label><select id="episodeStatus"><option value="draft">Draft</option><option value="published">Published</option><option value="scheduled">Scheduled</option></select></div>
 <div class="full"><label>Description</label><textarea id="episodeDescription" placeholder="What is this episode about?"></textarea></div>
 <div><label>Audio URL</label><input id="episodeAudio" type="url" placeholder="https://…"></div>
@@ -45,6 +46,8 @@
 <div><label>Thumbnail URL</label><input id="episodeThumb" type="url" placeholder="https://…"></div>
 <div><label>Duration (seconds)</label><input id="episodeDuration" type="number" min="0" placeholder="Optional"></div>
 <div class="full"><label>Show notes</label><textarea id="episodeNotes" placeholder="Show notes, links, credits, etc."></textarea></div>
+<div class="full"><label>Transcript</label><textarea id="episodeTranscript" placeholder="Optional episode transcript…"></textarea></div>
+<div><label>Monetization</label><select id="episodeMonetization"><option value="false">Off</option><option value="true">Enabled</option></select></div>
 <div><label>Tags</label><input id="episodeTags" placeholder="sports, tacoma, interview"></div>
 <div><label>Access</label><select id="episodeAccess"><option value="free">Free</option><option value="members">Members</option><option value="premium">Premium</option></select></div>
 <div><label>Explicit</label><select id="episodeExplicit"><option value="false">No</option><option value="true">Yes</option></select></div>
@@ -222,10 +225,10 @@ $('episodeForm').addEventListener('submit',async e=>{
   const podcastId=$('episodePodcast').value, title=$('episodeTitle').value.trim();
   const podcast=podcastsCache.find(p=>p.id===podcastId); if(!podcast)throw new Error('Choose a podcast first.');
   const slug=title.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'-'+Date.now().toString(36);
-  const release=$('episodeRelease').value||null, status=$('episodeStatus').value;
-  const row={podcast_id:podcastId,title,slug,description:$('episodeDescription').value.trim()||null,episode_number:Number($('episodeNumber').value)||null,season_number:Number($('episodeSeason').value)||1,audio_url:$('episodeAudio').value.trim()||null,video_url:$('episodeVideo').value.trim()||null,thumbnail_url:$('episodeThumb').value.trim()||null,duration_seconds:Number($('episodeDuration').value)||null,show_notes:$('episodeNotes').value.trim()||null,tags:$('episodeTags').value.split(',').map(x=>x.trim()).filter(Boolean),access_level:$('episodeAccess').value,is_explicit:$('episodeExplicit').value==='true',status,published_at:status==='published'?new Date().toISOString():null};
+  const release=$('episodeRelease').value||null, scheduled=$('episodeScheduled').value||null, status=$('episodeStatus').value;
+  const row={podcast_id:podcastId,title,slug,description:$('episodeDescription').value.trim()||null,episode_number:Number($('episodeNumber').value)||null,season_number:Number($('episodeSeason').value)||1,audio_url:$('episodeAudio').value.trim()||null,video_url:$('episodeVideo').value.trim()||null,thumbnail_url:$('episodeThumb').value.trim()||null,duration_seconds:Number($('episodeDuration').value)||null,show_notes:$('episodeNotes').value.trim()||null,transcript:$('episodeTranscript').value.trim()||null,monetization_enabled:$('episodeMonetization').value==='true',scheduled_at:status==='scheduled'&&scheduled?new Date(scheduled).toISOString():null,tags:$('episodeTags').value.split(',').map(x=>x.trim()).filter(Boolean),access_level:$('episodeAccess').value,is_explicit:$('episodeExplicit').value==='true',status,published_at:status==='published'?new Date().toISOString():null};
   const r=await db.from('podcast_episodes').insert(row).select('id,title').single(); if(r.error)throw r.error;
-  msg.className='small success-text'; msg.textContent='Episode created: '+r.data.title; $('episodeForm').reset(); $('episodeSeason').value='1'; $('episodeStatus').value='draft'; $('episodeAccess').value='free'; await Promise.all([loadLists(),loadEpisodes(),refreshCounts()]); toast('Episode created',r.data.title);
+  msg.className='small success-text'; msg.textContent='Episode created: '+r.data.title; $('episodeForm').reset(); $('episodeSeason').value='1'; $('episodeStatus').value='draft'; $('episodeAccess').value='free'; $('episodeMonetization').value='false'; await Promise.all([loadLists(),loadEpisodes(),refreshCounts()]); toast('Episode created',r.data.title);
  }catch(err){msg.className='small error-text';msg.textContent=err.message||'Unable to create episode.';}
  finally{btn.disabled=false;}
 });
@@ -234,7 +237,7 @@ $('episodeList').addEventListener('click',async e=>{
  try{
   if(action==='delete'){if(!confirm('Delete this episode? This cannot be undone.'))return; const r=await db.from('podcast_episodes').delete().eq('id',id); if(r.error)throw r.error; toast('Episode deleted',ep.title)}
   if(action==='toggle'){const next=ep.status==='published'?'draft':'published';const r=await db.from('podcast_episodes').update({status:next,published_at:next==='published'?(ep.published_at||new Date().toISOString()):null,updated_at:new Date().toISOString()}).eq('id',id).select('id,title,status').single();if(r.error)throw r.error;toast(next==='published'?'Episode published':'Episode moved to draft',ep.title)}
-  if(action==='edit'){const title=prompt('Episode title:',ep.title||'');if(title===null)return;const desc=prompt('Description:',ep.description||'');if(desc===null)return;const r=await db.from('podcast_episodes').update({title:title.trim()||ep.title,description:desc.trim()||null,updated_at:new Date().toISOString()}).eq('id',id).select('id,title').single();if(r.error)throw r.error;toast('Episode updated',r.data.title)}
+  if(action==='edit'){const title=prompt('Episode title:',ep.title||'');if(title===null)return;const desc=prompt('Description:',ep.description||'');if(desc===null)return;const notes=prompt('Show notes:',ep.show_notes||'');if(notes===null)return;const transcript=prompt('Transcript (optional):',ep.transcript||'');if(transcript===null)return;const r=await db.from('podcast_episodes').update({title:title.trim()||ep.title,description:desc.trim()||null,show_notes:notes.trim()||null,transcript:transcript.trim()||null,updated_at:new Date().toISOString()}).eq('id',id).select('id,title').single();if(r.error)throw r.error;toast('Episode updated',r.data.title)}
   await loadEpisodes(); await refreshCounts();
  }catch(err){toast('Episode action failed',err.message||'Unable to update episode')}
 });
