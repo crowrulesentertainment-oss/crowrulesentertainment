@@ -110,9 +110,9 @@
           <div><label>Access</label><select id="studioAccessInput"><option value="free">Free</option><option value="members">Members</option><option value="premium">Premium</option></select></div>
           <div><label>Explicit</label><select id="studioExplicit"><option value="false">No</option><option value="true">Yes</option></select></div>
           <div class="full"><label>Description</label><textarea id="studioDescriptionInput" placeholder="What is this episode about?"></textarea></div>
-          <div><label>Audio URL</label><input id="studioAudio" type="url" placeholder="https://…"></div>
-          <div><label>Video URL</label><input id="studioVideo" type="url" placeholder="https://…"></div>
-          <div><label>Thumbnail URL</label><input id="studioThumb" type="url" placeholder="https://…"></div>
+          <div><label>Audio URL</label><input id="studioAudio" type="url" placeholder="https://…"><input id="studioAudioFile" type="file" accept="audio/*" style="margin-top:7px"><div id="studioAudioUpload" class="small"></div></div>
+          <div><label>Video URL</label><input id="studioVideo" type="url" placeholder="https://…"><input id="studioVideoFile" type="file" accept="video/mp4,video/webm,video/quicktime" style="margin-top:7px"><div id="studioVideoUpload" class="small"></div></div>
+          <div><label>Thumbnail URL</label><input id="studioThumb" type="url" placeholder="https://…"><input id="studioThumbFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif" style="margin-top:7px"><div id="studioThumbUpload" class="small"></div></div>
           <div><label>Duration (seconds)</label><input id="studioDuration" type="number" min="0"></div>
           <div><label>Tags</label><input id="studioTags" placeholder="sports, tacoma, interview"></div>
           <div><label>Monetization</label><select id="studioMonetization"><option value="false">Off</option><option value="true">Enabled</option></select></div>
@@ -350,6 +350,24 @@ function renderStudioPreview(){
  if(video)media+='<video controls preload="metadata" style="width:100%;max-height:300px;margin-top:10px;border-radius:12px" src="'+escapeHtml(video)+'"></video>';
  $('studioMedia').innerHTML=media||'<div class="empty">No audio or video URL supplied.</div>';
 }
+async function uploadStudioFile(file,bucket,kind){
+ if(!file)throw new Error('Choose a file first.');
+ const {data:{user}}=await db.auth.getUser();if(!user)throw new Error('Active administrator session required.');
+ const ext=(file.name.split('.').pop()||'bin').toLowerCase();
+ const safe=(file.name.replace(/[^a-z0-9._-]+/gi,'-').replace(/^-+|-+$/g,'').slice(0,90)||('upload.'+ext));
+ const path=user.id+'/episodes/'+(studioEpisodeId||'new')+'/'+Date.now()+'-'+safe;
+ const {error}=await db.storage.from(bucket).upload(path,file,{contentType:file.type||undefined,upsert:false});
+ if(error)throw error;
+ const url=bucket==='cr-podcast-artwork'?db.storage.from(bucket).getPublicUrl(path).data.publicUrl:db.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+ return url;
+}
+async function bindStudioUpload(inputId,bucket,targetId,msgId){
+ const input=$(inputId),msg=$(msgId);input.addEventListener('change',async()=>{
+  const file=input.files?.[0];if(!file)return;msg.className='small';msg.textContent='Uploading '+file.name+'…';
+  try{const url=await uploadStudioFile(file,bucket,inputId);$(targetId).value=url;msg.className='small success-text';msg.textContent='Uploaded successfully.';renderStudioPreview();}
+  catch(e){msg.className='small error-text';msg.textContent=e.message||'Upload failed.';}
+ });
+}
 function studioPayload(forceStatus){
  let chapters=[];try{chapters=JSON.parse($('studioChapters').value.trim()||'[]');if(!Array.isArray(chapters))throw new Error('Chapters JSON must be an array.')}catch(e){throw new Error('Invalid chapters JSON: '+e.message)}
  const status=forceStatus||$('studioStatusInput').value, scheduled=$('studioScheduled').value||null;
@@ -368,6 +386,9 @@ async function saveStudio(forceStatus){
  }catch(e){msg.className='small error-text';msg.textContent=e.message||'Unable to save episode.';toast('Studio save failed',msg.textContent)}
  finally{btn.disabled=false}
 }
+bindStudioUpload('studioAudioFile','podcast-audio','studioAudio','studioAudioUpload');
+bindStudioUpload('studioVideoFile','podcast-audio','studioVideo','studioVideoUpload');
+bindStudioUpload('studioThumbFile','cr-podcast-artwork','studioThumb','studioThumbUpload');
 $('studioForm').addEventListener('submit',e=>{e.preventDefault();saveStudio()});
 $('studioPublish').addEventListener('click',()=>saveStudio('published'));
 $('studioDraft').addEventListener('click',()=>saveStudio('draft'));
