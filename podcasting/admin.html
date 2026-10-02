@@ -18,15 +18,15 @@
 <div id="rt" class="status"><i class="dot"></i><span>CONNECTING…</span></div>
 </header>
 <h1>Podcasting Live</h1>
-<p class="sub">Live dashboard — database changes appear automatically without refreshing this page.</p>
+<p class="sub">Connected to the CrowRules Supabase <strong>podcasts</strong> and <strong>members</strong> data layer. Changes appear automatically without refreshing.</p>
 <section class="grid">
 <div class="card"><div class="label">Podcasts</div><div id="podcasts" class="metric">—</div></div>
+<div class="card"><div class="label">Members</div><div id="members" class="metric">—</div></div>
 <div class="card"><div class="label">Creators</div><div id="creators" class="metric">—</div></div>
 <div class="card"><div class="label">Platform Events</div><div id="events" class="metric">—</div></div>
-<div class="card"><div class="label">Last Update</div><div id="updated" class="metric" style="font-size:18px">Waiting…</div></div>
 </section>
 <section class="card wide">
-<div class="toolbar"><div><strong>LIVE ACTIVITY</strong><div class="label" style="margin-top:5px">Supabase Realtime event stream</div></div><button id="refresh" class="btn">Refresh now</button></div>
+<div class="toolbar"><div><strong>LIVE ACTIVITY</strong><div class="label" style="margin-top:5px">Supabase Realtime event stream • podcasts • members • creators • platform events</div></div><button id="refresh" class="btn">Refresh now</button></div>
 <div id="feed" class="feed"><div class="empty">Connecting to live data…</div></div>
 </section>
 </div>
@@ -42,44 +42,23 @@ const feed=$('feed');
 let feedItems=[];
 const configs=[
  {key:'podcasts',label:'Podcasts',table:'podcasts'},
+ {key:'members',label:'Members',table:'members'},
  {key:'creators',label:'Creators',table:'creator_profiles'},
  {key:'events',label:'Platform Events',table:'cr_platform_events'}
 ];
-function setStatus(text,live){
- $('rt').classList.toggle('live',!!live);
- $('rt').querySelector('span').textContent=text;
-}
-function timeNow(){return new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit',second:'2-digit'});}
-function touch(){ $('updated').textContent=timeNow(); }
-function toast(title,detail){
- const n=$('notice');n.innerHTML='<b>'+escapeHtml(title)+'</b><br><span>'+escapeHtml(detail)+'</span>';n.classList.add('show');
- clearTimeout(window.__toast);window.__toast=setTimeout(()=>n.classList.remove('show'),4200);
-}
-function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
-function addEvent(label,payload,type){
- const row=payload?.new||payload?.old||payload||{};
- feedItems.unshift({label,type,row,time:new Date()});
- feedItems=feedItems.slice(0,60);
- renderFeed();touch();
-}
-function renderFeed(){
- if(!feedItems.length){feed.innerHTML='<div class="empty">No live events yet.</div>';return}
- feed.innerHTML=feedItems.map(x=>{
-  const id=x.row?.id?' • '+escapeHtml(x.row.id):'';
-  return '<div class="event"><strong>'+escapeHtml(x.label)+' — '+escapeHtml(x.type)+id+'</strong><span>'+x.time.toLocaleTimeString([], {hour:'numeric',minute:'2-digit',second:'2-digit'})+' • Realtime database change received</span></div>';
- }).join('');
-}
-async function countTable(table){
- const r=await db.from(table).select('*',{count:'exact',head:true});
- if(r.error) throw r.error;
- return r.count??0;
-}
+function setStatus(text,live){$('rt').classList.toggle('live',!!live);$('rt').querySelector('span').textContent=text}
+function timeNow(){return new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit',second:'2-digit'})}
+function touch(){ }
+function toast(title,detail){const n=$('notice');n.innerHTML='<b>'+escapeHtml(title)+'</b><br><span>'+escapeHtml(detail)+'</span>';n.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>n.classList.remove('show'),4200)}
+function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function addEvent(label,payload,type){const row=payload?.new||payload?.old||payload||{};feedItems.unshift({label,type,row,time:new Date()});feedItems=feedItems.slice(0,60);renderFeed()}
+function renderFeed(){if(!feedItems.length){feed.innerHTML='<div class="empty">No live events yet.</div>';return}feed.innerHTML=feedItems.map(x=>{const id=x.row?.id?' • '+escapeHtml(x.row.id):'';return '<div class="event"><strong>'+escapeHtml(x.label)+' — '+escapeHtml(x.type)+id+'</strong><span>'+x.time.toLocaleTimeString([], {hour:'numeric',minute:'2-digit',second:'2-digit'})+' • Realtime database change received</span></div>'}).join('')}
+async function countTable(table){const r=await db.from(table).select('*',{count:'exact',head:true});if(r.error)throw r.error;return r.count??0}
 async function refreshCounts(){
  if(!db){setStatus('CONFIGURATION REQUIRED',false);return}
  try{
   const results=await Promise.all(configs.map(async c=>({key:c.key,count:await countTable(c.table)})));
   results.forEach(x=>$(x.key).textContent=x.count.toLocaleString());
-  touch();
  }catch(e){
   console.error(e);
   feedItems.unshift({label:'Dashboard',type:'COUNT ERROR',row:{id:e.message},time:new Date()});
@@ -94,7 +73,7 @@ function subscribe(table,label){
    refreshCounts();
    toast(label+' updated',action+' received in real time');
  })
- .subscribe((status)=>{
+ .subscribe(status=>{
    if(status==='SUBSCRIBED') setStatus('LIVE • REALTIME',true);
    else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT') setStatus('RECONNECTING…',false);
  });
