@@ -84,6 +84,7 @@
     <div class="studio-preview">
       <div id="studioArtwork" class="studio-art">NO ARTWORK</div>
       <div class="studio-player">
+        <div id="studioWaveform" style="height:90px;border:1px solid #292440;border-radius:10px;background:#070910;overflow:hidden;margin-bottom:10px;display:grid;place-items:center"><canvas id="studioWaveCanvas" width="900" height="90" style="width:100%;height:90px"></canvas></div>
         <div class="label">MEDIA PREVIEW</div>
         <div id="studioMedia"></div>
       </div>
@@ -113,7 +114,7 @@
           <div><label>Audio URL</label><input id="studioAudio" type="url" placeholder="https://…"><input id="studioAudioFile" type="file" accept="audio/*" style="margin-top:7px"><div id="studioAudioUpload" class="small"></div></div>
           <div><label>Video URL</label><input id="studioVideo" type="url" placeholder="https://…"><input id="studioVideoFile" type="file" accept="video/mp4,video/webm,video/quicktime" style="margin-top:7px"><div id="studioVideoUpload" class="small"></div></div>
           <div><label>Thumbnail URL</label><input id="studioThumb" type="url" placeholder="https://…"><input id="studioThumbFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif" style="margin-top:7px"><div id="studioThumbUpload" class="small"></div></div>
-          <div><label>Duration (seconds)</label><input id="studioDuration" type="number" min="0"></div>
+          <div><label>Duration (seconds)</label><input id="studioDuration" type="number" min="0"><div id="studioDurationDetected" class="small" style="margin-top:5px"></div></div>
           <div><label>Tags</label><input id="studioTags" placeholder="sports, tacoma, interview"></div>
           <div><label>Monetization</label><select id="studioMonetization"><option value="false">Off</option><option value="true">Enabled</option></select></div>
           <div><label>Monetization product ID</label><input id="studioProduct" placeholder="Optional UUID"></div>
@@ -336,9 +337,23 @@ function openStudio(ep){
  $('studioTags').value=Array.isArray(ep.tags)?ep.tags.join(', '):'';$('studioMonetization').value=String(!!ep.monetization_enabled);
  $('studioProduct').value=ep.monetization_product_id||'';$('studioNotes').value=ep.show_notes||'';$('studioTranscript').value=ep.transcript||'';
  $('studioChapters').value=JSON.stringify(ep.chapters||[],null,2);
- renderStudioPreview();
+ renderStudioPreview();drawExistingWaveform();
  $('studioCard').scrollIntoView({behavior:'smooth',block:'start'});
 }
+function formatDuration(seconds){seconds=Math.max(0,Math.round(Number(seconds)||0));const h=Math.floor(seconds/3600),m=Math.floor((seconds%3600)/60),s=seconds%60;return (h?h+':':'')+String(m).padStart(h?'2':'1','0')+':'+String(s).padStart(2,'0')}
+async function inspectAudioFile(file){
+ if(!file)return;
+ const audio=document.createElement('audio');audio.preload='metadata';audio.src=URL.createObjectURL(file);
+ await new Promise((resolve,reject)=>{audio.onloadedmetadata=resolve;audio.onerror=reject});
+ if(Number.isFinite(audio.duration)){ $('studioDuration').value=Math.round(audio.duration); $('studioDurationDetected').textContent='Detected duration: '+formatDuration(audio.duration); }
+ URL.revokeObjectURL(audio.src);
+ const canvas=$('studioWaveCanvas'),ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
+ try{
+  const buf=await file.arrayBuffer(),ac=new (window.AudioContext||window.webkitAudioContext)(),decoded=await ac.decodeAudioData(buf),data=decoded.getChannelData(0),step=Math.max(1,Math.floor(data.length/canvas.width));
+  ctx.beginPath();for(let x=0;x<canvas.width;x++){let min=1,max=-1;const end=Math.min(data.length,(x+1)*step);for(let i=x*step;i<end;i+=Math.max(1,Math.floor(step/20))){const v=data[i];if(v<min)min=v;if(v>max)max=v}ctx.moveTo(x,45+min*38);ctx.lineTo(x,45+max*38)}ctx.strokeStyle='rgba(130,100,255,.9)';ctx.stroke();await ac.close();
+ }catch(e){$('studioDurationDetected').textContent+=' • Waveform unavailable for this file.'}
+}
+function drawExistingWaveform(){const canvas=$('studioWaveCanvas'),ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);if(!$('studioAudio').value){return}ctx.beginPath();for(let x=0;x<canvas.width;x++){const y=45+Math.sin(x*.09)*18*Math.abs(Math.sin(x*.017));ctx.moveTo(x,y-4);ctx.lineTo(x,y+4)}ctx.strokeStyle='rgba(130,100,255,.55)';ctx.stroke()}
 function renderStudioPreview(){
  const title=$('studioTitleInput').value.trim()||'Untitled episode', desc=$('studioDescriptionInput').value.trim();
  $('studioTitle').textContent=title;$('studioPreviewTitle').textContent=title;$('studioPreviewDescription').textContent=desc||'No description provided.';
@@ -386,6 +401,7 @@ async function saveStudio(forceStatus){
  }catch(e){msg.className='small error-text';msg.textContent=e.message||'Unable to save episode.';toast('Studio save failed',msg.textContent)}
  finally{btn.disabled=false}
 }
+$('studioAudioFile').addEventListener('change',async()=>{const file=$('studioAudioFile').files?.[0];if(file){try{await inspectAudioFile(file)}catch(e){$('studioDurationDetected').textContent='Could not inspect audio metadata.'}}});
 bindStudioUpload('studioAudioFile','podcast-audio','studioAudio','studioAudioUpload');
 bindStudioUpload('studioVideoFile','podcast-audio','studioVideo','studioVideoUpload');
 bindStudioUpload('studioThumbFile','cr-podcast-artwork','studioThumb','studioThumbUpload');
