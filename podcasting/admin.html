@@ -45,7 +45,7 @@
 </section>
 </div>
 <div id="notice" class="notice"></div>
-<div id="authGate" class="auth-gate" hidden><div class="auth-box"><div class="brand">CROWRULES<small>PODCASTING ADMIN</small></div><h2>Administrator sign-in required</h2><p id="authMessage">Checking your CrowRules session…</p><button id="retryAuth" class="btn">Check again</button></div></div>
+<div id="authGate" class="auth-gate" hidden><div class="auth-box"><div class="brand">CROWRULES<small>PODCASTING ADMIN</small></div><h2>Administrator sign-in required</h2><p id="authMessage">Checking your CrowRules session…</p><button id="retryAuth" class="btn">Check again</button><div class="small" style="margin-top:12px">Sign in through your Universal CrowRules account, then return to this page.</div></div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -116,10 +116,24 @@ function subscribeAll(){
  return channel
 }
 let channel;
+let starting=false;
+async function stopChannel(){
+ if(!channel)return;
+ const old=channel;
+ channel=null;
+ try{await db.removeChannel(old)}catch(e){console.warn('Realtime cleanup:',e)}
+}
 async function requireAdmin(){
  const {data,error}=await db.auth.getSession();
  if(error) throw error;
  const session=data?.session;
+ if(session){
+  const refreshed=await db.auth.refreshSession();
+  if(!refreshed.error && refreshed.data?.session) return requireAdminFromSession(refreshed.data.session);
+ }
+ return requireAdminFromSession(session);
+}
+function requireAdminFromSession(session){
  if(!session)return {ok:false,message:'Sign in to your CrowRules account first.'};
  const role=String(session.user?.app_metadata?.role||'').toLowerCase();
  const ok=['owner','super_admin','admin'].includes(role);
@@ -128,6 +142,8 @@ async function requireAdmin(){
  return {ok:true};
 }
 async function start(){
+ if(starting)return;
+ starting=true;
  setStatus('AUTHENTICATING…',false);
  $('authGate').hidden=false;
  try{
@@ -136,16 +152,28 @@ async function start(){
   $('authGate').hidden=true;
   setStatus('LOADING SUPABASE…',false);
   await Promise.all([refreshCounts(),loadLists()]);
+  await stopChannel();
   channel=subscribeAll();
  }catch(e){
   console.error(e);
   $('authMessage').textContent='Supabase connection failed: '+e.message;
   setStatus('SUPABASE ERROR',false);
+ }finally{
+  starting=false;
  }
 }
 $('refresh').addEventListener('click',async()=>{if(!window.__crAdminAccess){await start();return;}await Promise.all([refreshCounts(),loadLists()]);toast('Dashboard refreshed','Current Supabase data loaded')});
-db.auth.onAuthStateChange(()=>setTimeout(start,0));
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&channel){setStatus('RECONNECTING…',false);channel.unsubscribe().finally(()=>{channel=subscribeAll()})}});
+db.auth.onAuthStateChange((event)=>{
+ if(['SIGNED_IN','SIGNED_OUT','TOKEN_REFRESHED','USER_UPDATED'].includes(event)) setTimeout(start,0);
+});
+$('retryAuth').addEventListener('click',()=>start());
+document.addEventListener('visibilitychange',async()=>{
+ if(document.visibilityState==='visible'&&window.__crAdminAccess){
+  setStatus('RECONNECTING…',false);
+  await stopChannel();
+  channel=subscribeAll();
+ }
+});
 start();
 </script>
 </body>
