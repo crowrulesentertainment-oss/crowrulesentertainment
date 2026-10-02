@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#07080d">
+<title>CrowRules Podcasting — Admin Live</title>
+<style>
+:root{--bg:#07080d;--card:#10121d;--line:#292440;--text:#f7f4ff;--muted:#aaa5ba;--cyan:#58e6ff;--purple:#9b72ff;--good:#6df0b0;--bad:#ff7696}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#17142b 0,#07080d 48%);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,sans-serif}.wrap{max-width:1400px;margin:auto;padding:24px}.top{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:22px}.brand{font-weight:950;letter-spacing:.12em}.brand small{display:block;color:var(--cyan);font-size:11px;letter-spacing:.22em;margin-top:5px}.status{display:flex;align-items:center;gap:9px;border:1px solid var(--line);background:#0d0f18;padding:9px 13px;border-radius:999px;color:var(--muted);font-size:12px}.dot{width:9px;height:9px;border-radius:50%;background:var(--bad);box-shadow:0 0 12px currentColor}.live .dot{background:var(--good)}h1{font-size:clamp(30px,5vw,52px);margin:0 0 8px}.sub{color:var(--muted);margin:0 0 24px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card{background:linear-gradient(145deg,#111421,#0d0f18);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 15px 50px #0007}.metric{font-size:34px;font-weight:900;margin-top:8px}.label{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}.wide{margin-top:14px}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.btn{border:1px solid #383052;background:#161326;color:#fff;border-radius:10px;padding:10px 14px;font-weight:800;cursor:pointer}.btn:hover{border-color:var(--cyan)}.feed{margin-top:14px;display:grid;gap:9px;max-height:520px;overflow:auto}.event{border:1px solid #242039;background:#0b0d15;border-radius:12px;padding:12px}.event strong{display:block}.event span{display:block;color:var(--muted);font-size:12px;margin-top:4px}.empty{color:var(--muted);padding:25px;text-align:center}.notice{position:fixed;right:18px;bottom:18px;background:#111421;border:1px solid #3c3459;border-radius:13px;padding:13px 16px;box-shadow:0 15px 50px #0009;display:none;max-width:360px}.notice.show{display:block}.notice b{color:var(--cyan)}@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.wrap{padding:15px}.grid{grid-template-columns:1fr}.metric{font-size:30px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+<div class="brand">CROWRULES<small>PODCASTING ADMIN • REAL-TIME COMMAND CENTER</small></div>
+<div id="rt" class="status"><i class="dot"></i><span>CONNECTING…</span></div>
+</header>
+<h1>Podcasting Live</h1>
+<p class="sub">Live dashboard — database changes appear automatically without refreshing this page.</p>
+<section class="grid">
+<div class="card"><div class="label">Podcasts</div><div id="podcasts" class="metric">—</div></div>
+<div class="card"><div class="label">Creators</div><div id="creators" class="metric">—</div></div>
+<div class="card"><div class="label">Platform Events</div><div id="events" class="metric">—</div></div>
+<div class="card"><div class="label">Last Update</div><div id="updated" class="metric" style="font-size:18px">Waiting…</div></div>
+</section>
+<section class="card wide">
+<div class="toolbar"><div><strong>LIVE ACTIVITY</strong><div class="label" style="margin-top:5px">Supabase Realtime event stream</div></div><button id="refresh" class="btn">Refresh now</button></div>
+<div id="feed" class="feed"><div class="empty">Connecting to live data…</div></div>
+</section>
+</div>
+<div id="notice" class="notice"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const C=window.CROW_CONFIG||{};
+const SUPABASE_URL=C.supabaseUrl||'https://cevylpnoexugwgygvtgu.supabase.co';
+const SUPABASE_KEY=C.supabaseKey||C.supabaseAnonKey||C.publishableKey||'';
+const db=SUPABASE_KEY?supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
+const $=id=>document.getElementById(id);
+const feed=$('feed');
+let feedItems=[];
+const configs=[
+ {key:'podcasts',label:'Podcasts',table:'podcasts'},
+ {key:'creators',label:'Creators',table:'creator_profiles'},
+ {key:'events',label:'Platform Events',table:'cr_platform_events'}
+];
+function setStatus(text,live){
+ $('rt').classList.toggle('live',!!live);
+ $('rt').querySelector('span').textContent=text;
+}
+function timeNow(){return new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit',second:'2-digit'});}
+function touch(){ $('updated').textContent=timeNow(); }
+function toast(title,detail){
+ const n=$('notice');n.innerHTML='<b>'+escapeHtml(title)+'</b><br><span>'+escapeHtml(detail)+'</span>';n.classList.add('show');
+ clearTimeout(window.__toast);window.__toast=setTimeout(()=>n.classList.remove('show'),4200);
+}
+function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function addEvent(label,payload,type){
+ const row=payload?.new||payload?.old||payload||{};
+ feedItems.unshift({label,type,row,time:new Date()});
+ feedItems=feedItems.slice(0,60);
+ renderFeed();touch();
+}
+function renderFeed(){
+ if(!feedItems.length){feed.innerHTML='<div class="empty">No live events yet.</div>';return}
+ feed.innerHTML=feedItems.map(x=>{
+  const id=x.row?.id?' • '+escapeHtml(x.row.id):'';
+  return '<div class="event"><strong>'+escapeHtml(x.label)+' — '+escapeHtml(x.type)+id+'</strong><span>'+x.time.toLocaleTimeString([], {hour:'numeric',minute:'2-digit',second:'2-digit'})+' • Realtime database change received</span></div>';
+ }).join('');
+}
+async function countTable(table){
+ const r=await db.from(table).select('*',{count:'exact',head:true});
+ if(r.error) throw r.error;
+ return r.count??0;
+}
+async function refreshCounts(){
+ if(!db){setStatus('CONFIGURATION REQUIRED',false);return}
+ try{
+  const results=await Promise.all(configs.map(async c=>({key:c.key,count:await countTable(c.table)})));
+  results.forEach(x=>$(x.key).textContent=x.count.toLocaleString());
+  touch();
+ }catch(e){
+  console.error(e);
+  feedItems.unshift({label:'Dashboard',type:'COUNT ERROR',row:{id:e.message},time:new Date()});
+  feedItems=feedItems.slice(0,60);renderFeed();
+ }
+}
+function subscribe(table,label){
+ return db.channel('podcasting-admin-'+table)
+ .on('postgres_changes',{event:'*',schema:'public',table},payload=>{
+   const action=payload.eventType||'UPDATE';
+   addEvent(label,payload,action);
+   refreshCounts();
+   toast(label+' updated',action+' received in real time');
+ })
+ .subscribe((status)=>{
+   if(status==='SUBSCRIBED') setStatus('LIVE • REALTIME',true);
+   else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT') setStatus('RECONNECTING…',false);
+ });
+}
+async function start(){
+ if(!db){setStatus('CONFIGURATION REQUIRED',false);feed.innerHTML='<div class="empty">Add the existing CrowRules Supabase publishable/anon key through CROW_CONFIG.</div>';return}
+ setStatus('CONNECTING…',false);
+ await refreshCounts();
+ configs.forEach(c=>subscribe(c.table,c.label));
+}
+$('refresh').addEventListener('click',refreshCounts);
+start();
+</script>
+</body>
+</html>
