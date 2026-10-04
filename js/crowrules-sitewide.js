@@ -105,6 +105,19 @@ body{scroll-padding-top:70px}.cr-sitewide.cr-sw-hidden{display:none}.cr-sw-reope
  document.head.appendChild(s);
 }
 
+function loadPodcastingNavigation(){
+ if(!location.pathname.includes('/podcasting/'))return;
+ if(window.__CrowRulesPodcastingNavV3)return;
+ if(document.querySelector('script[data-crowrules-podcasting-nav]'))return;
+ const s=document.createElement('script');
+ s.src='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-podcasting-nav.js?v=3';
+ s.defer=true;
+ s.dataset.crowrulesPodcastingNav='true';
+ s.onload=()=>window.dispatchEvent(new CustomEvent('crowrules-podcasting-nav-ready'));
+ s.onerror=()=>console.warn('[CrowRules sitewide] Podcasting navigation failed to load');
+ document.head.appendChild(s);
+}
+
 function closeDrops(except){
  document.querySelectorAll('.cr-sw-drop.open').forEach(x=>{
   if(x!==except){x.classList.remove('open');x.querySelector(':scope>button')?.setAttribute('aria-expanded','false')}
@@ -214,7 +227,7 @@ function installGlobalEvents(){
 }
 
 async function boot(){
- css();installGlobalEvents();mount({user:null,session:null,client:null});
+ css();installGlobalEvents();mount({user:null,session:null,client:null});\n loadPodcastingNavigation();
  try{
   let db=null,session=null,user=null;
 
