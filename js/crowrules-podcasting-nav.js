@@ -1,8 +1,8 @@
-/* CrowRules Podcasting Navigation — Role-Aware Configuration-Driven V6 */
+/* CrowRules Podcasting Navigation — Role-Aware Configuration-Driven V7 */
 (()=>{"use strict";
-if(window.__CrowRulesPodcastingNavV6)return;
-window.__CrowRulesPodcastingNavV6=true;
-const CONFIG_URL="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-podcasting-nav-config.js?v=6";
+if(window.__CrowRulesPodcastingNavV7)return;
+window.__CrowRulesPodcastingNavV7=true;
+const CONFIG_URL="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-podcasting-nav-config.js?v=7";
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const onPodcasting=location.pathname.replace(/\\/g,"/").includes("/podcasting/");
 const state={config:null,drop:null,roles:new Set(["public"]),memberRole:null,membershipType:null};
@@ -63,7 +63,7 @@ function mount(){
 }
 function start(){
  if(!onPodcasting)return;
- loadConfig().then(async c=>{state.config=c;await loadMemberRole();mount();window.addEventListener("crowrules-auth",()=>{refresh();});}).catch(e=>console.warn("[CrowRules Podcasting Nav V6]",e));
+ loadConfig().then(async c=>{state.config=c;await loadMemberRole();mount();window.addEventListener("crowrules-auth",()=>{refresh();});}).catch(e=>console.warn("[CrowRules Podcasting Nav V7]",e));
  const observer=new MutationObserver(()=>{if(state.config&&document.querySelector(".cr-sw-nav")&&!document.querySelector(".cr-pod-drop"))mount()});
  observer.observe(document.body,{childList:true,subtree:true});
  addEventListener("resize",()=>document.querySelectorAll(".cr-pod-drop.open").forEach(position),{passive:true});
