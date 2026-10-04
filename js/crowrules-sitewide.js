@@ -107,7 +107,7 @@ body{scroll-padding-top:70px}.cr-sitewide.cr-sw-hidden{display:none}.cr-sw-reope
 
 function loadPodcastingNavigation(){
  if(!location.pathname.includes('/podcasting/'))return;
- if(window.__CrowRulesPodcastingNavV4)return;
+ if(window.__CrowRulesPodcastingNavV5)return;
  if(document.querySelector('script[data-crowrules-podcasting-nav]'))return;
  const s=document.createElement('script');
  s.src='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-podcasting-nav.js?v=5';
