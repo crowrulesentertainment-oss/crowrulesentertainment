@@ -4,7 +4,7 @@
  */
 window.CROWRULES_PODCAST_NAV_CONFIG={
  version:5,
- base:"https://crowrulesentertainment-oss.github.io/podcasting/",
+ base:"https://crowrulesentertainment-oss.github.io/crowrulesentertainment/podcasting/",
  groups:[
   {id:"creator",title:"CREATOR STUDIO",items:[
    {label:"Studio",file:"creator-dashboard.html",icon:"⌂",roles:["creator","admin"]},
