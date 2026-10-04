@@ -5,7 +5,7 @@ window.__CrowRulesPodcastingNavV6=true;
 const CONFIG_URL="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-podcasting-nav-config.js?v=6";
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const onPodcasting=location.pathname.replace(/\\/g,"/").includes("/podcasting/");
-const state={config:null,drop:null,roles:new Set(["public"])};
+const state={config:null,drop:null,roles:new Set(["public"]),memberRole:null,membershipType:null};
 function loadConfig(){
  if(window.CROWRULES_PODCAST_NAV_CONFIG)return Promise.resolve(window.CROWRULES_PODCAST_NAV_CONFIG);
  return new Promise((resolve,reject)=>{
@@ -46,8 +46,8 @@ function itemHtml(item){
 function section(g){const items=g.items.filter(visible);return items.length?'<div class="cr-pod-heading">'+esc(g.title)+'</div>'+items.map(itemHtml).join(""):""}
 function close(except){document.querySelectorAll(".cr-pod-drop.open").forEach(d=>{if(d!==except){d.classList.remove("open");d.querySelector(":scope>button")?.setAttribute("aria-expanded","false")}})}
 function position(drop){const b=drop.querySelector(":scope>button"),m=drop.querySelector(":scope>.cr-pod-menu");if(!b||!m)return;const r=b.getBoundingClientRect(),w=Math.min(360,innerWidth-20);let left=Math.max(10,Math.min(r.left,innerWidth-w-10)),top=r.bottom+7;if(innerWidth<=520)left=9;const h=Math.min(m.scrollHeight||420,innerHeight-20);if(top+h>innerHeight&&r.top>h)top=Math.max(10,r.top-h-7);m.style.left=left+"px";m.style.top=top+"px"}
-function refresh(){
- getRoles();
+async function refresh(){
+ await loadMemberRole();
  if(state.config && state.drop) mount();
 }
 function mount(){
@@ -63,7 +63,7 @@ function mount(){
 }
 function start(){
  if(!onPodcasting)return;
- loadConfig().then(c=>{state.config=c;mount();window.addEventListener("crowrules-auth",()=>mount());}).catch(e=>console.warn("[CrowRules Podcasting Nav V6]",e));
+ loadConfig().then(async c=>{state.config=c;await loadMemberRole();mount();window.addEventListener("crowrules-auth",()=>{refresh();});}).catch(e=>console.warn("[CrowRules Podcasting Nav V6]",e));
  const observer=new MutationObserver(()=>{if(state.config&&document.querySelector(".cr-sw-nav")&&!document.querySelector(".cr-pod-drop"))mount()});
  observer.observe(document.body,{childList:true,subtree:true});
  addEventListener("resize",()=>document.querySelectorAll(".cr-pod-drop.open").forEach(position),{passive:true});
