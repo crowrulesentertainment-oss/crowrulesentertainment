@@ -1,8 +1,8 @@
-/* CrowRules Podcasting Navigation — Configuration-Driven V4 */
+/* CrowRules Podcasting Navigation — Role-Aware Configuration-Driven V5 */
 (()=>{"use strict";
 if(window.__CrowRulesPodcastingNavV4)return;
 window.__CrowRulesPodcastingNavV4=true;
-const CONFIG_URL="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-podcasting-nav-config.js?v=4";
+const CONFIG_URL="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-podcasting-nav-config.js?v=5";
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const onPodcasting=location.pathname.replace(/\\/g,"/").includes("/podcasting/");
 const state={config:null,drop:null};
@@ -24,13 +24,24 @@ function css(){if(document.getElementById("cr-pod-nav-v4-css"))return;const s=do
 @media(max-width:850px){.cr-pod-drop>button{font-size:9px;padding:7px 8px}.cr-pod-mobile-label{display:inline}}
 @media(max-width:520px){.cr-pod-menu{min-width:calc(100vw - 18px);max-width:calc(100vw - 18px);left:9px!important}.cr-pod-item{min-height:42px;padding:10px}.cr-pod-drop>button{font-size:8px;padding:7px}}
 `;document.head.appendChild(s)}
+function getRoles(){
+ const u=window.CrowRulesAuth?.user||null,m=u?.user_metadata||{},a=window.CrowRulesAuth||{};
+ const roles=new Set(["public"]);
+ if(u)roles.add("member");
+ const add=v=>{if(Array.isArray(v))v.forEach(add);else if(typeof v==="string")v.split(/[,\\s]+/).forEach(x=>{x=x.trim().toLowerCase();if(x)roles.add(x)})};
+ add(a.role);add(a.roles);add(m.role);add(m.roles);add(m.user_role);add(m.account_role);
+ if(a.is_admin===true||m.is_admin===true||m.admin===true)roles.add("admin");
+ if(a.is_creator===true||m.is_creator===true||m.creator===true)roles.add("creator");
+ return roles;
+}
+function visible(item){const roles=getRoles(),required=item.roles||["public","member","creator","admin"];return required.some(r=>roles.has(String(r).toLowerCase()));}
 function urlFor(item){return new URL(item.file,state.config.base).href}
 function isCurrent(url){try{const a=new URL(url),b=new URL(location.href);return a.origin===b.origin&&a.pathname===b.pathname}catch{return false}}
 function itemHtml(item){
  const url=urlFor(item),status=item.status||"live",disabled=status!=="live",badge=item.badge||(status==="soon"?"SOON":status==="development"?"IN DEVELOPMENT":status==="offline"?"UNAVAILABLE":status==="new"?"NEW":"");
  return '<a role="menuitem" class="cr-pod-item'+(isCurrent(url)?" current":"")+(disabled?" disabled":"")+'" href="'+(disabled?"#":esc(url))+'"'+(isCurrent(url)?' aria-current="page"':"")+(disabled?' aria-disabled="true" tabindex="-1"':"")+'>'+ (item.icon?'<span class="cr-pod-icon" aria-hidden="true">'+esc(item.icon)+"</span>":"<span class=\"cr-pod-icon\" aria-hidden=\"true\">•</span>")+ '<span class="cr-pod-label">'+esc(item.label)+'</span>'+ (badge?'<span class="cr-pod-badge '+(status==="soon"||status==="development"?"soon":status==="offline"?"off":"")+'">'+esc(badge)+"</span>":"")+"</a>"
 }
-function section(g){return '<div class="cr-pod-heading">'+esc(g.title)+'</div>'+g.items.map(itemHtml).join("")}
+function section(g){const items=g.items.filter(visible);return items.length?'<div class="cr-pod-heading">'+esc(g.title)+'</div>'+items.map(itemHtml).join(""):""}
 function close(except){document.querySelectorAll(".cr-pod-drop.open").forEach(d=>{if(d!==except){d.classList.remove("open");d.querySelector(":scope>button")?.setAttribute("aria-expanded","false")}})}
 function position(drop){const b=drop.querySelector(":scope>button"),m=drop.querySelector(":scope>.cr-pod-menu");if(!b||!m)return;const r=b.getBoundingClientRect(),w=Math.min(360,innerWidth-20);let left=Math.max(10,Math.min(r.left,innerWidth-w-10)),top=r.bottom+7;if(innerWidth<=520)left=9;const h=Math.min(m.scrollHeight||420,innerHeight-20);if(top+h>innerHeight&&r.top>h)top=Math.max(10,r.top-h-7);m.style.left=left+"px";m.style.top=top+"px"}
 function mount(){
@@ -46,7 +57,7 @@ function mount(){
 }
 function start(){
  if(!onPodcasting)return;
- loadConfig().then(c=>{state.config=c;mount();}).catch(e=>console.warn("[CrowRules Podcasting Nav V4]",e));
+ loadConfig().then(c=>{state.config=c;mount();window.addEventListener("crowrules-auth",()=>mount());}).catch(e=>console.warn("[CrowRules Podcasting Nav V4]",e));
  const observer=new MutationObserver(()=>{if(state.config&&document.querySelector(".cr-sw-nav")&&!document.querySelector(".cr-pod-drop"))mount()});
  observer.observe(document.body,{childList:true,subtree:true});
  addEventListener("resize",()=>document.querySelectorAll(".cr-pod-drop.open").forEach(position),{passive:true});
