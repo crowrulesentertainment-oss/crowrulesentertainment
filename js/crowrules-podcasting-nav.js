@@ -61,7 +61,7 @@ function itemHtml(item){
 function section(g){const items=g.items.filter(visible);return items.length?'<div class="cr-pod-heading">'+esc(g.title)+'</div>'+items.map(itemHtml).join(""):""}
 function close(except){document.querySelectorAll(".cr-pod-drop.open").forEach(d=>{if(d!==except){d.classList.remove("open");d.querySelector(":scope>button")?.setAttribute("aria-expanded","false")}})}
 function position(drop){const b=drop.querySelector(":scope>button"),m=drop.querySelector(":scope>.cr-pod-menu");if(!b||!m)return;const r=b.getBoundingClientRect(),w=Math.min(360,innerWidth-20);let left=Math.max(10,Math.min(r.left,innerWidth-w-10)),top=r.bottom+7;if(innerWidth<=520)left=9;const h=Math.min(m.scrollHeight||420,innerHeight-20);if(top+h>innerHeight&&r.top>h)top=Math.max(10,r.top-h-7);m.style.left=left+"px";m.style.top=top+"px"}
-async function refresh(){
+async async function refresh(){
  await loadMemberRole();
  if(state.config && state.drop) mount();
 }
