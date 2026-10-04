@@ -30,11 +30,26 @@ function getRoles(){
  const roles=new Set(["public"]);
  if(u)roles.add("member");
  const add=v=>{if(Array.isArray(v))v.forEach(add);else if(typeof v==="string")v.split(/[,\\s]+/).forEach(x=>{x=x.trim().toLowerCase();if(x)roles.add(x)})};
- add(b.role);add(b.roles);add(b.app_role);add(b.app_roles);
+ add(state.memberRole);add(b.role);add(b.roles);add(b.app_role);add(b.app_roles);
  add(a.role);add(a.roles);add(a.user_role);add(a.account_role);
  if(b.is_admin===true||a.is_admin===true)roles.add("admin");
  if(b.is_creator===true||a.is_creator===true)roles.add("creator");
+ state.roles=roles;
  return roles;
+}
+async function loadMemberRole(){
+ const u=window.CrowRulesAuth?.user||null;
+ const db=window.CrowRulesAuth?.client||null;
+ state.memberRole=null;state.membershipType=null;
+ if(!u?.id||!db)return;
+ try{
+  const r=await db.from("members").select("role,membership_type,status").eq("user_id",u.id).maybeSingle();
+  if(!r.error&&r.data?.status!=="Suspended"){
+   state.memberRole=r.data?.role||null;
+   state.membershipType=r.data?.membership_type||null;
+  }
+ }catch(e){console.warn("[CrowRules Podcasting Nav] member role lookup failed",e)}
+ getRoles();
 }
 function visible(item){const roles=getRoles(),required=item.roles||["public","member","creator","admin"];return required.some(r=>roles.has(String(r).toLowerCase()));}
 function urlFor(item){return new URL(item.file,state.config.base).href}
