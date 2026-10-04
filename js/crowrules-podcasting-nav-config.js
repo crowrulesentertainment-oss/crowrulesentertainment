@@ -1,9 +1,9 @@
-/* CrowRules Podcasting Navigation Configuration V4
+/* CrowRules Podcasting Navigation Configuration V5
  * Single source of truth for Podcasting navigation destinations.
  * Add/edit destinations here; the renderer does not need to change.
  */
 window.CROWRULES_PODCAST_NAV_CONFIG={
- version:4,
+ version:5,
  base:"https://crowrulesentertainment-oss.github.io/podcasting/",
  groups:[
   {id:"creator",title:"CREATOR STUDIO",items:[
