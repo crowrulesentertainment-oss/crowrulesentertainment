@@ -24,5 +24,17 @@ list.querySelectorAll(".crn-item[data-id]").forEach(a=>a.onclick=async()=>{const
 await load();if(session)db.channel("crowrules-notifications-v42-"+session.user.id).on("postgres_changes",{event:"*",schema:"public",table:"crowrules_notifications",filter:"user_id=eq."+session.user.id},()=>load()).subscribe();
 window.CrowRulesNotifications={refresh:load,markAllRead:async()=>{if(session)await db.rpc("cr_mark_notifications_read",{p_ids:null});await load()}};
 db.auth.onAuthStateChange((_e,s)=>{session=s;load()})}
+
+/* Podcasting pages get a division-specific dropdown inside the universal navigation. */
+function loadPodcastingNavigation(){
+ if(!location.pathname.includes('/podcasting/'))return;
+ if(document.querySelector('script[data-crowrules-podcasting-nav]'))return;
+ const s=document.createElement('script');
+ s.src='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-podcasting-nav.js?v=1';
+ s.defer=true;
+ s.dataset.crowrulesPodcastingNav='true';
+ document.head.appendChild(s);
+}
+loadPodcastingNavigation();
 wait();
 })();
