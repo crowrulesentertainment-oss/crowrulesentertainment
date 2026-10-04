@@ -3,7 +3,7 @@
  * Add/edit destinations here; the renderer does not need to change.
  */
 window.CROWRULES_PODCAST_NAV_CONFIG={
- version:6,
+ version:7,
  base:"https://crowrulesentertainment-oss.github.io/crowrulesentertainment/podcasting/",
  groups:[
   {id:"creator",title:"CREATOR STUDIO",items:[
@@ -21,6 +21,7 @@ window.CROWRULES_PODCAST_NAV_CONFIG={
    {label:"Account",file:"account.html",icon:"⚙",roles:["member","creator","admin"]}
   ]},
   {id:"listener",title:"LISTENER",items:[
+   {label:"Join Podcasting",file:"signup.html",icon:"✦",roles:["public"]},
    {label:"Podcasts",file:"podcasts.html",roles:["public","member","creator","admin"]},
    {label:"Discover",file:"discover.html",roles:["public","member","creator","admin"]},
    {label:"Following",file:"following.html",roles:["member","creator","admin"]},
