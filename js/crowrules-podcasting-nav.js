@@ -63,7 +63,7 @@ function mount(){
 }
 function start(){
  if(!onPodcasting)return;
- loadConfig().then(c=>{state.config=c;mount();window.addEventListener("crowrules-auth",()=>mount());}).catch(e=>console.warn("[CrowRules Podcasting Nav V5]",e));
+ loadConfig().then(c=>{state.config=c;mount();window.addEventListener("crowrules-auth",()=>mount());}).catch(e=>console.warn("[CrowRules Podcasting Nav V6]",e));
  const observer=new MutationObserver(()=>{if(state.config&&document.querySelector(".cr-sw-nav")&&!document.querySelector(".cr-pod-drop"))mount()});
  observer.observe(document.body,{childList:true,subtree:true});
  addEventListener("resize",()=>document.querySelectorAll(".cr-pod-drop.open").forEach(position),{passive:true});
