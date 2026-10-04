@@ -110,7 +110,7 @@ function loadPodcastingNavigation(){
  if(window.__CrowRulesPodcastingNavV4)return;
  if(document.querySelector('script[data-crowrules-podcasting-nav]'))return;
  const s=document.createElement('script');
- s.src='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-podcasting-nav.js?v=4';
+ s.src='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-podcasting-nav.js?v=5';
  s.defer=true;
  s.dataset.crowrulesPodcastingNav='true';
  s.onload=()=>window.dispatchEvent(new CustomEvent('crowrules-podcasting-nav-ready'));
