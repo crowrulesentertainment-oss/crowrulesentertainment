@@ -227,7 +227,7 @@ function installGlobalEvents(){
 }
 
 async function boot(){
- css();installGlobalEvents();mount({user:null,session:null,client:null});\n loadPodcastingNavigation();
+ css();installGlobalEvents();mount({user:null,session:null,client:null});\n if(!location.pathname.includes('/podcasting/'))loadPodcastingNavigation();
  try{
   let db=null,session=null,user=null;
 
