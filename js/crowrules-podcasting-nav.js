@@ -15,7 +15,7 @@ function loadConfig(){
   document.head.appendChild(s);
  });
 }
-function css(){if(document.getElementById("cr-pod-nav-v5-css"))return;const s=document.createElement("style");s.id="cr-pod-nav-v4-css";s.textContent=`
+function css(){if(document.getElementById("cr-pod-nav-v5-css"))return;const s=document.createElement("style");s.id="cr-pod-nav-v5-css";s.textContent=`
 .cr-pod-drop{position:relative;flex:none}.cr-pod-drop>button{display:inline-flex;align-items:center;gap:4px;color:#cbd5e1;padding:8px 10px;border:1px solid transparent;border-radius:8px;background:transparent;font:800 10px Arial,sans-serif;white-space:nowrap;cursor:pointer}.cr-pod-drop>button:hover,.cr-pod-drop.open>button{border-color:#78efff33;background:#78efff0d;color:#fff}.cr-pod-chevron{font-size:9px;color:#78efff}
 .cr-pod-menu{position:fixed;z-index:100004;min-width:250px;max-width:calc(100vw - 20px);padding:8px;background:rgba(7,11,22,.99);border:1px solid #78efff55;border-radius:13px;display:none;gap:2px;box-shadow:0 20px 60px #000b;max-height:calc(100vh - 80px);overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}.cr-pod-drop.open>.cr-pod-menu{display:grid}
 .cr-pod-heading{padding:8px 10px 5px;color:#78efff;font-size:8px;letter-spacing:.16em;font-weight:900}.cr-pod-heading:not(:first-child){border-top:1px solid #ffffff10;margin-top:5px;padding-top:10px}
