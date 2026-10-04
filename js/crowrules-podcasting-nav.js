@@ -1,11 +1,11 @@
-/* CrowRules Podcasting Navigation — Role-Aware Configuration-Driven V5 */
+/* CrowRules Podcasting Navigation — Role-Aware Configuration-Driven V6 */
 (()=>{"use strict";
-if(window.__CrowRulesPodcastingNavV5)return;
-window.__CrowRulesPodcastingNavV5=true;
-const CONFIG_URL="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-podcasting-nav-config.js?v=5";
+if(window.__CrowRulesPodcastingNavV6)return;
+window.__CrowRulesPodcastingNavV6=true;
+const CONFIG_URL="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-podcasting-nav-config.js?v=6";
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const onPodcasting=location.pathname.replace(/\\/g,"/").includes("/podcasting/");
-const state={config:null,drop:null};
+const state={config:null,drop:null,roles:new Set(["public"])};
 function loadConfig(){
  if(window.CROWRULES_PODCAST_NAV_CONFIG)return Promise.resolve(window.CROWRULES_PODCAST_NAV_CONFIG);
  return new Promise((resolve,reject)=>{
@@ -15,7 +15,7 @@ function loadConfig(){
   document.head.appendChild(s);
  });
 }
-function css(){if(document.getElementById("cr-pod-nav-v5-css"))return;const s=document.createElement("style");s.id="cr-pod-nav-v5-css";s.textContent=`
+function css(){if(document.getElementById("cr-pod-nav-v6-css"))return;const s=document.createElement("style");s.id="cr-pod-nav-v6-css";s.textContent=`
 .cr-pod-drop{position:relative;flex:none}.cr-pod-drop>button{display:inline-flex;align-items:center;gap:4px;color:#cbd5e1;padding:8px 10px;border:1px solid transparent;border-radius:8px;background:transparent;font:800 10px Arial,sans-serif;white-space:nowrap;cursor:pointer}.cr-pod-drop>button:hover,.cr-pod-drop.open>button{border-color:#78efff33;background:#78efff0d;color:#fff}.cr-pod-chevron{font-size:9px;color:#78efff}
 .cr-pod-menu{position:fixed;z-index:100004;min-width:250px;max-width:calc(100vw - 20px);padding:8px;background:rgba(7,11,22,.99);border:1px solid #78efff55;border-radius:13px;display:none;gap:2px;box-shadow:0 20px 60px #000b;max-height:calc(100vh - 80px);overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}.cr-pod-drop.open>.cr-pod-menu{display:grid}
 .cr-pod-heading{padding:8px 10px 5px;color:#78efff;font-size:8px;letter-spacing:.16em;font-weight:900}.cr-pod-heading:not(:first-child){border-top:1px solid #ffffff10;margin-top:5px;padding-top:10px}
@@ -44,6 +44,10 @@ function itemHtml(item){
 function section(g){const items=g.items.filter(visible);return items.length?'<div class="cr-pod-heading">'+esc(g.title)+'</div>'+items.map(itemHtml).join(""):""}
 function close(except){document.querySelectorAll(".cr-pod-drop.open").forEach(d=>{if(d!==except){d.classList.remove("open");d.querySelector(":scope>button")?.setAttribute("aria-expanded","false")}})}
 function position(drop){const b=drop.querySelector(":scope>button"),m=drop.querySelector(":scope>.cr-pod-menu");if(!b||!m)return;const r=b.getBoundingClientRect(),w=Math.min(360,innerWidth-20);let left=Math.max(10,Math.min(r.left,innerWidth-w-10)),top=r.bottom+7;if(innerWidth<=520)left=9;const h=Math.min(m.scrollHeight||420,innerHeight-20);if(top+h>innerHeight&&r.top>h)top=Math.max(10,r.top-h-7);m.style.left=left+"px";m.style.top=top+"px"}
+function refresh(){
+ getRoles();
+ if(state.config && state.drop) mount();
+}
 function mount(){
  if(!onPodcasting||!state.config)return;
  css();const nav=document.querySelector(".cr-sw-nav");if(!nav)return;
