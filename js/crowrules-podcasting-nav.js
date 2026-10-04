@@ -25,13 +25,15 @@ function css(){if(document.getElementById("cr-pod-nav-v6-css"))return;const s=do
 @media(max-width:520px){.cr-pod-menu{min-width:calc(100vw - 18px);max-width:calc(100vw - 18px);left:9px!important}.cr-pod-item{min-height:42px;padding:10px}.cr-pod-drop>button{font-size:8px;padding:7px}}
 `;document.head.appendChild(s)}
 function getRoles(){
- const u=window.CrowRulesAuth?.user||null,m=u?.user_metadata||{},a=window.CrowRulesAuth||{};
+ const u=window.CrowRulesAuth?.user||null;
+ const m=u?.user_metadata||{},a=u?.app_metadata||{},b=window.CrowRulesAuth||{};
  const roles=new Set(["public"]);
  if(u)roles.add("member");
  const add=v=>{if(Array.isArray(v))v.forEach(add);else if(typeof v==="string")v.split(/[,\\s]+/).forEach(x=>{x=x.trim().toLowerCase();if(x)roles.add(x)})};
- add(a.role);add(a.roles);add(m.role);add(m.roles);add(m.user_role);add(m.account_role);
- if(a.is_admin===true||m.is_admin===true||m.admin===true)roles.add("admin");
- if(a.is_creator===true||m.is_creator===true||m.creator===true)roles.add("creator");
+ add(b.role);add(b.roles);add(b.app_role);add(b.app_roles);
+ add(a.role);add(a.roles);add(a.user_role);add(a.account_role);
+ if(b.is_admin===true||a.is_admin===true)roles.add("admin");
+ if(b.is_creator===true||a.is_creator===true)roles.add("creator");
  return roles;
 }
 function visible(item){const roles=getRoles(),required=item.roles||["public","member","creator","admin"];return required.some(r=>roles.has(String(r).toLowerCase()));}
