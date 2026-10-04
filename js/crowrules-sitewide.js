@@ -107,10 +107,10 @@ body{scroll-padding-top:70px}.cr-sitewide.cr-sw-hidden{display:none}.cr-sw-reope
 
 function loadPodcastingNavigation(){
  if(!location.pathname.includes('/podcasting/'))return;
- if(window.__CrowRulesPodcastingNavV6)return;
+ if(window.__CrowRulesPodcastingNavV8)return;
  if(document.querySelector('script[data-crowrules-podcasting-nav]'))return;
  const s=document.createElement('script');
- s.src='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-podcasting-nav.js?v=7';
+ s.src='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-podcasting-nav.js?v=8';
  s.defer=true;
  s.dataset.crowrulesPodcastingNav='true';
  s.onload=()=>window.dispatchEvent(new CustomEvent('crowrules-podcasting-nav-ready'));
