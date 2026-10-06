@@ -86,13 +86,19 @@ async function renderIncidents(){
  if(error){$("incidentSummary").innerHTML='<div class="notice">Incident center unavailable: '+esc(error.message)+'</div>';return}
  const a=data||{}, rows=a.incidents||[], ev=a.events||[];
  $("incidentSummary").innerHTML='<div class="cards" style="margin:0 0 14px"><div class="card"><div class="v">'+esc(a.open_incidents??0)+'</div><div class="k">OPEN INCIDENTS</div></div><div class="card"><div class="v red">'+esc(a.critical_incidents??0)+'</div><div class="k">CRITICAL</div></div><div class="card"><div class="v yellow">'+esc(a.escalated_incidents??0)+'</div><div class="k">ESCALATED</div></div></div>';
- $("incidents").innerHTML=rows.length?'<table class="data"><thead><tr><th>INCIDENT</th><th>SEVERITY</th><th>STATUS</th><th>ASSIGNED</th><th>RESPONSE</th><th>UPDATED</th></tr></thead><tbody>'+rows.map(i=>'<tr><td><span class="mono">'+esc(i.incident_key)+'</span></td><td>'+badge(i.severity)+'</td><td>'+badge(i.incident_status)+'</td><td>'+esc(i.assigned_to||"Unassigned")+'</td><td><div class="action"><button class="btn mini" onclick="incidentAction('+i.id+',\'ACKNOWLEDGE\')">ACK</button><button class="btn mini" onclick="incidentAction('+i.id+',\'START\')">START</button><button class="btn mini" onclick="incidentAction('+i.id+',\'ESCALATE\')">ESCALATE</button><button class="btn mini" onclick="incidentAction('+i.id+',\'RESOLVE\')">RESOLVE</button><button class="btn mini" onclick="incidentNote('+i.id+')">NOTE</button></div></td><td>'+fmt(i.updated_at)+'</td></tr>').join("")+'</tbody></table>':'<div class="notice">No recovery incidents currently require response.</div>';
+ $("incidents").innerHTML=rows.length?'<table class="data"><thead><tr><th>INCIDENT</th><th>SEVERITY</th><th>STATUS</th><th>ASSIGNED</th><th>RESPONSE</th><th>UPDATED</th></tr></thead><tbody>'+rows.map(i=>'<tr><td><span class="mono">'+esc(i.incident_key)+'</span></td><td>'+badge(i.severity)+'</td><td>'+badge(i.incident_status)+'</td><td>'+esc(i.assigned_to||"Unassigned")+'</td><td><div class="action"><button class="btn mini" onclick="incidentAction('+i.id+',\'ACKNOWLEDGE\')">ACK</button><button class="btn mini" onclick="incidentAction('+i.id+',\'START\')">START</button><button class="btn mini" onclick="incidentAssign('+i.id+')">ASSIGN</button><button class="btn mini" onclick="incidentAction('+i.id+',\'ESCALATE\')">ESCALATE</button><button class="btn mini" onclick="incidentAction('+i.id+',\'RESOLVE\')">RESOLVE</button><button class="btn mini" onclick="incidentNote('+i.id+')">NOTE</button></div></td><td>'+fmt(i.updated_at)+'</td></tr>').join("")+'</tbody></table>':'<div class="notice">No recovery incidents currently require response.</div>';
  $("incidentEvents").innerHTML=table(ev,["incident_id","event_type","old_status","new_status","actor","note","created_at"]);
 }
 async function incidentAction(id,action){
  const note=(action==="RESOLVE"||action==="ESCALATE")?prompt("Response note (optional):",""):null;
  if(note===null && (action==="RESOLVE"||action==="ESCALATE")) return;
  const {error}=await sb.rpc("cr_podcast_recovery_incident_update_v759",{p_incident_id:id,p_action:action,p_value:null,p_note:note||null});
+ if(error){alert(error.message);return} await renderIncidents();
+}
+async function incidentAssign(id){
+ const who=prompt("Assign incident to (name or team):","");
+ if(who===null)return;
+ const {error}=await sb.rpc("cr_podcast_recovery_incident_update_v759",{p_incident_id:id,p_action:"ASSIGN",p_value:who,p_note:null});
  if(error){alert(error.message);return} await renderIncidents();
 }
 async function incidentNote(id){
