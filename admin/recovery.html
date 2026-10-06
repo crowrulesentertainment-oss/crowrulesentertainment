@@ -15,15 +15,15 @@
 <body>
 <div id="login" class="login"><div class="loginbox"><div class="eyebrow">CROWRULES // V7.59</div><h1>RECOVERY CONTROL ROOM</h1><p class="sub">Administrator authentication is required. Recovery data is returned only through the protected V7.57 server-side control-room function.</p><div class="actions"><a class="btn" href="../account.html">GO TO ACCOUNT</a><a class="btn" href="./index.html">ADMIN CENTER</a></div><div id="loginError" class="error"></div></div></div>
 <main id="app" class="wrap hidden">
-<header class="top"><div><div class="eyebrow">ONE COMPANY // ONE UNIVERSE // RECOVERY OPERATIONS</div><div class="title">RECOVERY CONTROL ROOM</div><div class="sub">Live operational visibility for V7.53 disaster drills, V7.55 Recovery Readiness Certificates, and V7.56 lifecycle monitoring. Project-wide Supabase security-advisor findings remain a separate track.</div></div><div><div id="systemStamp" class="stamp">● CONNECTING</div><div class="actions" style="justify-content:flex-end;margin-top:10px"><button id="refresh" class="btn">REFRESH NOW</button><a class="btn" href="./index.html">COMMAND CENTER</a></div></div></header>
+<header class="top"><div><div class="eyebrow">ONE COMPANY // ONE UNIVERSE // RECOVERY OPERATIONS</div><div class="title">RECOVERY CONTROL ROOM</div><div class="sub">Live operational visibility for V7.53 disaster drills, V7.55 Recovery Readiness Certificates, and V7.56 lifecycle monitoring. Project-wide Supabase security-advisor findings remain a separate track.</div></div><div><div id="systemStamp" class="stamp">● CONNECTING</div><div class="actions" style="justify-content:flex-end;margin-top:10px"><button id="refresh" class="btn">REFRESH NOW</button><button id="drillBtn" class="btn">RUN NON-DESTRUCTIVE DRILL</button><a class="btn" href="./index.html">COMMAND CENTER</a></div></div></header>
 <section class="cards" id="cards"></section>
 <section class="section grid"><div class="panel"><h2>READINESS STATE</h2><div id="state"></div></div><div class="panel"><h2>CERTIFICATE</h2><div id="certificate"></div></div></section>
 <section class="section grid"><div class="panel"><h2>LATEST DRILL</h2><div id="drill"></div></div><div class="panel"><h2>RISK &amp; SCHEDULE</h2><div id="risk"></div></div></section>
-<section class="section"><div class="panel"><h2>DRILL HISTORY</h2><div class="table-wrap" id="drills"></div></div></section>
+<section class="section"><div class="panel"><h2>V7.60 RECOVERY COMMAND &amp; DRILL CENTER</h2><div id="drillCommand"></div><div class="table-wrap" id="v760History"></div></div></section><section class="section"><div class="panel"><h2>DRILL HISTORY</h2><div class="table-wrap" id="drills"></div></div></section>
 <section class="section"><div class="panel"><h2>CERTIFICATE HISTORY</h2><div class="table-wrap" id="certs"></div></div></section>
 <section class="section"><div class="panel"><h2>MONITORING SNAPSHOTS</h2><div class="table-wrap" id="monitoring"></div></div></section>
 <section class="section"><div class="panel"><h2>V7.58 ALERT CENTER</h2><div id="alertSummary"></div><div class="table-wrap" id="alerts"></div></div></section><section class="section"><div class="panel"><h2>V7.59 INCIDENT RESPONSE</h2><div id="incidentSummary"></div><div class="table-wrap" id="incidents"></div><h2 style="margin-top:22px">INCIDENT TIMELINE</h2><div class="table-wrap" id="incidentEvents"></div></div></section><section class="section"><div class="panel"><h2>V7.56 AUDIT TRAIL</h2><div class="table-wrap" id="audit"></div></div></section>
-<div class="footer">V7.58 CONTROL ROOM • Recovery alerts are deduplicated, hourly evaluated, and displayed here for administrator review.  No destructive recovery action is exposed here. Security-advisor findings such as Pro-plan-only leaked-password protection are intentionally excluded from readiness scoring.</div>
+<div class="footer">V7.60 COMMAND & DRILL CENTER • Recovery alerts are deduplicated, hourly evaluated, and displayed here for administrator review.  No destructive recovery action is exposed here. Security-advisor findings such as Pro-plan-only leaked-password protection are intentionally excluded from readiness scoring.</div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -35,13 +35,35 @@ const esc=v=>String(v??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&g
 function fmt(v){if(!v)return "—";const d=new Date(v);return Number.isNaN(d.getTime())?esc(v):d.toLocaleString();}
 function badge(v){const x=String(v??"").toUpperCase();const cls=["READY","ACTIVE","PASSED","VALID","LOW","A"].includes(x)?"ready":["EXPIRING","RENEWAL_DUE","MEDIUM","B"].includes(x)?"warn":["EXPIRED","VOID","FAILED","HIGH","CRITICAL","C"].includes(x)?"danger":"";return '<span class="badge '+cls+'">'+esc(x)+'</span>'}
 function kv(items){return '<div class="kv">'+items.map(([k,v])=>'<div class="key">'+esc(k)+'</div><div>'+v+'</div>').join("")+'</div>'}
+async function runDrill(){
+ const {data:archives,error}=await sb.rpc("cr_podcast_recovery_drill_archives_v760");
+ if(error){alert(error.message);return}
+ if(!archives?.length){alert("No eligible immutable, active, trusted archive is available.");return}
+ const choices=archives.map((a,i)=>`${i+1}. ${a.archive_key} [ID ${a.id}]`).join("\n");
+ const pick=prompt("SELECT LAST-KNOWN-GOOD ARCHIVE:\n\n"+choices+"\n\nEnter the archive number:","1");
+ if(pick===null)return;
+ const idx=Number(pick)-1;if(!Number.isInteger(idx)||!archives[idx]){alert("Invalid archive selection.");return}
+ if(!confirm("Start NON-DESTRUCTIVE recovery drill using archive "+archives[idx].archive_key+"? No production data will be restored or modified."))return;
+ $("systemStamp").textContent="● DRILL RUNNING";
+ const {data,error:e}=await sb.rpc("cr_podcast_recovery_drill_v760",{p_archive_id:archives[idx].id});
+ if(e){alert(e.message);await load();return}
+ alert("V7.60 drill PASSED.\nDrill ID: "+e.drill_id+"\nEvidence SHA-256: "+e.evidence_sha256);
+ await load();
+}
 async function load(){
  const {data:{session}}=await sb.auth.getSession();
  if(!session){$("login").classList.remove("hidden");$("app").classList.add("hidden");return}
  const {data,error}=await sb.rpc("cr_podcast_recovery_control_room_v756");
  if(error){$("loginError").textContent=error.message||"Recovery Control Room could not load.";return}
  $("login").classList.add("hidden");$("app").classList.remove("hidden");
- render(data); $("systemStamp").textContent="● LIVE • "+new Date().toLocaleTimeString();
+ render(data); await renderV760(); $("systemStamp").textContent="● LIVE • "+new Date().toLocaleTimeString();
+}
+async function renderV760(){
+ const {data,error}=await sb.rpc("cr_podcast_recovery_drill_history_v760");
+ if(error){$("drillCommand").innerHTML='<div class="notice">V7.60 drill center unavailable: '+esc(error.message)+'</div>';return}
+ const rows=data||[];
+ $("drillCommand").innerHTML='<div class="notice">Administrator-only. Select an immutable, active, trusted archive and execute a fully non-destructive verification sequence. The drill creates evidence and a V7.60 drill record without modifying production recovery data.</div>';
+ $("v760History").innerHTML=table(rows.map(r=>({run_key:r.run_key,status:r.status,drill_id:r.drill_id,archive_id:r.archive_id,selected_archive_key:r.selected_archive_key,evidence_sha256:r.evidence_sha256,started_at:r.started_at,completed_at:r.completed_at,actor:r.actor,version:r.version})),["run_key","status","drill_id","archive_id","selected_archive_key","evidence_sha256","started_at","completed_at","actor","version"]);
 }
 async function render(x){
  const l=x.lifecycle||{},c=x.certificate||{},d=x.latest_drill||{};
@@ -115,7 +137,7 @@ async function renderAlerts(){
  $("alerts").innerHTML=table(a.alerts||[],["alert_type","severity","status","message","first_seen_at","last_seen_at","details"]);
 }
 function table(rows,cols){if(!rows.length)return '<div class="notice">No records available.</div>';return '<table class="data"><thead><tr>'+cols.map(c=>'<th>'+esc(c)+'</th>').join("")+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+cols.map(c=>'<td>'+((c.includes("_at")||c==="created_at")?fmt(r[c]):c==="status"||c.includes("status")||c==="risk_level"||c==="readiness_grade"?badge(r[c]):c==="details"?'<span class="mono">'+esc(JSON.stringify(r[c]))+'</span>':esc(r[c]))+'</td>').join("")+'</tr>').join("")+'</tbody></table>'}
-$("refresh").onclick=()=>load();
+$("refresh").onclick=()=>load(); $("drillBtn").onclick=runDrill;
 sb.auth.onAuthStateChange((event,session)=>{if(event==="SIGNED_OUT")location.reload();if(event==="SIGNED_IN"&&session)load()});
 load();
 setInterval(load,60000);
