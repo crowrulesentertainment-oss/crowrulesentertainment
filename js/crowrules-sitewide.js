@@ -170,9 +170,10 @@ function renderAccount(menu,u,status){
  const profileBase=onPodcasting?'https://crowrulesentertainment-oss.github.io/podcasting/member-profile.html':CONFIG.crowspace+'profile.html';
  const profileUrl=signed?profileBase+'?user='+encodeURIComponent(u.id):profileBase;
  const accountUrl=onPodcasting?'https://crowrulesentertainment-oss.github.io/podcasting/account.html':CONFIG.crowspace+'account.html';
+ const returnUrl=encodeURIComponent(location.href);
  menu.innerHTML=signed
   ? '<a class="membership-link" href="'+CONFIG.membership+'">✦ Membership Center</a><a href="'+profileUrl+'">◉ My Profile</a><a href="'+accountUrl+'">⚙ Account</a><a href="'+CONFIG.crowspace+'settings.html">◌ Settings</a><div class="cr-sw-status">Signed in as '+esc(u.email||u.user_metadata?.display_name||'CrowRules member')+'</div><div class="cr-sw-divider"></div><button id="cr-sw-out" type="button">↪ Sign Out</button>'
-  : '<a class="membership-link" href="'+CONFIG.membership+'">✦ Explore Membership</a><a href="'+CONFIG.crowspace+'login.html">Log In</a><a href="'+CONFIG.crowspace+'signup.html">Create Universal Account</a><div class="cr-sw-status">'+esc(status||'Universal account ready')+'</div>';
+  : '<a class="membership-link" href="'+CONFIG.membership+'">✦ Explore Membership</a><a href="'+CONFIG.crowspace+'login.html?redirect='+returnUrl+'">Log In</a><a href="'+CONFIG.crowspace+'signup.html?redirect='+returnUrl+'">Create Universal Account</a><div class="cr-sw-status">'+esc(status||'Universal account ready')+'</div>';
 }
 
 function mount(state){
