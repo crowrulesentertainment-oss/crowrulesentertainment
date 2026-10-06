@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CrowRules V7.59 Recovery Incident Response Center</title>
+<title>CrowRules V7.61 Recovery Evidence & Certificate Automation</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Orbitron:wght@700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -13,14 +13,14 @@
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=5" defer></script></head>
 <body>
-<div id="login" class="login"><div class="loginbox"><div class="eyebrow">CROWRULES // V7.59</div><h1>RECOVERY CONTROL ROOM</h1><p class="sub">Administrator authentication is required. Recovery data is returned only through the protected V7.57 server-side control-room function.</p><div class="actions"><a class="btn" href="../account.html">GO TO ACCOUNT</a><a class="btn" href="./index.html">ADMIN CENTER</a></div><div id="loginError" class="error"></div></div></div>
+<div id="login" class="login"><div class="loginbox"><div class="eyebrow">CROWRULES // V7.61</div><h1>RECOVERY CONTROL ROOM</h1><p class="sub">Administrator authentication is required. Recovery data is returned only through the protected V7.57 server-side control-room function.</p><div class="actions"><a class="btn" href="../account.html">GO TO ACCOUNT</a><a class="btn" href="./index.html">ADMIN CENTER</a></div><div id="loginError" class="error"></div></div></div>
 <main id="app" class="wrap hidden">
-<header class="top"><div><div class="eyebrow">ONE COMPANY // ONE UNIVERSE // RECOVERY OPERATIONS</div><div class="title">RECOVERY CONTROL ROOM</div><div class="sub">Live operational visibility for V7.53 disaster drills, V7.55 Recovery Readiness Certificates, and V7.56 lifecycle monitoring. Project-wide Supabase security-advisor findings remain a separate track.</div></div><div><div id="systemStamp" class="stamp">● CONNECTING</div><div class="actions" style="justify-content:flex-end;margin-top:10px"><button id="refresh" class="btn">REFRESH NOW</button><button id="drillBtn" class="btn">RUN NON-DESTRUCTIVE DRILL</button><a class="btn" href="./index.html">COMMAND CENTER</a></div></div></header>
+<header class="top"><div><div class="eyebrow">ONE COMPANY // ONE UNIVERSE // RECOVERY OPERATIONS</div><div class="title">RECOVERY CONTROL ROOM</div><div class="sub">Live operational visibility for V7.53 disaster drills, V7.55 Recovery Readiness Certificates, and V7.56 lifecycle monitoring. Project-wide Supabase security-advisor findings remain a separate track.</div></div><div><div id="systemStamp" class="stamp">● CONNECTING</div><div class="actions" style="justify-content:flex-end;margin-top:10px"><button id="refresh" class="btn">REFRESH NOW</button><button id="drillBtn" class="btn">RUN NON-DESTRUCTIVE DRILL</button><button id="certBtn" class="btn">ISSUE / RENEW CERTIFICATE</button><a class="btn" href="./index.html">COMMAND CENTER</a></div></div></header>
 <section class="cards" id="cards"></section>
 <section class="section grid"><div class="panel"><h2>READINESS STATE</h2><div id="state"></div></div><div class="panel"><h2>CERTIFICATE</h2><div id="certificate"></div></div></section>
 <section class="section grid"><div class="panel"><h2>LATEST DRILL</h2><div id="drill"></div></div><div class="panel"><h2>RISK &amp; SCHEDULE</h2><div id="risk"></div></div></section>
 <section class="section"><div class="panel"><h2>V7.60 RECOVERY COMMAND &amp; DRILL CENTER</h2><div id="drillCommand"></div><div class="table-wrap" id="v760History"></div></div></section><section class="section"><div class="panel"><h2>DRILL HISTORY</h2><div class="table-wrap" id="drills"></div></div></section>
-<section class="section"><div class="panel"><h2>CERTIFICATE HISTORY</h2><div class="table-wrap" id="certs"></div></div></section>
+<section class="section"><div class="panel"><h2>V7.61 EVIDENCE &amp; CERTIFICATE AUTOMATION</h2><div id="certAutomation"></div><div class="table-wrap" id="v761History"></div></div></section><section class="section"><div class="panel"><h2>CERTIFICATE HISTORY</h2><div class="table-wrap" id="certs"></div></div></section>
 <section class="section"><div class="panel"><h2>MONITORING SNAPSHOTS</h2><div class="table-wrap" id="monitoring"></div></div></section>
 <section class="section"><div class="panel"><h2>V7.58 ALERT CENTER</h2><div id="alertSummary"></div><div class="table-wrap" id="alerts"></div></div></section><section class="section"><div class="panel"><h2>V7.59 INCIDENT RESPONSE</h2><div id="incidentSummary"></div><div class="table-wrap" id="incidents"></div><h2 style="margin-top:22px">INCIDENT TIMELINE</h2><div class="table-wrap" id="incidentEvents"></div></div></section><section class="section"><div class="panel"><h2>V7.56 AUDIT TRAIL</h2><div class="table-wrap" id="audit"></div></div></section>
 <div class="footer">V7.60 COMMAND & DRILL CENTER • Recovery alerts are deduplicated, hourly evaluated, and displayed here for administrator review.  No destructive recovery action is exposed here. Security-advisor findings such as Pro-plan-only leaked-password protection are intentionally excluded from readiness scoring.</div>
@@ -50,13 +50,28 @@ async function runDrill(){
  alert("V7.60 drill PASSED.\nDrill ID: "+e.drill_id+"\nEvidence SHA-256: "+e.evidence_sha256);
  await load();
 }
+async function automateCertificate(){
+ if(!confirm("Issue/renew the Recovery Readiness Certificate from the latest successful V7.60 drill? This validates evidence, updates lifecycle dates, resolves stale recovery alerts, and records the issuance. No production data is restored."))return;
+ $("systemStamp").textContent="● CERTIFICATE AUTOMATION RUNNING";
+ const {data,error}=await sb.rpc("cr_podcast_recovery_certificate_automate_v761");
+ if(error){alert(error.message);await load();return}
+ alert("V7.61 certificate issued successfully.\nCertificate: "+data.certificate_key+"\nReadiness: "+data.readiness_score+"/100 ("+data.readiness_grade+")\nEvidence chain: "+data.chain_validation_status+"\nAlerts resolved: "+data.alerts_resolved);
+ await load();
+}
+async function renderV761(){
+ const {data,error}=await sb.rpc("cr_podcast_recovery_certificate_history_v761");
+ if(error){$("certAutomation").innerHTML='<div class="notice">V7.61 automation history unavailable: '+esc(error.message)+'</div>';return}
+ const rows=data||[];
+ $("certAutomation").innerHTML='<div class="notice">Administrator-only certificate automation. A certificate can be issued only from a validated V7.60 non-destructive drill. Successful issuance renews the 30-day lifecycle window, records the evidence seal, resolves stale recovery alerts, and writes an immutable audit event. Project-wide security-advisor findings remain separate.</div>';
+ $("v761History").innerHTML=table(rows.map(r=>({issuance_key:r.issuance_key,certificate_id:r.certificate_id,drill_id:r.drill_id,archive_id:r.archive_id,prior_certificate_id:r.prior_certificate_id,readiness_score:r.readiness_score,readiness_grade:r.readiness_grade,chain_validation_status:r.chain_validation_status,evidence_sha256:r.evidence_sha256,alert_resolution_count:r.alert_resolution_count,lifecycle_status:r.lifecycle_status,issued_at:r.issued_at,issued_by:r.issued_by})),["issuance_key","certificate_id","drill_id","archive_id","prior_certificate_id","readiness_score","readiness_grade","chain_validation_status","evidence_sha256","alert_resolution_count","lifecycle_status","issued_at","issued_by"]);
+}
 async function load(){
  const {data:{session}}=await sb.auth.getSession();
  if(!session){$("login").classList.remove("hidden");$("app").classList.add("hidden");return}
  const {data,error}=await sb.rpc("cr_podcast_recovery_control_room_v756");
  if(error){$("loginError").textContent=error.message||"Recovery Control Room could not load.";return}
  $("login").classList.add("hidden");$("app").classList.remove("hidden");
- render(data); await renderV760(); $("systemStamp").textContent="● LIVE • "+new Date().toLocaleTimeString();
+ render(data); await renderV760(); await renderV761(); $("systemStamp").textContent="● LIVE • "+new Date().toLocaleTimeString();
 }
 async function renderV760(){
  const {data,error}=await sb.rpc("cr_podcast_recovery_drill_history_v760");
@@ -137,7 +152,7 @@ async function renderAlerts(){
  $("alerts").innerHTML=table(a.alerts||[],["alert_type","severity","status","message","first_seen_at","last_seen_at","details"]);
 }
 function table(rows,cols){if(!rows.length)return '<div class="notice">No records available.</div>';return '<table class="data"><thead><tr>'+cols.map(c=>'<th>'+esc(c)+'</th>').join("")+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+cols.map(c=>'<td>'+((c.includes("_at")||c==="created_at")?fmt(r[c]):c==="status"||c.includes("status")||c==="risk_level"||c==="readiness_grade"?badge(r[c]):c==="details"?'<span class="mono">'+esc(JSON.stringify(r[c]))+'</span>':esc(r[c]))+'</td>').join("")+'</tr>').join("")+'</tbody></table>'}
-$("refresh").onclick=()=>load(); $("drillBtn").onclick=runDrill;
+$("refresh").onclick=()=>load(); $("drillBtn").onclick=runDrill; $("certBtn").onclick=automateCertificate;
 sb.auth.onAuthStateChange((event,session)=>{if(event==="SIGNED_OUT")location.reload();if(event==="SIGNED_IN"&&session)load()});
 load();
 setInterval(load,60000);
