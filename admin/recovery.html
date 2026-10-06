@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CrowRules V7.57 Recovery Control Room</title>
+<title>CrowRules V7.58 Recovery Control Room</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Orbitron:wght@700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -13,7 +13,7 @@
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
 </head>
 <body>
-<div id="login" class="login"><div class="loginbox"><div class="eyebrow">CROWRULES // V7.57</div><h1>RECOVERY CONTROL ROOM</h1><p class="sub">Administrator authentication is required. Recovery data is returned only through the protected V7.57 server-side control-room function.</p><div class="actions"><a class="btn" href="../account.html">GO TO ACCOUNT</a><a class="btn" href="./index.html">ADMIN CENTER</a></div><div id="loginError" class="error"></div></div></div>
+<div id="login" class="login"><div class="loginbox"><div class="eyebrow">CROWRULES // V7.58</div><h1>RECOVERY CONTROL ROOM</h1><p class="sub">Administrator authentication is required. Recovery data is returned only through the protected V7.57 server-side control-room function.</p><div class="actions"><a class="btn" href="../account.html">GO TO ACCOUNT</a><a class="btn" href="./index.html">ADMIN CENTER</a></div><div id="loginError" class="error"></div></div></div>
 <main id="app" class="wrap hidden">
 <header class="top"><div><div class="eyebrow">ONE COMPANY // ONE UNIVERSE // RECOVERY OPERATIONS</div><div class="title">RECOVERY CONTROL ROOM</div><div class="sub">Live operational visibility for V7.53 disaster drills, V7.55 Recovery Readiness Certificates, and V7.56 lifecycle monitoring. Project-wide Supabase security-advisor findings remain a separate track.</div></div><div><div id="systemStamp" class="stamp">● CONNECTING</div><div class="actions" style="justify-content:flex-end;margin-top:10px"><button id="refresh" class="btn">REFRESH NOW</button><a class="btn" href="./index.html">COMMAND CENTER</a></div></div></header>
 <section class="cards" id="cards"></section>
@@ -22,8 +22,8 @@
 <section class="section"><div class="panel"><h2>DRILL HISTORY</h2><div class="table-wrap" id="drills"></div></div></section>
 <section class="section"><div class="panel"><h2>CERTIFICATE HISTORY</h2><div class="table-wrap" id="certs"></div></div></section>
 <section class="section"><div class="panel"><h2>MONITORING SNAPSHOTS</h2><div class="table-wrap" id="monitoring"></div></div></section>
-<section class="section"><div class="panel"><h2>V7.56 AUDIT TRAIL</h2><div class="table-wrap" id="audit"></div></div></section>
-<div class="footer">V7.57 CONTROL ROOM • Read-only operational dashboard. No destructive recovery action is exposed here. Security-advisor findings such as Pro-plan-only leaked-password protection are intentionally excluded from readiness scoring.</div>
+<section class="section"><div class="panel"><h2>V7.58 ALERT CENTER</h2><div id="alertSummary"></div><div class="table-wrap" id="alerts"></div></div></section><section class="section"><div class="panel"><h2>V7.56 AUDIT TRAIL</h2><div class="table-wrap" id="audit"></div></div></section>
+<div class="footer">V7.58 CONTROL ROOM • Recovery alerts are deduplicated, hourly evaluated, and displayed here for administrator review.  No destructive recovery action is exposed here. Security-advisor findings such as Pro-plan-only leaked-password protection are intentionally excluded from readiness scoring.</div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -43,7 +43,7 @@ async function load(){
  $("login").classList.add("hidden");$("app").classList.remove("hidden");
  render(data); $("systemStamp").textContent="● LIVE • "+new Date().toLocaleTimeString();
 }
-function render(x){
+async function render(x){
  const l=x.lifecycle||{},c=x.certificate||{},d=x.latest_drill||{};
  const overall=x.overall_status||"MONITOR";
  $("cards").innerHTML=[
@@ -79,7 +79,14 @@ function render(x){
  $("drills").innerHTML=table(x.recent_drills||[],["drill_key","status","archive_id","completed_at","actor","version"]);
  $("certs").innerHTML=table(x.recent_certificates||[],["certificate_id","readiness_score","readiness_grade","chain_validation_status","issued_at","version"]);
  $("monitoring").innerHTML=table(x.monitoring||[],["snapshot_key","lifecycle_status","readiness_score","readiness_grade","drill_status","chain_validation_status","risk_level","checked_at"]);
- $("audit").innerHTML=table(x.recent_audit||[],["event_type","certificate_id","drill_id","old_status","new_status","readiness_score","readiness_grade","actor","created_at","details"]);
+ $("audit").innerHTML=table(x.recent_audit||[],["event_type","certificate_id","drill_id","old_status","new_status","readiness_score","readiness_grade","actor","created_at","details"]); await renderAlerts();
+}
+async function renderAlerts(){
+ const {data,error}=await sb.rpc("cr_podcast_recovery_alert_center_v758");
+ if(error){$("alertSummary").innerHTML='<div class="notice">Alert center unavailable: '+esc(error.message)+'</div>';$("alerts").innerHTML='';return}
+ const a=data||{};
+ $("alertSummary").innerHTML='<div class="cards" style="margin:0 0 14px"><div class="card"><div class="v">'+esc(a.open_alerts??0)+'</div><div class="k">OPEN ALERTS</div></div><div class="card"><div class="v red">'+esc(a.critical_alerts??0)+'</div><div class="k">CRITICAL</div></div><div class="card"><div class="v yellow">'+esc(a.high_alerts??0)+'</div><div class="k">HIGH</div></div><div class="card"><div class="v cyan">'+esc(a.warning_alerts??0)+'</div><div class="k">WARNING</div></div></div>';
+ $("alerts").innerHTML=table(a.alerts||[],["alert_type","severity","status","message","first_seen_at","last_seen_at","details"]);
 }
 function table(rows,cols){if(!rows.length)return '<div class="notice">No records available.</div>';return '<table class="data"><thead><tr>'+cols.map(c=>'<th>'+esc(c)+'</th>').join("")+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+cols.map(c=>'<td>'+((c.includes("_at")||c==="created_at")?fmt(r[c]):c==="status"||c.includes("status")||c==="risk_level"||c==="readiness_grade"?badge(r[c]):c==="details"?'<span class="mono">'+esc(JSON.stringify(r[c]))+'</span>':esc(r[c]))+'</td>').join("")+'</tr>').join("")+'</tbody></table>'}
 $("refresh").onclick=()=>load();
