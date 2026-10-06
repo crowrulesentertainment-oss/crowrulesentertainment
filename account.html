@@ -1,2 +1,27 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CrowRules Podcasting — Account</title><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Orbitron:wght@500;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="css/podcasting-platform.css?v=1"><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-universal-member.js?v=2" defer></script><script src="js/podcasting-config.js?v=1"></script><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
-<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=5" defer></script></head><body><main class="cr-shell"><section class="hero"><div><div class="eyebrow">One Account. One Universe.</div><h1>YOUR CROWRULES ACCOUNT</h1><p>Podcasting uses the same CrowRules universal membership identity as CrowSpace, Sports, TV, Dreamscapes and the rest of the universe.</p><a class="btn primary" href="https://crowrulesentertainment-oss.github.io/crowspace/account.html">Open Universal Account</a><a class="btn" href="https://crowrulesentertainment-oss.github.io/members/">Membership Center</a></div><div class="hero-orb"><div class="orb-text">UNIVERSAL<br><span style="color:var(--cyan)">MEMBER</span></div></div></section></main></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CrowRules — Account</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Orbitron:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/podcasting-platform.css?v=2">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/crowrules-sitewide.js?v=6" defer></script>
+<script src="js/crowrules-universal-member.js?v=3" defer></script>
+<style>
+.account-wrap{width:min(900px,94vw);margin:100px auto 150px}.account-card{padding:30px}.account-card h1{font:800 clamp(32px,6vw,58px) Orbitron;margin:12px 0}.account-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}.account-status{margin:18px 0}.signed{display:none}.signed.show{display:block}.guest.show{display:block}.guest{display:none}.identity{display:grid;grid-template-columns:72px 1fr;gap:18px;align-items:center}.avatar{width:72px;height:72px;border-radius:20px;object-fit:cover;background:#101426;border:1px solid #ffffff18}.value{font-weight:700}.return-note{font-size:12px;color:var(--muted);margin-top:12px}
+</style></head><body><main class="account-wrap"><section class="card account-card">
+<div class="eyebrow">ONE ACCOUNT. ONE UNIVERSE.</div><h1>CROWRULES ACCOUNT</h1>
+<div id="guest" class="guest show"><p class="muted">Sign in once and return automatically to the page where you started.</p><div class="account-actions"><a class="btn primary" id="login" href="#">LOG IN</a><a class="btn" id="signup" href="#">CREATE ACCOUNT</a></div><div id="guestStatus" class="notice account-status">Not signed in.</div></div>
+<div id="signed" class="signed"><div class="identity"><img id="avatar" class="avatar" alt=""><div><div class="eyebrow">SIGNED IN</div><div id="email" class="value"></div><div id="name" class="muted"></div></div></div><div class="account-actions"><a class="btn primary" href="https://crowrulesentertainment-oss.github.io/crowspace/profile.html">MY PROFILE</a><a class="btn" href="https://crowrulesentertainment-oss.github.io/members/">MEMBERSHIP</a><button class="btn" id="logout" type="button">SIGN OUT</button></div><div class="notice account-status">Your universal CrowRules session is active.</div></div>
+<p class="return-note">Return destination: <span id="returnLabel"></span></p>
+</section></main>
+<script>
+(async()=>{const C={url:'https://cevylpnoexugwgygvtgu.supabase.co',key:'sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-'};
+const safeReturn=()=>{const raw=new URLSearchParams(location.search).get('returnTo');if(!raw)return location.href;try{const u=new URL(decodeURIComponent(raw),location.origin);if(u.protocol!=='http:'&&u.protocol!=='https:')return location.href;return u.href}catch{return location.href}};
+const target=safeReturn(),qs='?redirect='+encodeURIComponent(target);
+document.getElementById('login').href='https://crowrulesentertainment-oss.github.io/crowspace/login.html'+qs;
+document.getElementById('signup').href='https://crowrulesentertainment-oss.github.io/crowspace/signup.html'+qs;
+document.getElementById('returnLabel').textContent=target===location.href?'this account page':target;
+const db=window.supabase.createClient(C.url,C.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'pkce',storageKey:'crowrules-universal-session-v1',storage:window.localStorage}});
+async function current(){let s=(await db.auth.getSession()).data.session;if(!s){const r=await db.auth.refreshSession();s=r.data.session||null}return s}
+function render(s){document.getElementById('guest').classList.toggle('show',!s);document.getElementById('signed').classList.toggle('show',!!s);if(s){const u=s.user, m=u.user_metadata||{};document.getElementById('email').textContent=u.email||'';document.getElementById('name').textContent=m.display_name||m.full_name||m.name||'';document.getElementById('avatar').src=m.avatar_url||m.picture||''}}
+let s=await current();render(s);db.auth.onAuthStateChange((_e,n)=>render(n));document.getElementById('logout').onclick=async()=>{await db.auth.signOut({scope:'global'});render(null)};
+})();
+</script></body></html>
