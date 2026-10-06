@@ -1,2 +1,107 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CrowRules V7.63 Recovery Control Room</title><style>body{margin:0;background:#03040a;color:#f5f7ff;font:14px Arial,sans-serif}.wrap{max-width:1400px;margin:auto;padding:30px}.panel{margin:18px 0;padding:22px;background:#0a0d17;border:1px solid #20273a;border-radius:16px}.title{font-size:34px;font-weight:800}.muted{color:#9ba5bd;line-height:1.6}.btn{display:inline-block;padding:11px 15px;margin:5px;border:1px solid #57e8ff;border-radius:9px;background:#07131b;color:#57e8ff;text-decoration:none;cursor:pointer}.error{color:#ff647c;margin-top:15px}.login{max-width:600px;margin:12vh auto}.hidden{display:none!important}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:9px;border-bottom:1px solid #20273a;font-size:12px}th{color:#57e8ff}</style><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=5" defer></script><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
-</head><body><div id="login" class="panel login"><div class="title">RECOVERY CONTROL ROOM</div><p class="muted">V7.63 SESSION RESILIENCE<br>Your administrator session is missing or expired. The control room will refresh valid Supabase tokens when possible and will never run a protected recovery operation without a valid session.</p><a class="btn" href="../account.html?redirect=admin/recovery.html">SIGN IN TO CROWRULES</a><a class="btn" href="./index.html">ADMIN CENTER</a><div id="loginError" class="error"></div></div><main id="app" class="wrap hidden"><div class="panel"><div class="title">RECOVERY CONTROL ROOM</div><p class="muted">V7.63 • V7.60 non-destructive drills • V7.61 certificate automation • V7.58 alerts • V7.59 incidents</p><button id="refresh" class="btn">REFRESH NOW</button><button id="drillBtn" class="btn">RUN NON-DESTRUCTIVE DRILL</button><button id="certBtn" class="btn">ISSUE / RENEW CERTIFICATE</button><a class="btn" href="./index.html">COMMAND CENTER</a><p id="stamp" class="muted">CONNECTING</p></div><div class="panel"><h2>READINESS</h2><pre id="readiness" class="muted"></pre></div><div class="panel"><h2>V7.60 DRILL HISTORY</h2><div id="history" class="muted"></div></div><div class="panel"><h2>V7.61 CERTIFICATE HISTORY</h2><div id="certHistory" class="muted"></div></div></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>const URL="https://cevylpnoexugwgygvtgu.supabase.co",KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNldnlscG5vZXh1Z3dneWd2dGd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4MTYxOTYsImV4cCI6MjEwNDM5MjE5Nn0.bvSF3qRqFNvCtaF5CSDeeEO3yJnsnYt9CXmgUaBWjNQ",sb=supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,flowType:"pkce"}}),$=x=>document.getElementById(x);function sessErr(e){return /invalid or expired session|jwt|session|token/i.test(e?.message||"")}async function fresh(){let g=await sb.auth.getSession(),s=g.data?.session;if(!s)return null;let u=await sb.auth.getUser(s.access_token);if(u.error||!u.data?.user){let r=await sb.auth.refreshSession();s=r.data?.session;if(!s)return null;u=await sb.auth.getUser(s.access_token);if(u.error||!u.data?.user)return null}return s}async function guard(){if(await fresh())return true;$('loginError').textContent='Your Supabase session is missing or expired. Please sign in again.';$('login').classList.remove('hidden');$('app').classList.add('hidden');return false}function table(rows){if(!rows?.length)return'No records available.';let c=Object.keys(rows[0]);return'<table><tr>'+c.map(x=>'<th>'+x+'</th>').join('')+'</tr>'+rows.map(r=>'<tr>'+c.map(x=>'<td>'+String(r[x]??'').replace(/</g,'&lt;')+'</td>').join('')+'</tr>').join('')+'</table>'}async function load(){if(!await guard())return;let r=await sb.rpc('cr_podcast_recovery_control_room_v756');if(r.error){if(sessErr(r.error)){await sb.auth.signOut();$('loginError').textContent='Your administrator session expired. Please sign in again.';$('login').classList.remove('hidden');$('app').classList.add('hidden')}else $('loginError').textContent=r.error.message;return}$('login').classList.add('hidden');$('app').classList.remove('hidden');$('readiness').textContent=JSON.stringify(r.data,null,2);let h=await sb.rpc('cr_podcast_recovery_drill_history_v760');$('history').innerHTML=h.error?'<span class="error">'+h.error.message+'</span>':table(h.data);let ch=await sb.rpc('cr_podcast_recovery_certificate_history_v761');$('certHistory').innerHTML=ch.error?'<span class="error">'+ch.error.message+'</span>':table(ch.data);$('stamp').textContent='LIVE • '+new Date().toLocaleTimeString()}async function drill(){if(!await guard())return;let b=$('drillBtn');b.disabled=true;try{let a=await sb.rpc('cr_podcast_recovery_drill_archives_v760');if(a.error)throw a.error;if(!a.data?.length)throw Error('No eligible immutable, active, trusted archive is available.');let n=prompt(a.data.map((x,i)=>(i+1)+'. '+x.archive_key+' [ID '+x.id+']').join('\n')+'\n\nArchive number:','1');if(n===null)return;let x=a.data[Number(n)-1];if(!x)throw Error('Invalid archive selection.');if(!confirm('Start NON-DESTRUCTIVE recovery drill? No production data will be restored or modified.'))return;if(!await guard())throw Error('SESSION_EXPIRED');let d=await sb.rpc('cr_podcast_recovery_drill_v760',{p_archive_id:x.id});if(d.error)throw d.error;alert('V7.60 drill PASSED.\nDrill ID: '+d.data.drill_id);await load()}catch(e){if(e.message==='SESSION_EXPIRED'||sessErr(e)){await sb.auth.signOut();$('loginError').textContent='Your administrator session expired. Please sign in again.';$('login').classList.remove('hidden');$('app').classList.add('hidden')}else alert(e.message||'Recovery drill failed safely. No production mutation was attempted.')}finally{b.disabled=false}}async function cert(){if(!await guard())return;if(!confirm('Issue/renew certificate from the latest successful V7.60 drill?'))return;let r=await sb.rpc('cr_podcast_recovery_certificate_automate_v761');if(r.error){alert(sessErr(r.error)?'Your administrator session expired. Please sign in again.':r.error.message);if(sessErr(r.error))await sb.auth.signOut();return}alert('V7.61 certificate issued: '+r.data.certificate_key);await load()}$('refresh').onclick=load;$('drillBtn').onclick=drill;$('certBtn').onclick=cert;sb.auth.onAuthStateChange((e)=>{if(e==='SIGNED_OUT'){$('login').classList.remove('hidden');$('app').classList.add('hidden')}if(e==='TOKEN_REFRESHED')load()});load();setInterval(load,60000);</script></body></html>
+</head><body><div id="login" class="panel login"><div class="title">RECOVERY CONTROL ROOM</div><p class="muted">V7.63 SESSION RESILIENCE<br>Your administrator session is missing or expired. The control room will refresh valid Supabase tokens when possible and will never run a protected recovery operation without a valid session.</p><a class="btn" href="../account.html?redirect=admin/recovery.html">SIGN IN TO CROWRULES</a><a class="btn" href="./index.html">ADMIN CENTER</a><div id="loginError" class="error"></div></div><main id="app" class="wrap hidden"><div class="panel"><div class="title">RECOVERY CONTROL ROOM</div><p class="muted">V7.63 • V7.60 non-destructive drills • V7.61 certificate automation • V7.58 alerts • V7.59 incidents</p><button id="refresh" class="btn">REFRESH NOW</button><button id="drillBtn" class="btn">RUN NON-DESTRUCTIVE DRILL</button><button id="certBtn" class="btn">ISSUE / RENEW CERTIFICATE</button><a class="btn" href="./index.html">COMMAND CENTER</a><p id="stamp" class="muted">CONNECTING</p></div><div class="panel"><h2>READINESS</h2><pre id="readiness" class="muted"></pre></div><div class="panel"><h2>V7.60 DRILL HISTORY</h2><div id="history" class="muted"></div></div><div class="panel"><h2>V7.61 CERTIFICATE HISTORY</h2><div id="certHistory" class="muted"></div></div></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
+const URL="https://cevylpnoexugwgygvtgu.supabase.co",KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNldnlscG5vZXh1Z3dneWd2dGd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4MTYxOTYsImV4cCI6MjEwNDM5MjE5Nn0.bvSF3qRqFNvCtaF5CSDeeEO3yJnsnYt9CXmgUaBWjNQ",
+sb=supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:"pkce",storageKey:"crowrules-universal-session-v1"}}),
+$=x=>document.getElementById(x);
+let operationRunning=false,refreshInFlight=null;
+
+function classify(e){
+ const m=String(e?.message||e||"").toLowerCase();
+ if(/invalid or expired session|jwt|token.*expired|session.*expired/.test(m))return"EXPIRED_JWT";
+ if(/not signed in|no session|auth session missing/.test(m))return"NO_SESSION";
+ if(/administrator access required|not administrator|admin/.test(m)&&/administrator|admin/.test(m))return"NOT_ADMINISTRATOR";
+ if(/could not find the function|schema cache|does not exist/.test(m))return"MISSING_RPC";
+ if(/permission denied|insufficient privilege/.test(m))return"PERMISSION_DENIED";
+ if(/no eligible.*archive|eligible.*archive.*available/.test(m))return"NO_ELIGIBLE_ARCHIVE";
+ return"DRILL_FAILURE";
+}
+function messageFor(cat){
+ return ({EXPIRED_JWT:"SESSION EXPIRED — your Supabase session could not be refreshed.",NO_SESSION:"SIGN IN REQUIRED — no authenticated Supabase session is available.",NOT_ADMINISTRATOR:"ADMINISTRATOR AUTHORIZATION REQUIRED — your account is not authorized for recovery operations.",MISSING_RPC:"BACKEND COMPATIBILITY ERROR — the required recovery function is unavailable.",PERMISSION_DENIED:"BACKEND PERMISSION ERROR — the recovery operation was denied by Supabase.",NO_ELIGIBLE_ARCHIVE:"RECOVERY ARCHIVE UNAVAILABLE — no eligible last-known-good archive was found.",DRILL_FAILURE:"SAFE FAILURE — the recovery operation failed without attempting a production mutation."}[cat]||"RECOVERY ERROR");}
+function table(rows){if(!rows?.length)return"No records available.";let c=Object.keys(rows[0]);return'<table><tr>'+c.map(x=>'<th>'+x+'</th>').join('')+'</tr>'+rows.map(r=>'<tr>'+c.map(x=>'<td>'+String(r[x]??'').replace(/</g,'&lt;')+'</td>').join('')+'</tr>').join('')+'</table>'}
+async function audit(type,outcome,category,details={}){
+ try{await sb.rpc("cr_podcast_recovery_session_audit_v763",{p_event_type:type,p_outcome:outcome,p_failure_category:category||null,p_details:details})}catch(e){console.warn("V7.63 audit unavailable",e)}
+}
+async function refreshSession(){
+ if(refreshInFlight)return refreshInFlight;
+ refreshInFlight=(async()=>{await audit("REFRESH_ATTEMPT","SUCCESS",null,{reason:"session_validation"});const r=await sb.auth.refreshSession();return r.data?.session||null})().finally(()=>refreshInFlight=null);
+ return refreshInFlight;
+}
+async function fresh(){
+ let g=await sb.auth.getSession(),s=g.data?.session||null;
+ if(!s){await audit("SESSION_VALIDATED","FAILED","NO_SESSION",{phase:"getSession"});s=await refreshSession()}
+ if(!s)return null;
+ let u=await sb.auth.getUser(s.access_token);
+ if(u.error||!u.data?.user){
+   await audit("SESSION_VALIDATED","FAILED","EXPIRED_JWT",{phase:"getUser"});
+   s=await refreshSession();
+   if(!s)return null;
+   u=await sb.auth.getUser(s.access_token);
+   if(u.error||!u.data?.user)return null;
+ }
+ await audit("SESSION_VALIDATED","SUCCESS",null,{user_id:u.data.user.id});
+ return {session:s,user:u.data.user};
+}
+async function showLogin(cat){
+ $("loginError").textContent=cat?messageFor(cat):"Your administrator session is missing or expired. Please sign in again.";
+ $("login").classList.remove("hidden");$("app").classList.add("hidden");
+}
+async function guard(){
+ const x=await fresh();
+ if(!x){await showLogin("NO_SESSION");return null}
+ const a=await sb.rpc("crowrules_is_admin");
+ if(a.error){const cat=classify(a.error);await audit("AUTHORIZATION_RESULT","FAILED",cat,{rpc:"crowrules_is_admin"});await showLogin(cat);return null}
+ const ok=a.data===true;
+ await audit("AUTHORIZATION_RESULT",ok?"SUCCESS":"FAILED",ok?null:"NOT_ADMINISTRATOR",{authorized:ok});
+ if(!ok){await showLogin("NOT_ADMINISTRATOR");return null}
+ return x;
+}
+async function load(){
+ const x=await guard();if(!x)return;
+ const r=await sb.rpc("cr_podcast_recovery_control_room_v756");
+ if(r.error){const cat=classify(r.error);await audit("FAILURE_CLASSIFIED","FAILED",cat,{operation:"load"});if(cat==="EXPIRED_JWT"||cat==="NO_SESSION"){await showLogin(cat)}else $("loginError").textContent=messageFor(cat);return}
+ $("login").classList.add("hidden");$("app").classList.remove("hidden");
+ $("readiness").textContent=JSON.stringify(r.data,null,2);
+ const h=await sb.rpc("cr_podcast_recovery_drill_history_v760");$("history").innerHTML=h.error?'<span class="error">'+messageFor(classify(h.error))+'</span>':table(h.data);
+ const ch=await sb.rpc("cr_podcast_recovery_certificate_history_v761");$("certHistory").innerHTML=ch.error?'<span class="error">'+messageFor(classify(ch.error))+'</span>':table(ch.data);
+ const ah=await sb.rpc("cr_podcast_recovery_session_audit_history_v763",{p_limit:50});
+ if(!$("audit")){const p=document.createElement("div");p.className="panel";p.innerHTML="<h2>V7.63 SESSION AUDIT</h2><div id='audit' class='muted'></div>";$("app").appendChild(p)}
+ $("audit").innerHTML=ah.error?'<span class="error">'+messageFor(classify(ah.error))+'</span>':table(ah.data);
+ $("stamp").textContent="LIVE • "+new Date().toLocaleTimeString();
+}
+async function drill(){
+ if(operationRunning)return;
+ const x=await guard();if(!x)return;
+ const b=$("drillBtn");operationRunning=true;b.disabled=true;b.textContent="DRILL RUNNING";$("stamp").textContent="DRILL RUNNING • validating recovery chain…";
+ try{
+   const a=await sb.rpc("cr_podcast_recovery_drill_archives_v760");
+   if(a.error)throw a.error;
+   if(!a.data?.length)throw Error("No eligible immutable, active, trusted archive is available.");
+   await audit("DRILL_PREFLIGHT","SUCCESS",null,{eligible_archive_count:a.data.length,user_id:x.user.id});
+   const n=prompt(a.data.map((z,i)=>(i+1)+". "+z.archive_key+" [ID "+z.id+"]").join("\n")+"\n\nArchive number:","1");
+   if(n===null)return;
+   const selected=a.data[Number(n)-1];if(!selected)throw Error("Invalid archive selection.");
+   if(!confirm("Start NON-DESTRUCTIVE recovery drill? No production data will be restored or modified."))return;
+   const pre=await guard();if(!pre)throw Error("SESSION_EXPIRED");
+   const d=await sb.rpc("cr_podcast_recovery_drill_v760",{p_archive_id:selected.id});
+   if(d.error)throw d.error;
+   await audit("DRILL_PREFLIGHT","SUCCESS",null,{authorized:true,archive_id:selected.id,executed:true});
+   alert("V7.60 drill PASSED.\nDrill ID: "+d.data.drill_id);await load();
+ }catch(e){
+   const cat=e.message==="SESSION_EXPIRED"?"EXPIRED_JWT":classify(e);
+   await audit("FAILURE_CLASSIFIED","FAILED",cat,{operation:"drill"});
+   if(cat==="EXPIRED_JWT"||cat==="NO_SESSION"){await sb.auth.signOut();await showLogin(cat)}
+   else alert(messageFor(cat));
+ }finally{operationRunning=false;b.disabled=false;b.textContent="RUN NON-DESTRUCTIVE DRILL";if(!$("app").classList.contains("hidden"))$("stamp").textContent="READY • "+new Date().toLocaleTimeString()}
+}
+async function cert(){
+ const x=await guard();if(!x)return;
+ if(!confirm("Issue/renew certificate from the latest successful V7.60 drill?"))return;
+ const r=await sb.rpc("cr_podcast_recovery_certificate_automate_v761");
+ if(r.error){const cat=classify(r.error);await audit("FAILURE_CLASSIFIED","FAILED",cat,{operation:"certificate"});alert(messageFor(cat));if(cat==="EXPIRED_JWT"||cat==="NO_SESSION"){await sb.auth.signOut();await showLogin(cat)}return}
+ alert("V7.61 certificate issued: "+r.data.certificate_key);await load();
+}
+$("refresh").onclick=load;$("drillBtn").onclick=drill;$("certBtn").onclick=cert;
+sb.auth.onAuthStateChange((e)=>{if(e==="SIGNED_OUT")showLogin("NO_SESSION");if(e==="TOKEN_REFRESHED"&&!operationRunning)load()});
+load();
+setInterval(async()=>{if(document.visibilityState==="visible"&&!operationRunning){const x=await fresh();if(x)load()}},5*60*1000);
+</script></body></html>
