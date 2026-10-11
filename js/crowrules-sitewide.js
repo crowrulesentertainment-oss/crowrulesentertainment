@@ -15,23 +15,18 @@ const CONFIG={
   storageKey:'crowrules-universal-session-v1',
   membership:'https://crowrulesentertainment-oss.github.io/members/',
   home:'https://crowrulesentertainment-oss.github.io/crowrulesentertainment/',
-  crowspace:'https://crowrulesentertainment-oss.github.io/crowspace/'
 };
 
 const NAV_GROUPS=[
  {label:'UNIVERSE',items:[
   ['CrowRules Home',CONFIG.home],
-  ['CrowSpace',CONFIG.crowspace+'home.html'],
-  ['CrowRules TV','https://crowrulesentertainment-oss.github.io/crowrulestv/'],
-  ['Sports','https://crowrulesentertainment-oss.github.io/sports/']
+  ['CrowRules TV','https://crowrulesentertainment-oss.github.io/crowrulestv/']
  ]},
  {label:'STORIES',items:[
-  ['Dreamscapes','https://crowrulesentertainment-oss.github.io/dreamscapes/'],
   ['Podcasting','https://crowrulesentertainment-oss.github.io/podcasting/'],
   ['Memorials','https://crowrulesentertainment-oss.github.io/memorials/']
  ]},
  {label:'COMMUNITY',items:[
-  ['Spectrum Awards','https://crowrulesentertainment-oss.github.io/spectrum/'],
   ['Yearbooks','https://crowrulesentertainment-oss.github.io/yearbooks/'],
   ['Records','https://crowrulesentertainment-oss.github.io/records/']
  ]}
@@ -167,13 +162,13 @@ function menuLink(label,url){
 function renderAccount(menu,u,status){
  const signed=!!u && !!u.id;
  const onPodcasting=location.pathname.includes('/podcasting/');
- const profileBase=onPodcasting?'https://crowrulesentertainment-oss.github.io/podcasting/member-profile.html':CONFIG.crowspace+'profile.html';
+ const profileBase='https://crowrulesentertainment-oss.github.io/podcasting/member-profile.html';
  const profileUrl=signed?profileBase+'?user='+encodeURIComponent(u.id):profileBase;
- const accountUrl=onPodcasting?'https://crowrulesentertainment-oss.github.io/podcasting/account.html':CONFIG.crowspace+'account.html';
+ const accountUrl='https://crowrulesentertainment-oss.github.io/members/';
  const returnUrl=encodeURIComponent(location.href);
  menu.innerHTML=signed
   ? '<a class="membership-link" href="'+CONFIG.membership+'">✦ Membership Center</a><a href="'+profileUrl+'">◉ My Profile</a><a href="'+accountUrl+'">⚙ Account</a><a href="'+CONFIG.crowspace+'settings.html">◌ Settings</a><div class="cr-sw-status">Signed in as '+esc(u.email||u.user_metadata?.display_name||'CrowRules member')+'</div><div class="cr-sw-divider"></div><button id="cr-sw-out" type="button">↪ Sign Out</button>'
-  : '<a class="membership-link" href="'+CONFIG.membership+'">✦ Explore Membership</a><a href="'+CONFIG.crowspace+'login.html?redirect='+returnUrl+'">Log In</a><a href="'+CONFIG.crowspace+'signup.html?redirect='+returnUrl+'">Create Universal Account</a><div class="cr-sw-status">'+esc(status||'Universal account ready')+'</div>';
+  : '<a class="membership-link" href="'+CONFIG.membership+'">✦ Explore Membership</a><a href="'+'https://crowrulesentertainment-oss.github.io/podcasting/login.html?redirect='+returnUrl+'">Log In</a><a href="'+'https://crowrulesentertainment-oss.github.io/podcasting/signup.html?redirect='+returnUrl+'">Create Universal Account</a><div class="cr-sw-status">'+esc(status||'Universal account ready')+'</div>';
 }
 
 function mount(state){
