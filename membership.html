@@ -99,21 +99,23 @@ const connected=document.getElementById("connectedUniverse"),authStatus=document
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const money=c=>c===0?"FREE":"$"+(Number(c)/100).toFixed(2);
 function setStatus(el,msg,type=""){el.textContent=msg||"";el.className="status "+type}
-function features(value){if(Array.isArray(value))return value;try{return JSON.parse(value||"[]")}catch{return[]}}
+function features(value){if(Array.isArray(value))return value;try{const parsed=JSON.parse(value||"[]");return Array.isArray(parsed)?parsed:[]}catch{return[]}}
 function showCheckoutBanner(){const q=new URLSearchParams(location.search),v=q.get("checkout"),el=document.getElementById("checkoutBanner");if(!v)return;el.classList.remove("hidden");el.textContent=v==="success"?"Your Stripe checkout completed. Your membership status will appear here after the membership webhook finishes processing.":"Checkout was cancelled. No membership change was made."}
 
 async function loadPlans(){
  const r=await supabase.rpc("get_public_membership_plans");
  if(r.error){
   console.error("Membership plan load failed:",r.error);
-  renderPlanCards([
-   {plan_key:"crow",name:"CROW",price_cents:0,billing_interval:"free",description:"Free access to the CrowRules universe.",features:["Universal CrowRules account","Member profile","CrowPoints"],is_featured:false},
-   {plan_key:"crowner",name:"CROWNER",price_cents:500,billing_interval:"month",description:"Expanded member access and benefits.",features:["Everything in CROW","2× CrowPoints","Member experiences"],is_featured:true},
-   {plan_key:"creator",name:"CREATOR",price_cents:1000,billing_interval:"month",description:"Membership built for creators.",features:["Everything in CROWNER","3× CrowPoints","Creator-focused access"],is_featured:false},
-   {plan_key:"founder",name:"FOUNDER",price_cents:2500,billing_interval:"month",description:"Founding-level CrowRules membership.",features:["Everything in CREATOR","5× CrowPoints","Founder access"],is_featured:false}
-  ],true); return;
+  plansEl.innerHTML='<div class="notice" style="grid-column:1/-1"><strong>Membership plans are temporarily unavailable.</strong><br>We could not verify current pricing. Please try again in a moment.<br><button class="btn secondary" id="retryPlans" type="button" style="margin-top:12px">RETRY LOADING PLANS</button></div>';
+  document.getElementById("retryPlans")?.addEventListener("click",async()=>{plansEl.innerHTML='<div class="panel">Loading membership plans…</div>';try{await loadPlans()}catch(err){console.error("Membership plan retry failed:",err);plansEl.innerHTML='<div class="notice" style="grid-column:1/-1">Plans are still unavailable. Please refresh and try again.</div>'}});
+  return;
  }
- renderPlanCards(r.data,false);
+ const plans=Array.isArray(r.data)?r.data:(r.data?[r.data]:[]);
+ if(!plans.length){
+  plansEl.innerHTML='<div class="notice" style="grid-column:1/-1">No membership plans are currently published. Please check back soon.</div>';
+  return;
+ }
+ renderPlanCards(plans,false);
 }
 function renderPlanCards(data,isFallback){
  plansEl.innerHTML=(data||[]).map(p=>`<article class="plan ${p.is_featured?"featured":""}">
@@ -160,7 +162,8 @@ async function renderAccount(){
  document.getElementById("statusStat").textContent=current?.status||(m.error?"Unavailable":"active");
  document.getElementById("manageBilling").style.display=current&&current.plan_key&&current.plan_key!=="crow"?"inline-flex":"none";
  const seenSites=new Set();
- document.getElementById("siteGrid").innerHTML=(sites.data||[]).filter(s=>s.is_active&&s.site_url&&!seenSites.has(s.site_url)&&seenSites.add(s.site_url)).map(s=>'<a class="site" href="'+esc(s.site_url)+'" target="_blank" rel="noopener"><strong>'+esc(s.site_name||s.site_key)+'</strong><span>OPEN SITE ↗</span></a>').join("");
+ const safeSites=(sites.data||[]).filter(s=>{try{const u=new URL(s.site_url);return s.is_active&&u.protocol==="https:"&&!seenSites.has(u.href)&&seenSites.add(u.href)}catch{return false}});
+ document.getElementById("siteGrid").innerHTML=safeSites.map(s=>'<a class="site" href="'+esc(new URL(s.site_url).href)+'" target="_blank" rel="noopener noreferrer"><strong>'+esc(s.site_name||s.site_key)+'</strong><span>OPEN SITE ↗</span></a>').join("")||'<div class="notice">No connected sites are published yet.</div>';
  try{
   const r=await fetch(FUNCTION_BASE+"/membership-status",{headers:{Authorization:"Bearer "+session.access_token,"apikey":SUPABASE_KEY}});
   const j=await r.json();
