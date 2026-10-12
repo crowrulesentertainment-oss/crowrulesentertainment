@@ -149,16 +149,16 @@ async function renderAccount(){
   supabase.from("membership_profiles").select("display_name,username,points,watch_hours").eq("id",user.id).maybeSingle(),
   supabase.from("membership_sites").select("site_key,site_name,site_url,is_active").eq("is_active",true).order("site_name")
  ]);
- const current=m.data?.[0]||null;
- document.getElementById("membershipInfo").innerHTML=current?
+ const current=Array.isArray(m.data)?(m.data[0]||null):(m.data||null);
+ document.getElementById("membershipInfo").innerHTML=m.error?'<strong>Membership status temporarily unavailable</strong><br>'+esc(m.error.message||"Please refresh in a moment."):(current?
   "<strong>"+esc(current.plan_name||current.membership_type||"CrowRules Member")+"</strong><br>Status: "+esc(current.status||"active")+" · Level "+esc(current.level??"—")+"<br>Plan: "+esc(current.plan_key||"crow"):
-  "<strong>CROW</strong><br>Account connected. No paid plan is currently attached.";
- document.getElementById("levelStat").textContent=current?.level??"1";
+  "<strong>CROW</strong><br>Account connected. No paid plan is currently attached.");
+ document.getElementById("levelStat").textContent=current?.level??(m.error?"—":"1");
  document.getElementById("pointsStat").textContent=profile.data?.points??"0";
  const planMultiplier=current?.plan_key==="founder"?"5×":current?.plan_key==="creator"?"3×":current?.plan_key==="crowner"?"2×":"1×";
  document.getElementById("multiplierStat").textContent=planMultiplier;
- document.getElementById("statusStat").textContent=current?.status||"active";
- document.getElementById("manageBilling").style.display=current&&current.plan_key!=="crow"?"inline-flex":"none";
+ document.getElementById("statusStat").textContent=current?.status||(m.error?"Unavailable":"active");
+ document.getElementById("manageBilling").style.display=current&&current.plan_key&&current.plan_key!=="crow"?"inline-flex":"none";
  const seenSites=new Set();
  document.getElementById("siteGrid").innerHTML=(sites.data||[]).filter(s=>s.is_active&&s.site_url&&!seenSites.has(s.site_url)&&seenSites.add(s.site_url)).map(s=>'<a class="site" href="'+esc(s.site_url)+'" target="_blank" rel="noopener"><strong>'+esc(s.site_name||s.site_key)+'</strong><span>OPEN SITE ↗</span></a>').join("");
  try{
@@ -184,13 +184,13 @@ document.getElementById("profileForm").onsubmit=async e=>{
  setStatus(status,"NAME SAVED","ok");
 };
 document.getElementById("login").onsubmit=async e=>{e.preventDefault();const x=Object.fromEntries(new FormData(e.target));setStatus(authStatus,"Signing in…");const r=await supabase.auth.signInWithPassword({email:x.email,password:x.password});if(r.error)setStatus(authStatus,r.error.message,"error");else{setStatus(authStatus,"SIGNED IN","ok");await renderAccount()}};
-document.getElementById("signup").onsubmit=async e=>{e.preventDefault();const x=Object.fromEntries(new FormData(e.target));setStatus(authStatus,"Creating your account…");const r=await supabase.auth.signUp({email:x.email,password:x.password,options:{data:{display_name:x.email.split("@")[0]}}});if(r.error)setStatus(authStatus,r.error.message,"error");else setStatus(authStatus,r.data.session?"ACCOUNT CREATED · YOU ARE SIGNED IN":"ACCOUNT CREATED · CHECK YOUR EMAIL IF CONFIRMATION IS REQUIRED","ok")};
+document.getElementById("signup").onsubmit=async e=>{e.preventDefault();const x=Object.fromEntries(new FormData(e.target));setStatus(authStatus,"Creating your account…");const r=await supabase.auth.signUp({email:x.email,password:x.password,options:{data:{display_name:x.email.split("@")[0]}}});if(r.error){setStatus(authStatus,r.error.message,"error");return}if(r.data.session){setStatus(authStatus,"ACCOUNT CREATED · YOU ARE SIGNED IN","ok");e.target.reset();await renderAccount()}else{setStatus(authStatus,"ACCOUNT CREATED · CHECK YOUR EMAIL IF CONFIRMATION IS REQUIRED","ok")}};
 document.getElementById("google").onclick=async()=>{const r=await supabase.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.href}});if(r.error)setStatus(authStatus,r.error.message,"error")};
 document.getElementById("signout").onclick=async()=>{await supabase.auth.signOut();location.reload()};
 document.getElementById("refreshAccount").onclick=async()=>{setStatus(accountStatus,"Refreshing…");await renderAccount();setStatus(accountStatus,"ACCOUNT UPDATED","ok")};
 document.getElementById("manageBilling").onclick=async()=>{const {data:{session}}=await supabase.auth.getSession();if(!session)return;const b=document.getElementById("manageBilling");b.disabled=true;b.textContent="OPENING PORTAL…";try{const r=await fetch(FUNCTION_BASE+"/membership-portal",{method:"POST",headers:{Authorization:"Bearer "+session.access_token,"Content-Type":"application/json","apikey":SUPABASE_KEY}});const j=await r.json();if(!r.ok||!j.url)throw new Error(j.error||"Billing portal unavailable");location.href=j.url}catch(e){setStatus(accountStatus,e.message,"error");b.disabled=false;b.textContent="MANAGE BILLING"}};
-supabase.auth.onAuthStateChange(()=>{setTimeout(renderAccount,0)});
-showCheckoutBanner();await loadPlans();await renderAccount();
+let accountRenderQueued=false;\nsupabase.auth.onAuthStateChange(()=>{if(accountRenderQueued)return;accountRenderQueued=true;setTimeout(async()=>{accountRenderQueued=false;try{await renderAccount()}catch(err){console.error("Account refresh failed:",err);setStatus(accountStatus,"Could not refresh account details. Please use REFRESH to try again.","error")}},0)});
+showCheckoutBanner();\ntry{await loadPlans()}catch(err){console.error("Could not initialize membership plans:",err);plansEl.innerHTML='<div class="notice">Membership plans could not be loaded. Please refresh the page to try again.</div>'}\ntry{await renderAccount()}catch(err){console.error("Could not initialize membership account:",err);setStatus(accountStatus,"Account details could not be loaded. Please refresh to try again.","error")}
 </script>
 <script type="module" src="assets/app.js"></script>
 </body>
