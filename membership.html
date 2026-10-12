@@ -192,8 +192,11 @@ document.getElementById("google").onclick=async()=>{const r=await supabase.auth.
 document.getElementById("signout").onclick=async()=>{await supabase.auth.signOut();location.reload()};
 document.getElementById("refreshAccount").onclick=async()=>{setStatus(accountStatus,"Refreshing…");await renderAccount();setStatus(accountStatus,"ACCOUNT UPDATED","ok")};
 document.getElementById("manageBilling").onclick=async()=>{const {data:{session}}=await supabase.auth.getSession();if(!session)return;const b=document.getElementById("manageBilling");b.disabled=true;b.textContent="OPENING PORTAL…";try{const r=await fetch(FUNCTION_BASE+"/membership-portal",{method:"POST",headers:{Authorization:"Bearer "+session.access_token,"Content-Type":"application/json","apikey":SUPABASE_KEY}});const j=await r.json();if(!r.ok||!j.url)throw new Error(j.error||"Billing portal unavailable");location.href=j.url}catch(e){setStatus(accountStatus,e.message,"error");b.disabled=false;b.textContent="MANAGE BILLING"}};
-let accountRenderQueued=false;\nsupabase.auth.onAuthStateChange(()=>{if(accountRenderQueued)return;accountRenderQueued=true;setTimeout(async()=>{accountRenderQueued=false;try{await renderAccount()}catch(err){console.error("Account refresh failed:",err);setStatus(accountStatus,"Could not refresh account details. Please use REFRESH to try again.","error")}},0)});
-showCheckoutBanner();\ntry{await loadPlans()}catch(err){console.error("Could not initialize membership plans:",err);plansEl.innerHTML='<div class="notice">Membership plans could not be loaded. Please refresh the page to try again.</div>'}\ntry{await renderAccount()}catch(err){console.error("Could not initialize membership account:",err);setStatus(accountStatus,"Account details could not be loaded. Please refresh to try again.","error")}
+let accountRenderQueued=false;
+supabase.auth.onAuthStateChange(()=>{if(accountRenderQueued)return;accountRenderQueued=true;setTimeout(async()=>{accountRenderQueued=false;try{await renderAccount()}catch(err){console.error("Account refresh failed:",err);setStatus(accountStatus,"Could not refresh account details. Please use REFRESH to try again.","error")}},0)});
+showCheckoutBanner();
+try{await loadPlans()}catch(err){console.error("Could not initialize membership plans:",err);plansEl.innerHTML='<div class="notice">Membership plans could not be loaded. Please refresh the page to try again.</div>'}
+try{await renderAccount()}catch(err){console.error("Could not initialize membership account:",err);setStatus(accountStatus,"Account details could not be loaded. Please refresh to try again.","error")}
 </script>
 <script type="module" src="assets/app.js"></script>
 </body>
