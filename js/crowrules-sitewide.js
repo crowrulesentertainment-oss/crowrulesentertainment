@@ -222,6 +222,30 @@ function installGlobalEvents(){
  window.addEventListener('orientationchange',()=>setTimeout(reposition,50),{passive:true});
 }
 
+
+async function updateVisitorCounter(db){
+ const nodes=()=>Array.from(document.querySelectorAll('[data-visitor-count]'));
+ if(!nodes().length)return;
+ const key='crowrules-company-visitor-count-v1';
+ try{
+  let cached=null;
+  try{cached=sessionStorage.getItem(key)}catch{}
+  if(cached && /^\\d+$/.test(cached)){
+   nodes().forEach(n=>n.textContent=Number(cached).toLocaleString());
+   return;
+  }
+  const result=await withTimeout(db.rpc('increment_crowrules_company_visitor'),10000,'Visitor counter timed out');
+  if(result.error)throw result.error;
+  const count=Number(result.data);
+  if(!Number.isFinite(count)||count<0)throw new Error('Invalid visitor count');
+  try{sessionStorage.setItem(key,String(count))}catch{}
+  nodes().forEach(n=>n.textContent=count.toLocaleString());
+ }catch(e){
+  console.warn('[CrowRules visitor counter]',e);
+  nodes().forEach(n=>{if(!n.textContent||n.textContent==='—')n.textContent='—'});
+ }
+}
+
 async function boot(){
  css();installGlobalEvents();mount({user:null,session:null,client:null});\n if(!location.pathname.includes('/podcasting/'))loadPodcastingNavigation();
  try{
@@ -255,6 +279,7 @@ async function boot(){
 
   window.CrowRulesAuth=window.CrowRulesAuth||{};
   Object.assign(window.CrowRulesAuth,{client:db,session,user,ready:Promise.resolve(db)});
+  updateVisitorCounter(db);
   mount({client:db,session,user});
 
   if(!window.__CrowRulesSitewideAuthBound){
