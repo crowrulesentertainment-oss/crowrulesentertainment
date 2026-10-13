@@ -230,7 +230,7 @@ async function updateVisitorCounter(db){
  try{
   let cached=null;
   try{cached=sessionStorage.getItem(key)}catch{}
-  if(cached && /^\\d+$/.test(cached)){
+  if(cached && /^\d+$/.test(cached)){
    nodes().forEach(n=>n.textContent=Number(cached).toLocaleString());
    return;
   }
@@ -247,7 +247,8 @@ async function updateVisitorCounter(db){
 }
 
 async function boot(){
- css();installGlobalEvents();mount({user:null,session:null,client:null});\n if(!location.pathname.includes('/podcasting/'))loadPodcastingNavigation();
+ css();installGlobalEvents();mount({user:null,session:null,client:null});
+ if(!location.pathname.includes('/podcasting/'))loadPodcastingNavigation();
  try{
   let db=null,session=null,user=null;
 
