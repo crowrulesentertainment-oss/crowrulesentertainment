@@ -83,7 +83,6 @@ function css(){
 .cr-sw-menu a.cr-sw-current{background:#78efff12;color:#78efff}
 .cr-sw-membership{border-color:#78efff44!important;background:linear-gradient(135deg,#087e98aa,#654bb3aa)!important;color:#fff!important}
 .cr-sw-close{color:#cbd5e1;padding:8px 9px;border:1px solid #78efff22;border-radius:8px;background:transparent;font:900 13px Arial;line-height:1;cursor:pointer;flex:none}.cr-sw-close:hover,.cr-sw-close:focus-visible{color:#fff;border-color:#78efff55;background:#78efff0d;outline:none}
-.cr-sw-visitor{display:flex;align-items:center;gap:6px;white-space:nowrap;color:#9baec4;font:800 9px Arial,sans-serif;letter-spacing:.08em;padding:7px 9px;border:1px solid #78efff22;border-radius:8px}.cr-sw-visitor strong{color:#78efff;font:900 11px Orbitron,Arial,sans-serif;min-width:1ch}
 .cr-sw-account{margin-left:auto;color:#fff;padding:8px 10px;border:1px solid #78efff33;border-radius:8px;background:transparent;font:800 10px Arial;white-space:nowrap;cursor:pointer}
 .cr-sw-account:hover,.cr-sw-account:focus-visible{background:#78efff0d;outline:none}
 .cr-sw-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#6affaa;box-shadow:0 0 8px #6affaa;margin-right:6px}
@@ -178,7 +177,7 @@ function mount(state){
  if(!bar){
   bar=document.createElement('div');
   bar.className='cr-sitewide';
-  bar.innerHTML='<div class="cr-sw-in"><a class="cr-sw-brand" href="'+CONFIG.home+'">CROW<b>RULES</b></a><nav class="cr-sw-nav" aria-label="CrowRules universal navigation"></nav><button class="cr-sw-close" id="cr-sw-close" type="button" aria-label="Close Universal CrowRules Membership navigation" title="Close navigation">×</button><span class="cr-sw-visitor" aria-label="Sitewide visitor count">VISITORS <strong data-visitor-count aria-live="polite">—</strong></span><button class="cr-sw-account" id="cr-sw-account" type="button" aria-haspopup="true" aria-expanded="false"><span class="cr-sw-dot"></span><span>CONNECTING</span></button></div>';
+  bar.innerHTML='<div class="cr-sw-in"><a class="cr-sw-brand" href="'+CONFIG.home+'">CROW<b>RULES</b></a><nav class="cr-sw-nav" aria-label="CrowRules universal navigation"></nav><button class="cr-sw-close" id="cr-sw-close" type="button" aria-label="Close Universal CrowRules Membership navigation" title="Close navigation">×</button><span class="cr-sw-visitor" aria-label="Sitewide visitor count"></span><button class="cr-sw-account" id="cr-sw-account" type="button" aria-haspopup="true" aria-expanded="false"><span class="cr-sw-dot"></span><span>CONNECTING</span></button></div>';
   document.body.prepend(bar);
  }
  const nav=bar.querySelector('.cr-sw-nav');
@@ -224,29 +223,7 @@ function installGlobalEvents(){
 }
 
 
-async async function updateVisitorCounter(db){
- const nodes=()=>Array.from(document.querySelectorAll('[data-visitor-count]'));
- if(!nodes().length||!db?.rpc)return;
- const key='crowrules-company-visitor-count-v1';
- try{
-  let cached=null;
-  try{cached=sessionStorage.getItem(key)}catch{}
-  if(cached && /^\d+$/.test(cached)){
-   nodes().forEach(n=>n.textContent=Number(cached).toLocaleString());
-   return;
-  }
-  const result=await withTimeout(db.rpc('increment_crowrules_company_visitor'),10000,'Visitor counter timed out');
-  if(result.error)throw result.error;
-  const count=Number(result.data);
-  if(!Number.isFinite(count)||count<0)throw new Error('Invalid visitor count');
-  try{sessionStorage.setItem(key,String(count))}catch{}
-  nodes().forEach(n=>n.textContent=count.toLocaleString());
- }catch(e){
-  console.warn('[CrowRules visitor counter]',e);
-  nodes().forEach(n=>{if(!n.textContent||n.textContent==='—')n.textContent='—'});
- }
-}
-
+async 
 async function boot(){
  css();installGlobalEvents();mount({user:null,session:null,client:null});
  if(!location.pathname.includes('/podcasting/'))loadPodcastingNavigation();
@@ -281,7 +258,6 @@ async function boot(){
 
   window.CrowRulesAuth=window.CrowRulesAuth||{};
   Object.assign(window.CrowRulesAuth,{client:db,session,user,ready:Promise.resolve(db)});
-  updateVisitorCounter(db);
   mount({client:db,session,user});
 
   if(!window.__CrowRulesSitewideAuthBound){
