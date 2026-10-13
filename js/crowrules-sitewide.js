@@ -83,6 +83,7 @@ function css(){
 .cr-sw-menu a.cr-sw-current{background:#78efff12;color:#78efff}
 .cr-sw-membership{border-color:#78efff44!important;background:linear-gradient(135deg,#087e98aa,#654bb3aa)!important;color:#fff!important}
 .cr-sw-close{color:#cbd5e1;padding:8px 9px;border:1px solid #78efff22;border-radius:8px;background:transparent;font:900 13px Arial;line-height:1;cursor:pointer;flex:none}.cr-sw-close:hover,.cr-sw-close:focus-visible{color:#fff;border-color:#78efff55;background:#78efff0d;outline:none}
+.cr-sw-visitor{display:flex;align-items:center;gap:6px;white-space:nowrap;color:#9baec4;font:800 9px Arial,sans-serif;letter-spacing:.08em;padding:7px 9px;border:1px solid #78efff22;border-radius:8px}.cr-sw-visitor strong{color:#78efff;font:900 11px Orbitron,Arial,sans-serif;min-width:1ch}
 .cr-sw-account{margin-left:auto;color:#fff;padding:8px 10px;border:1px solid #78efff33;border-radius:8px;background:transparent;font:800 10px Arial;white-space:nowrap;cursor:pointer}
 .cr-sw-account:hover,.cr-sw-account:focus-visible{background:#78efff0d;outline:none}
 .cr-sw-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#6affaa;box-shadow:0 0 8px #6affaa;margin-right:6px}
@@ -223,9 +224,9 @@ function installGlobalEvents(){
 }
 
 
-async function updateVisitorCounter(db){
+async async function updateVisitorCounter(db){
  const nodes=()=>Array.from(document.querySelectorAll('[data-visitor-count]'));
- if(!nodes().length)return;
+ if(!nodes().length||!db?.rpc)return;
  const key='crowrules-company-visitor-count-v1';
  try{
   let cached=null;
