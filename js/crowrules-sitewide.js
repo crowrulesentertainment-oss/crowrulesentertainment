@@ -178,7 +178,7 @@ function mount(state){
  if(!bar){
   bar=document.createElement('div');
   bar.className='cr-sitewide';
-  bar.innerHTML='<div class="cr-sw-in"><a class="cr-sw-brand" href="'+CONFIG.home+'">CROW<b>RULES</b></a><nav class="cr-sw-nav" aria-label="CrowRules universal navigation"></nav><button class="cr-sw-close" id="cr-sw-close" type="button" aria-label="Close Universal CrowRules Membership navigation" title="Close navigation">×</button><button class="cr-sw-account" id="cr-sw-account" type="button" aria-haspopup="true" aria-expanded="false"><span class="cr-sw-dot"></span><span>CONNECTING</span></button></div>';
+  bar.innerHTML='<div class="cr-sw-in"><a class="cr-sw-brand" href="'+CONFIG.home+'">CROW<b>RULES</b></a><nav class="cr-sw-nav" aria-label="CrowRules universal navigation"></nav><button class="cr-sw-close" id="cr-sw-close" type="button" aria-label="Close Universal CrowRules Membership navigation" title="Close navigation">×</button><span class="cr-sw-visitor" aria-label="Sitewide visitor count">VISITORS <strong data-visitor-count aria-live="polite">—</strong></span><button class="cr-sw-account" id="cr-sw-account" type="button" aria-haspopup="true" aria-expanded="false"><span class="cr-sw-dot"></span><span>CONNECTING</span></button></div>';
   document.body.prepend(bar);
  }
  const nav=bar.querySelector('.cr-sw-nav');
