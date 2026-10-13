@@ -190,7 +190,7 @@ document.getElementById("profileForm").onsubmit=async e=>{
  const saveButton=e.submitter;if(saveButton){saveButton.disabled=true;saveButton.textContent="SAVING…"}
  setStatus(status,"Saving your name…");
  try{const authResult=await supabase.auth.updateUser({data:{...user.user_metadata,display_name,full_name:displayName,name:displayName}});if(authResult.error)throw authResult.error;
- const profileResult=await supabase.from("membership_profiles").upsert({id:user.id,display_name},{onConflict:"id"});
+ const profileResult=await supabase.from("membership_profiles").upsert({id:user.id,display_name:displayName},{onConflict:"id"});
  if(profileResult.error){setStatus(status,"Your account name was updated, but the member profile could not be synchronized. "+profileResult.error.message,"error");return}
  document.getElementById("memberName").textContent=displayName;setStatus(status,"Display name saved.","ok");
  }catch(err){setStatus(status,err.message||"Could not save your display name.","error")}finally{if(saveButton){saveButton.disabled=false;saveButton.textContent="SAVE NAME"}}
