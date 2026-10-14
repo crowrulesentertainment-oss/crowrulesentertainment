@@ -42,15 +42,15 @@ const withTimeout=(promise,ms,label)=>{
 };
 
 function ensureFavicon(){
- const href='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/test.jpg?v=2';
- let icon=document.querySelector('link[rel~="icon"]');
+ const href='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/favicon.svg?v=1';
+ let icon=document.querySelector('link[rel="icon"]');
  if(!icon){icon=document.createElement('link');icon.rel='icon';document.head.appendChild(icon);}
- icon.type='image/jpeg';
- icon.href=href+'?v=1';
+ icon.type='image/svg+xml';
+ icon.href=href;
  let shortcut=document.querySelector('link[rel="shortcut icon"]');
  if(!shortcut){shortcut=document.createElement('link');shortcut.rel='shortcut icon';document.head.appendChild(shortcut);}
- shortcut.type='image/jpeg';
- shortcut.href=href+'?v=1';
+ shortcut.type='image/svg+xml';
+ shortcut.href=href;
 }
 
 function loadSDK(){
