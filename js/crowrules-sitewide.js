@@ -42,7 +42,7 @@ const withTimeout=(promise,ms,label)=>{
 };
 
 function ensureFavicon(){
- const href='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/test.jpg';
+ const href='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/test.jpg?v=2';
  let icon=document.querySelector('link[rel~="icon"]');
  if(!icon){icon=document.createElement('link');icon.rel='icon';document.head.appendChild(icon);}
  icon.type='image/jpeg';
