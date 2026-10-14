@@ -41,6 +41,18 @@ const withTimeout=(promise,ms,label)=>{
  ]).finally(()=>clearTimeout(timer));
 };
 
+function ensureFavicon(){
+ const href='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/test.jpg';
+ let icon=document.querySelector('link[rel~="icon"]');
+ if(!icon){icon=document.createElement('link');icon.rel='icon';document.head.appendChild(icon);}
+ icon.type='image/jpeg';
+ icon.href=href+'?v=1';
+ let shortcut=document.querySelector('link[rel="shortcut icon"]');
+ if(!shortcut){shortcut=document.createElement('link');shortcut.rel='shortcut icon';document.head.appendChild(shortcut);}
+ shortcut.type='image/jpeg';
+ shortcut.href=href+'?v=1';
+}
+
 function loadSDK(){
  if(window.supabase?.createClient)return Promise.resolve(window.supabase);
  const existing=document.querySelector('script[data-crowrules-supabase-sdk]');
@@ -225,7 +237,7 @@ function installGlobalEvents(){
 
 async 
 async function boot(){
- css();installGlobalEvents();mount({user:null,session:null,client:null});
+ ensureFavicon();css();installGlobalEvents();mount({user:null,session:null,client:null});
  if(!location.pathname.includes('/podcasting/'))loadPodcastingNavigation();
  try{
   let db=null,session=null,user=null;
