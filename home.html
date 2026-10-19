@@ -68,86 +68,56 @@
   const grid = document.getElementById('youtube-video-grid');
   if (!grid) return;
   const channel = 'https://www.youtube.com/@CrowRulesEntertainment';
-  const escapeHTML = value => String(value || '').replace(/[&<>"']/g, char => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-  }[char]));
-  const showFallback = () => {
-    grid.innerHTML = '<p class="youtube-state">The video feed is temporarily unavailable. Visit the <a href="' + channel + '" target="_blank" rel="noopener noreferrer">official YouTube channel</a> for the latest uploads.</p>';
-  };
-  const parseDate = value => {
-    const timestamp = Date.parse(value || '');
-    return Number.isFinite(timestamp) ? timestamp : 0;
-  };
-  const getVideoId = item => {
+  const esc = value => String(value || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const fallback = () => { grid.innerHTML = '<p class="youtube-state">We could not load the video list right now. Visit the <a href="' + channel + '" target="_blank" rel="noopener noreferrer">official CrowRules Entertainment YouTube channel</a> for the latest uploads.</p>'; };
+  const videoId = item => {
     const url = String(item.link || item.url || '');
-    const match = url.match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([\w-]{11})/);
-    if (match) return match[1];
-    const guid = String(item.guid || item.id || '');
-    const guidMatch = guid.match(/(?:video:|yt:video:)([\w-]{11})/);
-    return guidMatch ? guidMatch[1] : '';
+    const m = url.match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([\w-]{11})/);
+    if (m) return m[1];
+    const g = String(item.guid || item.id || '').match(/(?:video:|yt:video:)([\w-]{11})/);
+    return g ? g[1] : '';
   };
-  const render = items => {
-    const videos = items.map(item => ({
-      item,
-      timestamp: parseDate(item.pubDate || item.published || item.updated),
-      id: getVideoId(item)
-    })).filter(video => video.id)
-      .sort((a, b) => b.timestamp - a.timestamp)
-      .slice(0, 6);
-    if (!videos.length) throw new Error('No video items returned');
-    grid.innerHTML = videos.map(({ item, timestamp, id }) => {
-      const url = 'https://www.youtube.com/watch?v=' + id;
-      const date = timestamp ? new Date(timestamp).toLocaleDateString(undefined, {
-        year: 'numeric', month: 'short', day: 'numeric'
-      }) : '';
-      return '<article class="youtube-video-card">' +
-        '<a class="youtube-video-thumb" href="' + url + '" target="_blank" rel="noopener noreferrer" aria-label="Watch ' + escapeHTML(item.title || 'CrowRules video') + '">' +
-        '<img loading="lazy" src="https://i.ytimg.com/vi/' + id + '/hqdefault.jpg" alt="' + escapeHTML(item.title || 'CrowRules video thumbnail') + '">' +
-        '</a><div class="youtube-video-copy"><h3><a href="' + url + '" target="_blank" rel="noopener noreferrer">' +
-        escapeHTML(item.title || 'CrowRules video') + '</a></h3><div class="youtube-video-date">' +
-        escapeHTML(date) + '</div></div></article>';
+  const dateValue = item => { const n = Date.parse(item.pubDate || item.published || item.updated || ''); return Number.isFinite(n) ? n : 0; };
+  function render(items) {
+    const videos = items.map(item => ({item, id:videoId(item), time:dateValue(item)})).filter(v => v.id).sort((a,b) => b.time-a.time).slice(0,6);
+    if (!videos.length) throw new Error('No playable videos in feed');
+    const newest = videos[0], newestTitle = esc(newest.item.title || 'Latest CrowRules Entertainment video');
+    const date = newest.time ? new Date(newest.time).toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}) : '';
+    const featured = '<article class="youtube-video-card youtube-featured-video"><div class="youtube-video-copy"><div class="section-label">LATEST UPLOAD · PLAY HERE</div><h3>' + newestTitle + '</h3><div class="youtube-video-date">' + esc(date) + '</div><p class="section-intro">Play the newest CrowRules Entertainment upload right here.</p><a class="card-link" href="https://www.youtube.com/watch?v=' + newest.id + '" target="_blank" rel="noopener noreferrer">OPEN ON YOUTUBE ↗</a></div><div class="youtube-video-thumb youtube-player"><iframe src="https://www.youtube-nocookie.com/embed/' + newest.id + '?autoplay=0&rel=0" title="' + newestTitle + '" loading="eager" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div></article>';
+    const rest = videos.slice(1).map(({item,id,time}) => {
+      const title=esc(item.title || 'CrowRules video'), published=time?new Date(time).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}):'', url='https://www.youtube.com/watch?v='+id;
+      return '<article class="youtube-video-card"><a class="youtube-video-thumb" href="'+url+'" target="_blank" rel="noopener noreferrer" aria-label="Watch '+title+'"><img loading="lazy" src="https://i.ytimg.com/vi/'+id+'/hqdefault.jpg" alt="'+title+' thumbnail"></a><div class="youtube-video-copy"><h3><a href="'+url+'" target="_blank" rel="noopener noreferrer">'+title+'</a></h3><div class="youtube-video-date">'+esc(published)+'</div></div></article>';
     }).join('');
-  };
-  const fetchJSON = async url => {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error('Feed request failed');
-    return response.json();
-  };
-  async function loadVideos() {
-    // Resolve the channel's stable UC... ID, then request YouTube's own recent-upload feed.
-    const channelPage = 'https://www.youtube.com/@CrowRulesEntertainment';
-    let channelId = '';
-    try {
-      const proxyURL = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(channelPage);
-      const response = await fetch(proxyURL);
-      if (response.ok) {
-        const html = await response.text();
-        const match = html.match(/(?:channelId|externalId|browseId)["\\s:=]+(UC[\\w-]{22})/);
-        if (match) channelId = match[1];
-      }
-    } catch (_) {}
-    if (channelId) {
-      try {
-        const feed = 'https://www.youtube.com/feeds/videos.xml?channel_id=' + encodeURIComponent(channelId);
-        const data = await fetchJSON('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(feed));
-        if (data.status === 'ok' && Array.isArray(data.items) && data.items.length) {
-          render(data.items);
-          return;
-        }
-      } catch (_) {}
-    }
-    // Fallback: RSSHub's YouTube handle route, also sorted newest-first before display.
-    try {
-      const feed = 'https://rsshub.app/youtube/handle/CrowRulesEntertainment';
-      const data = await fetchJSON('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(feed));
-      if (data.status === 'ok' && Array.isArray(data.items) && data.items.length) {
-        render(data.items);
-        return;
-      }
-    } catch (_) {}
-    showFallback();
+    grid.innerHTML=featured+rest;
   }
-  loadVideos();
+  async function getJSON(url) { const response=await fetch(url,{cache:'no-store'}); if(!response.ok) throw new Error('Feed request failed'); return response.json(); }
+  async function load() {
+    try {
+      const rss='https://rsshub.app/youtube/handle/CrowRulesEntertainment';
+      const data=await getJSON('https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent(rss));
+      if(data.status==='ok' && Array.isArray(data.items) && data.items.length){render(data.items);return;}
+    } catch (_) {}
+    try {
+      const response=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(channel),{cache:'no-store'});
+      if(!response.ok) throw new Error('Channel lookup failed');
+      const html=await response.text();
+      const match=html.match(/(?:channelId|externalId|browseId)\s*["':=\s]+(UC[\w-]{22})/);
+      if(!match) throw new Error('Channel ID not found');
+      const rss='https://www.youtube.com/feeds/videos.xml?channel_id='+match[1];
+      const data=await getJSON('https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent(rss));
+      if(data.status==='ok' && Array.isArray(data.items) && data.items.length){render(data.items);return;}
+    } catch (_) {}
+    fallback();
+  }
+  load();
 })();
-</script><script type="module" src="assets/app.js"></script><script type="module" src="assets/app.js"></script>
+</script>
+<style>
+.youtube-player{position:relative;aspect-ratio:16/9;background:#000}
+.youtube-player iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.youtube-featured-video{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);align-items:stretch}
+.youtube-featured-video .youtube-player{grid-column:2;grid-row:1}
+.youtube-featured-video .youtube-video-copy{grid-column:1;grid-row:1;align-self:center}
+@media(max-width:700px){.youtube-featured-video{grid-template-columns:1fr}.youtube-featured-video .youtube-player{grid-column:1;grid-row:2}.youtube-featured-video .youtube-video-copy{grid-column:1;grid-row:1}}
+</style><script type="module" src="assets/app.js"></script>
 </body></html>
