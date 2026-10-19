@@ -32,7 +32,7 @@ select cron.schedule(
   'crowrules-youtube-refresh',
   '*/5 * * * *',
   $job$
-    select extensions.http_post(
+    select net.http_post(
       url := 'https://cevylpnoexugwgygvtgu.supabase.co/functions/v1/crowrules-youtube-feed',
       headers := jsonb_build_object('Content-Type', 'application/json'),
       body := '{"action":"refresh"}'::jsonb,
