@@ -42,10 +42,21 @@ async function discoverChannelId(): Promise<string> {
   return "UC03D_GFGP1NqtnXwt1uXusA";
 }
 
+function decodeXml(value: string) {
+  return value.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"').replace(/&apos;/g, "'");
+}
+
+function xmlTag(block: string, localName: string) {
+  const pattern = new RegExp("<(?:[\\\\w-]+:)?" + localName + "\\\\b[^>]*>([\\\\s\\\\S]*?)<\\\\/(?:[\\\\w-]+:)?" + localName + "\\\\s*>", "i");
+  const match = block.match(pattern);
+  return match ? decodeXml(match[1].replace(/<[^>]+>/g, "").trim()) : "";
+}
+
 async function fetchLatest(channelId: string) {
   const sources = [
-    "https://rsshub.app/youtube/handle/CrowRulesEntertainment",
     "https://www.youtube.com/feeds/videos.xml?channel_id=" + encodeURIComponent(channelId),
+    "https://rsshub.app/youtube/handle/CrowRulesEntertainment",
   ];
   const failures: string[] = [];
   for (const url of sources) {
@@ -56,13 +67,12 @@ async function fetchLatest(channelId: string) {
       });
       if (!response.ok) throw new Error("Feed returned " + response.status);
       const xml = await response.text();
-      const document = new DOMParser().parseFromString(xml, "text/xml");
-      if (document.querySelector("parsererror")) throw new Error("Feed XML was not readable");
-      const entries = Array.from(document.getElementsByTagName("entry"));
-      const videos = entries.map((entry) => {
-        const id = textByLocalName(entry, "videoId");
-        const title = textByLocalName(entry, "title") || "CrowRules Entertainment video";
-        const published = textByLocalName(entry, "published") || textByLocalName(entry, "updated");
+      const entries = Array.from(xml.matchAll(/<entry\b[^>]*>([\s\S]*?)<\/entry>/gi));
+      const videos = entries.map((match) => {
+        const entry = match[1];
+        const id = xmlTag(entry, "videoId");
+        const title = xmlTag(entry, "title") || "CrowRules Entertainment video";
+        const published = xmlTag(entry, "published") || xmlTag(entry, "updated");
         return {
           video_id: id,
           title,
@@ -71,7 +81,7 @@ async function fetchLatest(channelId: string) {
           thumbnail_url: "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg",
           updated_at: new Date().toISOString(),
         };
-      }).filter((video) => /^[\\w-]{11}$/.test(video.video_id) && Number.isFinite(Date.parse(video.published_at)))
+      }).filter((video) => /^[\w-]{11}$/.test(video.video_id) && Number.isFinite(Date.parse(video.published_at)))
         .sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at))
         .slice(0, 12);
       if (!videos.length) throw new Error("Feed returned no valid public videos");
