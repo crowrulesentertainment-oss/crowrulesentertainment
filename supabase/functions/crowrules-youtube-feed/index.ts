@@ -43,32 +43,44 @@ async function discoverChannelId(): Promise<string> {
 }
 
 async function fetchLatest(channelId: string) {
-  const url = `https://www.youtube.com/feeds/videos.xml?channel_id=${encodeURIComponent(channelId)}`;
-  const response = await fetch(url, {
-    headers: { "User-Agent": "Mozilla/5.0 (compatible; CrowRulesVideoFeed/1.0)" },
-  });
-  if (!response.ok) throw new Error(`YouTube upload feed returned ${response.status}`);
-  const xml = await response.text();
-  const document = new DOMParser().parseFromString(xml, "text/xml");
-  if (document.querySelector("parsererror")) throw new Error("YouTube returned an unreadable upload feed");
-  const entries = Array.from(document.getElementsByTagName("entry"));
-  const videos = entries.map((entry) => {
-    const id = textByLocalName(entry, "videoId");
-    const title = textByLocalName(entry, "title") || "CrowRules Entertainment video";
-    const published = textByLocalName(entry, "published") || textByLocalName(entry, "updated");
-    return {
-      video_id: id,
-      title,
-      published_at: published,
-      video_url: `https://www.youtube.com/watch?v=${id}`,
-      thumbnail_url: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
-      updated_at: new Date().toISOString(),
-    };
-  }).filter((video) => /^[\w-]{11}$/.test(video.video_id) && Number.isFinite(Date.parse(video.published_at)))
-    .sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at))
-    .slice(0, 12);
-  if (!videos.length) throw new Error("YouTube upload feed returned no valid public videos");
-  return videos;
+  const sources = [
+    "https://rsshub.app/youtube/handle/CrowRulesEntertainment",
+    "https://www.youtube.com/feeds/videos.xml?channel_id=" + encodeURIComponent(channelId),
+  ];
+  const failures: string[] = [];
+  for (const url of sources) {
+    try {
+      const response = await fetch(url, {
+        headers: { "User-Agent": "Mozilla/5.0 (compatible; CrowRulesVideoFeed/1.0)" },
+        redirect: "follow",
+      });
+      if (!response.ok) throw new Error("Feed returned " + response.status);
+      const xml = await response.text();
+      const document = new DOMParser().parseFromString(xml, "text/xml");
+      if (document.querySelector("parsererror")) throw new Error("Feed XML was not readable");
+      const entries = Array.from(document.getElementsByTagName("entry"));
+      const videos = entries.map((entry) => {
+        const id = textByLocalName(entry, "videoId");
+        const title = textByLocalName(entry, "title") || "CrowRules Entertainment video";
+        const published = textByLocalName(entry, "published") || textByLocalName(entry, "updated");
+        return {
+          video_id: id,
+          title,
+          published_at: published,
+          video_url: "https://www.youtube.com/watch?v=" + id,
+          thumbnail_url: "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg",
+          updated_at: new Date().toISOString(),
+        };
+      }).filter((video) => /^[\\w-]{11}$/.test(video.video_id) && Number.isFinite(Date.parse(video.published_at)))
+        .sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at))
+        .slice(0, 12);
+      if (!videos.length) throw new Error("Feed returned no valid public videos");
+      return videos;
+    } catch (error) {
+      failures.push((error instanceof Error ? error.message : "Unknown feed error") + " [" + url + "]");
+    }
+  }
+  throw new Error("All YouTube feed sources failed: " + failures.join("; "));
 }
 
 async function refresh() {
