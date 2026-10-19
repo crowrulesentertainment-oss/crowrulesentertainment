@@ -103,11 +103,9 @@
       .filter(v => v.id).sort((a,b) => b.time-a.time).slice(0,6);
     if (!videos.length) throw new Error('No playable videos in feed');
     const newest = videos[0];
-    // Do not rebuild the iframe for the same upload: polling must not interrupt playback.
-    if (newest.id === currentNewestId) {
-      setStatus('Latest upload is up to date. Automatically checking YouTube for new videos every 5 minutes.');
-      return;
-    }
+    // Keep the current iframe intact when the newest video has not changed.
+    const sameNewest = newest.id === currentNewestId;
+    const existingFeatured = grid.querySelector('.youtube-featured-video');
     currentNewestId = newest.id;
     hasLoadedVideos = true;
     const newestTitle = esc(newest.item.title || 'Latest CrowRules Entertainment video');
@@ -117,6 +115,16 @@
       const title=esc(item.title || 'CrowRules video'), published=time?new Date(time).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}):'', url='https://www.youtube.com/watch?v='+id;
       return '<article class="youtube-video-card"><a class="youtube-video-thumb" href="'+url+'" target="_blank" rel="noopener noreferrer" aria-label="Watch '+title+'"><img loading="lazy" src="https://i.ytimg.com/vi/'+id+'/hqdefault.jpg" alt="'+title+' thumbnail"></a><div class="youtube-video-copy"><h3><a href="'+url+'" target="_blank" rel="noopener noreferrer">'+title+'</a></h3><div class="youtube-video-date">'+esc(published)+'</div></div></article>';
     }).join('');
+    if (sameNewest && existingFeatured) {
+      const heading = existingFeatured.querySelector('.youtube-video-copy h3');
+      if (heading) heading.textContent = newest.item.title || 'Latest CrowRules Entertainment video';
+      const dateNode = existingFeatured.querySelector('.youtube-video-date');
+      if (dateNode) dateNode.textContent = date;
+      grid.querySelectorAll('.youtube-video-card:not(.youtube-featured-video)').forEach(card => card.remove());
+      if (rest) grid.insertAdjacentHTML('beforeend', rest);
+      setStatus('Latest upload is up to date. Automatically checking YouTube for new videos every 5 minutes.');
+      return;
+    }
     grid.innerHTML=featured+rest;
     setStatus('Latest upload loaded. Automatically checking YouTube for new videos every 5 minutes.');
   }
@@ -142,6 +150,22 @@
     if (isLoading) return;
     isLoading = true;
     try {
+      // Prefer the server-maintained cache, which is refreshed by Supabase Cron
+      // every five minutes even when nobody has the homepage open.
+      try {
+        const response = await fetch('https://cevylpnoexugwgygvtgu.supabase.co/functions/v1/crowrules-youtube-feed', {cache:'no-store'});
+        if (response.ok) {
+          const data = await response.json();
+          if (Array.isArray(data.videos) && data.videos.length) {
+            render(data.videos.map(video => ({
+              title: video.title,
+              link: video.video_url,
+              pubDate: video.published_at
+            })));
+            return;
+          }
+        }
+      } catch (_) {}
       try {
         if (await tryFeed('https://rsshub.app/youtube/handle/CrowRulesEntertainment')) return;
       } catch (_) {}
