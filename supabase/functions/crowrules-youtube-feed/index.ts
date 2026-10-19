@@ -88,7 +88,7 @@ async function fetchLatest(channelId: string) {
       }).filter((video) => /^[\w-]{11}$/.test(video.video_id) && Number.isFinite(Date.parse(video.published_at)))
         .sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at))
         .slice(0, 12);
-      if (!videos.length) throw new Error("Feed returned no valid public videos");
+      if (!videos.length) throw new Error("Feed returned no valid public videos; entries=" + entries.length + "; sample=" + xml.slice(0, 180).replace(/\\s+/g, " "));
       return videos;
     } catch (error) {
       failures.push((error instanceof Error ? error.message : "Unknown feed error") + " [" + url + "]");
