@@ -48,9 +48,13 @@ function decodeXml(value: string) {
 }
 
 function xmlTag(block: string, localName: string) {
-  const pattern = new RegExp("<(?:[\\\\w-]+:)?" + localName + "\\\\b[^>]*>([\\\\s\\\\S]*?)<\\\\/(?:[\\\\w-]+:)?" + localName + "\\\\s*>", "i");
-  const match = block.match(pattern);
-  return match ? decodeXml(match[1].replace(/<[^>]+>/g, "").trim()) : "";
+  const tags = block.matchAll(/<(?:(?:[\w-]+):)?([\w-]+)\b[^>]*>([\s\S]*?)<\/(?:(?:[\w-]+):)?([\w-]+)\s*>/gi);
+  for (const tag of tags) {
+    if (tag[1] === localName && tag[3] === localName) {
+      return decodeXml(tag[2].replace(/<[^>]+>/g, "").trim());
+    }
+  }
+  return "";
 }
 
 async function fetchLatest(channelId: string) {
