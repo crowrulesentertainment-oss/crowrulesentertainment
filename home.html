@@ -63,5 +63,91 @@
 <section class="final-cta"><div class="cta-box"><div class="section-label">07 // ONE COMPANY. ONE UNIVERSE.</div><h2>LET'S BUILD WHAT COMES NEXT.</h2><p>Explore the company, become a member, bring an idea, support the work, or start a conversation about building with CrowRules.</p><div class="hero-actions" style="justify-content:center"><a class="btn" href="membership.html">JOIN THE UNIVERSE</a><a class="btn secondary" href="contact.html">START A CONVERSATION</a></div></div></section>
 </main>
 <footer><div class="counter">VISITORS · <strong data-visitor-count>—</strong></div><div style="margin-top:12px">CROWRULES ENTERTAINMENT · TACOMA, WASHINGTON · ONE COMPANY. ONE UNIVERSE.</div></footer>
-</div><script>(function(){const grid=document.getElementById('youtube-video-grid');if(!grid)return;const channel='https://www.youtube.com/@CrowRulesEntertainment';const feed='https://rsshub.app/youtube/handle/CrowRulesEntertainment';const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const fallback=()=>{grid.innerHTML='<p class="youtube-state">The video feed is temporarily unavailable. Visit the <a href="'+channel+'" target="_blank" rel="noopener noreferrer">official YouTube channel</a> for the latest uploads.</p>';};fetch('https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent(feed)).then(r=>{if(!r.ok)throw Error();return r.json();}).then(d=>{if(d.status!=='ok'||!Array.isArray(d.items)||!d.items.length)throw Error();grid.innerHTML=d.items.slice(0,6).map(v=>{const m=String(v.link||'').match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([\w-]{11})/);const id=m?m[1]:'';const url=id?'https://www.youtube.com/watch?v='+id:channel;const date=v.pubDate?new Date(v.pubDate).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}):'';return '<article class="youtube-video-card"><a class="youtube-video-thumb" href="'+url+'" target="_blank" rel="noopener noreferrer">'+(id?'<img loading="lazy" src="https://i.ytimg.com/vi/'+id+'/hqdefault.jpg" alt="">':'')+'</a><div class="youtube-video-copy"><h3><a href="'+url+'" target="_blank" rel="noopener noreferrer">'+esc(v.title||'CrowRules video')+'</a></h3><div class="youtube-video-date">'+esc(date)+'</div></div></article>';}).join('');}).catch(fallback);})();</script><script type="module" src="assets/app.js"></script>
+</div><script>
+(function () {
+  const grid = document.getElementById('youtube-video-grid');
+  if (!grid) return;
+  const channel = 'https://www.youtube.com/@CrowRulesEntertainment';
+  const escapeHTML = value => String(value || '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[char]));
+  const showFallback = () => {
+    grid.innerHTML = '<p class="youtube-state">The video feed is temporarily unavailable. Visit the <a href="' + channel + '" target="_blank" rel="noopener noreferrer">official YouTube channel</a> for the latest uploads.</p>';
+  };
+  const parseDate = value => {
+    const timestamp = Date.parse(value || '');
+    return Number.isFinite(timestamp) ? timestamp : 0;
+  };
+  const getVideoId = item => {
+    const url = String(item.link || item.url || '');
+    const match = url.match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([\w-]{11})/);
+    if (match) return match[1];
+    const guid = String(item.guid || item.id || '');
+    const guidMatch = guid.match(/(?:video:|yt:video:)([\w-]{11})/);
+    return guidMatch ? guidMatch[1] : '';
+  };
+  const render = items => {
+    const videos = items.map(item => ({
+      item,
+      timestamp: parseDate(item.pubDate || item.published || item.updated),
+      id: getVideoId(item)
+    })).filter(video => video.id)
+      .sort((a, b) => b.timestamp - a.timestamp)
+      .slice(0, 6);
+    if (!videos.length) throw new Error('No video items returned');
+    grid.innerHTML = videos.map(({ item, timestamp, id }) => {
+      const url = 'https://www.youtube.com/watch?v=' + id;
+      const date = timestamp ? new Date(timestamp).toLocaleDateString(undefined, {
+        year: 'numeric', month: 'short', day: 'numeric'
+      }) : '';
+      return '<article class="youtube-video-card">' +
+        '<a class="youtube-video-thumb" href="' + url + '" target="_blank" rel="noopener noreferrer" aria-label="Watch ' + escapeHTML(item.title || 'CrowRules video') + '">' +
+        '<img loading="lazy" src="https://i.ytimg.com/vi/' + id + '/hqdefault.jpg" alt="' + escapeHTML(item.title || 'CrowRules video thumbnail') + '">' +
+        '</a><div class="youtube-video-copy"><h3><a href="' + url + '" target="_blank" rel="noopener noreferrer">' +
+        escapeHTML(item.title || 'CrowRules video') + '</a></h3><div class="youtube-video-date">' +
+        escapeHTML(date) + '</div></div></article>';
+    }).join('');
+  };
+  const fetchJSON = async url => {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Feed request failed');
+    return response.json();
+  };
+  async function loadVideos() {
+    // Resolve the channel's stable UC... ID, then request YouTube's own recent-upload feed.
+    const channelPage = 'https://www.youtube.com/@CrowRulesEntertainment';
+    let channelId = '';
+    try {
+      const proxyURL = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(channelPage);
+      const response = await fetch(proxyURL);
+      if (response.ok) {
+        const html = await response.text();
+        const match = html.match(/(?:channelId|externalId|browseId)["\\s:=]+(UC[\\w-]{22})/);
+        if (match) channelId = match[1];
+      }
+    } catch (_) {}
+    if (channelId) {
+      try {
+        const feed = 'https://www.youtube.com/feeds/videos.xml?channel_id=' + encodeURIComponent(channelId);
+        const data = await fetchJSON('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(feed));
+        if (data.status === 'ok' && Array.isArray(data.items) && data.items.length) {
+          render(data.items);
+          return;
+        }
+      } catch (_) {}
+    }
+    // Fallback: RSSHub's YouTube handle route, also sorted newest-first before display.
+    try {
+      const feed = 'https://rsshub.app/youtube/handle/CrowRulesEntertainment';
+      const data = await fetchJSON('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(feed));
+      if (data.status === 'ok' && Array.isArray(data.items) && data.items.length) {
+        render(data.items);
+        return;
+      }
+    } catch (_) {}
+    showFallback();
+  }
+  loadVideos();
+})();
+</script><script type="module" src="assets/app.js"></script><script type="module" src="assets/app.js"></script>
 </body></html>
