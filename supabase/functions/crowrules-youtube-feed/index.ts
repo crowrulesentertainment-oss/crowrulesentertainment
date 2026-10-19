@@ -58,6 +58,36 @@ function xmlTag(block: string, localName: string) {
 }
 
 async function fetchLatest(channelId: string) {
+  const apiKey = Deno.env.get("YOUTUBE_API_KEY");
+  if (apiKey) {
+    const uploadsPlaylistId = "UU" + channelId.slice(2);
+    const apiUrl = new URL("https://www.googleapis.com/youtube/v3/playlistItems");
+    apiUrl.searchParams.set("part", "snippet,contentDetails");
+    apiUrl.searchParams.set("playlistId", uploadsPlaylistId);
+    apiUrl.searchParams.set("maxResults", "12");
+    apiUrl.searchParams.set("key", apiKey);
+    const apiResponse = await fetch(apiUrl.toString());
+    if (!apiResponse.ok) {
+      const details = (await apiResponse.text()).slice(0, 300);
+      throw new Error("YouTube Data API returned " + apiResponse.status + ": " + details);
+    }
+    const data = await apiResponse.json();
+    const videos = (Array.isArray(data.items) ? data.items : []).map((item: any) => {
+      const id = item.contentDetails?.videoId || item.snippet?.resourceId?.videoId || "";
+      return {
+        video_id: id,
+        title: item.snippet?.title || "CrowRules Entertainment video",
+        published_at: item.contentDetails?.videoPublishedAt || item.snippet?.publishedAt || "",
+        video_url: "https://www.youtube.com/watch?v=" + id,
+        thumbnail_url: "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg",
+        updated_at: new Date().toISOString(),
+      };
+    }).filter((video: any) => /^[\\w-]{11}$/.test(video.video_id) && Number.isFinite(Date.parse(video.published_at)))
+      .sort((a: any, b: any) => Date.parse(b.published_at) - Date.parse(a.published_at))
+      .slice(0, 12);
+    if (!videos.length) throw new Error("YouTube Data API returned no public uploads for channel " + channelId);
+    return videos;
+  }
   const sources = [
     "https://www.youtube.com/feeds/videos.xml?channel_id=" + encodeURIComponent(channelId),
     "https://rsshub.app/youtube/handle/CrowRulesEntertainment",
