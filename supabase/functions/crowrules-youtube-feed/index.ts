@@ -82,7 +82,7 @@ async function fetchLatest(channelId: string) {
         thumbnail_url: "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg",
         updated_at: new Date().toISOString(),
       };
-    }).filter((video: any) => /^[\\w-]{11}$/.test(video.video_id) && Number.isFinite(Date.parse(video.published_at)))
+    }).filter((video: any) => /^[\w-]{11}$/.test(video.video_id) && Number.isFinite(Date.parse(video.published_at)))
       .sort((a: any, b: any) => Date.parse(b.published_at) - Date.parse(a.published_at))
       .slice(0, 12);
     if (!videos.length) throw new Error("YouTube Data API returned no public uploads for channel " + channelId);
