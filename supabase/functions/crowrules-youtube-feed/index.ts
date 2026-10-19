@@ -38,42 +38,8 @@ function textByLocalName(parent: Element, name: string): string {
 }
 
 async function discoverChannelId(): Promise<string> {
-  // Resolve from the pinned CrowRules video first, avoiding unrelated channels
-  // that can appear in recommendations on the channel page.
-  const videoPage = await fetch("https://www.youtube.com/watch?v=0nV37ubZyWw", {
-    headers: { "User-Agent": "Mozilla/5.0 (compatible; CrowRulesVideoFeed/1.0)" },
-    redirect: "follow",
-  });
-  if (videoPage.ok) {
-    const videoHtml = await videoPage.text();
-    const metaPatterns = [
-      /<meta[^>]+itemprop=["']channelId["'][^>]+content=["'](UC[\\w-]{22})["']/i,
-      /<meta[^>]+content=["'](UC[\\w-]{22})["'][^>]+itemprop=["']channelId["']/i,
-      /"externalChannelId"\\s*:\\s*"(UC[\\w-]{22})"/,
-    ];
-    for (const pattern of metaPatterns) {
-      const match = videoHtml.match(pattern);
-      if (match?.[1]) return match[1];
-    }
-  }
-
-  const response = await fetch(CHANNEL_HANDLE_URL, {
-    headers: { "User-Agent": "Mozilla/5.0 (compatible; CrowRulesVideoFeed/1.0)" },
-    redirect: "follow",
-  });
-  if (!response.ok) throw new Error(`YouTube channel page returned ${response.status}`);
-  const html = await response.text();
-  const patterns = [
-    /"externalId"\\s*:\\s*"(UC[\\w-]{22})"/,
-    /"channelId"\\s*:\\s*"(UC[\\w-]{22})"/,
-    /"browseId"\\s*:\\s*"(UC[\\w-]{22})"/,
-    /itemprop=["']channelId["'][^>]*content=["'](UC[\\w-]{22})["']/i,
-  ];
-  for (const pattern of patterns) {
-    const match = html.match(pattern);
-    if (match?.[1]) return match[1];
-  }
-  throw new Error("Could not resolve the official CrowRules channel ID");
+  // Stable channel ID supplied for the official CrowRules Entertainment channel.
+  return "UC03D_GFGP1NqtnXwt1uXusA";
 }
 
 async function fetchLatest(channelId: string) {
