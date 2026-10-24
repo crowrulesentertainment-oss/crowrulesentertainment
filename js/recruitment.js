@@ -32,6 +32,11 @@
     status.textContent = message;
     status.className = "form-status " + type;
   };
+  const requestedRole = new URLSearchParams(window.location.search).get("role");
+  const roleSelect = document.getElementById("roleSelect");
+  if (requestedRole && roleSelect && [...roleSelect.options].some(option => option.value === requestedRole)) {
+    roleSelect.value = requestedRole;
+  }
   if (form) form.addEventListener("submit", async event => {
     event.preventDefault();
     if (!form.reportValidity()) return;
