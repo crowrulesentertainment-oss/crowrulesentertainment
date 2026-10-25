@@ -865,6 +865,20 @@
     .guest-card-details strong { display:block; color:var(--muted); font-size:.75rem; margin-bottom:4px; }
     @media(max-width:650px){.guest-card-details{grid-template-columns:1fr}}
 
+  
+    .network-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:22px}
+    .network-card{min-width:0;border:1px solid var(--border);border-radius:18px;background:linear-gradient(145deg,rgba(22,34,27,.92),rgba(10,17,13,.96));overflow:hidden}
+    .network-card img{width:100%;height:180px;object-fit:cover;display:block;background:#132018}
+    .network-card-body{padding:20px}.network-card h3{font-size:1.08rem}.network-card p{color:var(--muted);font-size:.88rem;white-space:pre-wrap;overflow-wrap:anywhere}
+    .network-tag{display:inline-block;color:var(--gold);font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+    .network-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+    .network-map{padding:8px;margin-bottom:18px}.network-map #communityMap{height:380px;border-radius:16px;background:#101a13;overflow:hidden}
+    .poll-option{display:block;padding:10px 12px;border:1px solid var(--border);border-radius:10px;margin:8px 0;cursor:pointer}
+    .poll-option input{margin-right:9px}.poll-result{height:7px;border-radius:9px;background:#293a2c;overflow:hidden;margin-top:6px}.poll-result span{display:block;height:100%;background:linear-gradient(90deg,#739b73,#d4e9bd)}
+    .network-meta{font-size:.76rem;color:var(--muted)}
+    @media(max-width:850px){.network-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.network-map #communityMap{height:300px}}
+    @media(max-width:560px){.network-grid{grid-template-columns:1fr}.network-map #communityMap{height:270px}}
+
   </style>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=5" defer></script></head>
@@ -1344,6 +1358,7 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script>
     "use strict";
 
@@ -2209,6 +2224,55 @@
       }
 
 
+
+      const networkEsc = (value) => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+      const networkApi = async (action, options={}) => {
+        const response = await fetch(`${API_URL}?action=${encodeURIComponent(action)}`, {method: options.method || "GET", headers: {"Content-Type":"application/json", ...(options.headers||{})}, ...(options.body ? {body:JSON.stringify(options.body)} : {})});
+        const data = await response.json().catch(()=>({}));
+        if(!response.ok || data.ok === false) throw new Error(data.error || "Request failed.");
+        return data;
+      };
+      function renderNetworkCards(targetId, items, kind) {
+        const target = document.getElementById(targetId); if(!target) return;
+        if(!items?.length){target.innerHTML='<div class="empty-state">Nothing published here yet. Check back soon.</div>';return;}
+        target.innerHTML=items.map(item=>{
+          const title=networkEsc(item.name||item.title||"Community");
+          const desc=networkEsc(item.description||item.story||item.bio||item.entry_text||"");
+          const image=item.image_url||item.portrait_url||item.thumbnail;
+          const imageHtml=image && /^https:\/\//i.test(image)?`<img loading="lazy" src="${networkEsc(image)}" alt="">`:"";
+          const tag=networkEsc(item.category||item.role||item.published_at||"Back Deck Live");
+          const link=item.website_url||item.social_url||(item.id&&kind==="video"?`https://www.youtube.com/watch?v=${encodeURIComponent(item.id)}`:null);
+          const action=link&&/^https:\/\//i.test(link)?`<a class="button button-secondary button-small" rel="noopener noreferrer" target="_blank" href="${networkEsc(link)}">${kind==="video"?"Watch episode":"Learn more"} ↗</a>`:"";
+          return `<article class="network-card">${imageHtml}<div class="network-card-body"><span class="network-tag">${tag}</span><h3>${title}</h3><p>${desc.slice(0,900)}</p><div class="network-actions">${action}</div></div></article>`;
+        }).join("");
+      }
+      async function loadNetworkMap(){
+        try{
+          const data=await networkApi("map-locations"); const items=data.locations||[];
+          renderNetworkCards("mapLocationCards",items.map(x=>({...x,title:x.name,description:x.description,website_url:x.website_url})));
+          if(!window.L){const el=document.getElementById("communityMap");el.innerHTML='<div class="empty-state">Map tiles are unavailable in this browser. Browse the published locations below.</div>';return;}
+          const map=L.map("communityMap").setView([47.2529,-122.4443],11);
+          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
+          const points=items.filter(x=>Number.isFinite(Number(x.lat))&&Number.isFinite(Number(x.lng)));
+          points.forEach(x=>L.marker([x.lat,x.lng]).addTo(map).bindPopup(`<strong>${networkEsc(x.name)}</strong><br>${networkEsc(x.category)}<br>${networkEsc(x.description)}`));
+          if(points.length){const group=L.featureGroup(points.map(x=>L.marker([x.lat,x.lng])));if(points.length>1)map.fitBounds(group.getBounds().pad(.15));}
+        }catch(e){document.getElementById("mapLocationCards").innerHTML='<div class="empty-state">Community map is temporarily unavailable.</div>';}
+      }
+      async function loadNetworkPublic(){
+        try{const d=await networkApi("spotlights");renderNetworkCards("spotlightCards",d.spotlights,"spotlight");}catch(e){}
+        try{const d=await networkApi("stories");renderNetworkCards("storyCards",d.stories,"story");}catch(e){}
+        try{const d=await networkApi("challenges");const target=document.getElementById("challengeCards");const items=d.challenges||[];if(!items.length){target.innerHTML='<div class="empty-state">No active challenges right now.</div>';return;}target.innerHTML=items.map(x=>`<article class="network-card"><div class="network-card-body"><span class="network-tag">Community challenge</span><h3>${networkEsc(x.title)}</h3><p>${networkEsc(x.description)}</p><p>${networkEsc(x.instructions)}</p><form class="challenge-form form-grid" data-id="${networkEsc(x.id)}"><div><label>Your display name</label><input class="field" name="display_name" required minlength="2" maxlength="100"></div><div><label>Entry text or story</label><textarea class="field" name="entry_text" maxlength="3000"></textarea></div><div><label>Photo URL (optional, HTTPS)</label><input class="field" name="image_url" type="url" placeholder="https://…"></div><div><label>Email (optional, private)</label><input class="field" name="contact_email" type="email"></div><button class="button button-primary">Submit entry</button><p class="form-status" aria-live="polite"></p></form></div></article>`).join("");target.querySelectorAll(".challenge-form").forEach(form=>form.addEventListener("submit",async e=>{e.preventDefault();const b=form.querySelector("button"),s=form.querySelector(".form-status");const fd=new FormData(form);b.disabled=true;try{const body=Object.fromEntries(fd.entries());body.challenge_id=form.dataset.id;body.website="";await networkApi("challenge-entry",{method:"POST",body});s.className="form-status success";s.textContent="Entry sent for review.";form.reset();}catch(err){s.className="form-status error";s.textContent=err.message;}finally{b.disabled=false;}}));}catch(e){}
+        try{const d=await networkApi("polls");const target=document.getElementById("pollCards");const polls=d.polls||[];if(!polls.length){target.innerHTML='<div class="empty-state">No active polls right now. Check back soon.</div>';return;}target.innerHTML=polls.map(p=>{const opts=Array.isArray(p.options)?p.options:[];return `<article class="network-card"><div class="network-card-body"><span class="network-tag">${Number(p.total_votes)||0} votes</span><h3>${networkEsc(p.question)}</h3><p>${networkEsc(p.description)}</p><form class="poll-form" data-id="${networkEsc(p.id)}">${opts.map((o,i)=>{const key=typeof o==="string"?o:o.key;const label=typeof o==="string"?o:o.label;const count=p.counts?.[key]||0;const pct=p.total_votes?Math.round(count/p.total_votes*100):0;return `<label class="poll-option"><input type="radio" name="option_key" value="${networkEsc(key)}" required>${networkEsc(label)}<div class="network-meta">${count} votes (${pct}%)</div><div class="poll-result"><span style="width:${pct}%"></span></div></label>`;}).join("")}<button class="button button-primary button-small">Vote</button><p class="form-status" aria-live="polite"></p></form></div></article>`}).join("");target.querySelectorAll(".poll-form").forEach(form=>form.addEventListener("submit",async e=>{e.preventDefault();const selected=form.querySelector('input[name="option_key"]:checked');const status=form.querySelector(".form-status"),btn=form.querySelector("button");if(!selected)return;let voter;try{voter=localStorage.getItem("bdl_voter_id");if(!voter){voter=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(36).slice(2));localStorage.setItem("bdl_voter_id",voter);}}catch{voter=crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(36).slice(2);}btn.disabled=true;try{await networkApi("poll-vote",{method:"POST",body:{poll_id:form.dataset.id,option_key:selected.value,voter_hash:voter}});status.className="form-status success";status.textContent="Vote recorded. Thanks for taking part!";}catch(err){status.className="form-status error";status.textContent=err.message;}finally{btn.disabled=false;}}));}catch(e){}
+        try{const d=await networkApi("youtube-latest");renderNetworkCards("youtubeEpisodeCards",(d.videos||[]).map(v=>({...v,title:v.title,description:v.description,thumbnail:v.thumbnail,id:v.id,published_at:v.published_at})).map(v=>({...v,website_url:`https://www.youtube.com/watch?v=${v.id}`})),"video");}catch(e){}
+        try{const d=await networkApi("admin-network");renderNetworkCards("guestProfileCards",(d.network?.back_deck_guest_profiles||[]).filter(x=>x.status==="published"),"guest");}catch(e){}
+      }
+      async function submitCommunityStory(event){
+        event.preventDefault();const form=event.currentTarget,status=document.getElementById("storyStatus"),button=document.getElementById("storySubmit");
+        if(document.getElementById("storyWebsite").value.trim()){form.reset();status.textContent="Thank you.";return;}
+        const body={title:document.getElementById("storyTitle").value.trim(),category:document.getElementById("storyCategory").value,name:document.getElementById("storyName").value.trim(),email:document.getElementById("storyEmail").value.trim(),story:document.getElementById("storyBody").value.trim(),website:""};
+        button.disabled=true;try{await networkApi("story-submit",{method:"POST",body});form.reset();status.className="form-status success";status.textContent="Thank you. Your story has been sent for private review.";}catch(e){status.className="form-status error";status.textContent=e.message;}finally{button.disabled=false;}
+      }
+
       function setupEvents() {
         $("#episodeSearch").addEventListener("input", renderEpisodes);
         $("#categoryFilter").addEventListener("change", renderEpisodes);
@@ -2216,6 +2280,7 @@
         $("#refreshStats").addEventListener("click", loadSubscriberStats);
         $("#shareEpisode").addEventListener("click", shareEpisode);
         $("#communityForm").addEventListener("submit", submitCommunityForm);
+        $("#storyForm").addEventListener("submit", submitCommunityStory);
         $("#guestApplicationForm").addEventListener("submit", submitGuestApplication);
         setupProducerDesk();
         $("#currentYear").textContent = String(new Date().getFullYear());
@@ -2235,7 +2300,9 @@
         await Promise.allSettled([
           loadEpisodes(),
           loadSubscriberStats(),
-          loadCrew()
+          loadCrew(),
+          loadNetworkMap(),
+          loadNetworkPublic()
         ]);
       }
 
