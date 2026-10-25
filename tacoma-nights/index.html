@@ -928,7 +928,7 @@
               <div class="video-placeholder">
                 <div>
                   <div class="play-icon" aria-hidden="true">▶</div>
-                  <h3>Loading the latest episode</h3>
+                  <h3>Loading Tacoma Nights</h3>
                   <p class="muted">Connecting to Tacoma Nights…</p>
                 </div>
               </div>
@@ -938,11 +938,11 @@
               <div class="episode-kicker" id="featuredKicker">Featured episode</div>
               <h3 class="episode-title" id="featuredTitle">Tacoma Nights</h3>
               <p class="episode-description" id="featuredDescription">
-                The latest conversation from Tacoma and the Pacific Northwest.
+                The latest episode from Tacoma and the Pacific Northwest.
               </p>
               <div class="muted" id="featuredDate"></div>
               <div class="episode-actions">
-                <a class="button button-primary" id="watchOnYouTube" href="https://www.youtube.com/@CrowRules_TV/streams" target="_blank" rel="noopener noreferrer">Watch on YouTube ↗</a>
+                <a class="button button-primary" id="watchOnYouTube" href="https://www.youtube.com/playlist?list=PLYK7RQq4_mhw" target="_blank" rel="noopener noreferrer">Watch on YouTube ↗</a>
                 <button class="button button-secondary" id="shareEpisode" type="button">Share episode</button>
               </div>
               <p class="status-line" id="episodeStatus" role="status" aria-live="polite">Loading episode information…</p>
@@ -972,8 +972,8 @@
 
             <div class="panel" style="margin-top:20px">
               <div class="panel-inner">
-                <span class="eyebrow">The weekly hangout</span>
-                <h3 style="margin-top:12px">Your seat is waiting.</h3>
+                <span class="eyebrow">The weekly broadcast</span>
+                <h3 style="margin-top:12px">Tacoma comes alive after dark.</h3>
                 <p class="muted">Settle in for community talk, news, life, mental health, business, sports, and stories from around the PNW.</p>
                 <ul class="info-list">
                   <li>
@@ -997,7 +997,7 @@
         <div class="section-heading reveal" style="margin-top:75px;margin-bottom:20px">
           <span class="eyebrow">From the archive</span>
           <h2>Previous conversations</h2>
-          <p>Search the episode library and choose what to watch next.</p>
+          <p>Episodes are discovered automatically from the official Tacoma Nights YouTube playlist. Refresh to check for new uploads.</p>
         </div>
 
         <div class="archive-tools reveal">
@@ -1242,6 +1242,7 @@
 
       const state = {
         episodes: [],
+        discoverySource: false,
         crew: [],
         featured: null,
         categories: new Set(),
@@ -1414,7 +1415,7 @@
         $("#featuredTitle").textContent = title;
         $("#featuredDescription").textContent = episode
           ? episodeDescription(episode)
-          : "Watch the featured Tacoma Nights video on CrowRules TV.";
+           : "Watch Tacoma Nights episodes and conversations from the official playlist.";
 
         $("#featuredDate").textContent = episode
           ? formatDate(episode.published_at || episode.created_at)
@@ -1429,7 +1430,7 @@
           ? "The episode library could not be loaded. Open the Tacoma Nights playlist to browse available episodes."
           : episode
             ? "Featured from the episode library."
-            : "Visit the channel for the latest available streams.";
+             : "Open the Tacoma Nights playlist for the latest episodes.";
 
         $("#shareEpisode").disabled = !id;
       }
@@ -1533,7 +1534,7 @@
           episodes.forEach(episode => grid.appendChild(createEpisodeCard(episode)));
         }
 
-        $("#archiveStatus").textContent = `${episodes.length} episode${episodes.length === 1 ? "" : "s"} shown`;
+        $("#archiveStatus").textContent = `${episodes.length} episode${episodes.length === 1 ? "" : "s"} shown${state.discoverySource ? " · Auto-synced from the Tacoma Nights YouTube playlist" : ""}`;
       }
 
       async function loadEpisodes() {
@@ -1544,6 +1545,7 @@
         try {
           const data = await apiRequest("episodes");
           const episodes = getArray(data, ["episodes", "results", "items"]);
+          state.discoverySource = data.source === "youtube_playlist_feed" || data.playlistId === PLAYLIST_ID;
           state.episodes = sortEpisodes(episodes.filter(item => item && typeof item === "object"));
 
           if (state.episodes.length) {
