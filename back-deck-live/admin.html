@@ -1,0 +1,817 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101411">
+  <title>Back Deck Live | Admin</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4"></script>
+
+  <style>
+    :root {
+      --bg: #101411;
+      --panel: #191f1a;
+      --panel2: #202820;
+      --border: #344035;
+      --text: #f2f2e9;
+      --muted: #a6b2a4;
+      --amber: #e9ad62;
+      --green: #92c9a0;
+      --red: #ff8f88;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(ellipse at top right, #35432b 0, transparent 42%),
+        var(--bg);
+      color: var(--text);
+      font: 15px/1.6 "DM Sans", sans-serif;
+      min-height: 100vh;
+    }
+
+    h1, h2, h3 {
+      font-family: "Space Grotesk", sans-serif;
+      line-height: 1.2;
+    }
+
+    h1 { font-size: clamp(2rem, 4vw, 3.2rem); margin: 8px 0; }
+    h2 { font-size: 1.4rem; }
+    p { color: var(--muted); }
+
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+
+    a { color: var(--amber); }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px max(5%, calc((100% - 1400px) / 2));
+      background: #111711eF;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      backdrop-filter: blur(14px);
+    }
+
+    .brand {
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+    }
+
+    .brand span { color: var(--amber); }
+
+    .wrap { max-width: 1400px; margin: auto; padding: 36px 5% 70px; }
+    .eyebrow { color: var(--amber); text-transform: uppercase; letter-spacing: .15em; font-size: .75rem; font-weight: 700; }
+
+    .panel {
+      background: linear-gradient(145deg, #202820, #171d18);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 24px;
+      margin: 22px 0;
+      box-shadow: 0 14px 40px #0002;
+    }
+
+    .login-panel { max-width: 480px; margin: 48px auto; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .field { display: flex; flex-direction: column; gap: 7px; margin: 12px 0; }
+    .field.full { grid-column: 1 / -1; }
+
+    label { color: #dce5d8; font-size: .88rem; font-weight: 600; }
+
+    input, textarea, select {
+      width: 100%;
+      color: var(--text);
+      background: #101610;
+      border: 1px solid #455344;
+      border-radius: 9px;
+      padding: 12px 13px;
+      min-height: 44px;
+    }
+
+    textarea { resize: vertical; min-height: 110px; }
+    input:focus, textarea:focus, select:focus { outline: 2px solid #e9ad6270; border-color: var(--amber); }
+
+    .btn {
+      border: 1px solid #566451;
+      background: var(--panel2);
+      color: var(--text);
+      border-radius: 9px;
+      padding: 10px 15px;
+      font-weight: 700;
+      transition: transform .15s, background .15s;
+    }
+
+    .btn:hover { transform: translateY(-1px); background: #303c30; }
+    .btn.primary { background: var(--amber); color: #20190f; border-color: var(--amber); }
+    .btn.danger { color: var(--red); border-color: #78433e; }
+    .btn.small { padding: 6px 10px; font-size: .82rem; }
+
+    .toolbar { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 25px 0; }
+    .tab.active { background: var(--amber); color: #20190f; border-color: var(--amber); }
+
+    .hidden { display: none !important; }
+
+    .notice {
+      padding: 12px 15px;
+      border-radius: 9px;
+      margin: 14px 0;
+      background: #263127;
+      border: 1px solid #455344;
+      color: var(--text);
+      overflow-wrap: anywhere;
+    }
+
+    .notice.error { background: #351e1d; border-color: #78433e; color: #ffd3ce; }
+    .notice.success { background: #203327; border-color: #426b4c; color: #d2f4d7; }
+
+    .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .stat { padding: 18px; background: #111711; border: 1px solid var(--border); border-radius: 12px; }
+    .stat strong { display: block; font: 700 1.8rem "Space Grotesk", sans-serif; color: var(--amber); }
+    .stat span { color: var(--muted); font-size: .85rem; }
+
+    .section-heading { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; }
+
+    .table-wrap { overflow-x: auto; margin-top: 15px; }
+    table { width: 100%; border-collapse: collapse; min-width: 760px; }
+    th, td { text-align: left; vertical-align: top; padding: 13px 11px; border-bottom: 1px solid var(--border); }
+    th { color: var(--amber); font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; }
+    td { overflow-wrap: anywhere; }
+    td .toolbar { min-width: 150px; }
+
+    .status {
+      display: inline-block;
+      border-radius: 30px;
+      padding: 3px 9px;
+      background: #29372b;
+      color: #c4e3c7;
+      font-size: .78rem;
+    }
+
+    .muted { color: var(--muted); font-size: .9rem; }
+    .checkline { display: flex; align-items: center; gap: 10px; margin: 15px 0; }
+    .checkline input { width: auto; min-height: auto; }
+    footer { padding: 25px 5%; border-top: 1px solid var(--border); text-align: center; color: var(--muted); }
+
+    @media (max-width: 720px) {
+      .grid, .stats { grid-template-columns: 1fr; }
+      .topbar { padding: 13px 5%; }
+      .wrap { padding-top: 24px; }
+      .panel { padding: 17px; }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="brand">BACK DECK <span>LIVE</span> <small style="color:#a6b2a4;font-weight:400">/ ADMIN</small></div>
+    <div class="toolbar">
+      <a href="index.html">View website</a>
+      <button class="btn small hidden" id="logoutBtn" type="button">Sign out</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section id="loginView" class="panel login-panel">
+      <div class="eyebrow">Authorized access only</div>
+      <h1>Admin sign in</h1>
+      <p>Manage Back Deck Live episodes, crew profiles, and community submissions.</p>
+
+      <form id="loginForm">
+        <div class="field">
+          <label for="email">Email address</label>
+          <input id="email" type="email" autocomplete="username" required>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" type="password" autocomplete="current-password" required>
+        </div>
+        <button class="btn primary" type="submit" style="width:100%">Sign in securely</button>
+      </form>
+      <div id="loginMessage" class="notice hidden" role="status"></div>
+      <p class="muted">Admin accounts must be created in Supabase Auth and explicitly authorized in the database. This page does not offer public registration.</p>
+    </section>
+
+    <section id="dashboard" class="hidden">
+      <div class="eyebrow">Back Deck Live control room</div>
+      <h1>Good to see you.</h1>
+      <p id="signedInAs">Checking administrator access…</p>
+      <div id="globalMessage" class="notice hidden" role="status"></div>
+
+      <div class="stats">
+        <div class="stat"><strong id="episodeCount">—</strong><span>Total episodes</span></div>
+        <div class="stat"><strong id="crewCount">—</strong><span>Crew profiles</span></div>
+        <div class="stat"><strong id="submissionCount">—</strong><span>Open submissions</span></div>
+      </div>
+
+      <nav class="tabs" aria-label="Admin sections">
+        <button class="btn tab active" data-tab="episodes" type="button">Episodes</button>
+        <button class="btn tab" data-tab="crew" type="button">Crew profiles</button>
+        <button class="btn tab" data-tab="submissions" type="button">Submissions</button>
+      </nav>
+
+      <!-- EPISODES -->
+      <section id="episodesSection" class="admin-section">
+        <div class="panel">
+          <div class="section-heading">
+            <div>
+              <div class="eyebrow">Video library</div>
+              <h2 id="episodeFormTitle">Add an episode</h2>
+            </div>
+            <button class="btn" id="episodeReset" type="button">Clear form</button>
+          </div>
+
+          <form id="episodeForm">
+            <input type="hidden" id="episodeId">
+            <div class="grid">
+              <div class="field">
+                <label for="episodeTitle">Episode title *</label>
+                <input id="episodeTitle" maxlength="180" required>
+              </div>
+              <div class="field">
+                <label for="episodeVideo">YouTube video ID *</label>
+                <input id="episodeVideo" placeholder="11-character video ID" pattern="[A-Za-z0-9_-]{11}" required>
+              </div>
+              <div class="field">
+                <label for="episodeCategory">Category</label>
+                <select id="episodeCategory">
+                  <option>Back Deck Live</option>
+                  <option>Community</option>
+                  <option>Business</option>
+                  <option>Entertainment</option>
+                  <option>Special</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="episodeDate">Published date</label>
+                <input id="episodeDate" type="datetime-local">
+              </div>
+              <div class="field">
+                <label for="episodeOrder">Sort order (lower appears first)</label>
+                <input id="episodeOrder" type="number" value="100">
+              </div>
+              <div class="field full">
+                <label for="episodeDescription">Description</label>
+                <textarea id="episodeDescription" maxlength="5000"></textarea>
+              </div>
+            </div>
+            <label class="checkline"><input id="episodePublished" type="checkbox"> Publish this episode on the public website</label>
+            <div class="toolbar">
+              <button class="btn primary" type="submit">Save episode</button>
+              <button class="btn hidden" id="episodeCancel" type="button">Cancel edit</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="panel">
+          <div class="section-heading"><h2>Episode library</h2><button class="btn" id="refreshEpisodes" type="button">Refresh</button></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Episode</th><th>YouTube</th><th>Publication</th><th>Actions</th></tr></thead>
+              <tbody id="episodesRows"><tr><td colspan="4">Loading episodes…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- CREW -->
+      <section id="crewSection" class="admin-section hidden">
+        <div class="panel">
+          <div class="section-heading">
+            <div><div class="eyebrow">People behind the show</div><h2 id="crewFormTitle">Add a crew profile</h2></div>
+            <button class="btn" id="crewReset" type="button">Clear form</button>
+          </div>
+
+          <form id="crewForm">
+            <input type="hidden" id="crewId">
+            <div class="grid">
+              <div class="field">
+                <label for="crewName">Display name *</label>
+                <input id="crewName" maxlength="100" required>
+              </div>
+              <div class="field">
+                <label for="crewRole">Role *</label>
+                <input id="crewRole" maxlength="100" placeholder="Host, producer, guest contributor…" required>
+              </div>
+              <div class="field full">
+                <label for="crewBio">Short biography</label>
+                <textarea id="crewBio" maxlength="2000"></textarea>
+              </div>
+              <div class="field">
+                <label for="crewAvatar">Portrait image URL (optional)</label>
+                <input id="crewAvatar" type="url" placeholder="https://…">
+              </div>
+              <div class="field">
+                <label for="crewProfile">Profile or social URL (optional)</label>
+                <input id="crewProfile" type="url" placeholder="https://…">
+              </div>
+              <div class="field">
+                <label for="crewOrder">Sort order</label>
+                <input id="crewOrder" type="number" value="100">
+              </div>
+            </div>
+            <label class="checkline"><input id="crewPublished" type="checkbox"> Publish this profile on the public website</label>
+            <div class="toolbar">
+              <button class="btn primary" type="submit">Save profile</button>
+              <button class="btn hidden" id="crewCancel" type="button">Cancel edit</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="panel">
+          <div class="section-heading"><h2>Crew directory</h2><button class="btn" id="refreshCrew" type="button">Refresh</button></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Name</th><th>Role</th><th>Publication</th><th>Actions</th></tr></thead>
+              <tbody id="crewRows"><tr><td colspan="4">Loading crew…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SUBMISSIONS -->
+      <section id="submissionsSection" class="admin-section hidden">
+        <div class="panel">
+          <div class="section-heading">
+            <div><div class="eyebrow">Community inbox</div><h2>Audience submissions</h2></div>
+            <button class="btn" id="refreshSubmissions" type="button">Refresh</button>
+          </div>
+          <p>Review topic ideas, guest suggestions, local businesses, and community stories. Keep submitter contact details private.</p>
+          <div class="field" style="max-width:320px">
+            <label for="submissionFilter">Filter by status</label>
+            <select id="submissionFilter">
+              <option value="all">All submissions</option>
+              <option value="new">New</option>
+              <option value="reviewing">Reviewing</option>
+              <option value="contacted">Contacted</option>
+              <option value="resolved">Resolved</option>
+              <option value="spam">Spam</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Received</th><th>Submitter</th><th>Type / message</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="submissionRows"><tr><td colspan="5">Loading submissions…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <footer>
+    CrowRules Entertainment · One Company. One Universe.
+    <div><a href="index.html">Back to Back Deck Live</a></div>
+  </footer>
+
+<script>
+(() => {
+  "use strict";
+
+  const CONFIG = {
+    supabaseUrl: "https://cevylpnoexugwgygvtgu.supabase.co",
+    supabasePublishableKey: "sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-"
+  };
+
+  const $ = id => document.getElementById(id);
+  const client = window.supabase.createClient(
+    CONFIG.supabaseUrl,
+    CONFIG.supabasePublishableKey,
+    { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
+  );
+
+  let currentUser = null;
+  let episodes = [];
+  let crew = [];
+  let submissions = [];
+
+  function showMessage(message, type = "", target = "globalMessage") {
+    const el = $(target);
+    el.textContent = message;
+    el.className = "notice" + (type ? " " + type : "");
+    el.classList.remove("hidden");
+  }
+
+  function hideMessage(target) {
+    $(target).classList.add("hidden");
+  }
+
+  function safe(value) {
+    return String(value ?? "").replace(/[&<>"']/g, char => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    })[char]);
+  }
+
+  function dateValue(value) {
+    if (!value) return "";
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return "";
+    const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+    return local.toISOString().slice(0, 16);
+  }
+
+  function formatDate(value) {
+    if (!value) return "Not set";
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? "Not set" : d.toLocaleString();
+  }
+
+  async function requireAdmin(user) {
+    const { data, error } = await client
+      .from("back_deck_admins")
+      .select("user_id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) throw new Error("This account is signed in but is not authorized as a Back Deck Live administrator.");
+  }
+
+  async function startDashboard(user) {
+    currentUser = user;
+    $("signedInAs").textContent = "Signed in as " + user.email;
+    $("loginView").classList.add("hidden");
+    $("dashboard").classList.remove("hidden");
+    $("logoutBtn").classList.remove("hidden");
+    await refreshAll();
+  }
+
+  async function handleSession(session) {
+    if (!session?.user) {
+      currentUser = null;
+      $("dashboard").classList.add("hidden");
+      $("logoutBtn").classList.add("hidden");
+      $("loginView").classList.remove("hidden");
+      return;
+    }
+
+    try {
+      await requireAdmin(session.user);
+      await startDashboard(session.user);
+    } catch (error) {
+      await client.auth.signOut();
+      $("dashboard").classList.add("hidden");
+      $("logoutBtn").classList.add("hidden");
+      $("loginView").classList.remove("hidden");
+      showMessage(error.message || "Admin access could not be verified.", "error", "loginMessage");
+    }
+  }
+
+  $("loginForm").addEventListener("submit", async event => {
+    event.preventDefault();
+    hideMessage("loginMessage");
+
+    const { data, error } = await client.auth.signInWithPassword({
+      email: $("email").value.trim(),
+      password: $("password").value
+    });
+
+    if (error) {
+      showMessage(error.message, "error", "loginMessage");
+      return;
+    }
+
+    try {
+      await requireAdmin(data.user);
+      await startDashboard(data.user);
+    } catch (err) {
+      await client.auth.signOut();
+      showMessage(err.message || "This account is not authorized.", "error", "loginMessage");
+    }
+  });
+
+  $("logoutBtn").addEventListener("click", async () => {
+    await client.auth.signOut();
+    $("password").value = "";
+    await handleSession(null);
+  });
+
+  document.querySelectorAll("[data-tab]").forEach(button => {
+    button.addEventListener("click", () => {
+      document.querySelectorAll("[data-tab]").forEach(b => b.classList.remove("active"));
+      button.classList.add("active");
+      document.querySelectorAll(".admin-section").forEach(section => section.classList.add("hidden"));
+      $(button.dataset.tab + "Section").classList.remove("hidden");
+    });
+  });
+
+  async function refreshAll() {
+    await Promise.all([loadEpisodes(), loadCrew(), loadSubmissions()]);
+  }
+
+  async function loadEpisodes() {
+    const { data, error } = await client
+      .from("back_deck_episodes")
+      .select("*")
+      .order("sort_order", { ascending: true })
+      .order("published_at", { ascending: false });
+
+    if (error) {
+      $("episodesRows").innerHTML = `<tr><td colspan="4">Could not load episodes: ${safe(error.message)}</td></tr>`;
+      return;
+    }
+
+    episodes = data || [];
+    $("episodeCount").textContent = episodes.length;
+
+    $("episodesRows").innerHTML = episodes.length ? episodes.map(item => `
+      <tr>
+        <td><strong>${safe(item.title)}</strong><br><span class="muted">${safe(item.category || "Back Deck Live")}</span></td>
+        <td><a href="https://www.youtube.com/watch?v=${encodeURIComponent(item.youtube_video_id)}" target="_blank" rel="noopener noreferrer">Watch video ↗</a><br><span class="muted">${safe(item.youtube_video_id)}</span></td>
+        <td><span class="status">${item.is_published ? "Published" : "Draft"}</span><br><span class="muted">${safe(formatDate(item.published_at))}</span></td>
+        <td><div class="toolbar">
+          <button class="btn small" data-edit-episode="${safe(item.id)}" type="button">Edit</button>
+          <button class="btn small danger" data-delete-episode="${safe(item.id)}" type="button">Delete</button>
+        </div></td>
+      </tr>`).join("") : `<tr><td colspan="4">No episodes yet. Add your first episode above.</td></tr>`;
+  }
+
+  function resetEpisodeForm() {
+    $("episodeForm").reset();
+    $("episodeId").value = "";
+    $("episodePublished").checked = false;
+    $("episodeOrder").value = "100";
+    $("episodeFormTitle").textContent = "Add an episode";
+    $("episodeCancel").classList.add("hidden");
+  }
+
+  $("episodeReset").addEventListener("click", resetEpisodeForm);
+  $("episodeCancel").addEventListener("click", resetEpisodeForm);
+  $("refreshEpisodes").addEventListener("click", loadEpisodes);
+
+  $("episodesRows").addEventListener("click", async event => {
+    const edit = event.target.closest("[data-edit-episode]");
+    const del = event.target.closest("[data-delete-episode]");
+
+    if (edit) {
+      const item = episodes.find(x => x.id === edit.dataset.editEpisode);
+      if (!item) return;
+      $("episodeId").value = item.id;
+      $("episodeTitle").value = item.title || "";
+      $("episodeVideo").value = item.youtube_video_id || "";
+      $("episodeCategory").value = item.category || "Back Deck Live";
+      $("episodeDate").value = dateValue(item.published_at);
+      $("episodeOrder").value = item.sort_order ?? 100;
+      $("episodeDescription").value = item.description || "";
+      $("episodePublished").checked = !!item.is_published;
+      $("episodeFormTitle").textContent = "Edit episode";
+      $("episodeCancel").classList.remove("hidden");
+      $("episodeForm").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    if (del) {
+      const item = episodes.find(x => x.id === del.dataset.deleteEpisode);
+      if (!item || !confirm(`Delete "${item.title}"? This cannot be undone.`)) return;
+      const { error } = await client.from("back_deck_episodes").delete().eq("id", item.id);
+      if (error) showMessage("Delete failed: " + error.message, "error");
+      else { showMessage("Episode deleted.", "success"); await loadEpisodes(); }
+    }
+  });
+
+  $("episodeForm").addEventListener("submit", async event => {
+    event.preventDefault();
+    const id = $("episodeId").value;
+    const videoId = $("episodeVideo").value.trim();
+
+    if (!/^[A-Za-z0-9_-]{11}$/.test(videoId)) {
+      showMessage("Enter the 11-character YouTube video ID, not the full URL.", "error");
+      return;
+    }
+
+    const publishedAt = $("episodeDate").value
+      ? new Date($("episodeDate").value).toISOString()
+      : null;
+
+    const payload = {
+      title: $("episodeTitle").value.trim(),
+      youtube_video_id: videoId,
+      category: $("episodeCategory").value,
+      published_at: publishedAt,
+      description: $("episodeDescription").value.trim(),
+      sort_order: Number($("episodeOrder").value || 100),
+      is_published: $("episodePublished").checked
+    };
+
+    const result = id
+      ? await client.from("back_deck_episodes").update(payload).eq("id", id)
+      : await client.from("back_deck_episodes").insert(payload);
+
+    if (result.error) {
+      showMessage("Could not save episode: " + result.error.message, "error");
+      return;
+    }
+
+    showMessage("Episode saved.", "success");
+    resetEpisodeForm();
+    await loadEpisodes();
+  });
+
+  async function loadCrew() {
+    const { data, error } = await client
+      .from("back_deck_crew")
+      .select("*")
+      .order("sort_order", { ascending: true })
+      .order("display_name", { ascending: true });
+
+    if (error) {
+      $("crewRows").innerHTML = `<tr><td colspan="4">Could not load crew: ${safe(error.message)}</td></tr>`;
+      return;
+    }
+
+    crew = data || [];
+    $("crewCount").textContent = crew.length;
+
+    $("crewRows").innerHTML = crew.length ? crew.map(item => `
+      <tr>
+        <td><strong>${safe(item.display_name)}</strong><br><span class="muted">${safe(item.bio || "")}</span></td>
+        <td>${safe(item.role)}</td>
+        <td><span class="status">${item.is_published ? "Published" : "Draft"}</span></td>
+        <td><div class="toolbar">
+          <button class="btn small" data-edit-crew="${safe(item.id)}" type="button">Edit</button>
+          <button class="btn small danger" data-delete-crew="${safe(item.id)}" type="button">Delete</button>
+        </div></td>
+      </tr>`).join("") : `<tr><td colspan="4">No crew profiles yet. Add a profile above.</td></tr>`;
+  }
+
+  function resetCrewForm() {
+    $("crewForm").reset();
+    $("crewId").value = "";
+    $("crewPublished").checked = false;
+    $("crewOrder").value = "100";
+    $("crewFormTitle").textContent = "Add a crew profile";
+    $("crewCancel").classList.add("hidden");
+  }
+
+  $("crewReset").addEventListener("click", resetCrewForm);
+  $("crewCancel").addEventListener("click", resetCrewForm);
+  $("refreshCrew").addEventListener("click", loadCrew);
+
+  $("crewRows").addEventListener("click", async event => {
+    const edit = event.target.closest("[data-edit-crew]");
+    const del = event.target.closest("[data-delete-crew]");
+
+    if (edit) {
+      const item = crew.find(x => x.id === edit.dataset.editCrew);
+      if (!item) return;
+      $("crewId").value = item.id;
+      $("crewName").value = item.display_name || "";
+      $("crewRole").value = item.role || "";
+      $("crewBio").value = item.bio || "";
+      $("crewAvatar").value = item.avatar_url || "";
+      $("crewProfile").value = item.profile_url || "";
+      $("crewOrder").value = item.sort_order ?? 100;
+      $("crewPublished").checked = !!item.is_published;
+      $("crewFormTitle").textContent = "Edit crew profile";
+      $("crewCancel").classList.remove("hidden");
+      $("crewForm").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    if (del) {
+      const item = crew.find(x => x.id === del.dataset.deleteCrew);
+      if (!item || !confirm(`Delete the profile for "${item.display_name}"?`)) return;
+      const { error } = await client.from("back_deck_crew").delete().eq("id", item.id);
+      if (error) showMessage("Delete failed: " + error.message, "error");
+      else { showMessage("Crew profile deleted.", "success"); await loadCrew(); }
+    }
+  });
+
+  $("crewForm").addEventListener("submit", async event => {
+    event.preventDefault();
+    const id = $("crewId").value;
+
+    const payload = {
+      display_name: $("crewName").value.trim(),
+      role: $("crewRole").value.trim(),
+      bio: $("crewBio").value.trim(),
+      avatar_url: $("crewAvatar").value.trim() || null,
+      profile_url: $("crewProfile").value.trim() || null,
+      sort_order: Number($("crewOrder").value || 100),
+      is_published: $("crewPublished").checked
+    };
+
+    const result = id
+      ? await client.from("back_deck_crew").update(payload).eq("id", id)
+      : await client.from("back_deck_crew").insert(payload);
+
+    if (result.error) {
+      showMessage("Could not save crew profile: " + result.error.message, "error");
+      return;
+    }
+
+    showMessage("Crew profile saved.", "success");
+    resetCrewForm();
+    await loadCrew();
+  });
+
+  async function loadSubmissions() {
+    const { data, error } = await client
+      .from("back_deck_submissions")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      $("submissionRows").innerHTML = `<tr><td colspan="5">Could not load submissions: ${safe(error.message)}</td></tr>`;
+      return;
+    }
+
+    submissions = data || [];
+    const open = submissions.filter(x => !["resolved", "spam", "archived"].includes(x.status)).length;
+    $("submissionCount").textContent = open;
+    renderSubmissions();
+  }
+
+  function renderSubmissions() {
+    const filter = $("submissionFilter").value;
+    const items = submissions.filter(x => filter === "all" || x.status === filter);
+
+    $("submissionRows").innerHTML = items.length ? items.map(item => `
+      <tr>
+        <td>${safe(formatDate(item.created_at))}</td>
+        <td><strong>${safe(item.name)}</strong><br><a href="mailto:${encodeURIComponent(item.email || "")}">${safe(item.email)}</a></td>
+        <td><span class="status">${safe(item.submission_type)}</span><p>${safe(item.message)}</p></td>
+        <td>
+          <label class="hidden" for="status-${safe(item.id)}">Submission status</label>
+          <select id="status-${safe(item.id)}" data-status-id="${safe(item.id)}" aria-label="Status for ${safe(item.name)}">
+            ${["new","reviewing","contacted","resolved","spam","archived"].map(s =>
+              `<option value="${s}" ${item.status === s ? "selected" : ""}>${s}</option>`
+            ).join("")}
+          </select>
+        </td>
+        <td><button class="btn small danger" data-delete-submission="${safe(item.id)}" type="button">Delete</button></td>
+      </tr>`).join("") : `<tr><td colspan="5">No submissions match this filter.</td></tr>`;
+  }
+
+  $("submissionFilter").addEventListener("change", renderSubmissions);
+  $("refreshSubmissions").addEventListener("click", loadSubmissions);
+
+  $("submissionRows").addEventListener("change", async event => {
+    const select = event.target.closest("[data-status-id]");
+    if (!select) return;
+
+    const id = select.dataset.statusId;
+    const status = select.value;
+    const { error } = await client.from("back_deck_submissions").update({ status }).eq("id", id);
+
+    if (error) {
+      showMessage("Could not update submission: " + error.message, "error");
+      await loadSubmissions();
+      return;
+    }
+
+    const item = submissions.find(x => x.id === id);
+    if (item) item.status = status;
+    renderSubmissions();
+    $("submissionCount").textContent = submissions.filter(x =>
+      !["resolved", "spam", "archived"].includes(x.status)
+    ).length;
+    showMessage("Submission status updated.", "success");
+  });
+
+  $("submissionRows").addEventListener("click", async event => {
+    const del = event.target.closest("[data-delete-submission]");
+    if (!del) return;
+
+    const item = submissions.find(x => x.id === del.dataset.deleteSubmission);
+    if (!item || !confirm(`Permanently delete the submission from ${item.name}?`)) return;
+
+    const { error } = await client.from("back_deck_submissions").delete().eq("id", item.id);
+    if (error) showMessage("Could not delete submission: " + error.message, "error");
+    else {
+      showMessage("Submission deleted.", "success");
+      await loadSubmissions();
+    }
+  });
+
+  client.auth.onAuthStateChange((_event, session) => {
+    if (!session) {
+      currentUser = null;
+      $("dashboard").classList.add("hidden");
+      $("logoutBtn").classList.add("hidden");
+      $("loginView").classList.remove("hidden");
+    }
+  });
+
+  client.auth.getSession().then(({ data, error }) => {
+    if (error) {
+      showMessage(error.message, "error", "loginMessage");
+      return;
+    }
+    if (data.session) handleSession(data.session);
+  });
+})();
+</script>
+</body>
+</html>
