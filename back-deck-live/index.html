@@ -835,6 +835,25 @@
       }
       .reveal { opacity: 1; transform: none; }
     }
+
+    /* Private Producer Desk */
+    .producer-desk { padding: 34px; border: 1px solid rgba(196,230,188,.22); border-radius: var(--radius); background: linear-gradient(145deg, rgba(20,32,24,.96), rgba(8,14,11,.98)); }
+    .producer-grid { display: grid; grid-template-columns: minmax(220px,.7fr) minmax(0,1.3fr); gap: 24px; align-items: start; }
+    .producer-form { display: grid; gap: 12px; }
+    .producer-form label, .submission-card label { display: grid; gap: 6px; color: var(--muted); font-size: .83rem; font-weight: 700; }
+    .producer-form input, .submission-card select, .submission-card textarea { width: 100%; color: var(--text); background: #0a120d; border: 1px solid var(--border); border-radius: 10px; padding: 11px 12px; }
+    .producer-toolbar { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:16px; }
+    .producer-toolbar select { color:var(--text); background:#0a120d; border:1px solid var(--border); border-radius:10px; padding:10px; }
+    .submission-list { display:grid; gap:14px; }
+    .submission-card { border:1px solid var(--border); border-radius:14px; background:rgba(255,255,255,.025); padding:18px; }
+    .submission-card h3 { overflow-wrap:anywhere; margin-bottom:5px; }
+    .submission-meta { color:var(--muted); font-size:.8rem; margin-bottom:12px; overflow-wrap:anywhere; }
+    .submission-message { white-space:pre-wrap; overflow-wrap:anywhere; color:#e3e9df; margin-bottom:14px; }
+    .submission-fields { display:grid; grid-template-columns:minmax(150px,.7fr) minmax(0,1.3fr); gap:12px; }
+    .producer-status { min-height:1.5em; color:var(--muted); font-size:.88rem; }
+    .producer-status.error { color:var(--danger); }
+    @media (max-width: 760px) { .producer-grid,.submission-fields { grid-template-columns:1fr; } .producer-desk { padding:20px; } }
+
   </style>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=5" defer></script></head>
@@ -1160,6 +1179,53 @@
       </div>
     </section>
 
+
+    <section class="section" id="producer-desk">
+      <div class="container">
+        <div class="section-heading reveal">
+          <span class="eyebrow">Private team tools</span>
+          <h2>Producer Desk</h2>
+          <p>Authorized Back Deck Live administrators can review community submissions here. Sign in with the Supabase Auth account already approved in the Back Deck Live admin list.</p>
+        </div>
+        <div class="producer-desk reveal">
+          <div id="producerSignedOut">
+            <form class="producer-form" id="producerLoginForm" style="max-width:520px">
+              <label for="producerEmail">Administrator email
+                <input id="producerEmail" type="email" autocomplete="username" required maxlength="254">
+              </label>
+              <label for="producerPassword">Password
+                <input id="producerPassword" type="password" autocomplete="current-password" required>
+              </label>
+              <div><button class="button button-primary" id="producerLoginButton" type="submit">Sign in securely</button></div>
+              <p class="form-note">Only accounts explicitly listed as Back Deck Live administrators can access submissions. Do not use a shared or public device to save your password.</p>
+            </form>
+          </div>
+          <div id="producerSignedIn" hidden>
+            <div class="producer-toolbar">
+              <span id="producerIdentity" class="muted" style="align-self:center;margin-right:auto"></span>
+              <button class="button button-secondary button-small" id="producerRefresh" type="button">Refresh inbox</button>
+              <button class="button button-secondary button-small" id="producerSignOut" type="button">Sign out</button>
+            </div>
+            <div class="producer-toolbar">
+              <label for="producerStatusFilter" style="display:flex;align-items:center;gap:8px">Status
+                <select id="producerStatusFilter">
+                  <option value="all">All statuses</option><option value="new">New</option><option value="reviewing">Reviewing</option><option value="contacted">Contacted</option><option value="resolved">Resolved</option><option value="spam">Spam</option><option value="archived">Archived</option>
+                </select>
+              </label>
+              <label for="producerTypeFilter" style="display:flex;align-items:center;gap:8px">Type
+                <select id="producerTypeFilter">
+                  <option value="all">All types</option><option>Topic idea</option><option>Guest suggestion</option><option>Local business</option><option>Community story</option><option>Other</option>
+                </select>
+              </label>
+            </div>
+            <p id="producerStatus" class="producer-status" role="status" aria-live="polite"></p>
+            <div id="producerSubmissions" class="submission-list"></div>
+          </div>
+          <p id="producerPublicStatus" class="producer-status" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+    </section>
+
     <section class="section">
       <div class="container">
         <div class="closing-cta reveal">
@@ -1200,6 +1266,7 @@
             <a href="#about">About the show</a>
             <a href="#crew">Our crew</a>
             <a href="#community">Send an idea</a>
+            <a href="#producer-desk">Producer Desk</a>
           </div>
         </div>
 
@@ -1224,12 +1291,18 @@
   <button class="back-to-top" id="backToTop" type="button" aria-label="Back to top" title="Back to top">↑</button>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     "use strict";
 
     (() => {
       const API_BASE =
         "https://cevylpnoexugwgygvtgu.supabase.co/functions/v1/back-deck-live-api";
+      const SUPABASE_URL = "https://cevylpnoexugwgygvtgu.supabase.co";
+      const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";
+      const authClient = window.supabase?.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+      });
 
       const CHANNEL_URL = "https://www.youtube.com/@CrowRules_TV";
       const STREAMS_URL = CHANNEL_URL + "/streams";
@@ -1300,6 +1373,7 @@
             method: options.method || "GET",
             headers: {
               "Content-Type": "application/json",
+              ...(options.accessToken ? { Authorization: `Bearer ${options.accessToken}` } : {}),
               ...(options.headers || {})
             },
             body: options.body ? JSON.stringify(options.body) : undefined,
@@ -1872,6 +1946,170 @@
         }
       }
 
+
+      function setProducerMessage(message, isError = false) {
+        const el = $("#producerStatus");
+        el.textContent = message;
+        el.classList.toggle("error", isError);
+      }
+
+      function updateProducerAuthUI(session) {
+        $("#producerSignedOut").hidden = !!session;
+        $("#producerSignedIn").hidden = !session;
+        $("#producerIdentity").textContent = session?.user?.email ? `Signed in as ${session.user.email}` : "";
+        $("#producerPublicStatus").textContent = "";
+      }
+
+      function producerToken() {
+        return authClient?.auth.getSession().then(({ data, error }) => {
+          if (error) throw error;
+          if (!data.session?.access_token) throw new Error("Please sign in again.");
+          return data.session.access_token;
+        });
+      }
+
+      function createSubmissionCard(item) {
+        const card = document.createElement("article");
+        card.className = "submission-card";
+        const heading = document.createElement("h3");
+        heading.textContent = safeText(item.name, "Unnamed submission");
+        const meta = document.createElement("div");
+        meta.className = "submission-meta";
+        const date = item.created_at ? new Date(item.created_at).toLocaleString() : "Date unavailable";
+        meta.textContent = `${safeText(item.submission_type)} · ${date} · ${safeText(item.email)}`;
+        const message = document.createElement("div");
+        message.className = "submission-message";
+        message.textContent = safeText(item.message);
+        const fields = document.createElement("div");
+        fields.className = "submission-fields";
+        const statusLabel = document.createElement("label");
+        statusLabel.textContent = "Review status";
+        const statusSelect = document.createElement("select");
+        for (const [value, label] of [["new","New"],["reviewing","Reviewing"],["contacted","Contacted"],["resolved","Resolved"],["spam","Spam"],["archived","Archived"]]) {
+          const option = document.createElement("option");
+          option.value = value;
+          option.textContent = label;
+          option.selected = item.status === value;
+          statusSelect.appendChild(option);
+        }
+        statusLabel.appendChild(statusSelect);
+        const notesLabel = document.createElement("label");
+        notesLabel.textContent = "Private internal notes";
+        const notes = document.createElement("textarea");
+        notes.rows = 3;
+        notes.maxLength = 5000;
+        notes.value = safeText(item.admin_notes);
+        notes.placeholder = "Team-only follow-up notes; never shown publicly.";
+        notesLabel.appendChild(notes);
+        fields.append(statusLabel, notesLabel);
+        const actions = document.createElement("div");
+        actions.style.marginTop = "12px";
+        const save = document.createElement("button");
+        save.className = "button button-primary button-small";
+        save.type = "button";
+        save.textContent = "Save review";
+        save.addEventListener("click", async () => {
+          save.disabled = true;
+          save.textContent = "Saving…";
+          try {
+            const accessToken = await producerToken();
+            await apiRequest("admin-update-submission", {
+              method: "POST", accessToken,
+              body: { id: item.id, status: statusSelect.value, admin_notes: notes.value }
+            });
+            item.status = statusSelect.value;
+            item.admin_notes = notes.value;
+            setProducerMessage("Review saved.");
+            showToast("Producer Desk update saved.");
+          } catch (error) {
+            setProducerMessage(safeText(error.message, "Could not save this review."), true);
+          } finally {
+            save.disabled = false;
+            save.textContent = "Save review";
+          }
+        });
+        actions.appendChild(save);
+        card.append(heading, meta, message, fields, actions);
+        return card;
+      }
+
+      async function loadProducerSubmissions() {
+        const container = $("#producerSubmissions");
+        container.replaceChildren();
+        setProducerMessage("Loading private submissions…");
+        try {
+          const accessToken = await producerToken();
+          const url = new URL(API_BASE);
+          url.searchParams.set("action", "admin-submissions");
+          url.searchParams.set("status", $("#producerStatusFilter").value);
+          url.searchParams.set("type", $("#producerTypeFilter").value);
+          const response = await fetch(url, {
+            headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+            cache: "no-store"
+          });
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok || data.ok === false) throw new Error(data.error || `Request failed (${response.status}).`);
+          const items = Array.isArray(data.submissions) ? data.submissions : [];
+          if (!items.length) {
+            setProducerMessage("No submissions match these filters.");
+            return;
+          }
+          items.forEach(item => container.appendChild(createSubmissionCard(item)));
+          setProducerMessage(`${items.length} submission${items.length === 1 ? "" : "s"} loaded. Internal notes are visible only in this authenticated desk.`);
+        } catch (error) {
+          setProducerMessage(safeText(error.message, "Could not load submissions."), true);
+        }
+      }
+
+      function setupProducerDesk() {
+        if (!authClient) {
+          $("#producerPublicStatus").textContent = "Secure sign-in could not initialize. Please reload or contact the site administrator.";
+          $("#producerLoginButton").disabled = true;
+          return;
+        }
+        authClient.auth.getSession().then(({ data }) => {
+          updateProducerAuthUI(data.session);
+          if (data.session) loadProducerSubmissions();
+        }).catch(() => {
+          updateProducerAuthUI(null);
+          $("#producerPublicStatus").textContent = "Could not restore your sign-in session.";
+        });
+        authClient.auth.onAuthStateChange((_event, session) => {
+          updateProducerAuthUI(session);
+          if (session) loadProducerSubmissions();
+          else $("#producerSubmissions").replaceChildren();
+        });
+        $("#producerLoginForm").addEventListener("submit", async event => {
+          event.preventDefault();
+          const button = $("#producerLoginButton");
+          button.disabled = true;
+          button.textContent = "Signing in…";
+          setProducerMessage("");
+          try {
+            const { error } = await authClient.auth.signInWithPassword({
+              email: $("#producerEmail").value.trim(),
+              password: $("#producerPassword").value
+            });
+            if (error) throw error;
+            $("#producerPassword").value = "";
+          } catch (error) {
+            $("#producerPublicStatus").textContent = safeText(error.message, "Sign-in failed.");
+            $("#producerPublicStatus").classList.add("error");
+          } finally {
+            button.disabled = false;
+            button.textContent = "Sign in securely";
+          }
+        });
+        $("#producerRefresh").addEventListener("click", loadProducerSubmissions);
+        $("#producerStatusFilter").addEventListener("change", loadProducerSubmissions);
+        $("#producerTypeFilter").addEventListener("change", loadProducerSubmissions);
+        $("#producerSignOut").addEventListener("click", async () => {
+          const { error } = await authClient.auth.signOut();
+          if (error) setProducerMessage("Sign-out failed. Close this browser if you are on a shared device.", true);
+          else setProducerMessage("You are signed out.");
+        });
+      }
+
       function setupEvents() {
         $("#episodeSearch").addEventListener("input", renderEpisodes);
         $("#categoryFilter").addEventListener("change", renderEpisodes);
@@ -1879,6 +2117,7 @@
         $("#refreshStats").addEventListener("click", loadSubscriberStats);
         $("#shareEpisode").addEventListener("click", shareEpisode);
         $("#communityForm").addEventListener("submit", submitCommunityForm);
+        setupProducerDesk();
         $("#currentYear").textContent = String(new Date().getFullYear());
 
         $("#backToTop").addEventListener("click", () => {
