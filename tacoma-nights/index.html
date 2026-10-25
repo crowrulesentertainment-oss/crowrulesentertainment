@@ -1011,6 +1011,8 @@
           </select>
           <select class="field" id="episodeSort" aria-label="Sort episodes"><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="title">Title A–Z</option></select>
           <button class="button button-secondary" id="refreshEpisodes" type="button">↻ Refresh all videos</button>
+          <button class="button button-secondary" id="savedOnlyToggle" type="button" aria-pressed="false">♡ Saved episodes (0)</button>
+          <button class="button button-secondary" id="surpriseMe" type="button">✦ Surprise me</button>
           <span class="archive-count" id="archiveCount" aria-live="polite">Loading playlist…</span>
         </div>
 
@@ -1254,8 +1256,51 @@
         crew: [],
         featured: null,
         categories: new Set(),
+        savedEpisodes: new Set(),
+        savedOnly: false,
         toastTimer: null
       };
+
+      function loadSavedEpisodes() {
+        try {
+          const saved = JSON.parse(localStorage.getItem("tacomaNightsSavedEpisodes") || "[]");
+          state.savedEpisodes = new Set(Array.isArray(saved) ? saved.filter(id => /^[a-zA-Z0-9_-]{11}$/.test(String(id))) : []);
+        } catch {
+          state.savedEpisodes = new Set();
+        }
+      }
+
+      function persistSavedEpisodes() {
+        try {
+          localStorage.setItem("tacomaNightsSavedEpisodes", JSON.stringify([...state.savedEpisodes]));
+          return true;
+        } catch {
+          showToast("This browser could not save your watchlist. Check its storage settings.");
+          return false;
+        }
+      }
+
+      function updateSavedOnlyButton() {
+        const button = $("#savedOnlyToggle");
+        if (!button) return;
+        button.textContent = (state.savedOnly ? "♥ Showing saved" : "♡ Saved episodes") + " (" + state.savedEpisodes.size + ")";
+        button.setAttribute("aria-pressed", String(state.savedOnly));
+      }
+
+      function toggleSavedEpisode(episode) {
+        const id = episodeVideoId(episode);
+        if (!id) return;
+        if (state.savedEpisodes.has(id)) {
+          state.savedEpisodes.delete(id);
+          showToast("Episode removed from your saved list.");
+        } else {
+          state.savedEpisodes.add(id);
+          showToast("Episode saved on this device.");
+        }
+        persistSavedEpisodes();
+        updateSavedOnlyButton();
+        renderEpisodes();
+      }
 
       function safeText(value, fallback = "") {
         if (value === null || value === undefined) return fallback;
@@ -1490,7 +1535,42 @@
           showToast("Episode loaded in the featured player.");
         });
 
-        content.append(meta, title, description, date, button);
+        const actions = document.createElement("div");
+        actions.className = "episode-actions";
+        actions.appendChild(button);
+
+        const saveButton = document.createElement("button");
+        saveButton.className = "button button-secondary button-small";
+        saveButton.type = "button";
+        saveButton.disabled = !id;
+        saveButton.textContent = state.savedEpisodes.has(id) ? "♥ Saved" : "♡ Save";
+        saveButton.setAttribute("aria-pressed", String(state.savedEpisodes.has(id)));
+        saveButton.addEventListener("click", () => toggleSavedEpisode(episode));
+        actions.appendChild(saveButton);
+
+        const shareButton = document.createElement("button");
+        shareButton.className = "button button-secondary button-small";
+        shareButton.type = "button";
+        shareButton.textContent = "↗ Share";
+        shareButton.disabled = !id;
+        shareButton.addEventListener("click", async () => {
+          const url = "https://www.youtube.com/watch?v=" + encodeURIComponent(id);
+          try {
+            if (navigator.share) {
+              await navigator.share({ title: episodeTitle(episode), url });
+            } else if (navigator.clipboard && window.isSecureContext) {
+              await navigator.clipboard.writeText(url);
+              showToast("Episode link copied.");
+            } else {
+              window.prompt("Copy this episode link:", url);
+            }
+          } catch (error) {
+            if (error && error.name !== "AbortError") showToast("Sharing is unavailable in this browser.");
+          }
+        });
+        actions.appendChild(shareButton);
+
+        content.append(meta, title, description, date, actions);
         article.append(thumb, content);
         return article;
       }
@@ -1520,7 +1600,9 @@
           const id = episodeVideoId(episode);
           const matchesSearch = [episodeTitle(episode), episodeDescription(episode), episodeCategory(episode)].join(" ").toLowerCase().includes(search);
           // Keep the featured episode in the archive too: the archive must contain every playlist video.
-          return matchesSearch && (!category || episodeCategory(episode) === category);
+          return matchesSearch &&
+            (!category || episodeCategory(episode) === category) &&
+            (!state.savedOnly || state.savedEpisodes.has(id));
         });
         episodes.sort((a,b) => {
           if (sort === "title") return episodeTitle(a).localeCompare(episodeTitle(b));
@@ -1544,6 +1626,7 @@
           visible.forEach(episode => grid.appendChild(createEpisodeCard(episode)));
         }
         $("#archiveCount").textContent = state.episodes.length.toLocaleString("en-US") + " playlist videos · " + total.toLocaleString("en-US") + " matching";
+        updateSavedOnlyButton();
         $("#archivePagination").hidden = total <= state.pageSize;
         $("#archivePageLabel").textContent = "Page " + state.currentPage + " of " + pageCount;
         $("#archivePrevious").disabled = state.currentPage <= 1;
@@ -1904,6 +1987,24 @@
         $("#episodeSearch").addEventListener("input", resetArchivePage);
         $("#categoryFilter").addEventListener("change", resetArchivePage);
         $("#episodeSort").addEventListener("change", resetArchivePage);
+        $("#savedOnlyToggle").addEventListener("click", () => {
+          state.savedOnly = !state.savedOnly;
+          state.currentPage = 1;
+          updateSavedOnlyButton();
+          renderEpisodes();
+          if (state.savedOnly) showToast("Showing episodes saved in this browser.");
+        });
+        $("#surpriseMe").addEventListener("click", () => {
+          const available = state.episodes.filter(episode => episodeVideoId(episode));
+          if (!available.length) {
+            showToast("Load the episode archive first.");
+            return;
+          }
+          const pick = available[Math.floor(Math.random() * available.length)];
+          showFeatured(pick);
+          $("#episodes").scrollIntoView({ behavior: "smooth" });
+          showToast("Your random Tacoma Nights pick is ready.");
+        });
         $("#archivePrevious").addEventListener("click", () => {
           if (state.currentPage > 1) { state.currentPage -= 1; renderEpisodes(); }
         });
@@ -1929,15 +2030,18 @@
         return state.episodes.filter(episode => {
           const id = episodeVideoId(episode);
           return [episodeTitle(episode), episodeDescription(episode), episodeCategory(episode)].join(" ").toLowerCase().includes(search) &&
-            (!category || episodeCategory(episode) === category);
+            (!category || episodeCategory(episode) === category) &&
+            (!state.savedOnly || state.savedEpisodes.has(episodeVideoId(episode)));
         }).length;
       }
 
       async function init() {
+        loadSavedEpisodes();
         setupNavigation();
         setupRevealAnimations();
         setupParticles();
         setupEvents();
+        updateSavedOnlyButton();
 
         // Load independently so a problem with one endpoint doesn't block the others.
         await Promise.allSettled([
