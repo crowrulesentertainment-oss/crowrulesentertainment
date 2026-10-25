@@ -1560,8 +1560,15 @@
         try {
           const data = await apiRequest("episodes");
           const episodes = getArray(data, ["episodes", "results", "items"]);
-          state.discoverySource = data.source === "youtube_playlist_feed" || data.playlistId === PLAYLIST_ID;
+          state.discoverySource = data.source === "youtube_playlist_feed" || data.source === "youtube_data_api" || data.playlistId === PLAYLIST_ID;
+          state.completePlaylist = data.completePlaylist === true && data.source === "youtube_data_api";
+          state.currentPage = 1;
           state.episodes = sortEpisodes(episodes.filter(item => item && typeof item === "object"));
+          if (state.discoverySource && !state.completePlaylist) {
+            $("#archiveStatus").textContent = data.needsApiKeyForFullArchive
+              ? "Recent-feed mode is active. Add YOUTUBE_API_KEY as a Supabase Edge Function secret to load every playlist video."
+              : "The YouTube API did not confirm a complete playlist sync. Refresh to retry.";
+          }
 
           if (state.episodes.length) {
             // Newest valid published episode first; fall back to the channel video if none has an ID.
@@ -1892,8 +1899,17 @@
       }
 
       function setupEvents() {
-        $("#episodeSearch").addEventListener("input", renderEpisodes);
-        $("#categoryFilter").addEventListener("change", renderEpisodes);
+        const resetArchivePage = () => { state.currentPage = 1; renderEpisodes(); };
+        $("#episodeSearch").addEventListener("input", resetArchivePage);
+        $("#categoryFilter").addEventListener("change", resetArchivePage);
+        $("#episodeSort").addEventListener("change", resetArchivePage);
+        $("#archivePrevious").addEventListener("click", () => {
+          if (state.currentPage > 1) { state.currentPage -= 1; renderEpisodes(); }
+        });
+        $("#archiveNext").addEventListener("click", () => {
+          const count = Math.max(1, Math.ceil(getFilteredEpisodeCount() / state.pageSize));
+          if (state.currentPage < count) { state.currentPage += 1; renderEpisodes(); }
+        });
         $("#refreshEpisodes").addEventListener("click", loadEpisodes);
         $("#refreshStats").addEventListener("click", loadSubscriberStats);
         $("#shareEpisode").addEventListener("click", shareEpisode);
@@ -1903,6 +1919,18 @@
         $("#backToTop").addEventListener("click", () => {
           window.scrollTo({ top: 0, behavior: "smooth" });
         });
+      }
+
+      function getFilteredEpisodeCount() {
+        const search = $("#episodeSearch").value.trim().toLowerCase();
+        const category = $("#categoryFilter").value;
+        const featuredId = state.featured ? episodeVideoId(state.featured) : "";
+        return state.episodes.filter(episode => {
+          const id = episodeVideoId(episode);
+          return !(featuredId && id === featuredId) &&
+            [episodeTitle(episode), episodeDescription(episode), episodeCategory(episode)].join(" ").toLowerCase().includes(search) &&
+            (!category || episodeCategory(episode) === category);
+        }).length;
       }
 
       async function init() {
