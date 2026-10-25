@@ -40,3 +40,30 @@ These features need dedicated database tables/API routes, secure access policies
 - Never put the Supabase service-role key in GitHub Pages or browser code.
 - Private submissions, guest contact details, and internal notes must never be exposed in public lists.
 - The existing API's rate limit is best-effort per Edge Function isolate; consider a persistent rate limiter before wider promotion.
+
+
+## Feature-suite expansion (schema + API deployed)
+Migration `tacoma_nights_feature_suite` was applied to Supabase project `cevylpnoexugwgygvtgu`. The following feature tables exist with RLS enabled and direct `anon`/`authenticated` table privileges revoked; browser traffic uses the Edge Function instead:
+- `tacoma_nights_guest_prospects`: guest pipeline, public booking routes, follow-up dates, consent status, and private notes.
+- `tacoma_nights_production_episodes` and `tacoma_nights_production_tasks`: episode status board, run-of-show JSON, assignments, priorities, deadlines, and task states.
+- `tacoma_nights_public_stories`, `tacoma_nights_community_events`, `tacoma_nights_community_partners`: moderation statuses and public-safe fields.
+- `tacoma_nights_topic_polls`, `tacoma_nights_topic_poll_options`, `tacoma_nights_topic_poll_votes`: shared polls and vote counts.
+- `tacoma_nights_newsletter_subscribers`: opt-in subscriber state/token fields (email confirmation and delivery are not enabled until a trusted sender and verified domain are configured).
+- `tacoma_nights_episode_assets`: transcripts, chapters, clips, sources, captions, show notes, verification and publication flags.
+- `tacoma_nights_watchlists`: user-scoped watch progress schema; cross-device UI and owner policies/routes still need to be completed.
+- `tacoma_nights_analytics_events`: aggregate event schema; ingestion, retention, privacy thresholds, and reporting UI still need to be completed.
+
+Edge Function version 9 adds authenticated admin collection routes (`admin-data-list`, `admin-data-save`, `admin-data-delete`, `admin-poll-save`) with table and field allowlists; public read of published community stories/events/partners/open polls; and public poll voting with one recorded vote per derived network/browser fingerprint when change-votes are disabled. The fingerprint is an anti-abuse signal, not proof of a unique person.
+
+A private Producer Desk is available at `producer.html`. It supports authenticated record management for guest prospects, production episodes, tasks, story approvals, events, partners, and episode assets, plus poll creation. Its interface requires trusted `app_metadata.role = admin`. The Community Hub now reads approved public content and uses the shared poll API when an official poll is open.
+
+## Remaining implementation / verification (do not claim these as finished)
+- [ ] Test the Community Hub and Producer Desk in a real browser after GitHub Pages deploys.
+- [ ] Confirm admin login with a known admin account; test non-admin, missing, invalid and expired token responses.
+- [ ] Confirm the public form still submits and a record appears in the private Submission Review Desk.
+- [ ] Create a test guest, episode, task, event/story/partner, asset and poll; edit/delete test records; then clean up test data.
+- [ ] Test shared poll voting and duplicate-vote handling. IP/user-agent fingerprints can be evaded and should not be presented as a strict identity system.
+- [ ] Verify RLS and table grants using database role/policy inspection and test the public Data API cannot expose private tables.
+- [ ] Add transactional email for newsletter confirmation/unsubscribe only after a verified sender/domain and compliant mailing workflow are configured. Do not collect newsletter signups as active without confirmation.
+- [ ] Complete owner-scoped watchlist routes/UI, analytics ingestion and dashboard, transcript/clip display, episode companion pages, and actual email delivery.
+- [ ] Add persistent rate limiting, retention/deletion rules, audit log for admin changes, and backups for operational data.
