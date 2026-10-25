@@ -1514,35 +1514,42 @@
         const grid = $("#episodeGrid");
         const search = $("#episodeSearch").value.trim().toLowerCase();
         const category = $("#categoryFilter").value;
-
+        const sort = $("#episodeSort").value;
         const featuredId = state.featured ? episodeVideoId(state.featured) : "";
-        const episodes = state.episodes.filter(episode => {
+        let episodes = state.episodes.filter(episode => {
           const id = episodeVideoId(episode);
-          const isFeatured = featuredId && id === featuredId;
-          const matchesSearch = [
-            episodeTitle(episode),
-            episodeDescription(episode),
-            episodeCategory(episode)
-          ].join(" ").toLowerCase().includes(search);
-          const matchesCategory = !category || episodeCategory(episode) === category;
-          return !isFeatured && matchesSearch && matchesCategory;
+          const matchesSearch = [episodeTitle(episode), episodeDescription(episode), episodeCategory(episode)].join(" ").toLowerCase().includes(search);
+          return !(featuredId && id === featuredId) && matchesSearch && (!category || episodeCategory(episode) === category);
         });
-
+        episodes.sort((a,b) => {
+          if (sort === "title") return episodeTitle(a).localeCompare(episodeTitle(b));
+          const ad = Date.parse(a.published_at || a.created_at || "") || 0;
+          const bd = Date.parse(b.published_at || b.created_at || "") || 0;
+          return sort === "oldest" ? ad - bd : bd - ad;
+        });
+        const total = episodes.length;
+        const pageCount = Math.max(1, Math.ceil(total / state.pageSize));
+        state.currentPage = Math.min(Math.max(1, state.currentPage), pageCount);
+        const startAt = (state.currentPage - 1) * state.pageSize;
+        const visible = episodes.slice(startAt, startAt + state.pageSize);
         grid.replaceChildren();
-
-        if (!episodes.length) {
+        if (!visible.length) {
           const empty = document.createElement("div");
           empty.className = "empty-state";
           empty.style.gridColumn = "1 / -1";
-          empty.textContent = state.episodes.length
-            ? "No episodes match those filters. Try a different search or topic."
-            : "No episodes were returned yet. Refresh the archive or open the Tacoma Nights playlist.";
+          empty.textContent = state.episodes.length ? "No episodes match those filters. Try a different search or topic." : "No episodes returned. Refresh or open the official Tacoma Nights playlist.";
           grid.appendChild(empty);
         } else {
-          episodes.forEach(episode => grid.appendChild(createEpisodeCard(episode)));
+          visible.forEach(episode => grid.appendChild(createEpisodeCard(episode)));
         }
-
-        $("#archiveStatus").textContent = `${episodes.length} episode${episodes.length === 1 ? "" : "s"} shown${state.discoverySource ? " · Auto-synced from the Tacoma Nights YouTube playlist" : ""}`;
+        $("#archiveCount").textContent = state.episodes.length.toLocaleString("en-US") + " playlist videos · " + total.toLocaleString("en-US") + " matching";
+        $("#archivePagination").hidden = total <= state.pageSize;
+        $("#archivePageLabel").textContent = "Page " + state.currentPage + " of " + pageCount;
+        $("#archivePrevious").disabled = state.currentPage <= 1;
+        $("#archiveNext").disabled = state.currentPage >= pageCount;
+        $("#archiveStatus").textContent = total
+          ? "Showing " + (startAt + 1) + "–" + Math.min(startAt + visible.length, total) + " of " + total + " videos" + (state.discoverySource ? (state.completePlaylist ? " · Full playlist synced." : " · Recent-feed mode; add a YouTube API key for every playlist video.") : ".")
+          : (state.discoverySource ? "Playlist loaded; no videos match the current filters." : "Open the official Tacoma Nights playlist if videos are not available.");
       }
 
       async function loadEpisodes() {
