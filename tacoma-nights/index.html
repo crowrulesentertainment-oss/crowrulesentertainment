@@ -589,6 +589,11 @@
       border-radius: 50%;
       background: rgba(5,9,6,.78);
     }
+    .episode-details { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 8px; }
+    .episode-details summary { color: var(--green-bright); cursor: pointer; font-size: .88rem; font-weight: 700; }
+    .episode-details p { color: var(--muted); font-size: .9rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .episode-details a { color: var(--green-bright); text-decoration: underline; text-underline-offset: 3px; }
+
     .episode-card-content { padding: 19px; }
     .episode-card-content h3 { font-size: 1.03rem; }
     .episode-card-content p { color: var(--muted); font-size: .86rem; }
@@ -1013,6 +1018,7 @@
           <button class="button button-secondary" id="refreshEpisodes" type="button">↻ Refresh all videos</button>
           <button class="button button-secondary" id="savedOnlyToggle" type="button" aria-pressed="false">♡ Saved episodes (0)</button>
           <button class="button button-secondary" id="surpriseMe" type="button">✦ Surprise me</button>
+          <button class="button button-secondary" id="clearArchiveFilters" type="button">Clear filters</button>
           <span class="archive-count" id="archiveCount" aria-live="polite">Loading playlist…</span>
         </div>
 
@@ -1570,7 +1576,25 @@
         });
         actions.appendChild(shareButton);
 
-        content.append(meta, title, description, date, actions);
+        const details = document.createElement("details");
+        details.className = "episode-details";
+        const summary = document.createElement("summary");
+        summary.textContent = "Episode details";
+        const fullDescription = document.createElement("p");
+        fullDescription.textContent = rawDescription;
+        const published = document.createElement("p");
+        published.textContent = "Published: " + formatDate(episode.published_at || episode.created_at);
+        details.append(summary, fullDescription, published);
+        if (id) {
+          const youtubeLink = document.createElement("a");
+          youtubeLink.href = "https://www.youtube.com/watch?v=" + encodeURIComponent(id);
+          youtubeLink.target = "_blank";
+          youtubeLink.rel = "noopener noreferrer";
+          youtubeLink.textContent = "Open episode on YouTube ↗";
+          details.appendChild(youtubeLink);
+        }
+
+        content.append(meta, title, description, date, actions, details);
         article.append(thumb, content);
         return article;
       }
@@ -2011,6 +2035,16 @@
         $("#archiveNext").addEventListener("click", () => {
           const count = Math.max(1, Math.ceil(getFilteredEpisodeCount() / state.pageSize));
           if (state.currentPage < count) { state.currentPage += 1; renderEpisodes(); }
+        });
+        $("#clearArchiveFilters").addEventListener("click", () => {
+          $("#episodeSearch").value = "";
+          $("#categoryFilter").value = "";
+          $("#episodeSort").value = "newest";
+          state.savedOnly = false;
+          state.currentPage = 1;
+          updateSavedOnlyButton();
+          renderEpisodes();
+          showToast("Archive filters cleared.");
         });
         $("#refreshEpisodes").addEventListener("click", loadEpisodes);
         $("#refreshStats").addEventListener("click", loadSubscriberStats);
