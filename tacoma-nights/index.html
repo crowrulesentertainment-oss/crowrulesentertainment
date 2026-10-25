@@ -550,6 +550,10 @@
     .field::placeholder { color: #87958a; }
     select.field { width: auto; min-width: 170px; }
     .search-field { flex: 1 1 260px; }
+    .archive-count { color: var(--muted); font-size: .82rem; align-self: center; }
+    .archive-pagination { display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:24px; }
+    .archive-pagination[hidden] { display:none; }
+    .archive-page-label { color:var(--muted); font-size:.85rem; min-width:120px; text-align:center; }
 
     .episode-grid {
       display: grid;
@@ -1005,12 +1009,15 @@
           <select class="field" id="categoryFilter" aria-label="Filter episodes by category">
             <option value="">All topics</option>
           </select>
-          <button class="button button-secondary" id="refreshEpisodes" type="button">↻ Refresh episodes</button>
+          <select class="field" id="episodeSort" aria-label="Sort episodes"><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="title">Title A–Z</option></select>
+          <button class="button button-secondary" id="refreshEpisodes" type="button">↻ Refresh all videos</button>
+          <span class="archive-count" id="archiveCount" aria-live="polite">Loading playlist…</span>
         </div>
 
         <div class="episode-grid" id="episodeGrid" aria-live="polite">
           <div class="empty-state">Loading the episode archive…</div>
         </div>
+        <div class="archive-pagination" id="archivePagination" hidden><button class="button button-secondary button-small" id="archivePrevious" type="button">← Previous</button><span class="archive-page-label" id="archivePageLabel">Page 1</span><button class="button button-secondary button-small" id="archiveNext" type="button">Next →</button></div>
         <p class="status-line" id="archiveStatus" role="status" aria-live="polite"></p>
       </div>
     </section>
@@ -1241,6 +1248,9 @@
       const state = {
         episodes: [],
         discoverySource: false,
+        completePlaylist: false,
+        currentPage: 1,
+        pageSize: 24,
         crew: [],
         featured: null,
         categories: new Set(),
