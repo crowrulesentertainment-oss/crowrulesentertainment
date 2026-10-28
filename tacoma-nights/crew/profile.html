@@ -18,14 +18,7 @@
     .portrait{aspect-ratio:4/5;display:grid;place-items:center;overflow:hidden;border-radius:20px;border:1px solid var(--border);background:radial-gradient(circle at 50% 20%,#344d69,#101b2b 65%);color:var(--blue);font:800 4rem "Manrope",sans-serif}.portrait img{width:100%;height:100%;object-fit:cover}.profile-body{padding:8px 0}.pill{display:inline-flex;padding:7px 11px;border:1px solid #e7b97555;border-radius:999px;color:var(--gold);font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase}.profile h2{font:800 clamp(2rem,4vw,3.4rem)/1.1 "Manrope",sans-serif;letter-spacing:-.04em;margin:18px 0 10px}.role{color:var(--blue);font-weight:700}.bio{white-space:pre-line;color:var(--muted);font-size:1rem;line-height:1.9;margin:22px 0}.details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:26px 0}.detail{padding:15px;border:1px solid var(--border);border-radius:15px;background:#ffffff05}.detail strong{display:block;color:var(--gold);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:7px}.detail span{color:var(--text);overflow-wrap:anywhere}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}.button{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 17px;border-radius:12px;border:1px solid var(--border);text-decoration:none;font-weight:800}.button.primary{background:var(--blue);color:#07111c;border-color:transparent}.button:hover{transform:translateY(-1px)}.status{padding:22px;border:1px dashed var(--border);border-radius:18px;color:var(--muted);line-height:1.7}.hidden{display:none!important}footer{margin-top:70px;padding:28px 0;border-top:1px solid var(--border);color:var(--muted);font-size:.84rem}.footer-inner{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     @media(max-width:760px){.nav{align-items:flex-start;flex-direction:column;padding:17px 0}.profile{grid-template-columns:1fr;padding:18px}.portrait{aspect-ratio:16/10;max-width:100%}.details{grid-template-columns:1fr}.hero{padding-top:40px}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
-  .editor-shell{margin:28px 0 0;padding:22px;border:1px solid var(--border);border-radius:22px;background:rgba(10,17,29,.88)}
-    .editor-shell h2{font:800 1.35rem "Manrope",sans-serif;margin:0 0 8px}.editor-shell p,.editor-help{color:var(--muted);font-size:.9rem;line-height:1.65}
-    .editor-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.editor-field{display:flex;flex-direction:column;gap:7px}.editor-field.full{grid-column:1/-1}.editor-field label{font-size:.78rem;font-weight:800;color:var(--blue);letter-spacing:.04em}
-    .editor-field input,.editor-field textarea{width:100%;padding:12px 13px;border:1px solid var(--border);border-radius:11px;background:#070d17;color:var(--text);font:inherit}.editor-field textarea{min-height:110px;resize:vertical}
-    .editor-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.button:disabled{opacity:.55;cursor:wait}.editor-message{margin-top:14px;padding:12px 14px;border-radius:12px;background:#ffffff08;color:var(--muted);font-size:.88rem}.avatar-preview{display:flex;align-items:center;gap:15px;flex-wrap:wrap}.avatar-preview .portrait{width:92px;aspect-ratio:1;border-radius:50%;font-size:1.8rem}.check-row{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:.9rem}
-    @media(max-width:640px){.editor-grid{grid-template-columns:1fr}.editor-field.full{grid-column:auto}.editor-shell{padding:16px}}
-  </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</style>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=5" defer></script></head>
 <body>
@@ -56,51 +49,13 @@
         <div id="actions" class="actions"></div>
       </div>
     </article>
-    <section class="editor-shell" id="crewEditor" aria-labelledby="editorTitle">
-      <h2 id="editorTitle">Crew profile management</h2>
-      <p>Authorized CrowRules administrators can update this profile and upload a crew avatar. Sign in with an administrator account to edit; database permissions are enforced by Supabase.</p>
-      <form id="signInForm">
-        <div class="editor-grid">
-          <div class="editor-field"><label for="adminEmail">Administrator email</label><input id="adminEmail" type="email" autocomplete="username" required></div>
-          <div class="editor-field"><label for="adminPassword">Password</label><input id="adminPassword" type="password" autocomplete="current-password" required></div>
-        </div>
-        <div class="editor-actions"><button class="button primary" type="submit" id="signInButton">Sign in to edit</button><button class="button hidden" type="button" id="signOutButton">Sign out</button></div>
-      </form>
-      <div id="editorStatus" class="editor-message" role="status" aria-live="polite">Sign in to see whether this account has profile-editing access.</div>
-      <form id="editForm" class="hidden">
-        <div class="avatar-preview" style="margin:22px 0">
-          <div class="portrait" id="editAvatarPreview">CR</div>
-          <div class="editor-field" style="flex:1;min-width:220px"><label for="avatarFile">Upload avatar (JPG, PNG, WebP or AVIF; max 5 MB)</label><input id="avatarFile" type="file" accept="image/jpeg,image/png,image/webp,image/avif"><span class="editor-help">Use an image you have permission to publish. The upload is stored in CrowRules Supabase Storage.</span></div>
-        </div>
-        <div class="editor-grid">
-          <div class="editor-field"><label for="editName">Display name</label><input id="editName" maxlength="100" required></div>
-          <div class="editor-field"><label for="editRole">Role / title</label><input id="editRole" maxlength="100" required></div>
-          <div class="editor-field full"><label for="editBio">Biography</label><textarea id="editBio" maxlength="5000" placeholder="A short introduction about this crew member"></textarea></div>
-          <div class="editor-field"><label for="editProfileUrl">Public profile URL</label><input id="editProfileUrl" type="url" placeholder="https://…"></div>
-          <div class="editor-field"><label for="editSpecialties">Specialties (comma-separated)</label><input id="editSpecialties" maxlength="1000" placeholder="Hosting, sports, production"></div>
-          <div class="editor-field"><label for="editWebsite">Website</label><input id="editWebsite" type="url" placeholder="https://…"></div>
-          <div class="editor-field"><label for="editYoutube">YouTube URL</label><input id="editYoutube" type="url" placeholder="https://youtube.com/…"></div>
-          <div class="editor-field"><label for="editInstagram">Instagram URL</label><input id="editInstagram" type="url" placeholder="https://instagram.com/…"></div>
-          <div class="editor-field"><label for="editFacebook">Facebook URL</label><input id="editFacebook" type="url" placeholder="https://facebook.com/…"></div>
-          <div class="editor-field full"><label class="check-row"><input id="editPublished" type="checkbox"> Publish this crew profile</label><label class="check-row"><input id="editFeatured" type="checkbox"> Feature this crew member</label><label class="check-row"><input id="editPortraitApproved" type="checkbox"> Portrait approved for public display</label></div>
-        </div>
-        <div class="editor-actions"><button class="button primary" type="submit" id="saveProfileButton">Save profile</button><button class="button" type="button" id="reloadProfileButton">Discard changes</button></div>
-      </form>
-    </section>
   </main>
   <footer><div class="wrap footer-inner"><span>© <span id="year"></span> CrowRules Entertainment</span><span>One company. One universe.</span><a href="../index.html#crew">← Back to Meet the Crew</a></div></footer>
   <script>
     "use strict";
     (() => {
       const API_BASE = "https://cevylpnoexugwgygvtgu.supabase.co/functions/v1/tacoma-nights-api";
-      const SUPABASE_URL = "https://cevylpnoexugwgygvtgu.supabase.co";
-      const SUPABASE_KEY = "sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";
-      const supabaseClient = window.supabase?.createClient
-        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
-        : null;
       const $ = (s) => document.querySelector(s);
-      let currentMember = null;
-      let isAdmin = false;
       const params = new URLSearchParams(location.search);
       const requested = (params.get("member") || "").trim();
       $("#year").textContent = new Date().getFullYear();
@@ -184,126 +139,7 @@
         addAction("Contact ↗", value(member, ["contact_url", "contact_link"]));
         $("#profile").classList.remove("hidden");
         $("#status").classList.add("hidden");
-        currentMember = member;
-        if (isAdmin) fillEditor(member);
-      }
-      function editorMessage(message, error = false) {
-        const el = $("#editorStatus");
-        el.textContent = message;
-        el.style.color = error ? "#ffb1a8" : "";
-      }
-      function fillEditor(member) {
-        $("#editName").value = value(member, ["display_name", "name"]);
-        $("#editRole").value = value(member, ["role_title", "role", "title"], "Crew member");
-        $("#editBio").value = value(member, ["bio"]);
-        $("#editProfileUrl").value = value(member, ["profile_url"]);
-        $("#editSpecialties").value = Array.isArray(member.specialties) ? member.specialties.join(", ") : "";
-        const social = member.social_links && typeof member.social_links === "object" ? member.social_links : {};
-        $("#editWebsite").value = value(social, ["website", "website_url"]);
-        $("#editYoutube").value = value(social, ["youtube", "youtube_url"]);
-        $("#editInstagram").value = value(social, ["instagram", "instagram_url"]);
-        $("#editFacebook").value = value(social, ["facebook", "facebook_url"]);
-        $("#editPublished").checked = member.is_published !== false;
-        $("#editFeatured").checked = member.is_featured === true;
-        $("#editPortraitApproved").checked = member.portrait_approved === true;
-        $("#editAvatarPreview").replaceChildren();
-        if (member.avatar_url && safeLink(member.avatar_url)) {
-          const img = document.createElement("img");
-          img.src = safeLink(member.avatar_url);
-          img.alt = "Current avatar";
-          img.onerror = () => { $("#editAvatarPreview").textContent = initials(member.display_name); };
-          $("#editAvatarPreview").appendChild(img);
-        } else {
-          $("#editAvatarPreview").textContent = initials(member.display_name);
-        }
-        $("#avatarFile").value = "";
-      }
-      function setAdminEditor(enabled) {
-        isAdmin = enabled;
-        $("#editForm").classList.toggle("hidden", !enabled);
-        $("#signInButton").classList.toggle("hidden", enabled);
-        $("#signOutButton").classList.toggle("hidden", !enabled);
-        $("#adminEmail").disabled = enabled;
-        $("#adminPassword").disabled = enabled;
-        if (enabled && currentMember) fillEditor(currentMember);
-      }
-      function validOptionalUrl(raw, label) {
-        if (!raw.trim()) return "";
-        const safe = safeLink(raw.trim());
-        if (!safe) throw new Error(label + " must be a valid HTTP or HTTPS URL.");
-        return safe;
-      }
-      async function refreshAdminSession() {
-        if (!supabaseClient) {
-          editorMessage("The Supabase client could not load. Refresh the page and try again.", true);
-          return;
-        }
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        const admin = session?.user?.app_metadata?.role === "admin";
-        setAdminEditor(admin);
-        if (session && !admin) {
-          editorMessage("You are signed in, but this account does not have the administrator role required to edit crew profiles.", true);
-        } else if (admin) {
-          editorMessage("Administrator access confirmed. Changes are protected by Supabase row-level security.");
-        }
-      }
-      async function uploadAvatar(file) {
-        if (!file) return currentMember?.avatar_url || null;
-        const allowed = ["image/jpeg", "image/png", "image/webp", "image/avif"];
-        if (!allowed.includes(file.type)) throw new Error("Choose a JPG, PNG, WebP, or AVIF image.");
-        if (file.size > 5 * 1024 * 1024) throw new Error("Avatar images must be 5 MB or smaller.");
-        if (!currentMember?.id) throw new Error("No crew member is loaded.");
-        const ext = ({ "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/avif": "avif" })[file.type];
-        const path = currentMember.id + "/" + crypto.randomUUID() + "." + ext;
-        const { error } = await supabaseClient.storage.from("tacoma-nights-crew").upload(path, file, {
-          cacheControl: "3600", contentType: file.type, upsert: false
-        });
-        if (error) throw error;
-        const { data } = supabaseClient.storage.from("tacoma-nights-crew").getPublicUrl(path);
-        return data.publicUrl;
-      }
-      async function saveProfile(event) {
-        event.preventDefault();
-        if (!isAdmin || !currentMember?.id) {
-          editorMessage("Administrator access is required to save changes.", true);
-          return;
-        }
-        const button = $("#saveProfileButton");
-        button.disabled = true;
-        button.textContent = "Saving…";
-        try {
-          const socialLinks = {};
-          for (const [field, key] of [["#editWebsite","website"],["#editYoutube","youtube"],["#editInstagram","instagram"],["#editFacebook","facebook"]]) {
-            const url = validOptionalUrl($(field).value, key);
-            if (url) socialLinks[key] = url;
-          }
-          const avatarFile = $("#avatarFile").files?.[0] || null;
-          const avatarUrl = await uploadAvatar(avatarFile);
-          const payload = {
-            display_name: $("#editName").value.trim(),
-            role_title: $("#editRole").value.trim(),
-            bio: $("#editBio").value.trim(),
-            profile_url: validOptionalUrl($("#editProfileUrl").value, "Profile URL") || null,
-            avatar_url: avatarUrl || null,
-            specialties: $("#editSpecialties").value.split(",").map(s => s.trim()).filter(Boolean).slice(0, 30),
-            social_links: socialLinks,
-            is_published: $("#editPublished").checked,
-            is_featured: $("#editFeatured").checked,
-            portrait_approved: $("#editPortraitApproved").checked,
-            updated_at: new Date().toISOString()
-          };
-          if (!payload.display_name || !payload.role_title) throw new Error("Display name and role are required.");
-          const { data, error } = await supabaseClient.from("tacoma_nights_crew").update(payload).eq("id", currentMember.id).select("id,display_name,role_title,bio,avatar_url,profile_url,specialties,social_links,is_published,is_featured,portrait_approved").single();
-          if (error) throw error;
-          currentMember = { ...currentMember, ...data, role: data.role_title };
-          render(currentMember);
-          editorMessage("Profile saved successfully.");
-        } catch (error) {
-          editorMessage(error?.message || "Could not save this profile.", true);
-        } finally {
-          button.disabled = false;
-          button.textContent = "Save profile";
-        }
+
       }
       async function load() {
         if (!requested) {
@@ -334,50 +170,10 @@
             return;
           }
           render(found);
-          await refreshAdminSession();
         } catch (error) {
           showError((error && error.message) || "Unable to load this crew profile. Please try again later.");
         }
       }
-      $("#signInForm").addEventListener("submit", async event => {
-        event.preventDefault();
-        if (!supabaseClient) return editorMessage("Supabase client is unavailable.", true);
-        const button = $("#signInButton");
-        button.disabled = true;
-        try {
-          const { error } = await supabaseClient.auth.signInWithPassword({
-            email: $("#adminEmail").value.trim(),
-            password: $("#adminPassword").value
-          });
-          if (error) throw error;
-          await refreshAdminSession();
-        } catch (error) {
-          editorMessage(error?.message || "Sign-in failed.", true);
-        } finally { button.disabled = false; }
-      });
-      $("#signOutButton").addEventListener("click", async () => {
-        await supabaseClient?.auth.signOut();
-        setAdminEditor(false);
-        editorMessage("You are signed out.");
-      });
-      $("#editForm").addEventListener("submit", saveProfile);
-      $("#reloadProfileButton").addEventListener("click", () => {
-        if (currentMember) fillEditor(currentMember);
-        editorMessage("Unsaved edits discarded. Reload the page to fetch the latest saved profile.");
-      });
-      $("#avatarFile").addEventListener("change", () => {
-        const file = $("#avatarFile").files?.[0];
-        if (!file) return;
-        if (!["image/jpeg","image/png","image/webp","image/avif"].includes(file.type) || file.size > 5 * 1024 * 1024) {
-          editorMessage("Choose a JPG, PNG, WebP, or AVIF image no larger than 5 MB.", true);
-          $("#avatarFile").value = "";
-          return;
-        }
-        const img = document.createElement("img");
-        img.alt = "Avatar upload preview";
-        img.src = URL.createObjectURL(file);
-        $("#editAvatarPreview").replaceChildren(img);
-      });
       load();
     })();
   </script>
