@@ -1070,7 +1070,8 @@
   </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
-<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=5" defer></script></head>
+<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=5" defer></script>  <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js" defer></script>
+</head>
 
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -1351,7 +1352,7 @@
               <div><label for="clipEpisode">Episode / intended air date (optional)</label><input class="field" id="clipEpisode" maxlength="120" placeholder="Example: Friday, November 6"></div>
               <div><label for="clipNotes">Notes for the editor (optional)</label><textarea class="field" id="clipNotes" maxlength="2000" placeholder="Names/pronunciations, suggested in/out points, source links, or editing notes."></textarea></div>
               <div><label for="clipFile">Video clip</label><input id="clipFile" type="file" accept="video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm" required></div>
-              <p class="form-note">Accepted formats: MP4, MOV, WebM. Maximum 100 MB per clip. Record in horizontal 16:9 landscape where possible.</p>
+              <p class="form-note">Accepted formats: MP4, MOV, WebM. Maximum <strong>500 MB per clip</strong>. Large files use resumable upload so an interrupted connection can retry. Record in horizontal 16:9 landscape where possible.</p>
               <label class="consent-row"><input id="clipRights" type="checkbox" required><span>I confirm I created this clip or have permission to submit it, and I grant CrowRules Entertainment permission to edit it for Tacoma Nights.</span></label>
               <button class="button button-primary" id="clipSubmit" type="submit">Upload clip to the edit desk ↗</button>
               <div class="clip-progress" aria-hidden="true"><span id="clipProgressBar"></span></div>
@@ -2352,7 +2353,7 @@
 
       // Public co-host drop: anonymous upload, private storage. Owner sign-in is only for reviewing downloads.
       const CLIP_SUPABASE_URL = "https://cevylpnoexugwgygvtgu.supabase.co";
-      const CLIP_SUPABASE_KEY = "PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE";
+      const CLIP_SUPABASE_KEY = "sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";
       const CLIP_BUCKET = "tacoma-nights-clips";
       const CLIP_TABLE = "tacoma_nights_clip_uploads";
       const CLIP_OWNER_EMAIL = "REPLACE_WITH_YOUR_OWNER_EMAIL";
@@ -2396,14 +2397,28 @@
           if($("#clipWebsite").value.trim()) throw new Error("Submission could not be accepted.");
           const client=clipClient();const name=$("#clipName").value.trim();const title=$("#clipTitle").value.trim();const file=$("#clipFile").files[0];
           if(!name||!title||!file)throw new Error("Enter your name, a segment title, and select a video.");
-          if(file.size>100*1024*1024)throw new Error("This uploader accepts files up to 100 MB.");
+          if(file.size>500*1024*1024)throw new Error("This uploader accepts files up to 500 MB.");
           if(!/\.(mp4|mov|webm)$/i.test(file.name)&&!["video/mp4","video/quicktime","video/webm"].includes(file.type))throw new Error("Choose an MP4, MOV, or WebM video.");
           if(!$("#clipRights").checked)throw new Error("Confirm you have permission to submit this clip.");
-          button.disabled=true;button.textContent="Uploading…";$("#clipProgressBar").style.width="10%";clipSetStatus("Uploading your clip privately…");
+          button.disabled=true;button.textContent="Uploading…";$("#clipProgressBar").style.width="0%";clipSetStatus("Preparing resumable upload…");
+          if(!window.tus?.Upload)throw new Error("The resumable-upload library did not load. Refresh the page and try again.");
           const cleanName=file.name.replace(/[^a-zA-Z0-9._-]/g,"_").slice(-100);
           const path="public-inbox/"+crypto.randomUUID()+"-"+cleanName;
-          const {error:uploadError}=await client.storage.from(CLIP_BUCKET).upload(path,file,{cacheControl:"3600",upsert:false,contentType:file.type||"application/octet-stream"});
-          if(uploadError)throw uploadError;$("#clipProgressBar").style.width="70%";
+          const projectId="cevylpnoexugwgygvtgu";
+          await new Promise((resolve,reject)=>{
+            const upload=new tus.Upload(file,{
+              endpoint:"https://"+projectId+".storage.supabase.co/storage/v1/upload/resumable",
+              retryDelays:[0,3000,5000,10000,20000],
+              headers:{apikey:CLIP_SUPABASE_KEY,authorization:"Bearer "+CLIP_SUPABASE_KEY},
+              uploadDataDuringCreation:true,removeFingerprintOnSuccess:true,chunkSize:6*1024*1024,
+              metadata:{bucketName:CLIP_BUCKET,objectName:path,contentType:file.type||"application/octet-stream",cacheControl:"3600"},
+              onError:error=>reject(error),
+              onProgress:(uploaded,total)=>{const pct=total?Math.min(99,Math.round(uploaded/total*100)):0;$("#clipProgressBar").style.width=pct+"%";clipSetStatus("Uploading privately… "+pct+"% ("+(uploaded/1024/1024).toFixed(1)+" of "+(total/1024/1024).toFixed(1)+" MB)");},
+              onSuccess:()=>resolve()
+            });
+            upload.start();
+          });
+          $("#clipProgressBar").style.width="70%";
           const {error:insertError}=await client.from(CLIP_TABLE).insert({
             owner_id:null,co_host_name:name,title,episode_label:$("#clipEpisode").value.trim()||null,
             notes:$("#clipNotes").value.trim()||null,storage_path:path,original_filename:file.name,
