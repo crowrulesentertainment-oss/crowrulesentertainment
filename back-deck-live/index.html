@@ -978,6 +978,16 @@
     @media(max-width:850px){.network-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.network-map #communityMap{height:300px}}
     @media(max-width:560px){.network-grid{grid-template-columns:1fr}.network-map #communityMap{height:270px}}
 
+    .audience-live{position:relative;z-index:2;border-bottom:1px solid var(--border);background:rgba(12,21,15,.92);backdrop-filter:blur(12px)}
+    .audience-live-inner{width:min(var(--max),calc(100% - 40px));margin:0 auto;min-height:48px;display:flex;align-items:center;justify-content:center;gap:11px;flex-wrap:wrap;padding:9px 0;color:var(--muted);font-size:.82rem}
+    .audience-live-label{display:inline-flex;align-items:center;gap:8px;color:var(--green-bright);font-size:.7rem;font-weight:800;letter-spacing:.16em}
+    .audience-live-pulse{width:8px;height:8px;border-radius:50%;background:#a9df9f;box-shadow:0 0 0 4px rgba(169,223,159,.12),0 0 12px rgba(169,223,159,.65);animation:audiencePulse 1.8s ease-in-out infinite}
+    .audience-live-count{font:800 1rem/1.2 "Manrope",sans-serif;color:var(--gold);font-variant-numeric:tabular-nums}
+    .audience-live-status{color:var(--muted)}
+    @keyframes audiencePulse{50%{opacity:.48;box-shadow:0 0 0 7px rgba(169,223,159,.04),0 0 7px rgba(169,223,159,.35)}}
+    @media(max-width:650px){.audience-live-inner{width:calc(100% - 28px);gap:8px;font-size:.76rem;text-align:center}}
+    @media(prefers-reduced-motion:reduce){.audience-live-pulse{animation:none}}
+
   </style>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=5" defer></script></head>
@@ -1007,6 +1017,14 @@
       </nav>
     </div>
   </header>
+
+  <aside class="audience-live" aria-label="Live Back Deck Live website audience">
+    <div class="audience-live-inner">
+      <span class="audience-live-label"><span class="audience-live-pulse" aria-hidden="true"></span> LIVE COMMUNITY</span>
+      <strong class="audience-live-count" id="publicLiveVisitorCount">Connecting…</strong>
+      <span class="audience-live-status" id="publicLiveVisitorDetail" role="status" aria-live="polite">Connecting to live visitor count</span>
+    </div>
+  </aside>
 
   <main id="main">
     <section class="hero hero--backdeck" id="home">
@@ -1519,6 +1537,55 @@
         categories: new Set(),
         toastTimer: null
       };
+
+      // Shared Presence channel reports live browser sessions on this public homepage.
+      // Each tab has a unique key; Supabase removes its presence when the connection closes.
+      function startPublicLiveVisitorCounter() {
+        const countNode = document.getElementById("publicLiveVisitorCount");
+        const detailNode = document.getElementById("publicLiveVisitorDetail");
+        if (!countNode || !detailNode || !authClient?.channel) return;
+
+        const presenceKey = (window.crypto && crypto.randomUUID)
+          ? crypto.randomUUID()
+          : "home-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2);
+        const channel = authClient.channel("back-deck-live-home-presence", {
+          config: { presence: { key: presenceKey } }
+        });
+
+        const renderCount = () => {
+          const presence = channel.presenceState();
+          const count = Object.values(presence).reduce(
+            (total, sessions) => total + (Array.isArray(sessions) ? sessions.length : 0), 0
+          );
+          countNode.textContent = String(count);
+          detailNode.textContent = count === 1
+            ? "visitor on Back Deck Live right now"
+            : "visitors on Back Deck Live right now";
+        };
+
+        channel.on("presence", { event: "sync" }, renderCount);
+        channel.subscribe(async status => {
+          if (status === "SUBSCRIBED") {
+            try {
+              await channel.track({
+                page: "back-deck-live-home",
+                online_at: new Date().toISOString()
+              });
+              renderCount();
+            } catch (error) {
+              countNode.textContent = "—";
+              detailNode.textContent = "Live visitor count temporarily unavailable";
+            }
+          } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+            countNode.textContent = "—";
+            detailNode.textContent = "Live visitor count temporarily unavailable";
+          }
+        });
+
+        window.addEventListener("pagehide", () => {
+          try { channel.untrack(); } catch (_) {}
+        }, { once: true });
+      }
 
       function safeText(value, fallback = "") {
         if (value === null || value === undefined) return fallback;
@@ -2533,6 +2600,7 @@
       }
 
       async function init() {
+        startPublicLiveVisitorCounter();
         setupNavigation();
         setupRevealAnimations();
         setupParticles();
