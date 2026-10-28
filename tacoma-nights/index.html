@@ -404,6 +404,17 @@
     }
 
     .hero-meta span { display: inline-flex; align-items: center; gap: 8px; }
+    /* Live Tacoma clock + weather, designed to sit inside the existing cinematic hero. */
+    .hero-conditions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px;max-width:690px}
+    .hero-condition-card{display:flex;align-items:center;gap:13px;min-width:205px;padding:12px 15px;border:1px solid rgba(224,238,232,.22);border-radius:14px;background:linear-gradient(120deg,rgba(5,12,19,.78),rgba(12,24,34,.66));box-shadow:0 12px 34px rgba(0,0,0,.18);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+    .hero-condition-icon{display:grid;place-items:center;width:39px;height:39px;flex-shrink:0;border-radius:12px;background:rgba(196,240,255,.09);font-size:1.35rem}
+    .hero-condition-label{color:#c8d7d9;font-size:.66rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+    .hero-condition-value{margin-top:2px;color:#fff;font-size:1.02rem;font-weight:800;line-height:1.3;font-variant-numeric:tabular-nums}
+    .hero-condition-detail{margin-top:3px;color:#c1cecf;font-size:.74rem}
+    .hero-weather-card{flex:1;min-width:230px}
+    .hero-weather-card .hero-condition-value{font-size:1rem}
+    .hero-condition-status{color:#c1cecf;font-size:.72rem}
+    @media(max-width:520px){.hero-conditions{gap:8px;margin-top:18px}.hero-condition-card{min-width:0;flex:1;padding:11px 12px}.hero-weather-card{flex-basis:100%}}
     .hero-subscriber-goal{width:min(430px,100%);margin-top:27px;padding:17px 19px;border:1px solid rgba(205,228,192,.28);border-radius:15px;background:linear-gradient(120deg,rgba(6,13,9,.82),rgba(18,31,22,.72));box-shadow:0 14px 45px rgba(0,0,0,.2);backdrop-filter:blur(12px)}
     .hero-goal-top{display:flex;align-items:center;justify-content:space-between;gap:12px}.hero-goal-label{color:#d5e8cd;font-size:.72rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase}.hero-goal-count{margin-top:5px;font-size:clamp(1.5rem,3vw,2rem);font-weight:800;letter-spacing:-.055em}.hero-goal-count small{color:#b9c6b7;font-size:.85rem;letter-spacing:0}.hero-goal-badge{padding:6px 9px;border:1px solid rgba(205,228,192,.25);border-radius:8px;color:var(--green-bright);font-size:.68rem;font-weight:900}.hero-goal-track{height:7px;margin-top:13px;overflow:hidden;border-radius:99px;background:rgba(255,255,255,.13)}.hero-goal-bar{width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#749c75,#d1e7b7);transition:width .8s ease}.hero-goal-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px;color:#c5d0c2;font-size:.76rem}.hero-goal-cta{color:#d1e7b7;font-weight:800;text-decoration:none}
     @media(max-width:520px){.hero-content{padding:82px 0 105px}.hero-subscriber-goal{margin-top:22px;padding:15px}.hero-goal-bottom{align-items:flex-start;flex-direction:column;gap:6px}}
@@ -1135,6 +1146,24 @@
             <span>◷ Fridays · 10 PM Pacific</span>
             <span>⌁ Tacoma, Washington · Pacific Northwest</span>
             <span>◉ Built from the ground up</span>
+          </div>
+          <div class="hero-conditions" aria-label="Current Tacoma time and weather">
+            <div class="hero-condition-card">
+              <div class="hero-condition-icon" aria-hidden="true">◷</div>
+              <div>
+                <div class="hero-condition-label">Tacoma local time</div>
+                <div class="hero-condition-value" id="heroTacomaClock" aria-live="off">Loading time…</div>
+                <div class="hero-condition-detail" id="heroTacomaDate">Pacific Time</div>
+              </div>
+            </div>
+            <div class="hero-condition-card hero-weather-card">
+              <div class="hero-condition-icon" id="heroWeatherIcon" aria-hidden="true">🌦️</div>
+              <div>
+                <div class="hero-condition-label">Tacoma, Washington · Current weather</div>
+                <div class="hero-condition-value" id="heroWeatherValue">Checking conditions…</div>
+                <div class="hero-condition-detail" id="heroWeatherDetail">Live weather updates automatically</div>
+              </div>
+            </div>
           </div>
           <div class="hero-subscriber-goal" aria-label="YouTube subscriber goal: 1,000 subscribers"><div class="hero-goal-top"><div><div class="hero-goal-label">Help Tacoma Nights grow</div><div class="hero-goal-count"><span id="heroSubscriberCount">—</span> <small>/ 1,000 subscribers</small></div></div><span class="hero-goal-badge">ROAD TO 1K</span></div><div class="hero-goal-track" role="progressbar" aria-label="Progress toward 1,000 YouTube subscribers" aria-valuemin="0" aria-valuemax="1000" aria-valuenow="0" id="heroSubscriberProgress"><div class="hero-goal-bar" id="heroSubscriberBar"></div></div><div class="hero-goal-bottom"><span id="heroSubscriberPercent">Loading subscriber goal…</span><a class="hero-goal-cta" href="https://www.youtube.com/@CrowRules_TV?sub_confirmation=1" target="_blank" rel="noopener noreferrer">Subscribe and help us reach 1,000 ↗</a></div></div>
         </div>
@@ -2659,11 +2688,73 @@
         }).length;
       }
 
+      // Tacoma-specific live conditions for the hero. The clock runs locally in Pacific Time;
+      // weather comes from Open-Meteo's public forecast API (no API key required).
+      function setupHeroConditions() {
+        const clock = document.getElementById("heroTacomaClock");
+        const date = document.getElementById("heroTacomaDate");
+        const weatherValue = document.getElementById("heroWeatherValue");
+        const weatherDetail = document.getElementById("heroWeatherDetail");
+        const weatherIcon = document.getElementById("heroWeatherIcon");
+        const timeZone = "America/Los_Angeles";
+        function updateTacomaClock() {
+          const now = new Date();
+          if (clock) clock.textContent = new Intl.DateTimeFormat("en-US", {
+            timeZone, hour: "numeric", minute: "2-digit", second: "2-digit", hour12: true
+          }).format(now);
+          if (date) date.textContent = new Intl.DateTimeFormat("en-US", {
+            timeZone, weekday: "long", month: "short", day: "numeric", year: "numeric"
+          }).format(now) + " · Pacific Time";
+        }
+        updateTacomaClock();
+        window.setInterval(updateTacomaClock, 1000);
+
+        const conditions = {
+          0: ["☀️", "Clear sky"], 1: ["🌤️", "Mainly clear"], 2: ["⛅", "Partly cloudy"],
+          3: ["☁️", "Overcast"], 45: ["🌫️", "Fog"], 48: ["🌫️", "Depositing rime fog"],
+          51: ["🌦️", "Light drizzle"], 53: ["🌦️", "Drizzle"], 55: ["🌧️", "Dense drizzle"],
+          56: ["🌧️", "Freezing drizzle"], 57: ["🌧️", "Heavy freezing drizzle"],
+          61: ["🌦️", "Light rain"], 63: ["🌧️", "Rain"], 65: ["🌧️", "Heavy rain"],
+          66: ["🌧️", "Freezing rain"], 67: ["🌧️", "Heavy freezing rain"],
+          71: ["🌨️", "Light snow"], 73: ["🌨️", "Snow"], 75: ["❄️", "Heavy snow"],
+          77: ["🌨️", "Snow grains"], 80: ["🌦️", "Rain showers"], 81: ["🌧️", "Rain showers"],
+          82: ["⛈️", "Violent rain showers"], 85: ["🌨️", "Snow showers"], 86: ["❄️", "Heavy snow showers"],
+          95: ["⛈️", "Thunderstorm"], 96: ["⛈️", "Thunderstorm with hail"], 99: ["⛈️", "Severe thunderstorm"]
+        };
+        async function loadTacomaWeather() {
+          if (!weatherValue || !weatherDetail || !weatherIcon) return;
+          try {
+            const url = "https://api.open-meteo.com/v1/forecast?latitude=47.2529&longitude=-122.4443&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=America%2FLos_Angeles";
+            const response = await fetch(url, {cache:"no-store"});
+            if (!response.ok) throw new Error("Weather service unavailable");
+            const data = await response.json();
+            const current = data.current;
+            if (!current || typeof current.temperature_2m !== "number") throw new Error("No current conditions");
+            const condition = conditions[current.weather_code] || ["🌦️", "Current conditions"];
+            weatherIcon.textContent = condition[0];
+            weatherValue.textContent = Math.round(current.temperature_2m) + "°F · " + condition[1];
+            const feels = Math.round(current.apparent_temperature);
+            const humidity = Math.round(current.relative_humidity_2m);
+            const wind = Math.round(current.wind_speed_10m);
+            weatherDetail.textContent = "Feels like " + feels + "° · Humidity " + humidity + "% · Wind " + wind + " mph";
+            weatherValue.setAttribute("title", "Weather data: Open-Meteo");
+            weatherDetail.setAttribute("title", "Current conditions from Open-Meteo; refreshes about every 15 minutes.");
+          } catch (error) {
+            weatherIcon.textContent = "🌦️";
+            weatherValue.textContent = "Weather temporarily unavailable";
+            weatherDetail.textContent = "Please check back shortly.";
+          }
+        }
+        loadTacomaWeather();
+        window.setInterval(loadTacomaWeather, 15 * 60 * 1000);
+      }
+
       async function init() {
         loadSavedEpisodes();
         setupNavigation();
         setupRevealAnimations();
         setupParticles();
+        setupHeroConditions();
         setupEvents();
         setupClipDrop();
         setupPublicChat();
