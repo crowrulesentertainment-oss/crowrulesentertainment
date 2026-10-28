@@ -56,6 +56,19 @@ html{scroll-behavior:smooth;scroll-padding-top:96px}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.media-card,.panel{transition:none}}
 
 
+/* Tacoma local clock and live weather */
+.local-info-strip{border-bottom:1px solid #ffffff14;background:#0c120e}
+.local-info-inner{display:flex;align-items:center;gap:22px;min-height:82px;padding-top:12px;padding-bottom:12px}
+.local-info-block{display:flex;align-items:center;gap:12px;min-width:0}
+.local-info-icon,.weather-icon{display:grid;place-items:center;width:42px;height:42px;flex:0 0 42px;background:#d8f36c12;border:1px solid #d8f36c30;color:var(--lime);font-size:1.55rem}
+.local-info-block>div{display:flex;flex-direction:column;min-width:0}
+.local-info-label{font-size:.61rem;letter-spacing:.12em;font-weight:800;color:var(--muted)}
+.local-info-block strong{font:800 1.35rem/1.2 "Barlow Condensed";color:var(--paper);margin:3px 0}
+.local-info-block small{font-size:.7rem;color:var(--muted)}
+.local-info-divider{width:1px;height:42px;background:#ffffff20;flex:0 0 1px}
+.weather-updated{margin-left:auto;color:var(--muted);font-size:.65rem;text-align:right}
+@media(max-width:650px){.local-info-inner{align-items:flex-start;gap:14px;flex-wrap:wrap}.local-info-divider{display:none}.local-info-block{flex:1 1 220px}.weather-updated{flex-basis:100%;margin-left:54px;text-align:left}}
+@media(max-width:420px){.local-info-block{flex-basis:100%}.weather-updated{margin-left:0}}
 /* Real-time control-room visitor counter */
 .visitor-strip{border-bottom:1px solid #d8f36c30;background:linear-gradient(90deg,#141d17,#101512 72%);box-shadow:0 8px 22px #0002}
 .visitor-inner{min-height:48px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
@@ -71,6 +84,12 @@ html{scroll-behavior:smooth;scroll-padding-top:96px}
 <body>
 <header class="top"><div class="wrap topinner"><a class="brand" href="./"><span class="mark">TN</span><span>TACOMA NIGHTS <span style="color:var(--lime)">/ CONTROL ROOM</span></span></a><div class="top-actions"><a class="btn ghost" href="./" target="_blank" rel="noopener">View public site ↗</a><button class="btn ghost hidden" id="signOutBtn">Sign out</button></div></div></header>
 <div class="visitor-strip" role="status" aria-live="polite" aria-atomic="true"><div class="wrap visitor-inner"><span class="visitor-live-dot" id="visitorLiveDot" aria-hidden="true"></span><span class="visitor-label">LIVE VISITORS</span><strong id="visitorCount">—</strong><span class="visitor-description" id="visitorStatus">Connecting to live presence…</span><span class="visitor-scope">THIS CONTROL ROOM</span></div></div>
+<section class="local-info-strip" aria-label="Tacoma local time and weather"><div class="wrap local-info-inner">
+<div class="local-info-block"><span class="local-info-icon" aria-hidden="true">◷</span><div><span class="local-info-label">TACOMA · PACIFIC TIME</span><strong id="tacomaClock">--:--:-- --</strong><small id="tacomaDate">Loading local date…</small></div></div>
+<div class="local-info-divider" aria-hidden="true"></div>
+<div class="local-info-block weather-block"><span class="weather-icon" id="tacomaWeatherIcon" aria-hidden="true">☁</span><div><span class="local-info-label">TACOMA CURRENT WEATHER</span><strong id="tacomaWeather">Loading conditions…</strong><small id="tacomaWeatherDetails">Fetching latest observation…</small></div></div>
+<span class="weather-updated" id="weatherUpdated">Weather refreshes every 15 min</span>
+</div></section>
 <main class="wrap">
 <section class="hero"><p class="micro">CROWRULES ENTERTAINMENT · PRIVATE OPERATIONS</p><h1>PREMIERE<br><span style="color:var(--lime)">CONTROL ROOM.</span></h1><p>Manage the next episode, publish crew profiles, and review community submissions from one place. This dashboard requires an authenticated Supabase user with an administrator role.</p><div id="globalStatus" class="notice" role="status" aria-live="polite">Connecting to secure operations…</div></section>
 <section id="authPanel" class="auth hidden"><p class="micro">ADMIN ACCESS</p><h2>Sign in.</h2><p class="small">Use your Tacoma Nights administrator account. Public visitors cannot access the private inbox or management controls.</p><form id="loginForm" class="fields"><label class="full">Email address<input name="email" type="email" autocomplete="username" required maxlength="254"></label><label class="full">Password<input name="password" type="password" autocomplete="current-password" required></label><div class="full actions"><button class="btn" id="loginBtn">Sign in securely ↗</button></div></form><p id="authMessage" class="small" role="status" aria-live="polite"></p></section>
@@ -119,6 +138,53 @@ const URL='https://cevylpnoexugwgygvtgu.supabase.co';
 const KEY='sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-';
 const $=id=>document.getElementById(id);
 let db=null, currentUser=null, crewCache=[], submissionsCache=[], assetsCache=[], clipUploadsCache=[], visitorChannel=null;
+function initTacomaLocalInfo(){
+ const clock=$('tacomaClock'),date=$('tacomaDate'),weather=$('tacomaWeather'),details=$('tacomaWeatherDetails'),icon=$('tacomaWeatherIcon'),updated=$('weatherUpdated');
+ const zone='America/Los_Angeles';
+ const tick=()=>{
+  const now=new Date();
+  clock.textContent=new Intl.DateTimeFormat('en-US',{timeZone:zone,hour:'numeric',minute:'2-digit',second:'2-digit',hour12:true}).format(now);
+  date.textContent=new Intl.DateTimeFormat('en-US',{timeZone:zone,weekday:'long',month:'long',day:'numeric',year:'numeric'}).format(now);
+ };
+ tick();setInterval(tick,1000);
+ const describeCode=code=>{
+  if(code===0)return ['Clear sky','☀'];
+  if(code===1)return ['Mainly clear','🌤'];
+  if(code===2)return ['Partly cloudy','⛅'];
+  if(code===3)return ['Overcast','☁'];
+  if([45,48].includes(code))return ['Foggy','🌫'];
+  if([51,53,55].includes(code))return ['Drizzle','🌦'];
+  if([56,57].includes(code))return ['Freezing drizzle','🌧'];
+  if([61,63,65].includes(code))return ['Rain','🌧'];
+  if([66,67].includes(code))return ['Freezing rain','🌧'];
+  if([71,73,75,77].includes(code))return ['Snow','❄'];
+  if([80,81,82].includes(code))return ['Rain showers','🌦'];
+  if([85,86].includes(code))return ['Snow showers','🌨'];
+  if([95,96,99].includes(code))return ['Thunderstorms','⛈'];
+  return ['Conditions available','🌡'];
+ };
+ const loadWeather=async()=>{
+  try{
+   const url='https://api.open-meteo.com/v1/forecast?latitude=47.2529&longitude=-122.4443&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=America%2FLos_Angeles';
+   const response=await fetch(url,{cache:'no-store'});
+   if(!response.ok)throw new Error('Weather service returned HTTP '+response.status);
+   const data=await response.json(),v=data.current;
+   if(!v)throw new Error('Current weather was not included in the response');
+   const [condition,emoji]=describeCode(Number(v.weather_code));
+   weather.textContent=Math.round(v.temperature_2m)+'°F · '+condition;
+   icon.textContent=emoji;
+   details.textContent='Feels '+Math.round(v.apparent_temperature)+'°F · Humidity '+Math.round(v.relative_humidity_2m)+'% · Wind '+Math.round(v.wind_speed_10m)+' mph';
+   const stamp=v.time?new Date(v.time):new Date();
+   updated.textContent='Updated '+new Intl.DateTimeFormat('en-US',{timeZone:zone,hour:'numeric',minute:'2-digit',hour12:true}).format(stamp)+' PT · refreshes every 15 min';
+  }catch(err){
+   console.warn('Tacoma weather unavailable:',err);
+   weather.textContent='Weather unavailable';icon.textContent='☁';
+   details.textContent='Live conditions could not be loaded. Check your connection.';
+   updated.textContent='Will retry in 15 min';
+  }
+ };
+ loadWeather();setInterval(loadWeather,15*60*1000);
+}
 function initVisitorCounter(){
  const countEl=$('visitorCount'),statusEl=$('visitorStatus'),dot=$('visitorLiveDot');
  const setState=(count,message,online=true)=>{countEl.textContent=count==null?'—':String(count);statusEl.textContent=message;dot.classList.toggle('offline',!online);};
@@ -206,7 +272,7 @@ $('avatarFile').addEventListener('change',()=>{const file=$('avatarFile').files[
 $('clipsList').addEventListener('click',e=>{const d=e.target.closest('[data-download-asset]'),c=e.target.closest('[data-download-clip]'),o=e.target.closest('[data-open-clip]'),x=e.target.closest('[data-delete-clip]');if(d)downloadAsset(d.dataset.downloadAsset,d);if(c)openPrivateClip(c.dataset.downloadClip,c,true);if(o)openPrivateClip(o.dataset.openClip,o,false);if(x)deleteClipSubmission(x.dataset.deleteClip,x);});$('newCrewBtn').addEventListener('click',clearCrewForm);$('cancelCrewBtn').addEventListener('click',clearCrewForm);$('crewRefreshBtn').addEventListener('click',()=>loadCrew().catch(e=>say($('crewFormStatus'),e.message,true)));$('inboxRefreshBtn').addEventListener('click',()=>loadSubmissions().catch(e=>say($('globalStatus'),e.message,true)));$('reloadBtn').addEventListener('click',loadAll);$('submissionFilter').addEventListener('change',renderSubmissions);
 $('crewList').addEventListener('click',async e=>{const edit=e.target.closest('[data-edit-crew]'),del=e.target.closest('[data-delete-crew]');if(edit){const p=crewCache.find(x=>x.id===edit.dataset.editCrew);if(!p)return;const f=$('crewForm');for(const k of ['id','display_name','role_title','bio','avatar_url','profile_url','sort_order'])f.elements[k].value=p[k]??'';f.elements.is_featured.checked=!!p.is_featured;f.elements.is_published.checked=!!p.is_published;$('avatarFile').value='';updateAvatarPreview(p.avatar_url||'');f.scrollIntoView({behavior:'smooth',block:'start'});return;}if(del){const p=crewCache.find(x=>x.id===del.dataset.deleteCrew);if(!p||!confirm('Delete crew profile for '+p.display_name+'? This cannot be undone.'))return;try{const {error}=await db.from('tacoma_nights_crew').delete().eq('id',p.id);if(error)throw error;await loadCrew();say($('crewFormStatus'),'Crew profile deleted.');}catch(err){say($('crewFormStatus'),err.message,true);}}});
 $('submissionList').addEventListener('click',async e=>{const del=e.target.closest('[data-delete-submission]');if(del){const id=del.dataset.deleteSubmission,record=submissionsCache.find(x=>x.id===id);if(!record||!confirm('PERMANENTLY DELETE this community submission?\n\n'+(record.subject||record.submission_type)+' from '+(record.full_name||'unknown sender')+'\n\nThis cannot be undone.'))return;setBusy(del,true,'Deleting…');try{const {data:deletedRow,error}=await db.from('tacoma_nights_submissions').delete().eq('id',id).select('id').maybeSingle();if(error)throw error;if(!deletedRow)throw new Error('No submission was deleted. Refresh the inbox and confirm your administrator session.');submissionsCache=submissionsCache.filter(x=>x.id!==id);renderSubmissions();$('statNew').textContent=submissionsCache.filter(x=>x.status==='new').length;say($('globalStatus'),'Community submission deleted permanently.');}catch(err){say($('globalStatus'),'Delete failed: '+(err.message||'Check administrator permissions.'),true);}finally{del.disabled=false;del.textContent='Delete submission ×';}return;}const button=e.target.closest('[data-save-submission]');if(!button)return;const card=button.closest('[data-submission]'),id=button.dataset.saveSubmission,status=card.querySelector('[data-status]').value,notes=card.querySelector('[data-notes]').value;setBusy(button,true);try{const {error}=await db.from('tacoma_nights_submissions').update({status,internal_notes:notes,reviewed_at:new Date().toISOString()}).eq('id',id);if(error)throw error;await loadSubmissions();say($('globalStatus'),'Submission review saved.');}catch(err){say($('globalStatus'),err.message||'Could not save review.',true);}finally{setBusy(button,false,'Save review');}});
-function init(){if(!window.supabase?.createClient){say($('globalStatus'),'The Supabase client could not load. Refresh the page or try again later.',true);return;}db=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});initVisitorCounter();db.auth.getSession().then(({data})=>verifySession(data.session)).catch(()=>showSignedOut());db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT')showSignedOut();else if(session&&event==='SIGNED_IN')verifySession(session);});}
+function init(){if(!window.supabase?.createClient){say($('globalStatus'),'The Supabase client could not load. Refresh the page or try again later.',true);return;}db=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});initTacomaLocalInfo();initVisitorCounter();db.auth.getSession().then(({data})=>verifySession(data.session)).catch(()=>showSignedOut());db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT')showSignedOut();else if(session&&event==='SIGNED_IN')verifySession(session);});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
 </script></body></html>
