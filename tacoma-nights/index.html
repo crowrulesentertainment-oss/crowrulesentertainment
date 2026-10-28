@@ -1937,25 +1937,19 @@
 
         card.append(avatar, name, role, bio);
 
-        // Prefer the published member profile URL from the API. If this is Jonathan's
-        // crew record and no URL was configured, link to the site's member profile page.
-        const profileUrl = safeExternalUrl(
-          member.profile_url || member.member_profile_url || member.public_profile_url || member.url ||
-          ((displayName.toLowerCase() === "jonathan riehle" || initials(displayName) === "JR")
-            ? "https://crowrulesentertainment-oss.github.io/crowrulesentertainment/podcasting/members/"
-            : "")
+        // Give every crew member a dedicated profile URL. The profile page
+        // resolves the key against the published crew API response.
+        const profileKey = String(
+          member.slug || member.member_slug || member.id || member.member_id ||
+          displayName.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
         );
-        if (profileUrl) {
-          const links = document.createElement("div");
-          links.className = "crew-links";
-          const link = document.createElement("a");
-          link.href = profileUrl;
-          link.target = "_blank";
-          link.rel = "noopener noreferrer";
-          link.textContent = "View member profile ↗";
-          links.appendChild(link);
-          card.appendChild(links);
-        }
+        const links = document.createElement("div");
+        links.className = "crew-links";
+        const link = document.createElement("a");
+        link.href = "crew/profile.html?member=" + encodeURIComponent(profileKey);
+        link.textContent = "View crew profile ↗";
+        links.appendChild(link);
+        card.appendChild(links);
 
         return card;
       }
