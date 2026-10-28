@@ -772,6 +772,18 @@
       text-transform: uppercase;
     }
     .crew-card p { color: var(--muted); font-size: .9rem; }
+    .crew-bio-toggle {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; margin-top: 14px; padding: 10px 12px;
+      border: 1px solid rgba(196,230,188,.22); border-radius: 10px;
+      color: var(--green-bright); background: rgba(255,255,255,.035);
+      font: inherit; font-size: .82rem; font-weight: 800; cursor: pointer;
+      transition: background .2s ease, border-color .2s ease;
+    }
+    .crew-bio-toggle:hover, .crew-bio-toggle:focus-visible {
+      background: rgba(196,230,188,.09); border-color: rgba(196,230,188,.5);
+    }
+    .crew-bio { margin: 14px 0 0; text-align: left; }
     .crew-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
     .crew-links a { color: var(--green-bright); font-size: .83rem; font-weight: 700; }
 
@@ -2101,17 +2113,36 @@
         role.className = "crew-role";
         role.textContent = safeText(member.role, "Tacoma Nights Crew");
 
-        const bio = document.createElement("p");
-        bio.textContent = safeText(member.bio, "Part of the team building Tacoma Nights.");
-
-        card.append(avatar, name, role, bio);
-
-        // Give every crew member a dedicated profile URL. The profile page
-        // resolves the key against the published crew API response.
+        // Keep the public crew cards concise: bios are hidden until the
+        // visitor explicitly opens that member's bio.
         const profileKey = String(
           member.slug || member.member_slug || member.id || member.member_id ||
           displayName.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
         );
+        const bioId = "crew-bio-" + profileKey.toLowerCase().replace(/[^a-z0-9_-]/g, "-");
+        const bio = document.createElement("p");
+        bio.className = "crew-bio";
+        bio.id = bioId;
+        bio.hidden = true;
+        bio.textContent = safeText(member.bio, "Part of the team building Tacoma Nights.");
+
+        const bioToggle = document.createElement("button");
+        bioToggle.type = "button";
+        bioToggle.className = "crew-bio-toggle";
+        bioToggle.setAttribute("aria-controls", bioId);
+        bioToggle.setAttribute("aria-expanded", "false");
+        bioToggle.textContent = "Read bio +";
+        bioToggle.addEventListener("click", () => {
+          const expanded = bioToggle.getAttribute("aria-expanded") === "true";
+          bioToggle.setAttribute("aria-expanded", String(!expanded));
+          bio.hidden = expanded;
+          bioToggle.textContent = expanded ? "Read bio +" : "Hide bio −";
+        });
+
+        card.append(avatar, name, role, bioToggle, bio);
+
+        // Give every crew member a dedicated profile URL. The profile page
+        // resolves the key against the published crew API response.
         const links = document.createElement("div");
         links.className = "crew-links";
         const link = document.createElement("a");
