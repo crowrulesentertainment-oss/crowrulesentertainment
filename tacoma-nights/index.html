@@ -192,6 +192,32 @@
       cursor: pointer;
     }
 
+
+    /* Compact, responsive primary navigation */
+    .nav{gap:clamp(12px,2vw,24px)}
+    .nav-links{gap:clamp(12px,1.45vw,21px);font-size:.82rem;white-space:nowrap}
+    .nav-links .nav-primary-link{padding:9px 0}
+    .nav-chat-link{display:inline-flex;align-items:center;gap:7px}
+    .nav-live-dot{width:7px;height:7px;border-radius:50%;background:#82d9a5;box-shadow:0 0 10px rgba(130,217,165,.55)}
+    .nav-more{position:relative}
+    .nav-more summary{display:flex;align-items:center;gap:7px;list-style:none;cursor:pointer;padding:9px 0;color:#d4ded4;transition:color .2s ease}
+    .nav-more summary::-webkit-details-marker{display:none}
+    .nav-more summary:hover,.nav-more[open] summary{color:var(--green-bright)}
+    .nav-more summary span{font-size:1rem;color:var(--gold);transition:transform .2s ease}
+    .nav-more[open] summary span{transform:rotate(180deg)}
+    .nav-more-menu{position:absolute;top:calc(100% + 15px);right:-16px;z-index:120;display:grid;gap:4px;min-width:220px;padding:9px;border:1px solid var(--border);border-radius:15px;background:rgba(7,13,10,.98);box-shadow:0 18px 45px rgba(0,0,0,.38);backdrop-filter:blur(18px)}
+    .nav-more-menu a{padding:10px 12px;border-radius:9px;white-space:normal}
+    .nav-more-menu a:hover{background:rgba(196,230,188,.08)}
+    .nav-links .nav-subscribe{padding:8px 12px;min-height:36px;flex-shrink:0}
+    @media(max-width:1120px) and (min-width:961px){
+      .nav{gap:12px}
+      .brand{gap:9px}
+      .brand-mark{width:39px;height:39px}
+      .brand-name{font-size:.9rem}
+      .brand-subtitle{font-size:.58rem;letter-spacing:.1em}
+      .nav-links{gap:12px;font-size:.78rem}
+    }
+
     /* Buttons */
     .button {
       display: inline-flex;
@@ -882,8 +908,13 @@
         background: rgba(7,13,10,.98);
       }
       .nav-links.open { display: flex; }
-      .nav-links a { padding: 12px 3px; }
+      .nav-links > a:not(.button) { padding: 12px 3px; }
       .nav-links .button { margin-top: 8px; }
+      .nav-more{width:100%;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+      .nav-more summary{padding:12px 3px;justify-content:space-between}
+      .nav-more-menu{position:static;min-width:0;padding:4px 0 10px;border:0;border-radius:0;background:transparent;box-shadow:none;backdrop-filter:none}
+      .nav-more-menu a{padding:11px 12px 11px 18px}
+      .nav-links .nav-subscribe{width:100%;margin-top:10px}
       .episode-layout { grid-template-columns: 1fr; }
       .episode-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
       .crew-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
@@ -1057,15 +1088,20 @@
       <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navLinks" aria-label="Open navigation">☰ Menu</button>
 
       <nav class="nav-links" id="navLinks" aria-label="Main navigation">
-        <a href="#episodes">Episodes</a>
-        <a href="#about">The Show</a>
-        <a href="#crew">Our Crew</a>
-        <a href="#live-chat">Live Chat</a>
-        <a href="#community">Community</a>
-        <a href="#cohost-clips">Co-host Uploads</a>
-        <a href="community.html">Community Hub</a>
-        <a href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/podcasting/">Podcasting</a>
-        <a class="button button-primary button-small" href="https://www.youtube.com/@CrowRules_TV?sub_confirmation=1" target="_blank" rel="noopener noreferrer">Subscribe ↗</a>
+        <a class="nav-primary-link" href="#episodes">Episodes</a>
+        <a class="nav-primary-link" href="#about">The Show</a>
+        <a class="nav-primary-link" href="#crew">Our Crew</a>
+        <a class="nav-primary-link nav-chat-link" href="#live-chat"><span class="nav-live-dot" aria-hidden="true"></span>Live Chat</a>
+        <details class="nav-more">
+          <summary>Explore <span aria-hidden="true">⌄</span></summary>
+          <div class="nav-more-menu">
+            <a href="#community">Community</a>
+            <a href="#cohost-clips">Co-host Uploads</a>
+            <a href="community.html">Community Hub</a>
+            <a href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/podcasting/">CrowRules Podcasting</a>
+          </div>
+        </details>
+        <a class="button button-primary button-small nav-subscribe" href="https://www.youtube.com/@CrowRules_TV?sub_confirmation=1" target="_blank" rel="noopener noreferrer">Subscribe ↗</a>
       </nav>
     </div>
   </header>
@@ -2201,7 +2237,23 @@
             toggle.setAttribute("aria-expanded", "false");
             toggle.setAttribute("aria-label", "Open navigation");
             toggle.textContent = "☰ Menu";
+            const more = nav.querySelector(".nav-more");
+            if (more) more.open = false;
           });
+        });
+        document.addEventListener("click", event => {
+          const more = nav.querySelector(".nav-more");
+          if (more && !more.contains(event.target)) more.open = false;
+        });
+        document.addEventListener("keydown", event => {
+          if (event.key === "Escape") {
+            const more = nav.querySelector(".nav-more");
+            if (more) { more.open = false; more.querySelector("summary")?.focus(); }
+            nav.classList.remove("open");
+            toggle.setAttribute("aria-expanded", "false");
+            toggle.setAttribute("aria-label", "Open navigation");
+            toggle.textContent = "☰ Menu";
+          }
         });
       }
 
