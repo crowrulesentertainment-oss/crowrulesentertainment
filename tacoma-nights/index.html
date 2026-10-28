@@ -1385,7 +1385,7 @@
               <div><label for="clipEpisode">Episode / intended air date (optional)</label><input class="field" id="clipEpisode" maxlength="120" placeholder="Example: Friday, November 6"></div>
               <div><label for="clipNotes">Notes for the editor (optional)</label><textarea class="field" id="clipNotes" maxlength="2000" placeholder="Names/pronunciations, suggested in/out points, source links, or editing notes."></textarea></div>
               <div><label for="clipFile">Video clip</label><input id="clipFile" type="file" accept="video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm" required></div>
-              <p class="form-note">Accepted formats: MP4, MOV, WebM. Maximum <strong>500 MB per clip</strong>. Large files use resumable upload so an interrupted connection can retry. Record in horizontal 16:9 landscape where possible.</p>
+              <p class="form-note">Accepted formats: MP4, MOV, WebM. Maximum <strong>50 GB per clip</strong> (the current resumable-upload limit). Large files use resumable upload so an interrupted connection can retry. Record in horizontal 16:9 landscape where possible.</p>
               <label class="consent-row"><input id="clipRights" type="checkbox" required><span>I confirm I created this clip or have permission to submit it, and I grant CrowRules Entertainment permission to edit it for Tacoma Nights.</span></label>
               <button class="button button-primary" id="clipSubmit" type="submit">Upload clip to the edit desk ↗</button>
               <div class="clip-progress" aria-hidden="true"><span id="clipProgressBar"></span></div>
@@ -2391,8 +2391,14 @@
       const CLIP_SUPABASE_KEY = "sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";
       const CLIP_BUCKET = "tacoma-nights-clips";
       const CLIP_TABLE = "tacoma_nights_clip_uploads";
+      const CLIP_MAX_BYTES = 50 * 1024 * 1024 * 1024;
       const CLIP_OWNER_EMAIL = "REPLACE_WITH_YOUR_OWNER_EMAIL";
       let clipSupabase = null;
+      function clipFormatSize(bytes) {
+        const gb = 1024 * 1024 * 1024;
+        if (bytes >= gb) return (bytes / gb).toFixed(2) + " GB";
+        return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+      }
       function clipSetStatus(message, kind = "") {
         const node = $("#clipStatus"); if (!node) return;
         node.className = "clip-status" + (kind ? " " + kind : ""); node.textContent = message;
@@ -2432,7 +2438,7 @@
           if($("#clipWebsite").value.trim()) throw new Error("Submission could not be accepted.");
           const client=clipClient();const name=$("#clipName").value.trim();const title=$("#clipTitle").value.trim();const file=$("#clipFile").files[0];
           if(!name||!title||!file)throw new Error("Enter your name, a segment title, and select a video.");
-          if(file.size>500*1024*1024)throw new Error("This uploader accepts files up to 500 MB.");
+          if(file.size>CLIP_MAX_BYTES)throw new Error("This uploader accepts files up to 50 GB.");
           if(!/\.(mp4|mov|webm)$/i.test(file.name)&&!["video/mp4","video/quicktime","video/webm"].includes(file.type))throw new Error("Choose an MP4, MOV, or WebM video.");
           if(!$("#clipRights").checked)throw new Error("Confirm you have permission to submit this clip.");
           button.disabled=true;button.textContent="Uploading…";$("#clipProgressBar").style.width="0%";clipSetStatus("Preparing resumable upload…");
@@ -2448,7 +2454,7 @@
               uploadDataDuringCreation:true,removeFingerprintOnSuccess:true,chunkSize:6*1024*1024,
               metadata:{bucketName:CLIP_BUCKET,objectName:path,contentType:file.type||"application/octet-stream",cacheControl:"3600"},
               onError:error=>reject(error),
-              onProgress:(uploaded,total)=>{const pct=total?Math.min(99,Math.round(uploaded/total*100)):0;$("#clipProgressBar").style.width=pct+"%";clipSetStatus("Uploading privately… "+pct+"% ("+(uploaded/1024/1024).toFixed(1)+" of "+(total/1024/1024).toFixed(1)+" MB)");},
+              onProgress:(uploaded,total)=>{const pct=total?Math.min(99,Math.round(uploaded/total*100)):0;$("#clipProgressBar").style.width=pct+"%";clipSetStatus("Uploading privately… "+pct+"% ("+clipFormatSize(uploaded)+" of "+clipFormatSize(total)+")");},
               onSuccess:()=>resolve()
             });
             upload.start();
