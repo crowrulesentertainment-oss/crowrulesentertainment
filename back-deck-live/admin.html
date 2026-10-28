@@ -224,7 +224,13 @@
   </section>
 
   <main class="wrap">
-    <section id="loginView" class="panel login-panel">
+    <section id="sessionChecking" class="panel login-panel" role="status" aria-live="polite">
+      <div class="eyebrow">Secure session</div>
+      <h1>Checking administrator session…</h1>
+      <p class="muted">Restoring your saved sign-in and verifying Back Deck Live administrator access.</p>
+    </section>
+
+    <section id="loginView" class="panel login-panel hidden">
       <div class="eyebrow">Authorized access only</div>
       <h1>Admin sign in</h1>
       <p>Manage Back Deck Live episodes, crew profiles, and community submissions.</p>
@@ -927,21 +933,91 @@
     }
   });
 
-  client.auth.onAuthStateChange((_event, session) => {
-    if (!session) {
+  // Restore a previously saved Supabase session automatically, then validate the
+  // user's administrator authorization before revealing any control-room tools.
+  let handledSessionUserId = null;
+  let sessionCheckFinished = false;
+  let sessionHandlingPromise = Promise.resolve();
+
+  function showSessionChecking() {
+    $("loginView").classList.add("hidden");
+    $("dashboard").classList.add("hidden");
+    $("logoutBtn").classList.add("hidden");
+    $("sessionChecking").classList.remove("hidden");
+  }
+
+  function showLoginAfterSessionCheck() {
+    $("sessionChecking").classList.add("hidden");
+    $("dashboard").classList.add("hidden");
+    $("logoutBtn").classList.add("hidden");
+    $("loginView").classList.remove("hidden");
+  }
+
+  async function processAuthSession(session, force = false) {
+    const userId = session?.user?.id || null;
+    if (!force && sessionCheckFinished && userId && handledSessionUserId === userId && currentUser?.id === userId) return;
+
+    sessionCheckFinished = true;
+    if (!userId) {
+      handledSessionUserId = null;
       currentUser = null;
-      $("dashboard").classList.add("hidden");
-      $("logoutBtn").classList.add("hidden");
-      $("loginView").classList.remove("hidden");
+      showLoginAfterSessionCheck();
+      return;
+    }
+
+    handledSessionUserId = userId;
+    $("sessionChecking").classList.remove("hidden");
+    $("loginView").classList.add("hidden");
+    $("dashboard").classList.add("hidden");
+
+    try {
+      await requireAdmin(session.user);
+      $("sessionChecking").classList.add("hidden");
+      await startDashboard(session.user);
+    } catch (error) {
+      handledSessionUserId = null;
+      await client.auth.signOut();
+      showLoginAfterSessionCheck();
+      showMessage(error.message || "Saved session found, but administrator access could not be verified. Please sign in again.", "error", "loginMessage");
+    }
+  }
+
+  // Register the listener immediately so saved sessions and auth redirects are not missed.
+  client.auth.onAuthStateChange((event, session) => {
+    if (event === "SIGNED_OUT" || !session) {
+      currentUser = null;
+      handledSessionUserId = null;
+      showLoginAfterSessionCheck();
+      return;
+    }
+
+    if (["INITIAL_SESSION", "SIGNED_IN", "TOKEN_REFRESHED", "USER_UPDATED"].includes(event)) {
+      // Defer async Supabase queries until after the auth callback returns.
+      window.setTimeout(() => {
+        sessionHandlingPromise = sessionHandlingPromise
+          .then(() => processAuthSession(session))
+          .catch(error => {
+            showLoginAfterSessionCheck();
+            showMessage(error.message || "Could not restore your administrator session.", "error", "loginMessage");
+          });
+      }, 0);
     }
   });
 
+  // Keep the login form hidden while Supabase restores its persisted browser session.
+  showSessionChecking();
   client.auth.getSession().then(({ data, error }) => {
     if (error) {
-      showMessage(error.message, "error", "loginMessage");
+      sessionCheckFinished = true;
+      showLoginAfterSessionCheck();
+      showMessage(error.message || "Could not check the saved session.", "error", "loginMessage");
       return;
     }
-    if (data.session) handleSession(data.session);
+    sessionHandlingPromise = sessionHandlingPromise.then(() => processAuthSession(data.session, true));
+  }).catch(error => {
+    sessionCheckFinished = true;
+    showLoginAfterSessionCheck();
+    showMessage(error.message || "Could not check the saved session.", "error", "loginMessage");
   });
 })();
 </script>
