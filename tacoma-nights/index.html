@@ -850,6 +850,26 @@
     }
   
     /* Co-host clip drop */
+    /* Living Tacoma skyline: slow parallax, rain shimmer, distant city lights */
+    .hero-image{transform:scale(1.08);animation:cinematic-pan 34s cubic-bezier(.45,0,.55,1) infinite alternate;filter:saturate(1.12) contrast(1.08)}
+    .hero::before{content:"";position:absolute;inset:0;z-index:-2;pointer-events:none;background:
+      linear-gradient(180deg,rgba(3,8,15,.08),rgba(3,8,15,.08) 50%,rgba(3,8,15,.7)),
+      repeating-linear-gradient(105deg,transparent 0 17px,rgba(200,225,255,.025) 18px,transparent 19px 37px);
+      background-size:auto,180px 100%;animation:rain-drift 3.8s linear infinite;opacity:.6}
+    .hero::after{content:"";position:absolute;inset:0;z-index:-4;pointer-events:none;background:
+      radial-gradient(ellipse at 76% 36%,rgba(255,190,117,.2),transparent 17%),
+      radial-gradient(ellipse at 80% 55%,rgba(64,155,220,.2),transparent 35%),
+      linear-gradient(115deg,transparent 30%,rgba(137,194,223,.06) 48%,transparent 64%);
+      background-size:auto,auto,220% 100%;animation:cinematic-light 18s ease-in-out infinite alternate}
+    .hero-glow{animation:glow-pulse 7s ease-in-out infinite alternate;filter:blur(3px)}
+    .hero-content{animation:hero-arrive 1.1s cubic-bezier(.2,.7,.2,1) both}
+    .live-label{backdrop-filter:blur(12px);box-shadow:0 0 28px rgba(255,126,108,.08)}
+    @keyframes cinematic-pan{0%{transform:scale(1.06) translate3d(0,0,0)}100%{transform:scale(1.16) translate3d(-1.4%,-.8%,0)}}
+    @keyframes rain-drift{from{background-position:0 0,0 -100px}to{background-position:0 0,0 100px}}
+    @keyframes cinematic-light{from{background-position:center,center,-100% 0}to{background-position:center,center,100% 0}}
+    @keyframes hero-arrive{from{opacity:0;transform:translateY(22px);filter:blur(5px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
+    @media(prefers-reduced-motion:reduce){.hero-image,.hero::before,.hero::after,.hero-glow,.hero-content{animation:none!important}}
+
     .clip-upload-layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:24px;align-items:start}
     .clip-drop{border:1px dashed rgba(196,230,188,.42);border-radius:18px;padding:24px;background:rgba(5,12,8,.38)}
     .clip-drop input[type=file]{width:100%;padding:14px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.025);color:var(--text)}
@@ -1137,20 +1157,19 @@
           <article class="panel reveal"><div class="panel-inner">
             <h3>Co-host clip drop</h3>
             <p class="muted">Please record in <strong>horizontal (16:9) landscape</strong> format. Use clear audio, leave a few seconds of silence at the beginning and end, and name your segment so it's easy to identify.</p>
-            <div class="clip-private-note">Uploads are intended for the production team, not public display. Only use this uploader after the Tacoma Nights Supabase storage bucket and access policies have been configured.</div>
+            <div class="clip-private-note">Simple handoff: your name, your clip, and optional notes. Files are stored in a private bucket and are not displayed publicly. Please only submit material you have permission to share.</div>
             <form id="clipUploadForm" class="form-grid" style="margin-top:20px">
-              <div><label for="clipEmail">Co-host email</label><input class="field" id="clipEmail" type="email" autocomplete="email" required maxlength="254" placeholder="you@example.com"></div>
-              <button class="button button-secondary" id="clipSignIn" type="button">Email me a secure sign-in link</button>
-              <p class="form-note">Use the same email address Jonathan has approved for Tacoma Nights co-host uploads. Check your inbox for the sign-in link.</p>
+              <div><label for="clipName">Your name</label><input class="field" id="clipName" autocomplete="name" required maxlength="100" placeholder="Name or on-air name"></div>
+              <div class="honeypot" aria-hidden="true"><label for="clipWebsite">Leave this blank</label><input id="clipWebsite" name="website" tabindex="-1" autocomplete="off"></div>
               <div><label for="clipTitle">Segment title</label><input class="field" id="clipTitle" required maxlength="120" placeholder="Example: Tacoma Sports Roundup"></div>
               <div><label for="clipEpisode">Episode / intended air date (optional)</label><input class="field" id="clipEpisode" maxlength="120" placeholder="Example: Friday, November 6"></div>
               <div><label for="clipNotes">Notes for the editor (optional)</label><textarea class="field" id="clipNotes" maxlength="2000" placeholder="Names/pronunciations, suggested in/out points, source links, or editing notes."></textarea></div>
               <div><label for="clipFile">Video clip</label><input id="clipFile" type="file" accept="video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm" required></div>
-              <p class="form-note">Accepted formats: MP4, MOV, WebM. Keep files under 100 MB for this browser uploader. Larger files may need a resumable upload workflow.</p>
+              <p class="form-note">Accepted formats: MP4, MOV, WebM. Maximum 100 MB per clip. Record in horizontal 16:9 landscape where possible.</p>
               <label class="consent-row"><input id="clipRights" type="checkbox" required><span>I confirm I created this clip or have permission to submit it, and I grant CrowRules Entertainment permission to edit it for Tacoma Nights.</span></label>
               <button class="button button-primary" id="clipSubmit" type="submit">Upload clip to the edit desk ↗</button>
               <div class="clip-progress" aria-hidden="true"><span id="clipProgressBar"></span></div>
-              <p id="clipStatus" class="clip-status" role="status" aria-live="polite">Sign in with your approved co-host email to upload a clip.</p>
+              <p id="clipStatus" class="clip-status" role="status" aria-live="polite">Add your name and select a video. No sign-in required.</p>
             </form>
           </div></article>
           <aside class="panel reveal"><div class="panel-inner">
@@ -2146,149 +2165,88 @@
       }
 
 
-      // Co-host clip drop — uses Supabase Auth + a private Storage bucket.
-      // Set the publishable/anon key below, and apply the matching SQL/RLS setup before enabling uploads.
+      // Public co-host drop: anonymous upload, private storage. Owner sign-in is only for reviewing downloads.
       const CLIP_SUPABASE_URL = "https://cevylpnoexugwgygvtgu.supabase.co";
       const CLIP_SUPABASE_KEY = "PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE";
       const CLIP_BUCKET = "tacoma-nights-clips";
       const CLIP_TABLE = "tacoma_nights_clip_uploads";
       const CLIP_OWNER_EMAIL = "REPLACE_WITH_YOUR_OWNER_EMAIL";
       let clipSupabase = null;
-      let clipSession = null;
-
       function clipSetStatus(message, kind = "") {
-        const node = $("#clipStatus");
-        if (!node) return;
-        node.className = "clip-status" + (kind ? " " + kind : "");
-        node.textContent = message;
+        const node = $("#clipStatus"); if (!node) return;
+        node.className = "clip-status" + (kind ? " " + kind : ""); node.textContent = message;
       }
       function clipClient() {
-        if (!window.supabase || !window.supabase.createClient) throw new Error("Supabase client library did not load.");
-        if (!CLIP_SUPABASE_KEY || CLIP_SUPABASE_KEY.startsWith("PASTE_")) throw new Error("The clip uploader needs your Supabase publishable/anon key configured in index.html.");
-        if (!clipSupabase) {
-          clipSupabase = window.supabase.createClient(CLIP_SUPABASE_URL, CLIP_SUPABASE_KEY, {
-            auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-          });
-        }
+        if (!window.supabase?.createClient) throw new Error("Supabase client library did not load.");
+        if (!CLIP_SUPABASE_KEY || CLIP_SUPABASE_KEY.startsWith("PASTE_")) throw new Error("The clip uploader needs the Supabase publishable/anon key configured.");
+        if (!clipSupabase) clipSupabase = window.supabase.createClient(CLIP_SUPABASE_URL, CLIP_SUPABASE_KEY, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
         return clipSupabase;
       }
-      async function clipRefreshSession() {
-        const client = clipClient();
-        const { data, error } = await client.auth.getSession();
-        if (error) throw error;
-        clipSession = data.session;
-        const email = clipSession?.user?.email || "";
-        $("#clipOwnerPanel").hidden = !email || email.toLowerCase() !== CLIP_OWNER_EMAIL.toLowerCase() || CLIP_OWNER_EMAIL.startsWith("REPLACE_");
-        if (email) {
-          $("#clipSignIn").textContent = "Signed in: " + email + " · Send another sign-in link";
-          clipSetStatus("Signed in. Add your segment details and choose the clip to upload.", "success");
-        }
-        return clipSession;
-      }
-      async function clipSendMagicLink() {
-        try {
-          const email = $("#clipEmail").value.trim().toLowerCase();
-          if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error("Enter a valid co-host email address first.");
-          const client = clipClient();
-          const { error } = await client.auth.signInWithOtp({
-            email,
-            options: { emailRedirectTo: window.location.href.split("#")[0].split("?")[0] }
-          });
-          if (error) throw error;
-          clipSetStatus("Sign-in link sent. Open the email on this device, then return here to upload.", "success");
-        } catch (error) { clipSetStatus(error.message || "Could not send the sign-in link.", "error"); }
-      }
       async function clipLoadOwnerSubmissions() {
-        const list = $("#clipList");
-        list.replaceChildren();
-        const client = clipClient();
-        const { data: { session } } = await client.auth.getSession();
-        if (!session || !CLIP_OWNER_EMAIL || CLIP_OWNER_EMAIL.startsWith("REPLACE_") ||
-            session.user.email.toLowerCase() !== CLIP_OWNER_EMAIL.toLowerCase()) {
-          list.textContent = "Sign in with the configured owner account to view submissions.";
-          return;
+        const list=$("#clipList"); list.replaceChildren();
+        const client=clipClient(); const {data:{session}}=await client.auth.getSession();
+        if (!session || CLIP_OWNER_EMAIL.startsWith("REPLACE_") || (session.user.email||"").toLowerCase()!==CLIP_OWNER_EMAIL.toLowerCase()) {
+          list.textContent="Sign in with the configured production-owner account to view incoming clips."; return;
         }
-        const { data, error } = await client.from(CLIP_TABLE).select("*").order("created_at", { ascending: false }).limit(100);
-        if (error) throw error;
-        if (!data || !data.length) { list.textContent = "No clips have been submitted yet."; return; }
-        for (const item of data) {
-          const card = document.createElement("article"); card.className = "clip-item";
-          const title = document.createElement("strong"); title.textContent = item.title || "Untitled clip";
-          const meta = document.createElement("small");
-          meta.textContent = [item.co_host_email, item.episode_label, item.created_at ? new Date(item.created_at).toLocaleString() : ""].filter(Boolean).join(" · ");
-          const notes = document.createElement("p"); notes.className = "muted"; notes.textContent = item.notes || "No editor notes.";
-          const actions = document.createElement("div"); actions.className = "clip-item-actions";
-          const download = document.createElement("button"); download.type = "button"; download.className = "button button-primary button-small"; download.textContent = "Create download link";
-          download.addEventListener("click", async () => {
-            download.disabled = true;
-            try {
-              const { data: signed, error: signedError } = await clipClient().storage.from(CLIP_BUCKET).createSignedUrl(item.storage_path, 900, { download: true });
-              if (signedError) throw signedError;
-              const a = document.createElement("a"); a.href = signed.signedUrl; a.download = ""; a.rel = "noopener"; a.click();
-            } catch (e) { clipSetStatus("Download link failed: " + (e.message || "Unknown error"), "error"); }
-            finally { download.disabled = false; }
-          });
-          actions.append(download); card.append(title, meta, notes, actions); list.append(card);
+        const {data,error}=await client.from(CLIP_TABLE).select("*").order("created_at",{ascending:false}).limit(100);
+        if(error) throw error;
+        if(!data?.length){list.textContent="No clips submitted yet.";return;}
+        for(const item of data){
+          const card=document.createElement("article");card.className="clip-item";
+          const title=document.createElement("strong");title.textContent=item.title||"Untitled clip";
+          const meta=document.createElement("small");meta.textContent=[item.co_host_name,item.episode_label,item.created_at?new Date(item.created_at).toLocaleString():""].filter(Boolean).join(" · ");
+          const notes=document.createElement("p");notes.className="muted";notes.textContent=item.notes||"No editor notes.";
+          const actions=document.createElement("div");actions.className="clip-item-actions";
+          const download=document.createElement("button");download.type="button";download.className="button button-primary button-small";download.textContent="Download clip";
+          download.addEventListener("click",async()=>{download.disabled=true;try{
+            const {data:signed,error:signedError}=await clipClient().storage.from(CLIP_BUCKET).createSignedUrl(item.storage_path,900,{download:true});
+            if(signedError)throw signedError;const a=document.createElement("a");a.href=signed.signedUrl;a.download="";a.rel="noopener";a.click();
+          }catch(e){clipSetStatus("Download failed: "+(e.message||"Unknown error"),"error");}finally{download.disabled=false;}});
+          actions.append(download);card.append(title,meta,notes,actions);list.append(card);
         }
       }
       async function clipUpload(event) {
-        event.preventDefault();
-        const button = $("#clipSubmit");
-        try {
-          const client = clipClient();
-          const { data: { session } } = await client.auth.getSession();
-          if (!session) throw new Error("Please sign in using the secure email link before uploading.");
-          const email = (session.user.email || "").toLowerCase();
-          const approvedEmail = $("#clipEmail").value.trim().toLowerCase();
-          if (!email || email !== approvedEmail) throw new Error("The signed-in email must match the co-host email above.");
-          const file = $("#clipFile").files[0];
-          const title = $("#clipTitle").value.trim();
-          if (!file || !title) throw new Error("Add a title and select a video clip.");
-          if (file.size > 100 * 1024 * 1024) throw new Error("This uploader accepts files up to 100 MB. Please compress the clip or request a large-file upload workflow.");
-          if (!/\.(mp4|mov|webm)$/i.test(file.name) && !["video/mp4","video/quicktime","video/webm"].includes(file.type)) throw new Error("Choose an MP4, MOV, or WebM video file.");
-          if (!$("#clipRights").checked) throw new Error("Confirm you have permission to submit this clip.");
-          button.disabled = true; button.textContent = "Uploading…"; $("#clipProgressBar").style.width = "10%";
-          clipSetStatus("Uploading privately to Supabase Storage…");
-          const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-120);
-          const path = session.user.id + "/" + new Date().toISOString().replace(/[:.]/g,"-") + "-" + safeName;
-          const { error: uploadError } = await client.storage.from(CLIP_BUCKET).upload(path, file, { cacheControl:"3600", upsert:false, contentType:file.type || "application/octet-stream" });
-          if (uploadError) throw uploadError;
-          $("#clipProgressBar").style.width = "75%";
-          const { error: insertError } = await client.from(CLIP_TABLE).insert({
-            owner_id: session.user.id, co_host_email: email, title,
-            episode_label: $("#clipEpisode").value.trim() || null,
-            notes: $("#clipNotes").value.trim() || null,
-            storage_path: path, original_filename: file.name, file_size: file.size,
-            mime_type: file.type || null, rights_confirmed: true
+        event.preventDefault(); const button=$("#clipSubmit");
+        try{
+          if($("#clipWebsite").value.trim()) throw new Error("Submission could not be accepted.");
+          const client=clipClient();const name=$("#clipName").value.trim();const title=$("#clipTitle").value.trim();const file=$("#clipFile").files[0];
+          if(!name||!title||!file)throw new Error("Enter your name, a segment title, and select a video.");
+          if(file.size>100*1024*1024)throw new Error("This uploader accepts files up to 100 MB.");
+          if(!/\.(mp4|mov|webm)$/i.test(file.name)&&!["video/mp4","video/quicktime","video/webm"].includes(file.type))throw new Error("Choose an MP4, MOV, or WebM video.");
+          if(!$("#clipRights").checked)throw new Error("Confirm you have permission to submit this clip.");
+          button.disabled=true;button.textContent="Uploading…";$("#clipProgressBar").style.width="10%";clipSetStatus("Uploading your clip privately…");
+          const cleanName=file.name.replace(/[^a-zA-Z0-9._-]/g,"_").slice(-100);
+          const path="public-inbox/"+crypto.randomUUID()+"-"+cleanName;
+          const {error:uploadError}=await client.storage.from(CLIP_BUCKET).upload(path,file,{cacheControl:"3600",upsert:false,contentType:file.type||"application/octet-stream"});
+          if(uploadError)throw uploadError;$("#clipProgressBar").style.width="70%";
+          const {error:insertError}=await client.from(CLIP_TABLE).insert({
+            owner_id:null,co_host_name:name,title,episode_label:$("#clipEpisode").value.trim()||null,
+            notes:$("#clipNotes").value.trim()||null,storage_path:path,original_filename:file.name,
+            file_size:file.size,mime_type:file.type||null,rights_confirmed:true
           });
-          if (insertError) {
-            await client.storage.from(CLIP_BUCKET).remove([path]).catch(() => {});
-            throw insertError;
-          }
-          $("#clipProgressBar").style.width = "100%";
-          clipSetStatus("Upload complete. Your clip is stored privately for the Tacoma Nights edit desk.", "success");
-          $("#clipFile").value = ""; $("#clipTitle").value = ""; $("#clipEpisode").value = ""; $("#clipNotes").value = ""; $("#clipRights").checked = false;
-          await clipRefreshSession();
-          if (!$("#clipOwnerPanel").hidden) await clipLoadOwnerSubmissions();
-        } catch (error) {
-          clipSetStatus((error.message || "Clip upload failed.") + " If this is a setup issue, check the bucket, table, and RLS policies.", "error");
-        } finally { button.disabled = false; button.textContent = "Upload clip to the edit desk ↗"; }
+          if(insertError){await client.storage.from(CLIP_BUCKET).remove([path]);throw insertError;}
+          $("#clipProgressBar").style.width="100%";clipSetStatus("Clip received. Thanks, "+name+" — your video is now in the private edit queue.","success");
+          $("#clipUploadForm").reset();
+        }catch(error){clipSetStatus((error.message||"Upload failed.")+" If this is a setup issue, check the bucket, table, and anonymous-upload policies.","error");}
+        finally{button.disabled=false;button.textContent="Upload clip to the edit desk ↗";}
       }
       function setupClipDrop() {
-        $("#clipSignIn").addEventListener("click", clipSendMagicLink);
-        $("#clipUploadForm").addEventListener("submit", clipUpload);
-        $("#refreshClips").addEventListener("click", () => clipLoadOwnerSubmissions().catch(e => clipSetStatus(e.message, "error")));
-        if (window.location.hash.includes("access_token") || window.location.search.includes("code=")) {
-          clipSetStatus("Verifying your secure sign-in link…");
-        }
-        if (window.supabase?.createClient && !CLIP_SUPABASE_KEY.startsWith("PASTE_")) {
-          clipClient().auth.onAuthStateChange(() => clipRefreshSession().then(() => {
-            if (!$("#clipOwnerPanel").hidden) return clipLoadOwnerSubmissions();
-          }).catch(e => clipSetStatus(e.message, "error")));
-          clipRefreshSession().catch(e => clipSetStatus(e.message, "error"));
-        } else {
-          clipSetStatus("Setup required: configure the Supabase publishable key and apply the private bucket/table policies before uploads can be accepted.");
-        }
+        $("#clipUploadForm").addEventListener("submit",clipUpload);
+        $("#refreshClips").addEventListener("click",()=>clipLoadOwnerSubmissions().catch(e=>clipSetStatus(e.message,"error")));
+        try{
+          if(CLIP_SUPABASE_KEY.startsWith("PASTE_")){clipSetStatus("Setup required: configure the Supabase publishable key and anonymous upload policies.");return;}
+          const client=clipClient();
+          client.auth.onAuthStateChange((_event,session)=>{
+            const owner=!!session&&!CLIP_OWNER_EMAIL.startsWith("REPLACE_")&&(session.user.email||"").toLowerCase()===CLIP_OWNER_EMAIL.toLowerCase();
+            $("#clipOwnerPanel").hidden=!owner;
+            if(owner)clipLoadOwnerSubmissions().catch(e=>clipSetStatus(e.message,"error"));
+          });
+          client.auth.getSession().then(({data:{session}})=>{
+            const owner=!!session&&!CLIP_OWNER_EMAIL.startsWith("REPLACE_")&&(session.user.email||"").toLowerCase()===CLIP_OWNER_EMAIL.toLowerCase();
+            $("#clipOwnerPanel").hidden=!owner;
+          }).catch(()=>{});
+          clipSetStatus("Ready. Enter your name and upload your video — no account or sign-in required.");
+        }catch(e){clipSetStatus(e.message||"Uploader setup is incomplete.","error");}
       }
 
       function getFilteredEpisodeCount() {
