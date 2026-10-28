@@ -640,6 +640,41 @@
     .episode-details p { color: var(--muted); font-size: .9rem; white-space: pre-wrap; overflow-wrap: anywhere; }
     .episode-details a { color: var(--green-bright); text-decoration: underline; text-underline-offset: 3px; }
 
+    /* Video-only episode gallery: hide metadata and keep the thumbnails as the interface. */
+    #episodes .section-heading p,
+    #episodes .episode-layout aside,
+    #episodes #featuredVideo + .panel-inner,
+    #episodes .archive-tools,
+    #episodes #archivePagination,
+    #episodes #archiveStatus,
+    #episodes .episode-card-content { display: none !important; }
+
+    #episodes .episode-layout { display: block; }
+    #episodes .episode-layout > article { width: 100%; }
+    #episodes #featuredVideo { aspect-ratio: 16 / 9; min-height: 0; }
+    #episodes .episode-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    #episodes .episode-card { border: 0; border-radius: 14px; background: transparent; box-shadow: none; }
+    #episodes .episode-thumb {
+      aspect-ratio: 16 / 9;
+      position: relative;
+      cursor: pointer;
+      overflow: hidden;
+      border-radius: 14px;
+      background: #080d17;
+      box-shadow: 0 12px 30px rgba(0,0,0,.28);
+    }
+    #episodes .episode-thumb img { transition: transform .6s ease, filter .35s ease; }
+    #episodes .episode-thumb:hover img { transform: scale(1.045); filter: brightness(1.12); }
+    #episodes .episode-thumb::after { pointer-events: none; }
+    #episodes .episode-thumb:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
+    #episodes .episode-thumb iframe { display:block; width:100%; height:100%; position:absolute; inset:0; border:0; }
+    @media (max-width: 850px) {
+      #episodes .episode-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 520px) {
+      #episodes .episode-grid { grid-template-columns: 1fr; gap: 13px; }
+    }
+
     .episode-card-content { padding: 19px; }
     .episode-card-content h3 { font-size: 1.03rem; }
     .episode-card-content p { color: var(--muted); font-size: .86rem; }
@@ -1666,10 +1701,11 @@
         const id = episodeVideoId(episode);
         const article = document.createElement("article");
         article.className = "episode-card";
-
         const thumb = document.createElement("div");
         thumb.className = "episode-thumb";
-
+        thumb.setAttribute("role", "button");
+        thumb.setAttribute("tabindex", id ? "0" : "-1");
+        thumb.setAttribute("aria-label", "Play Tacoma Nights video");
         if (id) {
           const image = document.createElement("img");
           image.src = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
@@ -1677,93 +1713,26 @@
           image.loading = "lazy";
           image.onerror = () => { image.style.display = "none"; };
           thumb.appendChild(image);
-        }
-
-        const content = document.createElement("div");
-        content.className = "episode-card-content";
-
-        const meta = document.createElement("div");
-        meta.className = "episode-card-meta";
-        meta.textContent = episodeCategory(episode);
-
-        const title = document.createElement("h3");
-        title.textContent = episodeTitle(episode);
-
-        const description = document.createElement("p");
-        const rawDescription = episodeDescription(episode);
-        description.textContent = rawDescription.length > 145
-          ? rawDescription.slice(0, 142) + "…"
-          : rawDescription;
-
-        const date = document.createElement("p");
-        date.textContent = formatDate(episode.published_at || episode.created_at);
-
-        const button = document.createElement("button");
-        button.className = "button button-secondary button-small";
-        button.type = "button";
-        button.textContent = "▶ Watch episode";
-        button.disabled = !id;
-        button.addEventListener("click", () => {
-          showFeatured(episode);
-          $("#episodes").scrollIntoView({ behavior: "smooth" });
-          showToast("Episode loaded in the featured player.");
-        });
-
-        const actions = document.createElement("div");
-        actions.className = "episode-actions";
-        actions.appendChild(button);
-
-        const saveButton = document.createElement("button");
-        saveButton.className = "button button-secondary button-small";
-        saveButton.type = "button";
-        saveButton.disabled = !id;
-        saveButton.textContent = state.savedEpisodes.has(id) ? "♥ Saved" : "♡ Save";
-        saveButton.setAttribute("aria-pressed", String(state.savedEpisodes.has(id)));
-        saveButton.addEventListener("click", () => toggleSavedEpisode(episode));
-        actions.appendChild(saveButton);
-
-        const shareButton = document.createElement("button");
-        shareButton.className = "button button-secondary button-small";
-        shareButton.type = "button";
-        shareButton.textContent = "↗ Share";
-        shareButton.disabled = !id;
-        shareButton.addEventListener("click", async () => {
-          const url = "https://www.youtube.com/watch?v=" + encodeURIComponent(id);
-          try {
-            if (navigator.share) {
-              await navigator.share({ title: episodeTitle(episode), url });
-            } else if (navigator.clipboard && window.isSecureContext) {
-              await navigator.clipboard.writeText(url);
-              showToast("Episode link copied.");
-            } else {
-              window.prompt("Copy this episode link:", url);
+          const playVideo = () => {
+            if (thumb.querySelector("iframe")) return;
+            const frame = document.createElement("iframe");
+            frame.src = "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(id) + "?autoplay=1&rel=0";
+            frame.title = "Tacoma Nights video";
+            frame.loading = "lazy";
+            frame.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+            frame.allowFullscreen = true;
+            frame.referrerPolicy = "strict-origin-when-cross-origin";
+            thumb.replaceChildren(frame);
+          };
+          thumb.addEventListener("click", playVideo);
+          thumb.addEventListener("keydown", event => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              playVideo();
             }
-          } catch (error) {
-            if (error && error.name !== "AbortError") showToast("Sharing is unavailable in this browser.");
-          }
-        });
-        actions.appendChild(shareButton);
-
-        const details = document.createElement("details");
-        details.className = "episode-details";
-        const summary = document.createElement("summary");
-        summary.textContent = "Episode details";
-        const fullDescription = document.createElement("p");
-        fullDescription.textContent = rawDescription;
-        const published = document.createElement("p");
-        published.textContent = "Published: " + formatDate(episode.published_at || episode.created_at);
-        details.append(summary, fullDescription, published);
-        if (id) {
-          const youtubeLink = document.createElement("a");
-          youtubeLink.href = "https://www.youtube.com/watch?v=" + encodeURIComponent(id);
-          youtubeLink.target = "_blank";
-          youtubeLink.rel = "noopener noreferrer";
-          youtubeLink.textContent = "Open episode on YouTube ↗";
-          details.appendChild(youtubeLink);
+          });
         }
-
-        content.append(meta, title, description, date, actions, details);
-        article.append(thumb, content);
+        article.appendChild(thumb);
         return article;
       }
 
