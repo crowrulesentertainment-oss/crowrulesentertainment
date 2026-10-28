@@ -1505,7 +1505,9 @@
 
       const CHANNEL_URL = "https://www.youtube.com/@CrowRules_TV";
       const STREAMS_URL = CHANNEL_URL + "/streams";
-      const FALLBACK_VIDEO_ID = "Fe9so6aSOcY";
+      const FALLBACK_VIDEO_ID = "LIVE_STREAM";
+      const YOUTUBE_CHANNEL_ID = "UC03D_GFGP1NqtnXwt1uXusA";
+      const NEXT_LIVE_TITLE = "Next Live Stream — Saturday, October 31 · 3 PM Pacific";
       const DEFAULT_GOAL = 1000;
 
       const $ = (selector, root = document) => root.querySelector(selector);
@@ -1643,9 +1645,10 @@
 
       function setFeaturedFrame(videoId, title) {
         const frame = $("#featuredVideo");
-        const id = safeVideoId(videoId);
+        const liveStream = videoId === "LIVE_STREAM";
+        const id = liveStream ? "" : safeVideoId(videoId);
 
-        if (!id) {
+        if (!id && !liveStream) {
           frame.replaceChildren();
           const placeholder = document.createElement("div");
           placeholder.className = "video-placeholder";
@@ -1661,7 +1664,9 @@
         }
 
         const iframe = document.createElement("iframe");
-        iframe.src = `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1`;
+        iframe.src = liveStream
+          ? `https://www.youtube-nocookie.com/embed/live_stream?channel=${YOUTUBE_CHANNEL_ID}&rel=0&modestbranding=1`
+          : `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1`;
         iframe.title = title || "Back Deck Live video";
         iframe.loading = "lazy";
         iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
@@ -1674,27 +1679,30 @@
       function showFeatured(episode, fallback = false) {
         state.featured = episode || null;
 
+        const isNextLive = !episode;
         const id = episode ? episodeVideoId(episode) : FALLBACK_VIDEO_ID;
-        const title = episode ? episodeTitle(episode) : "Back Deck Live — featured video";
+        const title = episode ? episodeTitle(episode) : NEXT_LIVE_TITLE;
         setFeaturedFrame(id, title);
 
         $("#featuredKicker").textContent = episode
           ? episodeCategory(episode)
-          : "Back Deck Live · Featured video";
+          : "UP NEXT · LIVE STREAM";
 
         $("#featuredTitle").textContent = title;
         $("#featuredDescription").textContent = episode
           ? episodeDescription(episode)
-          : "Watch the featured Back Deck Live video on CrowRules TV.";
+          : "Join Back Deck Live for the next live conversation from Tacoma and the Pacific Northwest. The player will show the channel's live stream when it is broadcasting; open YouTube to view the scheduled stream and set a reminder.";
 
         $("#featuredDate").textContent = episode
           ? formatDate(episode.published_at || episode.created_at)
-          : "";
+          : "Saturday, October 31, 2026 · 3 PM Pacific";
 
         const watchLink = $("#watchOnYouTube");
-        watchLink.href = id
-          ? `https://www.youtube.com/watch?v=${encodeURIComponent(id)}`
-          : STREAMS_URL;
+        watchLink.href = isNextLive
+          ? "https://www.youtube.com/@CrowRules_TV/live"
+          : id
+            ? `https://www.youtube.com/watch?v=${encodeURIComponent(id)}`
+            : STREAMS_URL;
 
         $("#episodeStatus").textContent = fallback
           ? "The episode library could not be loaded. Showing the available channel video instead."
@@ -1702,7 +1710,7 @@
             ? "Featured from the episode library."
             : "Visit the channel for the latest available streams.";
 
-        $("#shareEpisode").disabled = !id;
+        $("#shareEpisode").disabled = isNextLive || !id;
       }
 
       function createEpisodeCard(episode) {
@@ -1817,21 +1825,11 @@
           const episodes = getArray(data, ["episodes", "results", "items"]);
           state.episodes = sortEpisodes(episodes.filter(item => item && typeof item === "object"));
 
-          if (state.episodes.length) {
-            // Newest valid published episode first; fall back to the channel video if none has an ID.
-            const newest = state.episodes.find(item => episodeVideoId(item));
-            if (newest) {
-              showFeatured(newest);
-            } else {
-              showFeatured(null);
-              $("#episodeStatus").textContent = "Episodes loaded, but none has a valid YouTube video ID.";
-            }
-            populateCategories(state.episodes);
-            renderEpisodes();
-          } else {
-            showFeatured(null);
-            populateCategories([]);
-            renderEpisodes();
+          // Keep the featured player focused on the next live stream; archived episodes remain below.
+          showFeatured(null);
+          populateCategories(state.episodes);
+          renderEpisodes();
+          if (!state.episodes.length) {
             $("#archiveStatus").textContent = "The API returned no episodes.";
           }
         } catch (error) {
