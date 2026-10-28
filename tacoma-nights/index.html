@@ -1937,7 +1937,14 @@
 
         card.append(avatar, name, role, bio);
 
-        const profileUrl = safeExternalUrl(member.profile_url || member.url || "");
+        // Prefer the published member profile URL from the API. If this is Jonathan's
+        // crew record and no URL was configured, link to the site's member profile page.
+        const profileUrl = safeExternalUrl(
+          member.profile_url || member.member_profile_url || member.public_profile_url || member.url ||
+          ((displayName.toLowerCase() === "jonathan riehle" || initials(displayName) === "JR")
+            ? "https://crowrulesentertainment-oss.github.io/crowrulesentertainment/podcasting/members/"
+            : "")
+        );
         if (profileUrl) {
           const links = document.createElement("div");
           links.className = "crew-links";
@@ -1945,7 +1952,7 @@
           link.href = profileUrl;
           link.target = "_blank";
           link.rel = "noopener noreferrer";
-          link.textContent = "View profile ↗";
+          link.textContent = "View member profile ↗";
           links.appendChild(link);
           card.appendChild(links);
         }
