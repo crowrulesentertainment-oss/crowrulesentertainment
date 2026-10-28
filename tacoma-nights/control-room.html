@@ -55,10 +55,22 @@ html{scroll-behavior:smooth;scroll-padding-top:96px}
 @media(max-width:480px){.media-tools{grid-template-columns:1fr}.media-tools label:first-child{grid-column:auto}.media-summary{grid-template-columns:1fr}.media-metric{display:grid;grid-template-columns:1fr auto;align-items:center;gap:4px 12px}.media-metric strong{grid-column:2;grid-row:1/3;margin:0}.media-metric small{grid-column:1}.media-card-actions{display:grid;grid-template-columns:1fr}.media-card-actions .btn{width:100%}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.media-card,.panel{transition:none}}
 
+
+/* Real-time control-room visitor counter */
+.visitor-strip{border-bottom:1px solid #d8f36c30;background:linear-gradient(90deg,#141d17,#101512 72%);box-shadow:0 8px 22px #0002}
+.visitor-inner{min-height:48px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
+.visitor-live-dot{width:8px;height:8px;border-radius:50%;background:#d8f36c;box-shadow:0 0 0 4px #d8f36c18,0 0 15px #d8f36c70;flex:0 0 auto}
+.visitor-live-dot.offline{background:#e87852;box-shadow:0 0 0 4px #e8785218}
+.visitor-label,.visitor-scope{font-size:.64rem;font-weight:800;letter-spacing:.13em;color:var(--muted)}
+.visitor-inner strong{font:800 1.35rem/1 "Barlow Condensed";color:var(--lime);min-width:1ch;font-variant-numeric:tabular-nums}
+.visitor-description{font-size:.74rem;color:var(--muted)}
+.visitor-scope{margin-left:auto;border:1px solid #ffffff1c;padding:5px 8px}
+@media(max-width:480px){.visitor-inner{gap:8px}.visitor-scope{margin-left:0}.visitor-description{flex-basis:100%;padding-left:18px}}
 </style><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=5" defer></script></head>
 <body>
 <header class="top"><div class="wrap topinner"><a class="brand" href="./"><span class="mark">TN</span><span>TACOMA NIGHTS <span style="color:var(--lime)">/ CONTROL ROOM</span></span></a><div class="top-actions"><a class="btn ghost" href="./" target="_blank" rel="noopener">View public site ↗</a><button class="btn ghost hidden" id="signOutBtn">Sign out</button></div></div></header>
+<div class="visitor-strip" role="status" aria-live="polite" aria-atomic="true"><div class="wrap visitor-inner"><span class="visitor-live-dot" id="visitorLiveDot" aria-hidden="true"></span><span class="visitor-label">LIVE VISITORS</span><strong id="visitorCount">—</strong><span class="visitor-description" id="visitorStatus">Connecting to live presence…</span><span class="visitor-scope">THIS CONTROL ROOM</span></div></div>
 <main class="wrap">
 <section class="hero"><p class="micro">CROWRULES ENTERTAINMENT · PRIVATE OPERATIONS</p><h1>PREMIERE<br><span style="color:var(--lime)">CONTROL ROOM.</span></h1><p>Manage the next episode, publish crew profiles, and review community submissions from one place. This dashboard requires an authenticated Supabase user with an administrator role.</p><div id="globalStatus" class="notice" role="status" aria-live="polite">Connecting to secure operations…</div></section>
 <section id="authPanel" class="auth hidden"><p class="micro">ADMIN ACCESS</p><h2>Sign in.</h2><p class="small">Use your Tacoma Nights administrator account. Public visitors cannot access the private inbox or management controls.</p><form id="loginForm" class="fields"><label class="full">Email address<input name="email" type="email" autocomplete="username" required maxlength="254"></label><label class="full">Password<input name="password" type="password" autocomplete="current-password" required></label><div class="full actions"><button class="btn" id="loginBtn">Sign in securely ↗</button></div></form><p id="authMessage" class="small" role="status" aria-live="polite"></p></section>
@@ -106,7 +118,35 @@ html{scroll-behavior:smooth;scroll-padding-top:96px}
 const URL='https://cevylpnoexugwgygvtgu.supabase.co';
 const KEY='sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-';
 const $=id=>document.getElementById(id);
-let db=null, currentUser=null, crewCache=[], submissionsCache=[], assetsCache=[], clipUploadsCache=[];
+let db=null, currentUser=null, crewCache=[], submissionsCache=[], assetsCache=[], clipUploadsCache=[], visitorChannel=null;
+function initVisitorCounter(){
+ const countEl=$('visitorCount'),statusEl=$('visitorStatus'),dot=$('visitorLiveDot');
+ const setState=(count,message,online=true)=>{countEl.textContent=count==null?'—':String(count);statusEl.textContent=message;dot.classList.toggle('offline',!online);};
+ if(!db?.channel){setState(null,'Live count unavailable · realtime client missing',false);return;}
+ let visitorId,sessionId;
+ try{visitorId=localStorage.getItem('tn-control-room-visitor-id');if(!visitorId){visitorId=crypto.randomUUID();localStorage.setItem('tn-control-room-visitor-id',visitorId);}}catch(_){visitorId=crypto.randomUUID();}
+ try{sessionId=crypto.randomUUID();}catch(_){sessionId='session-'+Date.now()+'-'+Math.random().toString(36).slice(2);}
+ setState(null,'Connecting to live presence…',false);
+ const updateCount=()=>{
+  if(!visitorChannel)return;
+  const state=visitorChannel.presenceState(),visitors=new Set();
+  Object.values(state).forEach(metas=>{(Array.isArray(metas)?metas:[]).forEach(meta=>{if(meta&&typeof meta.visitorId==='string')visitors.add(meta.visitorId);});});
+  setState(visitors.size,'Live · updates automatically',true);
+ };
+ visitorChannel=db.channel('tacoma-nights-control-room-live-visitors',{config:{presence:{key:sessionId}}})
+  .on('presence',{event:'sync'},updateCount)
+  .on('presence',{event:'join'},updateCount)
+  .on('presence',{event:'leave'},updateCount)
+  .subscribe(async status=>{
+   if(status==='SUBSCRIBED'){
+    try{const result=await visitorChannel.track({visitorId, page:'control-room', onlineAt:new Date().toISOString()});if(result?.status==='error')throw new Error('Presence tracking was rejected');updateCount();}
+    catch(err){console.warn('Control-room visitor presence could not be tracked:',err);setState(null,'Live count unavailable · check Supabase Realtime',false);}
+   }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
+    setState(null,'Live count unavailable · reconnect or check Realtime',false);
+   }
+  });
+ window.addEventListener('pagehide',()=>{if(visitorChannel&&db)db.removeChannel(visitorChannel);},{once:true});
+}
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const say=(el,msg,bad=false)=>{el.textContent=msg;el.classList.toggle('error',!!bad);};
 function isAdmin(user){return user?.app_metadata?.role==='admin';}
@@ -166,7 +206,7 @@ $('avatarFile').addEventListener('change',()=>{const file=$('avatarFile').files[
 $('clipsList').addEventListener('click',e=>{const d=e.target.closest('[data-download-asset]'),c=e.target.closest('[data-download-clip]'),o=e.target.closest('[data-open-clip]'),x=e.target.closest('[data-delete-clip]');if(d)downloadAsset(d.dataset.downloadAsset,d);if(c)openPrivateClip(c.dataset.downloadClip,c,true);if(o)openPrivateClip(o.dataset.openClip,o,false);if(x)deleteClipSubmission(x.dataset.deleteClip,x);});$('newCrewBtn').addEventListener('click',clearCrewForm);$('cancelCrewBtn').addEventListener('click',clearCrewForm);$('crewRefreshBtn').addEventListener('click',()=>loadCrew().catch(e=>say($('crewFormStatus'),e.message,true)));$('inboxRefreshBtn').addEventListener('click',()=>loadSubmissions().catch(e=>say($('globalStatus'),e.message,true)));$('reloadBtn').addEventListener('click',loadAll);$('submissionFilter').addEventListener('change',renderSubmissions);
 $('crewList').addEventListener('click',async e=>{const edit=e.target.closest('[data-edit-crew]'),del=e.target.closest('[data-delete-crew]');if(edit){const p=crewCache.find(x=>x.id===edit.dataset.editCrew);if(!p)return;const f=$('crewForm');for(const k of ['id','display_name','role_title','bio','avatar_url','profile_url','sort_order'])f.elements[k].value=p[k]??'';f.elements.is_featured.checked=!!p.is_featured;f.elements.is_published.checked=!!p.is_published;$('avatarFile').value='';updateAvatarPreview(p.avatar_url||'');f.scrollIntoView({behavior:'smooth',block:'start'});return;}if(del){const p=crewCache.find(x=>x.id===del.dataset.deleteCrew);if(!p||!confirm('Delete crew profile for '+p.display_name+'? This cannot be undone.'))return;try{const {error}=await db.from('tacoma_nights_crew').delete().eq('id',p.id);if(error)throw error;await loadCrew();say($('crewFormStatus'),'Crew profile deleted.');}catch(err){say($('crewFormStatus'),err.message,true);}}});
 $('submissionList').addEventListener('click',async e=>{const del=e.target.closest('[data-delete-submission]');if(del){const id=del.dataset.deleteSubmission,record=submissionsCache.find(x=>x.id===id);if(!record||!confirm('PERMANENTLY DELETE this community submission?\n\n'+(record.subject||record.submission_type)+' from '+(record.full_name||'unknown sender')+'\n\nThis cannot be undone.'))return;setBusy(del,true,'Deleting…');try{const {data:deletedRow,error}=await db.from('tacoma_nights_submissions').delete().eq('id',id).select('id').maybeSingle();if(error)throw error;if(!deletedRow)throw new Error('No submission was deleted. Refresh the inbox and confirm your administrator session.');submissionsCache=submissionsCache.filter(x=>x.id!==id);renderSubmissions();$('statNew').textContent=submissionsCache.filter(x=>x.status==='new').length;say($('globalStatus'),'Community submission deleted permanently.');}catch(err){say($('globalStatus'),'Delete failed: '+(err.message||'Check administrator permissions.'),true);}finally{del.disabled=false;del.textContent='Delete submission ×';}return;}const button=e.target.closest('[data-save-submission]');if(!button)return;const card=button.closest('[data-submission]'),id=button.dataset.saveSubmission,status=card.querySelector('[data-status]').value,notes=card.querySelector('[data-notes]').value;setBusy(button,true);try{const {error}=await db.from('tacoma_nights_submissions').update({status,internal_notes:notes,reviewed_at:new Date().toISOString()}).eq('id',id);if(error)throw error;await loadSubmissions();say($('globalStatus'),'Submission review saved.');}catch(err){say($('globalStatus'),err.message||'Could not save review.',true);}finally{setBusy(button,false,'Save review');}});
-function init(){if(!window.supabase?.createClient){say($('globalStatus'),'The Supabase client could not load. Refresh the page or try again later.',true);return;}db=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});db.auth.getSession().then(({data})=>verifySession(data.session)).catch(()=>showSignedOut());db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT')showSignedOut();else if(session&&event==='SIGNED_IN')verifySession(session);});}
+function init(){if(!window.supabase?.createClient){say($('globalStatus'),'The Supabase client could not load. Refresh the page or try again later.',true);return;}db=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});initVisitorCounter();db.auth.getSession().then(({data})=>verifySession(data.session)).catch(()=>showSignedOut());db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT')showSignedOut();else if(session&&event==='SIGNED_IN')verifySession(session);});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
 </script></body></html>
