@@ -115,6 +115,17 @@
     }
     .skip-link:focus { top: 12px; }
 
+    /* Shared Supabase Realtime presence counter, shown on the public site and Control Room. */
+    .site-visitor-strip{position:relative;z-index:5;border-bottom:1px solid rgba(196,240,255,.15);background:linear-gradient(90deg,rgba(8,17,29,.98),rgba(14,27,43,.96));}
+    .site-visitor-inner{min-height:47px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
+    .site-visitor-dot{width:8px;height:8px;flex:0 0 auto;border-radius:50%;background:#82d9a5;box-shadow:0 0 0 4px rgba(130,217,165,.1),0 0 13px rgba(130,217,165,.55)}
+    .site-visitor-dot.offline{background:#e87852;box-shadow:0 0 0 4px rgba(232,120,82,.1)}
+    .site-visitor-label,.site-visitor-scope{font-size:.64rem;font-weight:800;letter-spacing:.13em;color:#b8c9d8}
+    .site-visitor-inner strong{font:800 1.3rem/1 "Manrope",sans-serif;color:var(--green-bright);min-width:1ch;font-variant-numeric:tabular-nums}
+    .site-visitor-status{font-size:.76rem;color:#c3d0dc}
+    .site-visitor-scope{margin-left:auto;border:1px solid rgba(255,255,255,.12);padding:5px 8px;border-radius:5px}
+    @media(max-width:520px){.site-visitor-inner{gap:8px}.site-visitor-scope{margin-left:0}.site-visitor-status{flex-basis:100%;padding-left:18px}}
+
     /* Navigation */
     .site-header {
       position: sticky;
@@ -1132,6 +1143,16 @@
       </nav>
     </div>
   </header>
+
+  <div class="site-visitor-strip" role="status" aria-live="polite" aria-atomic="true">
+    <div class="container site-visitor-inner">
+      <span class="site-visitor-dot" id="siteVisitorDot" aria-hidden="true"></span>
+      <span class="site-visitor-label">LIVE ON TACOMA NIGHTS</span>
+      <strong id="siteVisitorCount">—</strong>
+      <span class="site-visitor-status" id="siteVisitorStatus">Connecting to live visitors…</span>
+      <span class="site-visitor-scope">ACROSS THE SHOW SITE</span>
+    </div>
+  </div>
 
   <main id="main">
     <section class="hero" id="home">
@@ -2786,7 +2807,72 @@
         window.setInterval(loadTacomaWeather, 15 * 60 * 1000);
       }
 
+      // Shared live visitor count: this public page and the private Control Room use the same Realtime Presence channel.
+      function setupSiteVisitorCounter() {
+        const count = document.getElementById("siteVisitorCount");
+        const status = document.getElementById("siteVisitorStatus");
+        const dot = document.getElementById("siteVisitorDot");
+        const setState = (n, message, online = true) => {
+          if (count) count.textContent = n == null ? "—" : String(n);
+          if (status) status.textContent = message;
+          if (dot) dot.classList.toggle("offline", !online);
+        };
+        if (!window.supabase?.createClient) {
+          setState(null, "Live count unavailable · client did not load", false);
+          return;
+        }
+        let visitorId, sessionId;
+        try {
+          visitorId = localStorage.getItem("tn-sitewide-visitor-id");
+          if (!visitorId) { visitorId = crypto.randomUUID(); localStorage.setItem("tn-sitewide-visitor-id", visitorId); }
+        } catch (_) { visitorId = crypto.randomUUID(); }
+        try { sessionId = crypto.randomUUID(); }
+        catch (_) { sessionId = "session-" + Date.now() + "-" + Math.random().toString(36).slice(2); }
+        let visitorClient, channel;
+        const updateCount = () => {
+          if (!channel) return;
+          const unique = new Set();
+          Object.values(channel.presenceState()).forEach(metas => {
+            (Array.isArray(metas) ? metas : []).forEach(meta => {
+              if (meta && typeof meta.visitorId === "string") unique.add(meta.visitorId);
+            });
+          });
+          setState(unique.size, "Live · updates automatically", true);
+        };
+        try {
+          visitorClient = window.supabase.createClient(CLIP_SUPABASE_URL, CLIP_SUPABASE_KEY, {
+            auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+          });
+          setState(null, "Connecting to live visitors…", false);
+          channel = visitorClient.channel("tacoma-nights-sitewide-live-visitors", { config: { presence: { key: sessionId } } })
+            .on("presence", { event: "sync" }, updateCount)
+            .on("presence", { event: "join" }, updateCount)
+            .on("presence", { event: "leave" }, updateCount)
+            .subscribe(async connection => {
+              if (connection === "SUBSCRIBED") {
+                try {
+                  const tracked = await channel.track({ visitorId, page: "public-site", onlineAt: new Date().toISOString() });
+                  if (tracked?.status === "error") throw new Error("Presence tracking was rejected");
+                  updateCount();
+                } catch (error) {
+                  console.warn("Public visitor presence could not be tracked:", error);
+                  setState(null, "Live count unavailable · check Realtime access", false);
+                }
+              } else if (connection === "CHANNEL_ERROR" || connection === "TIMED_OUT" || connection === "CLOSED") {
+                setState(null, "Live count unavailable · reconnecting may help", false);
+              }
+            });
+          window.addEventListener("pagehide", () => {
+            if (channel && visitorClient) visitorClient.removeChannel(channel);
+          }, { once: true });
+        } catch (error) {
+          console.warn("Could not initialize public visitor presence:", error);
+          setState(null, "Live count unavailable · try refreshing", false);
+        }
+      }
+
       async function init() {
+        setupSiteVisitorCounter();
         loadSavedEpisodes();
         setupNavigation();
         setupRevealAnimations();
