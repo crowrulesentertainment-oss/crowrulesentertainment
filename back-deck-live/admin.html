@@ -169,7 +169,7 @@
       width: min(1120px, 92%);
       margin: 20px auto 0;
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 12px;
     }
     .live-tile {
@@ -185,8 +185,9 @@
     .live-tile-value { display:block; margin-top:6px; font:700 clamp(1.25rem, 2.5vw, 1.85rem)/1.25 "Space Grotesk",sans-serif; overflow-wrap:anywhere; }
     .live-tile-detail { display:block; color:var(--muted); font-size:.82rem; margin-top:4px; }
     @media (max-width: 720px) {
-      .live-strip { grid-template-columns: 1fr; gap: 9px; margin-top: 12px; }
+      .live-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; margin-top: 12px; }
       .live-tile { padding: 13px 16px; }
+      .live-tile-value { font-size: 1.25rem; }
       .grid, .stats { grid-template-columns: 1fr; }
       .topbar { padding: 13px 5%; }
       .wrap { padding-top: 24px; }
@@ -210,6 +211,11 @@
       <div class="live-tile-label"><span class="live-dot" aria-hidden="true"></span> Live visitors</div>
       <strong class="live-tile-value" id="liveVisitorCount">Connecting…</strong>
       <span class="live-tile-detail" id="liveVisitorDetail">Active sessions on this admin page</span>
+    </article>
+    <article class="live-tile">
+      <div class="live-tile-label"><span class="live-dot" aria-hidden="true"></span> Live website visitors</div>
+      <strong class="live-tile-value" id="publicLiveVisitorCount">Connecting…</strong>
+      <span class="live-tile-detail" id="publicLiveVisitorDetail">Active sessions on the public homepage</span>
     </article>
     <article class="live-tile">
       <div class="live-tile-label">◷ Tacoma local time</div>
@@ -475,6 +481,36 @@
     window.addEventListener("pagehide", () => { channel.untrack(); }, { once: true });
   }
 
+  // Subscribe to the public homepage's Presence channel without tracking this admin tab.
+  // This keeps the admin-page count and public-site count separate.
+  function startPublicLiveVisitorCounter() {
+    const countNode = $("publicLiveVisitorCount");
+    const detailNode = $("publicLiveVisitorDetail");
+    if (!countNode || !detailNode || !client.channel) return;
+
+    const channel = client.channel("back-deck-live-home-presence");
+    const renderCount = () => {
+      const presence = channel.presenceState();
+      const count = Object.values(presence).reduce(
+        (total, sessions) => total + (Array.isArray(sessions) ? sessions.length : 0), 0
+      );
+      countNode.textContent = String(count);
+      detailNode.textContent = count === 1
+        ? "1 active session on the public homepage"
+        : count + " active sessions on the public homepage";
+    };
+
+    channel.on("presence", { event: "sync" }, renderCount);
+    channel.subscribe(status => {
+      if (status === "SUBSCRIBED") {
+        renderCount();
+      } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+        countNode.textContent = "Unavailable";
+        detailNode.textContent = "Public-site presence connection interrupted";
+      }
+    });
+  }
+
   function startTacomaClock() {
     const timeNode = $("tacomaClock");
     const dateNode = $("tacomaDate");
@@ -535,6 +571,7 @@
   startTacomaClock();
   startTacomaWeather();
   startLiveVisitorCounter();
+  startPublicLiveVisitorCounter();
 
   function showMessage(message, type = "", target = "globalMessage") {
     const el = $(target);
