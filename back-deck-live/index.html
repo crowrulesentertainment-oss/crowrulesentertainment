@@ -1356,6 +1356,14 @@
             </div>
             <p id="producerGuestStatus" class="producer-status" role="status" aria-live="polite"></p><div id="producerGuests" class="submission-list"></div>
 
+            <div class="producer-toolbar" style="margin-top:28px">
+              <h3 style="margin:0 auto 0 0">Crew profile editor</h3>
+              <button class="button button-secondary button-small" id="producerCrewRefresh" type="button">Load crew profiles</button>
+            </div>
+            <p class="form-note">Edit the public crew bio, role, photo, profile link and display order. Saving requires the secure admin-update-crew API action and administrator authorization.</p>
+            <p id="producerCrewStatus" class="producer-status" role="status" aria-live="polite"></p>
+            <div id="producerCrewEditor" class="submission-list"></div>
+
           </div>
           <p id="producerPublicStatus" class="producer-status" role="status" aria-live="polite"></p>
         </div>
@@ -1878,18 +1886,22 @@
 
         card.append(avatar, name, role, bio);
 
+        const links = document.createElement("div");
+        links.className = "crew-links";
+        const fullProfile = document.createElement("a");
+        fullProfile.href = "profile.html?name=" + encodeURIComponent(displayName);
+        fullProfile.textContent = "Meet " + displayName.split(/\\s+/)[0] + " ↗";
+        links.appendChild(fullProfile);
         const profileUrl = safeExternalUrl(member.profile_url || member.url || "");
         if (profileUrl) {
-          const links = document.createElement("div");
-          links.className = "crew-links";
           const link = document.createElement("a");
           link.href = profileUrl;
           link.target = "_blank";
           link.rel = "noopener noreferrer";
-          link.textContent = "View profile ↗";
+          link.textContent = "Social profile ↗";
           links.appendChild(link);
-          card.appendChild(links);
         }
+        card.appendChild(links);
 
         return card;
       }
@@ -2207,14 +2219,14 @@
         }
         authClient.auth.getSession().then(({ data }) => {
           updateProducerAuthUI(data.session);
-          if (data.session) loadProducerSubmissions();
+          if (data.session) { loadProducerSubmissions(); loadProducerGuests(); loadProducerCrewProfiles(); }
         }).catch(() => {
           updateProducerAuthUI(null);
           $("#producerPublicStatus").textContent = "Could not restore your sign-in session.";
         });
         authClient.auth.onAuthStateChange((_event, session) => {
           updateProducerAuthUI(session);
-          if (session) { loadProducerSubmissions(); loadProducerGuests(); }
+          if (session) { loadProducerSubmissions(); loadProducerGuests(); loadProducerCrewProfiles(); }
           else $("#producerSubmissions").replaceChildren();
         });
         $("#producerLoginForm").addEventListener("submit", async event => {
@@ -2240,6 +2252,7 @@
         });
         $("#producerRefresh").addEventListener("click", loadProducerSubmissions);
         $("#producerGuestRefresh").addEventListener("click", loadProducerGuests);
+        $("#producerCrewRefresh").addEventListener("click", loadProducerCrewProfiles);
         $("#producerGuestStatusFilter").addEventListener("change", loadProducerGuests);
         $("#producerStatusFilter").addEventListener("change", loadProducerSubmissions);
         $("#producerTypeFilter").addEventListener("change", loadProducerSubmissions);
@@ -2250,6 +2263,115 @@
         });
       }
 
+
+
+      function setCrewEditorStatus(message, isError = false) {
+        const el = $("#producerCrewStatus");
+        if (!el) return;
+        el.textContent = message;
+        el.classList.toggle("error", isError);
+      }
+
+      async function loadProducerCrewProfiles() {
+        const container = $("#producerCrewEditor");
+        if (!container) return;
+        container.replaceChildren();
+        setCrewEditorStatus("Loading crew profiles…");
+        try {
+          const token = await producerToken();
+          const data = await apiRequest("crew", { accessToken: token });
+          const crew = getArray(data, ["crew", "members", "results", "items"]).filter(x => x && typeof x === "object");
+          if (!crew.length) {
+            setCrewEditorStatus("No crew profiles were returned by the crew API.");
+            return;
+          }
+          crew.forEach(member => {
+            const card = document.createElement("article");
+            card.className = "submission-card";
+            const heading = document.createElement("h3");
+            heading.textContent = safeText(member.display_name || member.name, "Crew member");
+            const form = document.createElement("form");
+            form.className = "producer-form";
+            const fields = [
+              ["display_name", "Display name", member.display_name || member.name || "", "text", 120],
+              ["role", "Role / title", member.role || "", "text", 120],
+              ["avatar_url", "Photo URL (HTTPS)", member.avatar_url || member.image_url || "", "url", 1000],
+              ["profile_url", "Social / external profile URL", member.profile_url || member.url || "", "url", 1000],
+              ["bio", "Public biography", member.bio || "", "textarea", 2500],
+              ["sort_order", "Display order (lower appears first)", String(member.sort_order ?? 999), "number", 8]
+            ];
+            fields.forEach(([key, labelText, value, type, max]) => {
+              const label = document.createElement("label");
+              label.textContent = labelText;
+              let input;
+              if (type === "textarea") {
+                input = document.createElement("textarea");
+                input.rows = 4;
+              } else {
+                input = document.createElement("input");
+                input.type = type;
+              }
+              input.name = key;
+              input.value = String(value);
+              input.maxLength = Number(max);
+              if (key === "display_name" || key === "role") input.required = true;
+              if (key === "sort_order") { input.min = "0"; input.max = "9999"; input.step = "1"; }
+              label.appendChild(input);
+              form.appendChild(label);
+            });
+            const publicFlagLabel = document.createElement("label");
+            const publicFlag = document.createElement("input");
+            publicFlag.type = "checkbox";
+            publicFlag.name = "is_published";
+            publicFlag.checked = member.is_published !== false && member.published !== false;
+            publicFlagLabel.append(publicFlag, document.createTextNode(" Published on the public crew section"));
+            form.appendChild(publicFlagLabel);
+            const save = document.createElement("button");
+            save.type = "submit";
+            save.className = "button button-primary button-small";
+            save.textContent = "Save crew profile";
+            const note = document.createElement("p");
+            note.className = "form-note";
+            note.textContent = "Changes are sent only through the authenticated admin API. If the API action is not enabled server-side, saving will return an error and nothing will be changed.";
+            form.append(save, note);
+            form.addEventListener("submit", async event => {
+              event.preventDefault();
+              if (!form.reportValidity()) return;
+              const body = Object.fromEntries(new FormData(form).entries());
+              body.id = member.id;
+              body.display_name = String(body.display_name || "").trim();
+              body.role = String(body.role || "").trim();
+              body.bio = String(body.bio || "").trim();
+              body.avatar_url = String(body.avatar_url || "").trim();
+              body.profile_url = String(body.profile_url || "").trim();
+              body.sort_order = Number(body.sort_order || 999);
+              body.is_published = publicFlag.checked;
+              if (body.avatar_url && !/^https:\/\//i.test(body.avatar_url)) {
+                setCrewEditorStatus("Photo URLs must use HTTPS.", true); return;
+              }
+              if (body.profile_url && !/^https:\/\//i.test(body.profile_url)) {
+                setCrewEditorStatus("Profile URLs must use HTTPS.", true); return;
+              }
+              save.disabled = true; save.textContent = "Saving…";
+              try {
+                const accessToken = await producerToken();
+                await apiRequest("admin-update-crew", { method: "POST", accessToken, body });
+                setCrewEditorStatus("Crew profile saved. Refresh the public page to verify the published result.");
+                showToast("Crew profile update saved.");
+              } catch (error) {
+                setCrewEditorStatus(safeText(error.message, "Could not save the crew profile."), true);
+              } finally {
+                save.disabled = false; save.textContent = "Save crew profile";
+              }
+            });
+            card.append(heading, form);
+            container.appendChild(card);
+          });
+          setCrewEditorStatus(crew.length + " crew profile" + (crew.length === 1 ? "" : "s") + " loaded for editing.");
+        } catch (error) {
+          setCrewEditorStatus(safeText(error.message, "Could not load crew profiles."), true);
+        }
+      }
 
       async function loadProducerGuests() {
         const container=$("#producerGuests"), statusEl=$("#producerGuestStatus");
