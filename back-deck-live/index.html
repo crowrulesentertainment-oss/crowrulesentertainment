@@ -240,14 +240,54 @@
       position: absolute;
       inset: 0;
       z-index: -5;
-      background-image:
-        linear-gradient(90deg, rgba(4,10,7,.94) 0%, rgba(4,10,7,.76) 42%, rgba(4,10,7,.28) 100%),
-        linear-gradient(0deg, rgba(4,9,6,.94), transparent 55%),
-        url("images/back-deck-live.png");
-      background-position: center, center, center;
-      background-size: cover;
+      overflow: hidden;
+      background: #101b14;
       transform: scale(1.035);
-      animation: hero-drift 28s ease-in-out infinite alternate;
+      animation: hero-drift 34s ease-in-out infinite alternate;
+      will-change: transform;
+    }
+
+    /* Real Tacoma photography: downtown from the Thea Foss Waterway.
+       The source image is released into the public domain by its creator. */
+    .hero-scene {
+      position: absolute;
+      inset: 0;
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      opacity: 0;
+      transform: scale(1.04);
+      will-change: opacity, transform;
+    }
+    .hero-scene::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(4,10,7,.91) 0%, rgba(4,10,7,.70) 38%, rgba(4,10,7,.18) 100%),
+        linear-gradient(0deg, rgba(4,9,6,.97) 0%, rgba(4,9,6,.18) 54%, rgba(4,9,6,.18) 100%),
+        linear-gradient(180deg, rgba(4,9,6,.12), transparent 40%);
+    }
+    .hero-scene--waterway {
+      background-image: url("https://commons.wikimedia.org/wiki/Special:FilePath/Tacoma%20skyline%20from%20Thea%20Foss%20Waterway.jpg");
+      animation: tacoma-scene-a 27s ease-in-out infinite;
+    }
+    .hero-scene--rainier {
+      background-image: url("https://commons.wikimedia.org/wiki/Special:FilePath/Mount%20Rainier%20from%20Thea%20Foss%20Waterway.jpg");
+      animation: tacoma-scene-b 27s ease-in-out infinite;
+    }
+    .hero-scene--brand {
+      background-image: url("images/back-deck-live.png");
+      animation: tacoma-scene-c 27s ease-in-out infinite;
+    }
+    .hero-image::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(115deg, transparent 35%, rgba(224,190,133,.06) 60%, transparent 78%);
+      mix-blend-mode: screen;
+      animation: cinematic-sweep 12s ease-in-out infinite;
     }
 
     .hero-fallback {
@@ -762,8 +802,28 @@
       50% { box-shadow: 0 0 0 7px rgba(255,126,108,0); }
     }
     @keyframes hero-drift {
-      from { transform: scale(1.035) translateX(0); }
-      to { transform: scale(1.09) translateX(-.5%); }
+      from { transform: scale(1.035) translate3d(0, 0, 0); }
+      to { transform: scale(1.095) translate3d(-.45%, -.3%, 0); }
+    }
+    @keyframes tacoma-scene-a {
+      0%, 5% { opacity: 1; transform: scale(1.04) translate3d(0,0,0); }
+      27%, 38% { opacity: 1; transform: scale(1.09) translate3d(-.5%,-.25%,0); }
+      43%, 100% { opacity: 0; transform: scale(1.12) translate3d(-.8%,-.4%,0); }
+    }
+    @keyframes tacoma-scene-b {
+      0%, 31% { opacity: 0; transform: scale(1.12) translate3d(.7%,.2%,0); }
+      38% { opacity: 1; }
+      47%, 70% { opacity: 1; transform: scale(1.06) translate3d(-.3%,0,0); }
+      79%, 100% { opacity: 0; transform: scale(1.1) translate3d(-.6%,-.2%,0); }
+    }
+    @keyframes tacoma-scene-c {
+      0%, 65% { opacity: 0; transform: scale(1.1) translate3d(.4%,.2%,0); }
+      73%, 92% { opacity: .48; transform: scale(1.045) translate3d(0,0,0); }
+      100% { opacity: 0; transform: scale(1.08) translate3d(-.3%,0,0); }
+    }
+    @keyframes cinematic-sweep {
+      0%, 100% { opacity: .15; transform: translateX(-18%); }
+      50% { opacity: .65; transform: translateX(18%); }
     }
     @keyframes glow-pulse {
       from { opacity: .55; transform: scale(.9); }
@@ -803,12 +863,10 @@
       .container { width: min(var(--max), calc(100% - 28px)); }
       .section { padding: 60px 0; }
       .hero { min-height: 640px; }
-      .hero-image {
-        background-image:
-          linear-gradient(90deg, rgba(4,10,7,.83), rgba(4,10,7,.53)),
-          linear-gradient(0deg, rgba(4,9,6,.96), transparent 70%),
-          url("images/back-deck-live.png");
-        background-position: center, center, 58% center;
+      .hero-scene::after {
+        background:
+          linear-gradient(90deg, rgba(4,10,7,.78), rgba(4,10,7,.42)),
+          linear-gradient(0deg, rgba(4,9,6,.98), transparent 78%);
       }
       .hero-content { padding: 90px 0 100px; }
       .hero h1 { font-size: clamp(3rem, 15vw, 5rem); }
@@ -912,7 +970,11 @@
   <main id="main">
     <section class="hero" id="home">
       <div class="hero-fallback" aria-hidden="true"></div>
-      <div class="hero-image" aria-hidden="true"></div>
+      <div class="hero-image" aria-hidden="true">
+        <div class="hero-scene hero-scene--waterway"></div>
+        <div class="hero-scene hero-scene--rainier"></div>
+        <div class="hero-scene hero-scene--brand"></div>
+      </div>
       <div class="hero-glow" aria-hidden="true"></div>
       <div id="particles" aria-hidden="true"></div>
 
