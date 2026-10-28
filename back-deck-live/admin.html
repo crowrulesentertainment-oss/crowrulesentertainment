@@ -165,7 +165,28 @@
     .checkline input { width: auto; min-height: auto; }
     footer { padding: 25px 5%; border-top: 1px solid var(--border); text-align: center; color: var(--muted); }
 
+    .live-strip {
+      width: min(1120px, 92%);
+      margin: 20px auto 0;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .live-tile {
+      min-width: 0;
+      padding: 17px 19px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: linear-gradient(145deg, rgba(34,45,35,.96), rgba(20,27,22,.96));
+      box-shadow: 0 12px 30px rgba(0,0,0,.16);
+    }
+    .live-tile-label { display:flex; align-items:center; gap:8px; color:var(--muted); font-size:.78rem; text-transform:uppercase; letter-spacing:.1em; }
+    .live-dot { width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 12px rgba(146,201,160,.7); flex:0 0 auto; }
+    .live-tile-value { display:block; margin-top:6px; font:700 clamp(1.25rem, 2.5vw, 1.85rem)/1.25 "Space Grotesk",sans-serif; overflow-wrap:anywhere; }
+    .live-tile-detail { display:block; color:var(--muted); font-size:.82rem; margin-top:4px; }
     @media (max-width: 720px) {
+      .live-strip { grid-template-columns: 1fr; gap: 9px; margin-top: 12px; }
+      .live-tile { padding: 13px 16px; }
       .grid, .stats { grid-template-columns: 1fr; }
       .topbar { padding: 13px 5%; }
       .wrap { padding-top: 24px; }
@@ -183,6 +204,24 @@
       <button class="btn small hidden" id="logoutBtn" type="button">Sign out</button>
     </div>
   </header>
+
+  <section class="live-strip" aria-label="Live admin status">
+    <article class="live-tile">
+      <div class="live-tile-label"><span class="live-dot" aria-hidden="true"></span> Live visitors</div>
+      <strong class="live-tile-value" id="liveVisitorCount">Connecting…</strong>
+      <span class="live-tile-detail" id="liveVisitorDetail">Active sessions on this admin page</span>
+    </article>
+    <article class="live-tile">
+      <div class="live-tile-label">◷ Tacoma local time</div>
+      <strong class="live-tile-value" id="tacomaClock">—</strong>
+      <span class="live-tile-detail" id="tacomaDate">Pacific Time</span>
+    </article>
+    <article class="live-tile">
+      <div class="live-tile-label">☁ Tacoma weather</div>
+      <strong class="live-tile-value" id="tacomaWeather">Loading…</strong>
+      <span class="live-tile-detail" id="tacomaWeatherDetail">Current conditions · Tacoma, WA</span>
+    </article>
+  </section>
 
   <main class="wrap">
     <section id="loginView" class="panel login-panel">
@@ -398,6 +437,98 @@
   let episodes = [];
   let crew = [];
   let submissions = [];
+
+  // Shared Supabase Presence gives a live count of sessions currently on this admin page.
+  function startLiveVisitorCounter() {
+    const countNode = $("liveVisitorCount");
+    const detailNode = $("liveVisitorDetail");
+    if (!countNode || !detailNode || !client.channel) return;
+
+    const channel = client.channel("back-deck-live-admin-presence", {
+      config: { presence: { key: (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : "tab-" + Math.random().toString(36).slice(2) } }
+    });
+
+    const renderCount = () => {
+      const presence = channel.presenceState();
+      const count = Object.values(presence).reduce((total, sessions) => total + (Array.isArray(sessions) ? sessions.length : 0), 0);
+      countNode.textContent = String(count);
+      detailNode.textContent = count === 1 ? "1 active session on this admin page" : count + " active sessions on this admin page";
+    };
+
+    channel.on("presence", { event: "sync" }, renderCount);
+    channel.subscribe(async status => {
+      if (status === "SUBSCRIBED") {
+        await channel.track({ online_at: new Date().toISOString(), page: "back-deck-live-admin" });
+        renderCount();
+      } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+        countNode.textContent = "Unavailable";
+        detailNode.textContent = "Live presence connection interrupted";
+      }
+    });
+
+    window.addEventListener("pagehide", () => { channel.untrack(); }, { once: true });
+  }
+
+  function startTacomaClock() {
+    const timeNode = $("tacomaClock");
+    const dateNode = $("tacomaDate");
+    if (!timeNode || !dateNode) return;
+    const timeFormat = new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/Los_Angeles", hour: "numeric", minute: "2-digit", second: "2-digit", hour12: true
+    });
+    const dateFormat = new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/Los_Angeles", weekday: "long", month: "short", day: "numeric", year: "numeric"
+    });
+    const update = () => {
+      const now = new Date();
+      timeNode.textContent = timeFormat.format(now);
+      dateNode.textContent = dateFormat.format(now) + " · Pacific Time";
+    };
+    update();
+    window.setInterval(update, 1000);
+  }
+
+  function startTacomaWeather() {
+    const weatherNode = $("tacomaWeather");
+    const detailNode = $("tacomaWeatherDetail");
+    if (!weatherNode || !detailNode) return;
+
+    const descriptions = {
+      0: "Clear sky", 1: "Mostly clear", 2: "Partly cloudy", 3: "Overcast",
+      45: "Fog", 48: "Freezing fog", 51: "Light drizzle", 53: "Drizzle",
+      55: "Heavy drizzle", 56: "Freezing drizzle", 57: "Heavy freezing drizzle",
+      61: "Light rain", 63: "Rain", 65: "Heavy rain", 66: "Freezing rain",
+      67: "Heavy freezing rain", 71: "Light snow", 73: "Snow", 75: "Heavy snow",
+      77: "Snow grains", 80: "Rain showers", 81: "Showers", 82: "Heavy showers",
+      85: "Snow showers", 86: "Heavy snow showers", 95: "Thunderstorm",
+      96: "Thunderstorm · hail", 99: "Severe thunderstorm · hail"
+    };
+
+    const load = async () => {
+      try {
+        const url = "https://api.open-meteo.com/v1/forecast?latitude=47.2529&longitude=-122.4443&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=America%2FLos_Angeles";
+        const response = await fetch(url, { cache: "no-store" });
+        if (!response.ok) throw new Error("Weather service unavailable");
+        const payload = await response.json();
+        const current = payload.current;
+        if (!current) throw new Error("Current weather unavailable");
+        const code = Number(current.weather_code);
+        weatherNode.textContent = Math.round(Number(current.temperature_2m)) + "°F";
+        detailNode.textContent = (descriptions[code] || "Current conditions") + " · Feels like " +
+          Math.round(Number(current.apparent_temperature)) + "°F · Wind " +
+          Math.round(Number(current.wind_speed_10m)) + " mph";
+      } catch {
+        weatherNode.textContent = "Unavailable";
+        detailNode.textContent = "Weather data could not be loaded · Tacoma, WA";
+      }
+    };
+    load();
+    window.setInterval(load, 10 * 60 * 1000);
+  }
+
+  startTacomaClock();
+  startTacomaWeather();
+  startLiveVisitorCounter();
 
   function showMessage(message, type = "", target = "globalMessage") {
     const el = $(target);
