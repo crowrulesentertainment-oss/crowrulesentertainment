@@ -1180,6 +1180,9 @@
               <li><span>03</span><div><strong>Jonathan reviews</strong><small>The clip is stored privately for review and download by the production owner.</small></div></li>
               <li><span>04</span><div><strong>Edited into the show</strong><small>Selected clips may be trimmed, mixed, captioned, and included in a future episode.</small></div></li>
             </ul>
+            <div id="clipOwnerAccess" style="margin-top:20px;padding-top:18px;border-top:1px solid var(--border)">
+              <h3>Production owner access</h3><p class="form-note">Only the production owner needs to sign in to review and download clips. Co-hosts do not sign in.</p><div class="form-row"><input class="field" id="clipOwnerEmail" type="email" autocomplete="email" placeholder="Owner email address" aria-label="Production owner email"><button class="button button-secondary" id="clipOwnerSignIn" type="button">Send owner sign-in link</button></div>
+            </div>
             <div id="clipOwnerPanel" hidden>
               <h3>Production owner — incoming clips</h3>
               <p class="muted">Private submissions available to your account.</p>
@@ -2232,6 +2235,7 @@
       }
       function setupClipDrop() {
         $("#clipUploadForm").addEventListener("submit",clipUpload);
+        $("#clipOwnerSignIn").addEventListener("click",async()=>{try{const email=$("#clipOwnerEmail").value.trim().toLowerCase();if(!email||email!==CLIP_OWNER_EMAIL.toLowerCase())throw new Error("Enter the configured production-owner email address.");const {error}=await clipClient().auth.signInWithOtp({email,options:{emailRedirectTo:window.location.href.split("#")[0].split("?")[0]}});if(error)throw error;clipSetStatus("Owner sign-in link sent. Open it on this device to review and download clips.","success");}catch(e){clipSetStatus(e.message||"Could not send owner sign-in link.","error");}});
         $("#refreshClips").addEventListener("click",()=>clipLoadOwnerSubmissions().catch(e=>clipSetStatus(e.message,"error")));
         try{
           if(CLIP_SUPABASE_KEY.startsWith("PASTE_")){clipSetStatus("Setup required: configure the Supabase publishable key and anonymous upload policies.");return;}
