@@ -281,7 +281,7 @@ function mount(){
  /* Theme changes are managed only by the authenticated Control Room selector. */
  loadGlobalTheme();
 }
-window.CrowRulesThemes={setTheme,current, key:KEY, themes:THEMES.map(({id,label,icon,desc})=>({id,label,icon,desc}))};
+window.CrowRulesThemes={setTheme,current,key:KEY,themes:THEMES.map(({id,label,icon,desc,accent})=>({id,label,icon,desc,accent}))};
 /* Keep every open Tacoma Nights tab synchronized, including the Control Room's dedicated selector. */
 window.addEventListener('crowrules:global-theme-updated',e=>{const id=e.detail&&e.detail.theme;if(id&&THEMES.some(t=>t.id===id))setTheme(id)});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
