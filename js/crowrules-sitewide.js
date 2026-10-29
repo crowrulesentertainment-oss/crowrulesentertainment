@@ -237,6 +237,9 @@ function installGlobalEvents(){
 
 async 
 function loadSitewideThemes(){
+ // The appearance selector belongs exclusively to the Tacoma Nights section.
+ // Do not inject it into other CrowRules sites that share the universal shell.
+ if(!location.pathname.includes('/tacoma-nights/'))return;
  if(window.__CrowRulesThemeLoaderStarted)return;
  window.__CrowRulesThemeLoaderStarted=true;
  const existing=document.querySelector('script[data-crowrules-theme-system]');
