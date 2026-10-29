@@ -112,5 +112,6 @@ function mount(){
  window.addEventListener('storage',e=>{if(e.key===KEY)setTheme(e.newValue||'default')});
  setTheme(current());
 }
+window.CrowRulesThemes={setTheme,current, themes:THEMES.map(({id,label,icon,desc})=>({id,label,icon,desc}))};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
 })();
