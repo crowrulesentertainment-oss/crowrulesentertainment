@@ -138,6 +138,59 @@ body.cr-theme-halloween .cr-theme-particle:nth-child(7n){font-size:calc(var(--si
 @keyframes crHauntedFog{from{transform:translate3d(-7%,0,0) scaleX(.92)}to{transform:translate3d(8%,-24px,0) scaleX(1.08)}}
 @keyframes crHauntedGlow{from{opacity:.55;filter:hue-rotate(-8deg)}to{opacity:1;filter:hue-rotate(12deg)}}
 @media(prefers-reduced-motion:reduce){body.cr-theme-halloween .cr-theme-particle,body.cr-theme-halloween .cr-theme-fog,body.cr-theme-halloween .cr-theme-atmosphere:before{animation:none!important}}
+/* Halloween realism pass: colder moonlight, deep vignette, restrained blood-red glows, layered ground fog and film-grain texture. */
+body.cr-theme-halloween{
+ background-color:#050406!important;
+ background-image:
+  radial-gradient(ellipse at 72% 13%,rgba(151,25,27,.17),transparent 24%),
+  radial-gradient(ellipse at 12% 48%,rgba(70,37,91,.14),transparent 32%),
+  linear-gradient(180deg,rgba(3,3,6,.42) 0%,rgba(5,3,7,.68) 42%,rgba(2,2,4,.96) 100%),
+  url('https://images.unsplash.com/photo-1509557965875-b88c97052f0e?auto=format&fit=crop&w=2200&q=85')!important;
+ background-position:center,center,center,center 34%!important;
+ background-size:cover!important;background-attachment:fixed!important;
+}
+body.cr-theme-halloween .hero-image{
+ background-image:
+  linear-gradient(90deg,rgba(2,2,5,.78) 0%,rgba(5,3,8,.34) 46%,rgba(3,2,5,.18) 72%,rgba(2,2,4,.48) 100%),
+  linear-gradient(180deg,rgba(3,2,5,.24),transparent 32%,rgba(2,2,4,.82) 100%),
+  url('https://images.unsplash.com/photo-1475738198235-4b30fcf6a3b9?auto=format&fit=crop&w=2400&q=85')!important;
+ background-color:#070509!important;filter:saturate(.78) contrast(1.19) brightness(.78)!important;
+ box-shadow:inset 0 0 110px 24px rgba(0,0,0,.68)!important;
+}
+body.cr-theme-halloween .hero-image:before{
+ background-image:
+  radial-gradient(ellipse at 76% 24%,rgba(125,13,24,.18),transparent 28%),
+  linear-gradient(90deg,rgba(2,2,5,.48),transparent 58%),
+  linear-gradient(0deg,rgba(2,2,4,.72),transparent 70%),
+  url('https://images.unsplash.com/photo-1475738198235-4b30fcf6a3b9?auto=format&fit=crop&w=2400&q=85')!important;
+ filter:grayscale(.28) sepia(.12) contrast(1.12)!important;opacity:.76!important;
+}
+body.cr-theme-halloween .hero-image:after{
+ background-image:
+  radial-gradient(ellipse at 76% 22%,rgba(139,12,27,.22),transparent 31%),
+  linear-gradient(90deg,rgba(8,2,7,.4),rgba(5,2,7,.08) 65%),
+  linear-gradient(0deg,rgba(2,2,4,.82),transparent 68%),
+  url('https://images.unsplash.com/photo-1475738198235-4b30fcf6a3b9?auto=format&fit=crop&w=2400&q=85')!important;
+ filter:grayscale(.18) contrast(1.2) brightness(.68)!important;opacity:.62!important;mix-blend-mode:screen;
+}
+body.cr-theme-halloween .cr-theme-atmosphere{background:radial-gradient(ellipse at center,transparent 38%,rgba(0,0,0,.26) 100%)}
+body.cr-theme-halloween .cr-theme-atmosphere:after{
+ content:"";position:absolute;inset:0;opacity:.17;mix-blend-mode:soft-light;
+ background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0,rgba(255,255,255,.035) 1px,transparent 1px,transparent 3px),repeating-linear-gradient(90deg,rgba(0,0,0,.1) 0,rgba(0,0,0,.1) 1px,transparent 1px,transparent 4px);
+}
+body.cr-theme-halloween .cr-theme-fog{
+ height:clamp(180px,32vh,360px);bottom:-2%;opacity:.72;
+ background:
+  radial-gradient(ellipse at 22% 80%,rgba(112,119,143,.22),transparent 52%),
+  radial-gradient(ellipse at 62% 68%,rgba(105,85,126,.2),transparent 48%),
+  linear-gradient(90deg,transparent,rgba(151,155,173,.12),rgba(83,73,103,.2),rgba(161,164,177,.13),transparent);
+ filter:blur(38px);animation:crHauntedFog 25s ease-in-out infinite alternate;
+}
+body.cr-theme-halloween .cr-theme-particle{filter:drop-shadow(0 0 8px rgba(175,171,197,.32));text-shadow:0 0 12px rgba(180,170,207,.3);mix-blend-mode:screen}
+body.cr-theme-halloween .cr-theme-particle:nth-child(5n){filter:drop-shadow(0 0 8px rgba(140,17,30,.42));text-shadow:0 0 14px rgba(145,15,30,.38)}
+body.cr-theme-halloween .hero h1,body.cr-theme-halloween .hero h2{ text-shadow:0 4px 28px rgba(0,0,0,.95),0 0 34px rgba(112,13,26,.24)}
+@keyframes crHalloweenDreadPulse{0%,100%{opacity:.55}50%{opacity:.88}}
+@media(prefers-reduced-motion:reduce){body.cr-theme-halloween .cr-theme-atmosphere:after{animation:none!important}}
 /* Added holiday palettes for Tacoma Nights seasonal theme picker */
 body.cr-theme-valentines{--cr-accent:#ff8ba7;--cr-panel:rgba(35,10,22,.94);--cr-ink:#fff0f4;--cr-muted:#e0b9c7;--cr-glow:rgba(244,65,112,.25);--cr-hero-image:url('https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=2400&q=85');--cr-hero-image-alt:var(--cr-hero-image);background-color:#190914!important;background-image:linear-gradient(180deg,rgba(20,5,13,.52),rgba(20,5,13,.92)),url('https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=2200&q=85')!important;background-position:center,center 40%!important;background-size:cover!important;background-attachment:fixed!important}
 body.cr-theme-easter{--cr-accent:#c7a6ff;--cr-panel:rgba(18,22,35,.93);--cr-ink:#f8f4ff;--cr-muted:#c8c6df;--cr-glow:rgba(170,130,255,.23);--cr-hero-image:url('https://images.unsplash.com/photo-1462275646964-a0e3386b89fa?auto=format&fit=crop&w=2400&q=85');--cr-hero-image-alt:var(--cr-hero-image);background-color:#101525!important;background-image:linear-gradient(180deg,rgba(9,15,25,.48),rgba(9,15,25,.88)),url('https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=2200&q=85')!important;background-position:center,center 42%!important;background-size:cover!important;background-attachment:fixed!important}
