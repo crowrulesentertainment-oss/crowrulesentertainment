@@ -1,133 +1,116 @@
-/* CrowRules Sitewide Theme Switcher v1
- * Add new entries to THEMES and matching CSS rules to extend themes in future.
- * The original page styling is the default; selected themes persist across CrowRules pages.
+/* CrowRules Tacoma Nights Cinematic Theme System v3
+ * Section-scoped theme switcher: Tacoma Nights pages only.
+ * Scenic photos are remote Unsplash image URLs; the original layout/content stays intact.
  */
 (function(){
 'use strict';
-if(window.__CrowRulesThemeSwitcherLoaded)return;
-window.__CrowRulesThemeSwitcherLoaded=true;
-const STORAGE_KEY='crowrules-sitewide-theme-v1';
+if(window.__CrowRulesThemeSwitcherV3Loaded)return;
+window.__CrowRulesThemeSwitcherV3Loaded=true;
+const KEY='crowrules-sitewide-theme-v1';
 const THEMES=[
- {id:'default',label:'Tacoma Nights · Default',icon:'✦',description:'Original site design'},
- {id:'halloween',label:'Halloween Cinematic',icon:'🎃',description:'Moonlit scenes, fog, bats and autumn leaves'}
+ {id:'default',label:'Tacoma Nights · Default',icon:'🌃',desc:'Rain-lit Tacoma skyline · cool cinematic blue',accent:'#9bdcff',glow:'rgba(75,155,220,.20)',panel:'rgba(7,15,28,.90)',ink:'#f0f7ff',muted:'#b7c6d8',photo:'https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=2400&q=85',hero:'https://commons.wikimedia.org/wiki/Special:FilePath/Tacoma_Narrows_Bridge_Panorama.jpg?width=2400',particles:'✦',labelText:'DEFAULT'},
+ {id:'halloween',label:'Halloween Cinematic',icon:'🎃',desc:'Moonlit streets, fog, drifting leaves and ember light',accent:'#ffb36b',glow:'rgba(255,105,38,.22)',panel:'rgba(24,11,12,.92)',ink:'#fff2e7',muted:'#d1b6a8',photo:'https://images.unsplash.com/photo-1509557965875-b88c97052f0e?auto=format&fit=crop&w=2400&q=85',hero:'https://images.unsplash.com/photo-1475738198235-4b30fcf6a3b9?auto=format&fit=crop&w=2400&q=85',particles:'🍂',labelText:'HALLOWEEN'},
+ {id:'thanksgiving',label:'Thanksgiving Cinematic',icon:'🦃',desc:'Warm autumn skies, amber leaves and fireside gold',accent:'#ffc477',glow:'rgba(219,113,39,.23)',panel:'rgba(27,16,11,.92)',ink:'#fff4e4',muted:'#d5bda6',photo:'https://images.unsplash.com/photo-1506368249639-73a05d6f6488?auto=format&fit=crop&w=2400&q=85',hero:'https://images.unsplash.com/photo-1515003197210-e0cd7184f8b5?auto=format&fit=crop&w=2400&q=85',particles:'🍁',labelText:'THANKSGIVING'},
+ {id:'christmas',label:'Christmas Cinematic',icon:'🎄',desc:'Snowfall, evergreen glow and cinematic winter lights',accent:'#8ce8c2',glow:'rgba(42,177,145,.22)',panel:'rgba(5,19,21,.92)',ink:'#effff9',muted:'#b5d5ce',photo:'https://images.unsplash.com/photo-1512389142860-9c449e58a543?auto=format&fit=crop&w=2400&q=85',hero:'https://images.unsplash.com/photo-1482517967863-00e15c9b44be?auto=format&fit=crop&w=2400&q=85',particles:'❄',labelText:'CHRISTMAS'},
+ {id:'newyear',label:'New Year’s Eve Cinematic',icon:'🎆',desc:'Midnight skyline, fireworks and champagne-gold light',accent:'#f8d98b',glow:'rgba(119,121,255,.24)',panel:'rgba(9,11,27,.93)',ink:'#fff9e9',muted:'#c7c9df',photo:'https://images.unsplash.com/photo-1498931299472-f7a63a5a1cfa?auto=format&fit=crop&w=2400&q=85',hero:'https://images.unsplash.com/photo-1467810563316-b5476525c0f9?auto=format&fit=crop&w=2400&q=85',particles:'✦',labelText:'NEW YEAR’S EVE'}
 ];
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function current(){try{return localStorage.getItem(KEY)||'default'}catch{return'default'}}
 function addStyles(){
- if(document.getElementById('cr-theme-system-css'))return;
- const s=document.createElement('style');s.id='cr-theme-system-css';s.textContent=`
-.cr-theme-picker{position:fixed;right:14px;bottom:14px;z-index:99990;font:600 12px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;color:#fff}
-.cr-theme-toggle{display:flex;align-items:center;gap:9px;min-height:46px;padding:10px 14px;border:1px solid #b9c9d944;border-radius:13px;background:rgba(8,12,20,.94);color:#f4f7fb;box-shadow:0 12px 38px #0008;backdrop-filter:blur(18px);cursor:pointer;font-weight:800}
-.cr-theme-toggle:hover,.cr-theme-toggle:focus-visible{border-color:#ffb26b;outline:2px solid #ffb26b30;outline-offset:2px}
-.cr-theme-toggle .cr-theme-icon{font-size:17px}.cr-theme-toggle small{display:block;color:#b9c5d2;font-size:9px;font-weight:700;letter-spacing:.1em;text-align:left}
-.cr-theme-menu{position:absolute;right:0;bottom:calc(100% + 9px);width:min(300px,calc(100vw - 28px));padding:8px;border:1px solid #ffffff26;border-radius:16px;background:rgba(8,10,15,.97);box-shadow:0 20px 60px #000b;backdrop-filter:blur(20px);display:none;gap:5px}
+ if(document.getElementById('cr-theme-v3-css'))return;
+ const s=document.createElement('style');s.id='cr-theme-v3-css';s.textContent=`
+:root{--cr-scene-accent:#9bdcff;--cr-scene-panel:rgba(7,15,28,.9);--cr-scene-ink:#f0f7ff;--cr-scene-muted:#b7c6d8;--cr-scene-glow:rgba(75,155,220,.2)}
+body[class*="cr-theme-"]{transition:background-color .6s ease,color .4s ease}
+body.cr-theme-default,body.cr-theme-halloween,body.cr-theme-thanksgiving,body.cr-theme-christmas,body.cr-theme-newyear{--cr-scene-accent:var(--cr-accent);--cr-scene-panel:var(--cr-panel);--cr-scene-ink:var(--cr-ink);--cr-scene-muted:var(--cr-muted);--cr-scene-glow:var(--cr-glow)}
+body.cr-theme-default{--cr-accent:#9bdcff;--cr-panel:rgba(7,15,28,.91);--cr-ink:#f0f7ff;--cr-muted:#b7c6d8;--cr-glow:rgba(75,155,220,.2)}
+body.cr-theme-halloween{--cr-accent:#ffb36b;--cr-panel:rgba(24,11,12,.93);--cr-ink:#fff2e7;--cr-muted:#d1b6a8;--cr-glow:rgba(255,105,38,.22)}
+body.cr-theme-thanksgiving{--cr-accent:#ffc477;--cr-panel:rgba(27,16,11,.93);--cr-ink:#fff4e4;--cr-muted:#d5bda6;--cr-glow:rgba(219,113,39,.23)}
+body.cr-theme-christmas{--cr-accent:#8ce8c2;--cr-panel:rgba(5,19,21,.93);--cr-ink:#effff9;--cr-muted:#b5d5ce;--cr-glow:rgba(42,177,145,.22)}
+body.cr-theme-newyear{--cr-accent:#f8d98b;--cr-panel:rgba(9,11,27,.94);--cr-ink:#fff9e9;--cr-muted:#c7c9df;--cr-glow:rgba(119,121,255,.24)}
+body.cr-theme-default{background-color:#07111f!important;background-image:linear-gradient(180deg,rgba(5,11,21,.52),rgba(5,11,21,.90)),url('https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=2200&q=85')!important;background-position:center,center 38%!important;background-size:cover!important;background-attachment:fixed!important}
+body.cr-theme-halloween{background-color:#090608!important;background-image:linear-gradient(180deg,rgba(7,4,7,.55),rgba(7,4,7,.91)),url('https://images.unsplash.com/photo-1509557965875-b88c97052f0e?auto=format&fit=crop&w=2200&q=85')!important;background-position:center,center 34%!important;background-size:cover!important;background-attachment:fixed!important}
+body.cr-theme-thanksgiving{background-color:#170d08!important;background-image:linear-gradient(180deg,rgba(20,9,5,.56),rgba(20,9,5,.92)),url('https://images.unsplash.com/photo-1506368249639-73a05d6f6488?auto=format&fit=crop&w=2200&q=85')!important;background-position:center,center 42%!important;background-size:cover!important;background-attachment:fixed!important}
+body.cr-theme-christmas{background-color:#041412!important;background-image:linear-gradient(180deg,rgba(2,13,14,.55),rgba(2,13,14,.91)),url('https://images.unsplash.com/photo-1512389142860-9c449e58a543?auto=format&fit=crop&w=2200&q=85')!important;background-position:center,center 40%!important;background-size:cover!important;background-attachment:fixed!important}
+body.cr-theme-newyear{background-color:#07091a!important;background-image:linear-gradient(180deg,rgba(5,6,20,.48),rgba(5,6,20,.91)),url('https://images.unsplash.com/photo-1498931299472-f7a63a5a1cfa?auto=format&fit=crop&w=2200&q=85')!important;background-position:center,center 40%!important;background-size:cover!important;background-attachment:fixed!important}
+body[class*="cr-theme-"] :is(.site-header,.site-visitor-strip,.cr-sitewide,.cr-sw-menu,.cr-sw-account-menu,.site-footer,footer,.nav-more-menu){backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+body[class*="cr-theme-"] :is(.site-header,header,.header,.navbar,.navigation,.site-nav,.topbar,.top-bar){background-color:var(--cr-scene-panel)!important;border-color:color-mix(in srgb,var(--cr-scene-accent) 28%,transparent)!important}
+body[class*="cr-theme-"] :is(.panel,.card,.tile,.modal,.dialog,.content-card,.section-card,.feature-card,.widget,.chat-panel,.chat-sidebar,.composer,.chat-composer,.hero-card,.info-card,.form-card,.form-panel,.hero-condition-card,.hero-subscriber-goal){background-color:var(--cr-scene-panel);border-color:color-mix(in srgb,var(--cr-scene-accent) 28%,transparent)}
+body[class*="cr-theme-"] :is(h1,h2,h3,h4,.eyebrow,.section-label,.kicker,.accent,.highlight,.brand-accent,.hero h1 span,.brand-mark,.hero-condition-value,.site-visitor-inner strong){color:var(--cr-scene-accent)}
+body[class*="cr-theme-"] :is(a:not(.button):not(.btn),.nav-more summary:hover,.nav-more[open] summary){text-decoration-color:var(--cr-scene-accent)}
+body[class*="cr-theme-"] :is(button,.button,.btn,input[type=submit],input[type=button]){--button-accent:var(--cr-scene-accent)}
+body[class*="cr-theme-"] :is(input,textarea,select){border-color:color-mix(in srgb,var(--cr-scene-accent) 35%,#252525);color:var(--cr-scene-ink)}
+body[class*="cr-theme-"] ::selection{background:color-mix(in srgb,var(--cr-scene-accent) 40%,transparent)}
+body[class*="cr-theme-"] .hero{background-color:var(--cr-scene-panel);border-color:color-mix(in srgb,var(--cr-scene-accent) 30%,transparent)}
+body[class*="cr-theme-"] .hero-image{background-image:linear-gradient(90deg,rgba(3,5,12,.88),rgba(3,5,12,.38) 65%,rgba(3,5,12,.2)),linear-gradient(0deg,rgba(3,5,12,.88),transparent 65%),var(--cr-hero-image)!important}
+body[class*="cr-theme-"] .hero-image:before{background-image:linear-gradient(90deg,rgba(3,5,12,.83),rgba(3,5,12,.25)),linear-gradient(0deg,rgba(3,5,12,.84),transparent 65%),var(--cr-hero-image)!important;animation:crThemeSceneA 26s ease-in-out infinite!important}
+body[class*="cr-theme-"] .hero-image:after{background-image:linear-gradient(90deg,rgba(3,5,12,.85),rgba(3,5,12,.25)),linear-gradient(0deg,rgba(3,5,12,.82),transparent 65%),var(--cr-hero-image-alt)!important;animation:crThemeSceneB 26s ease-in-out infinite!important}
+body.cr-theme-default{--cr-hero-image:url('https://commons.wikimedia.org/wiki/Special:FilePath/Tacoma_Narrows_Bridge_Panorama.jpg?width=2400');--cr-hero-image-alt:url('https://commons.wikimedia.org/wiki/Special:FilePath/Downtown_Tacoma_skyline_from_Pacific_Avenue_%26_32nd_Street_%282024%29.jpg?width=2200')}
+body.cr-theme-halloween{--cr-hero-image:url('https://images.unsplash.com/photo-1509557965875-b88c97052f0e?auto=format&fit=crop&w=2400&q=85');--cr-hero-image-alt:url('https://images.unsplash.com/photo-1475738198235-4b30fcf6a3b9?auto=format&fit=crop&w=2400&q=85')}
+body.cr-theme-thanksgiving{--cr-hero-image:url('https://images.unsplash.com/photo-1506368249639-73a05d6f6488?auto=format&fit=crop&w=2400&q=85');--cr-hero-image-alt:url('https://images.unsplash.com/photo-1515003197210-e0cd7184f8b5?auto=format&fit=crop&w=2400&q=85')}
+body.cr-theme-christmas{--cr-hero-image:url('https://images.unsplash.com/photo-1512389142860-9c449e58a543?auto=format&fit=crop&w=2400&q=85');--cr-hero-image-alt:url('https://images.unsplash.com/photo-1482517967863-00e15c9b44be?auto=format&fit=crop&w=2400&q=85')}
+body.cr-theme-newyear{--cr-hero-image:url('https://images.unsplash.com/photo-1498931299472-f7a63a5a1cfa?auto=format&fit=crop&w=2400&q=85');--cr-hero-image-alt:url('https://images.unsplash.com/photo-1467810563316-b5476525c0f9?auto=format&fit=crop&w=2400&q=85')}
+body.cr-theme-default .button-primary{color:#07111f;background:linear-gradient(135deg,#c4ebff,#70b9e9)}
+body.cr-theme-halloween .button-primary{color:#1b0b04;background:linear-gradient(135deg,#ffd09a,#e76c2c)}
+body.cr-theme-thanksgiving .button-primary{color:#241004;background:linear-gradient(135deg,#ffe0a4,#d88a3b)}
+body.cr-theme-christmas .button-primary{color:#052019;background:linear-gradient(135deg,#b4f6d9,#47b98e)}
+body.cr-theme-newyear .button-primary{color:#171124;background:linear-gradient(135deg,#fff0b2,#c2a6ff)}
+.cr-theme-atmosphere{position:fixed;inset:0;z-index:2;overflow:hidden;pointer-events:none;contain:strict;isolation:isolate}
+.cr-theme-atmosphere:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 78% 18%,var(--cr-scene-glow),transparent 35%);animation:crAmbientPulse 9s ease-in-out infinite alternate}
+.cr-theme-particle{position:absolute;top:-12%;left:var(--x);font-size:var(--size);opacity:var(--opacity);color:var(--cr-scene-accent);text-shadow:0 0 14px var(--cr-scene-glow);animation:crParticleFall var(--duration) linear var(--delay) infinite;will-change:transform}
+.cr-theme-fog{position:absolute;left:-30%;width:160%;height:150px;bottom:8%;background:linear-gradient(90deg,transparent,var(--cr-scene-glow),rgba(180,200,230,.06),transparent);filter:blur(28px);opacity:.65;animation:crFogMove 28s ease-in-out infinite alternate}
+.cr-theme-picker{position:fixed;right:15px;bottom:15px;z-index:100010;font:600 12px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;color:#fff}
+.cr-theme-toggle{display:flex;align-items:center;gap:9px;min-height:48px;padding:10px 14px;border:1px solid color-mix(in srgb,var(--cr-scene-accent) 50%,transparent);border-radius:14px;background:rgba(5,8,16,.94);color:#fff;box-shadow:0 12px 38px #0009;backdrop-filter:blur(18px);cursor:pointer;font-weight:850}
+.cr-theme-toggle:hover,.cr-theme-toggle:focus-visible{outline:2px solid var(--cr-scene-accent);outline-offset:3px}
+.cr-theme-toggle .cr-theme-icon{font-size:19px}.cr-theme-toggle small{display:block;color:#d1d8e2;font-size:9px;font-weight:800;letter-spacing:.12em;text-align:left}
+.cr-theme-menu{position:absolute;right:0;bottom:calc(100% + 10px);width:min(330px,calc(100vw - 24px));padding:9px;border:1px solid #ffffff28;border-radius:18px;background:rgba(5,8,15,.97);box-shadow:0 22px 70px #000c;backdrop-filter:blur(24px);display:none;gap:5px;max-height:min(75vh,520px);overflow:auto}
 .cr-theme-picker.open .cr-theme-menu{display:grid}
-.cr-theme-menu-title{padding:8px 10px 6px;color:#aebbc9;font-size:9px;font-weight:900;letter-spacing:.17em}
-.cr-theme-option{display:flex;align-items:center;gap:11px;width:100%;padding:11px;border:1px solid transparent;border-radius:11px;background:transparent;color:#fff;text-align:left;cursor:pointer}
-.cr-theme-option:hover,.cr-theme-option:focus-visible{background:#ffffff0b;border-color:#ffffff18;outline:none}
-.cr-theme-option[aria-pressed="true"]{background:#ff9b3d12;border-color:#ff9b3d70}
-.cr-theme-option-icon{display:grid;place-items:center;flex:0 0 34px;width:34px;height:34px;border-radius:10px;background:#ffffff0c;font-size:17px}
-.cr-theme-option-copy{min-width:0;flex:1}.cr-theme-option-copy strong{display:block;font-size:12px}.cr-theme-option-copy small{display:block;margin-top:3px;color:#aebbc9;font-size:10px}
-.cr-theme-check{color:#ffb26b;font-size:15px}
-.cr-theme-atmosphere{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0;contain:strict}
-.cr-theme-atmosphere .cr-moon{position:absolute;top:12vh;right:9vw;width:clamp(65px,9vw,125px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 36% 34%,#fff1d6,#ffc079 42%,#df743b 69%,#6a2a1b 100%);box-shadow:0 0 45px #ff8a3633,0 0 120px #b94d2524;opacity:.68;animation:crMoonGlow 8s ease-in-out infinite}
-.cr-theme-atmosphere .cr-fog{position:absolute;left:-25%;width:150%;height:170px;filter:blur(28px);opacity:.18;background:linear-gradient(90deg,transparent,#9d503b,#d39b6b,#65425e,transparent);animation:crFogDrift 25s ease-in-out infinite alternate}
-.cr-theme-atmosphere .cr-fog.f2{top:67%;opacity:.12;animation-duration:32s;animation-direction:alternate-reverse}
-.cr-theme-atmosphere .cr-bat{position:absolute;left:-12%;top:13%;font-size:24px;color:#050406;text-shadow:0 0 8px #ff9b3d22;animation:crBatFlight 24s linear infinite}
-.cr-theme-atmosphere .cr-bat.b2{top:25%;font-size:16px;animation-duration:31s;animation-delay:-13s;opacity:.8}
-.cr-theme-atmosphere .cr-leaf{position:absolute;top:-8%;left:17%;font-size:18px;opacity:.65;animation:crLeafFall 18s linear infinite}
-.cr-theme-atmosphere .cr-leaf.l2{left:43%;animation-delay:-7s;animation-duration:23s}.cr-theme-atmosphere .cr-leaf.l3{left:78%;animation-delay:-12s;animation-duration:20s}
-.cr-theme-atmosphere .cr-jack{position:absolute;bottom:5%;left:2%;font-size:clamp(24px,3vw,42px);filter:drop-shadow(0 0 16px #ff7c2b66);animation:crJackGlow 4s ease-in-out infinite}
-.cr-theme-atmosphere .cr-jack.j2{left:auto;right:3%;bottom:10%;font-size:clamp(19px,2.4vw,32px);animation-delay:-2s}
-
-/* Cross-page theme tokens and generic components: lets the selected theme follow users beyond one specific page layout. */
-:root{--cr-theme-accent:#78efff;--cr-theme-accent-soft:rgba(120,239,255,.14);--cr-theme-panel:rgba(8,12,20,.88);--cr-theme-border:rgba(120,239,255,.24);--cr-theme-ink:#eef6ff;--cr-theme-muted:#a9b8ca;--cr-theme-glow:rgba(120,239,255,.12)}
-body.cr-theme-default{--cr-theme-accent:#78efff;--cr-theme-accent-soft:rgba(120,239,255,.14);--cr-theme-panel:rgba(8,12,20,.88);--cr-theme-border:rgba(120,239,255,.24);--cr-theme-ink:#eef6ff;--cr-theme-muted:#a9b8ca;--cr-theme-glow:rgba(120,239,255,.12)}
-body.cr-theme-halloween{--cr-theme-accent:#ffad55;--cr-theme-accent-soft:rgba(255,155,61,.14);--cr-theme-panel:rgba(22,12,12,.92);--cr-theme-border:rgba(255,155,61,.28);--cr-theme-ink:#fff2e6;--cr-theme-muted:#c5ad9e;--cr-theme-glow:rgba(255,119,46,.15)}
-body.cr-theme-halloween :is(header,nav,aside,footer,.header,.navbar,.navigation,.site-nav,.site-header,.site-footer,.topbar,.top-bar,.sidebar,.panel,.card,.tile,.modal,.dialog,.dropdown-menu,.menu-panel,.content-card,.section-card,.feature-card,.widget,.chat-panel,.chat-sidebar,.composer,.chat-composer,.messages,.message-bubble,.hero-card,.info-card,.form-card,.form-panel){border-color:var(--cr-theme-border)}
-body.cr-theme-halloween :is(header,.header,.navbar,.navigation,.site-nav,.site-header,.topbar,.top-bar,.sidebar,nav[aria-label]){background-color:rgba(12,7,8,.92)}
-body.cr-theme-halloween :is(.panel,.card,.tile,.modal,.dialog,.dropdown-menu,.menu-panel,.content-card,.section-card,.feature-card,.widget,.chat-panel,.chat-sidebar,.composer,.chat-composer,.hero-card,.info-card,.form-card,.form-panel){background-color:var(--cr-theme-panel);box-shadow:0 16px 48px rgba(0,0,0,.28)}
-body.cr-theme-halloween :is(h1,h2,h3,h4,.eyebrow,.section-label,.kicker,.accent,.highlight,.brand-accent){text-shadow:0 0 25px rgba(255,119,46,.15)}
-body.cr-theme-halloween :is(a:not(.button):not(.btn),.accent,.highlight,.eyebrow,.section-label,.kicker){text-decoration-color:#ffad5570}
-body.cr-theme-halloween :is(button,.button,.btn,input[type=submit],input[type=button]){--button-accent:#ffad55}
-body.cr-theme-halloween :is(input,textarea,select){color:#fff2e6;background-color:rgba(10,7,8,.92);border-color:#70452f}
-body.cr-theme-halloween :is(input,textarea,select):focus{outline-color:#ffad55;box-shadow:0 0 0 3px rgba(255,155,61,.12)}
-body.cr-theme-halloween ::selection{background:#ff9b3d55;color:#fff}
-body.cr-theme-halloween :is(.cr-sitewide,.cr-sw-menu,.cr-sw-account-menu){--theme-accent:#ffad55}
-body.cr-theme-halloween :is(.cr-sw-brand b,.cr-sw-menu .cr-sw-heading,.cr-sw-menu a.cr-sw-current,.cr-sw-menu .chev){color:#ffad55}
-body.cr-theme-halloween :is(.cr-sw-drop>button:hover,.cr-sw-drop.open>button,.cr-sw-menu a:hover,.cr-sw-menu button:hover){background:#ff9b3d12;border-color:#ff9b3d33}
-body.cr-theme-halloween .cr-theme-toggle{border-color:#ff9b3d70;background:rgba(18,9,9,.96)}
-body.cr-theme-halloween .cr-theme-option[aria-pressed="true"]{background:#ff9b3d16;border-color:#ff9b3d70}
-
-body.cr-theme-halloween{background-color:#090608!important;background-image:linear-gradient(180deg,rgba(7,5,7,.62),rgba(7,5,7,.9)),url('https://images.unsplash.com/photo-1509557965875-b88c97052f0e?auto=format&fit=crop&w=2200&q=85')!important;background-position:center,center 30%!important;background-size:cover!important;background-attachment:fixed!important;--bg:#090608;--panel:rgba(24,14,13,.94);--panel-light:rgba(43,24,19,.9);--text:#fff2e6;--muted:#c5ad9e;--green:#ff9b3d;--green-bright:#ffc17b;--gold:#ffd18a;--border:rgba(255,157,76,.22);--danger:#ff8a72;--shadow:0 24px 70px rgba(0,0,0,.55)}
-body.cr-theme-halloween .cr-theme-atmosphere{z-index:0}
-body.cr-theme-halloween .site-header,body.cr-theme-halloween .site-visitor-strip,body.cr-theme-halloween .cr-sitewide,body.cr-theme-halloween .cr-sw-reopen,body.cr-theme-halloween .site-footer,body.cr-theme-halloween footer{border-color:#ff9b3d36}
-body.cr-theme-halloween .site-header{background:rgba(13,7,8,.88)}
-body.cr-theme-halloween .site-visitor-strip,body.cr-theme-halloween .feature-strip{background:rgba(15,8,8,.92)}
-body.cr-theme-halloween .hero{background-color:#160b0b;border-color:#ff9b3d3a}
-body.cr-theme-halloween .hero-image{background-image:linear-gradient(90deg,rgba(9,4,6,.88) 0%,rgba(9,4,6,.58) 43%,rgba(9,4,6,.14) 100%),linear-gradient(0deg,rgba(9,4,6,.9),rgba(9,4,6,.05) 65%),url('https://images.unsplash.com/photo-1509557965875-b88c97052f0e?auto=format&fit=crop&w=2400&q=88')!important}
-body.cr-theme-halloween .hero-image:before{background-image:linear-gradient(90deg,rgba(9,4,6,.85),rgba(9,4,6,.2)),linear-gradient(0deg,rgba(9,4,6,.8),transparent 65%),url('https://images.unsplash.com/photo-1509557965875-b88c97052f0e?auto=format&fit=crop&w=2200&q=85')!important;animation:crSceneFadeA 24s ease-in-out infinite!important}
-body.cr-theme-halloween .hero-image:after{background-image:linear-gradient(90deg,rgba(9,4,6,.85),rgba(9,4,6,.22)),linear-gradient(0deg,rgba(9,4,6,.8),transparent 65%),url('https://images.unsplash.com/photo-1475738198235-4b30fcf6a3b9?auto=format&fit=crop&w=2200&q=85')!important;animation:crSceneFadeB 24s ease-in-out infinite!important}
-body.cr-theme-halloween .hero h1 span,body.cr-theme-halloween .eyebrow,body.cr-theme-halloween .brand-mark,body.cr-theme-halloween .nav-links a:hover,body.cr-theme-halloween .hero-condition-value,body.cr-theme-halloween .site-visitor-inner strong{color:#ffc17b}
-body.cr-theme-halloween .button-primary,body.cr-theme-halloween .nav-subscribe{color:#1a0a04;background:linear-gradient(135deg,#ffc17b,#e76c2c);border-color:#ffb66d55}
-body.cr-theme-halloween .button-secondary,body.cr-theme-halloween .panel,body.cr-theme-halloween .card,body.cr-theme-halloween .hero-condition-card,body.cr-theme-halloween .hero-subscriber-goal{border-color:#ff9b3d3c}
-body.cr-theme-halloween .panel,body.cr-theme-halloween .card{background:linear-gradient(145deg,rgba(32,18,17,.94),rgba(11,8,10,.96))}
-body.cr-theme-halloween .panel-inner,body.cr-theme-halloween .episode-card,body.cr-theme-halloween .strip-item{border-color:#ff9b3d26}
-body.cr-theme-halloween .live-label{background:#2b100f9c;border-color:#ff9b3d55}
-body.cr-theme-halloween .live-dot{background:#ff8a43;box-shadow:0 0 15px #ff8a43aa}
-body.cr-theme-halloween .particle{background:#ffb05e;box-shadow:0 0 12px 2px #ff7c2b77}
-body.cr-theme-halloween .play-icon,body.cr-theme-halloween .hero-condition-icon{color:#ffc17b;background:#ff9b3d18;border-color:#ff9b3d55}
-body.cr-theme-halloween .episode-kicker,body.cr-theme-halloween .hero-goal-badge{color:#ffc17b}
-body.cr-theme-halloween .hero-goal-bar{background:linear-gradient(90deg,#a54a22,#ffc17b)}
-body.cr-theme-halloween .nav-more-menu,body.cr-theme-halloween .nav-more-menu a:hover{background:rgba(16,8,8,.98)}
-body.cr-theme-halloween .hero-glow{background:rgba(255,119,46,.16)}
-body.cr-theme-halloween .hero h1{text-shadow:0 6px 45px #000a}
-@keyframes crMoonGlow{0%,100%{filter:brightness(.88)}50%{filter:brightness(1.13)}}
-@keyframes crFogDrift{from{transform:translateX(-5%) translateY(0)}to{transform:translateX(5%) translateY(-24px)}}
-@keyframes crBatFlight{0%{transform:translate(-5vw,0) rotate(4deg)}25%{transform:translate(30vw,42px) rotate(-8deg)}50%{transform:translate(60vw,-20px) rotate(6deg)}75%{transform:translate(90vw,35px) rotate(-5deg)}100%{transform:translate(120vw,-10px) rotate(4deg)}}
-@keyframes crLeafFall{0%{transform:translate3d(0,-8vh,0) rotate(0);opacity:0}10%{opacity:.7}50%{transform:translate3d(10vw,55vh,0) rotate(280deg)}90%{opacity:.5}100%{transform:translate3d(-4vw,112vh,0) rotate(620deg);opacity:0}}
-@keyframes crJackGlow{0%,100%{filter:drop-shadow(0 0 8px #ff7c2b44);transform:translateY(0)}50%{filter:drop-shadow(0 0 22px #ff7c2baa);transform:translateY(-4px)}}
-@keyframes crSceneFadeA{0%,28%{opacity:0}38%,62%{opacity:1}72%,100%{opacity:0}}
-@keyframes crSceneFadeB{0%,60%{opacity:0}70%,91%{opacity:1}100%{opacity:0}}
-@media(max-width:520px){.cr-theme-picker{right:9px;bottom:9px}.cr-theme-toggle{min-height:43px;padding:9px 11px}.cr-theme-toggle .cr-theme-word{display:none}}
-@media(prefers-reduced-motion:reduce){.cr-theme-atmosphere *{animation:none!important}.cr-theme-atmosphere{display:none!important}body.cr-theme-halloween .hero-image,body.cr-theme-halloween .hero-image:before,body.cr-theme-halloween .hero-image:after{animation:none!important}}
-`;
- document.head.appendChild(s);
+.cr-theme-menu-title{padding:9px 10px 7px;color:#b9c6d8;font-size:9px;font-weight:900;letter-spacing:.17em}
+.cr-theme-option{display:flex;align-items:center;gap:11px;width:100%;padding:11px;border:1px solid transparent;border-radius:12px;background:transparent;color:#fff;text-align:left;cursor:pointer}
+.cr-theme-option:hover,.cr-theme-option:focus-visible{background:#ffffff0c;border-color:#ffffff1c;outline:none}
+.cr-theme-option[aria-pressed=true]{background:color-mix(in srgb,var(--cr-scene-accent) 10%,transparent);border-color:color-mix(in srgb,var(--cr-scene-accent) 55%,transparent)}
+.cr-theme-option-icon{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border-radius:11px;background:linear-gradient(145deg,#ffffff17,#ffffff05);font-size:20px}
+.cr-theme-option-copy{min-width:0;flex:1}.cr-theme-option-copy strong{display:block;font-size:12px}.cr-theme-option-copy small{display:block;margin-top:3px;color:#b9c6d8;font-size:10px;line-height:1.45}
+.cr-theme-check{color:var(--cr-scene-accent);font-size:16px}
+@keyframes crParticleFall{0%{transform:translate3d(0,-10vh,0) rotate(0deg);opacity:0}8%{opacity:var(--opacity)}50%{transform:translate3d(5vw,55vh,0) rotate(220deg)}92%{opacity:var(--opacity)}100%{transform:translate3d(-4vw,115vh,0) rotate(540deg);opacity:0}}
+@keyframes crFogMove{from{transform:translateX(-8%) translateY(0)}to{transform:translateX(8%) translateY(-26px)}}
+@keyframes crAmbientPulse{from{opacity:.45;transform:scale(1)}to{opacity:1;transform:scale(1.08)}}
+@keyframes crThemeSceneA{0%,25%{opacity:0}35%,60%{opacity:1}70%,100%{opacity:0}}
+@keyframes crThemeSceneB{0%,58%{opacity:0}68%,90%{opacity:1}100%{opacity:0}}
+@media(max-width:520px){.cr-theme-picker{right:9px;bottom:9px}.cr-theme-toggle{min-height:44px;padding:9px 11px}.cr-theme-toggle .cr-theme-word{display:none}.cr-theme-menu{width:min(310px,calc(100vw - 18px))}}
+@media(prefers-reduced-motion:reduce){.cr-theme-atmosphere,.cr-theme-atmosphere *{animation:none!important;display:none!important}body[class*="cr-theme-"] .hero-image,body[class*="cr-theme-"] .hero-image:before,body[class*="cr-theme-"] .hero-image:after{animation:none!important}}
+`;document.head.appendChild(s);
 }
-function safeGet(){try{return localStorage.getItem(STORAGE_KEY)||'default'}catch{return'default'}}
-function safeSet(id){try{localStorage.setItem(STORAGE_KEY,id)}catch{}}
 function setTheme(id){
- const theme=THEMES.find(t=>t.id===id)||THEMES[0];
- document.body.classList.toggle('cr-theme-halloween',theme.id==='halloween');
- document.body.classList.toggle('cr-theme-default',theme.id==='default');
- document.documentElement.dataset.crowrulesTheme=theme.id;
- document.querySelectorAll('.cr-theme-option').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.theme===theme.id)));
- const label=document.querySelector('.cr-theme-current');if(label)label.textContent=theme.id==='default'?'CURRENT · DEFAULT':'CURRENT · HALLOWEEN';
- safeSet(theme.id);
+ const t=THEMES.find(x=>x.id===id)||THEMES[0];
+ THEMES.forEach(x=>document.body.classList.toggle('cr-theme-'+x.id,x.id===t.id));
+ document.documentElement.dataset.crowrulesTheme=t.id;
+ document.querySelectorAll('.cr-theme-option').forEach(b=>{const yes=b.dataset.theme===t.id;b.setAttribute('aria-pressed',String(yes));const check=b.querySelector('.cr-theme-check');if(check)check.textContent=yes?'✓':''});
+ const icon=document.querySelector('.cr-theme-current-icon');if(icon)icon.textContent=t.icon;
+ const label=document.querySelector('.cr-theme-current-label');if(label)label.textContent=t.label;
+ try{localStorage.setItem(KEY,t.id)}catch{}
  let layer=document.querySelector('.cr-theme-atmosphere');
- if(theme.id==='halloween'&&!layer){
-  layer=document.createElement('div');layer.className='cr-theme-atmosphere';layer.setAttribute('aria-hidden','true');
-  layer.innerHTML='<div class="cr-moon"></div><div class="cr-fog" style="top:34%"></div><div class="cr-fog f2"></div><div class="cr-bat">🦇</div><div class="cr-bat b2">🦇</div><div class="cr-leaf">🍂</div><div class="cr-leaf l2">🍁</div><div class="cr-leaf l3">🍂</div><div class="cr-jack">🎃</div><div class="cr-jack j2">🕯️</div>';
-  document.body.appendChild(layer);
- }else if(theme.id!=='halloween'&&layer)layer.remove();
- const picker=document.querySelector('.cr-theme-picker');if(picker){picker.classList.remove('open');picker.querySelector('.cr-theme-toggle')?.setAttribute('aria-expanded','false')}
+ if(!layer){layer=document.createElement('div');layer.className='cr-theme-atmosphere';layer.setAttribute('aria-hidden','true');document.body.appendChild(layer)}
+ layer.innerHTML='';
+ if(t.id!=='default'){
+  const fog=document.createElement('div');fog.className='cr-theme-fog';layer.appendChild(fog);
+  const glyph=t.id==='christmas'?['❄','✧','❄','✦']:t.id==='thanksgiving'?['🍂','🍁','✧','🍂']:t.id==='halloween'?['🍂','✧','🦇','🍁']:['✦','✧','·','✦'];
+  for(let i=0;i<34;i++){const p=document.createElement('span');p.className='cr-theme-particle';p.textContent=glyph[i%glyph.length];p.style.setProperty('--x',(Math.random()*100)+'%');p.style.setProperty('--size',(8+Math.random()*15)+'px');p.style.setProperty('--opacity',(0.22+Math.random()*.5).toFixed(2));p.style.setProperty('--duration',(12+Math.random()*22)+'s');p.style.setProperty('--delay',(-Math.random()*32)+'s');layer.appendChild(p)}
+ }
 }
 function mount(){
+ if(!document.body||!location.pathname.includes('/tacoma-nights/'))return;
  addStyles();
- if(!document.querySelector('.cr-theme-picker')){
-  const picker=document.createElement('div');picker.className='cr-theme-picker';
-  picker.innerHTML='<div class="cr-theme-menu" role="menu" aria-label="Choose a site theme"><div class="cr-theme-menu-title">SITEWIDE APPEARANCE</div>'+THEMES.map(t=>'<button class="cr-theme-option" type="button" role="menuitemradio" aria-pressed="false" data-theme="'+esc(t.id)+'"><span class="cr-theme-option-icon">'+t.icon+'</span><span class="cr-theme-option-copy"><strong>'+esc(t.label)+'</strong><small>'+esc(t.description)+'</small></span><span class="cr-theme-check" aria-hidden="true">✓</span></button>').join('')+'<div class="cr-theme-menu-title cr-theme-current">CURRENT · DEFAULT</div></div><button class="cr-theme-toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Choose sitewide theme"><span class="cr-theme-icon">🎨</span><span class="cr-theme-word"><small>APPEARANCE</small>Choose theme ▾</span></button>';
-  document.body.appendChild(picker);
-  const toggle=picker.querySelector('.cr-theme-toggle');
-  toggle.addEventListener('click',()=>{const open=picker.classList.toggle('open');toggle.setAttribute('aria-expanded',String(open))});
-  picker.querySelectorAll('[data-theme]').forEach(btn=>btn.addEventListener('click',()=>setTheme(btn.dataset.theme)));
-  document.addEventListener('click',e=>{if(!picker.contains(e.target)){picker.classList.remove('open');toggle.setAttribute('aria-expanded','false')}});
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'){picker.classList.remove('open');toggle.setAttribute('aria-expanded','false')}});
- }
- setTheme(safeGet());
+ if(document.querySelector('.cr-theme-picker')){setTheme(current());return}
+ const picker=document.createElement('div');picker.className='cr-theme-picker';
+ picker.innerHTML='<button class="cr-theme-toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Choose Tacoma Nights visual theme"><span class="cr-theme-icon cr-theme-current-icon">🌃</span><span class="cr-theme-word"><small>CHANGE SCENERY</small><span class="cr-theme-current-label">Tacoma Nights · Default</span></span><span aria-hidden="true">⌃</span></button><div class="cr-theme-menu" role="group" aria-label="Choose a cinematic theme"><div class="cr-theme-menu-title">TACOMA NIGHTS · CINEMATIC WORLDS</div>'+THEMES.map(t=>'<button class="cr-theme-option" type="button" data-theme="'+t.id+'" aria-pressed="false"><span class="cr-theme-option-icon">'+t.icon+'</span><span class="cr-theme-option-copy"><strong>'+esc(t.label)+'</strong><small>'+esc(t.desc)+'</small></span><span class="cr-theme-check" aria-hidden="true"></span></button>').join('')+'</div>';
+ document.body.appendChild(picker);
+ const toggle=picker.querySelector('.cr-theme-toggle');
+ toggle.addEventListener('click',()=>{const open=!picker.classList.contains('open');picker.classList.toggle('open',open);toggle.setAttribute('aria-expanded',String(open))});
+ picker.querySelectorAll('.cr-theme-option').forEach(b=>b.addEventListener('click',()=>{setTheme(b.dataset.theme);picker.classList.remove('open');toggle.setAttribute('aria-expanded','false')}));
+ document.addEventListener('click',e=>{if(!picker.contains(e.target)){picker.classList.remove('open');toggle.setAttribute('aria-expanded','false')}});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'){picker.classList.remove('open');toggle.setAttribute('aria-expanded','false')}});
+ window.addEventListener('storage',e=>{if(e.key===KEY)setTheme(e.newValue||'default')});
+ setTheme(current());
 }
-window.addEventListener('storage',event=>{if(event.key===STORAGE_KEY&&event.newValue){setTheme(event.newValue)}});
-try{if('BroadcastChannel'in window){const channel=new BroadcastChannel('crowrules-sitewide-themes');window.__CrowRulesThemeChannel=channel;channel.addEventListener('message',event=>{if(event.data&&event.data.type==='theme'&&event.data.id){setTheme(event.data.id)}})}}catch{}
-const originalSetTheme=setTheme;
-setTheme=function(id){originalSetTheme(id);try{window.__CrowRulesThemeChannel?.postMessage({type:'theme',id})}catch{}};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
 })();
