@@ -1,18 +1,18 @@
-/* CrowRules Tacoma Nights Cinematic Theme System v3
- * Section-scoped theme switcher: Tacoma Nights pages only.
- * Scenic photos are remote Unsplash image URLs; the original layout/content stays intact.
+/* CrowRules Tacoma Nights Cinematic Theme System v4
+ * Section-scoped cinematic seasonal system: Tacoma Nights pages only.
+ * Keeps the existing hero/banner layout while changing its seasonal scene, atmosphere and motion.
  */
 (function(){
 'use strict';
-if(window.__CrowRulesThemeSwitcherV3Loaded)return;
-window.__CrowRulesThemeSwitcherV3Loaded=true;
+if(window.__CrowRulesThemeSwitcherV4Loaded)return;
+window.__CrowRulesThemeSwitcherV4Loaded=true;
 const KEY='crowrules-sitewide-theme-v1';
 const THEMES=[
- {id:'default',label:'Tacoma Nights · Default',icon:'🌃',desc:'Rain-lit Tacoma skyline · cool cinematic blue',accent:'#9bdcff',glow:'rgba(75,155,220,.20)',panel:'rgba(7,15,28,.90)',ink:'#f0f7ff',muted:'#b7c6d8',photo:'https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=2400&q=85',hero:'https://commons.wikimedia.org/wiki/Special:FilePath/Tacoma_Narrows_Bridge_Panorama.jpg?width=2400',particles:'✦',labelText:'DEFAULT'},
- {id:'halloween',label:'Halloween Cinematic',icon:'🎃',desc:'Moonlit streets, fog, drifting leaves and ember light',accent:'#ffb36b',glow:'rgba(255,105,38,.22)',panel:'rgba(24,11,12,.92)',ink:'#fff2e7',muted:'#d1b6a8',photo:'https://images.unsplash.com/photo-1509557965875-b88c97052f0e?auto=format&fit=crop&w=2400&q=85',hero:'https://images.unsplash.com/photo-1475738198235-4b30fcf6a3b9?auto=format&fit=crop&w=2400&q=85',particles:'🍂',labelText:'HALLOWEEN'},
- {id:'thanksgiving',label:'Thanksgiving Cinematic',icon:'🦃',desc:'Warm autumn skies, amber leaves and fireside gold',accent:'#ffc477',glow:'rgba(219,113,39,.23)',panel:'rgba(27,16,11,.92)',ink:'#fff4e4',muted:'#d5bda6',photo:'https://images.unsplash.com/photo-1506368249639-73a05d6f6488?auto=format&fit=crop&w=2400&q=85',hero:'https://images.unsplash.com/photo-1515003197210-e0cd7184f8b5?auto=format&fit=crop&w=2400&q=85',particles:'🍁',labelText:'THANKSGIVING'},
- {id:'christmas',label:'Christmas Cinematic',icon:'🎄',desc:'Snowfall, evergreen glow and cinematic winter lights',accent:'#8ce8c2',glow:'rgba(42,177,145,.22)',panel:'rgba(5,19,21,.92)',ink:'#effff9',muted:'#b5d5ce',photo:'https://images.unsplash.com/photo-1512389142860-9c449e58a543?auto=format&fit=crop&w=2400&q=85',hero:'https://images.unsplash.com/photo-1482517967863-00e15c9b44be?auto=format&fit=crop&w=2400&q=85',particles:'❄',labelText:'CHRISTMAS'},
- {id:'newyear',label:'New Year’s Eve Cinematic',icon:'🎆',desc:'Midnight skyline, fireworks and champagne-gold light',accent:'#f8d98b',glow:'rgba(119,121,255,.24)',panel:'rgba(9,11,27,.93)',ink:'#fff9e9',muted:'#c7c9df',photo:'https://images.unsplash.com/photo-1498931299472-f7a63a5a1cfa?auto=format&fit=crop&w=2400&q=85',hero:'https://images.unsplash.com/photo-1467810563316-b5476525c0f9?auto=format&fit=crop&w=2400&q=85',particles:'✦',labelText:'NEW YEAR’S EVE'}
+ {id:'default',label:'Tacoma Nights · Default',icon:'🌃',desc:'Rain-slick Tacoma skyline, waterfront lights and deep Pacific Northwest blues',accent:'#9bdcff',glow:'rgba(75,155,220,.20)',panel:'rgba(7,15,28,.90)',ink:'#f0f7ff',muted:'#b7c6d8',photo:'https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=2400&q=85',hero:'https://commons.wikimedia.org/wiki/Special:FilePath/Tacoma_Narrows_Bridge_Panorama.jpg?width=2400',particles:'✦',labelText:'DEFAULT'},
+ {id:'halloween',label:'Halloween Cinematic',icon:'🎃',desc:'Realistic haunted woods, moonlit fog, pumpkins and drifting amber leaves',accent:'#ffb36b',glow:'rgba(255,105,38,.22)',panel:'rgba(24,11,12,.92)',ink:'#fff2e7',muted:'#d1b6a8',photo:'https://images.unsplash.com/photo-1509557965875-b88c97052f0e?auto=format&fit=crop&w=2400&q=85',hero:'https://images.unsplash.com/photo-1475738198235-4b30fcf6a3b9?auto=format&fit=crop&w=2400&q=85',particles:'🍂',labelText:'HALLOWEEN'},
+ {id:'thanksgiving',label:'Thanksgiving Cinematic',icon:'🦃',desc:'Golden fall foliage, harvest tables, warm windows and drifting leaves',accent:'#ffc477',glow:'rgba(219,113,39,.23)',panel:'rgba(27,16,11,.92)',ink:'#fff4e4',muted:'#d5bda6',photo:'https://images.unsplash.com/photo-1506368249639-73a05d6f6488?auto=format&fit=crop&w=2400&q=85',hero:'https://images.unsplash.com/photo-1515003197210-e0cd7184f8b5?auto=format&fit=crop&w=2400&q=85',particles:'🍁',labelText:'THANKSGIVING'},
+ {id:'christmas',label:'Christmas Cinematic',icon:'🎄',desc:'Snow-covered evergreens, glowing cabins, falling snow and festive lights',accent:'#8ce8c2',glow:'rgba(42,177,145,.22)',panel:'rgba(5,19,21,.92)',ink:'#effff9',muted:'#b5d5ce',photo:'https://images.unsplash.com/photo-1512389142860-9c449e58a543?auto=format&fit=crop&w=2400&q=85',hero:'https://images.unsplash.com/photo-1482517967863-00e15c9b44be?auto=format&fit=crop&w=2400&q=85',particles:'❄',labelText:'CHRISTMAS'},
+ {id:'newyear',label:'New Year’s Eve Cinematic',icon:'🎆',desc:'A midnight city skyline, sparkling fireworks and elegant gold-violet light',accent:'#f8d98b',glow:'rgba(119,121,255,.24)',panel:'rgba(9,11,27,.93)',ink:'#fff9e9',muted:'#c7c9df',photo:'https://images.unsplash.com/photo-1498931299472-f7a63a5a1cfa?auto=format&fit=crop&w=2400&q=85',hero:'https://images.unsplash.com/photo-1467810563316-b5476525c0f9?auto=format&fit=crop&w=2400&q=85',particles:'✦',labelText:'NEW YEAR’S EVE'}
 ];
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function current(){try{return localStorage.getItem(KEY)||'default'}catch{return'default'}}
@@ -43,7 +43,7 @@ body[class*="cr-theme-"] ::selection{background:color-mix(in srgb,var(--cr-scene
 body[class*="cr-theme-"] .hero{background-color:var(--cr-scene-panel);border-color:color-mix(in srgb,var(--cr-scene-accent) 30%,transparent)}
 body[class*="cr-theme-"] .hero-image{background-image:linear-gradient(90deg,rgba(3,5,12,.88),rgba(3,5,12,.38) 65%,rgba(3,5,12,.2)),linear-gradient(0deg,rgba(3,5,12,.88),transparent 65%),var(--cr-hero-image)!important}
 body[class*="cr-theme-"] .hero-image:before{background-image:linear-gradient(90deg,rgba(3,5,12,.83),rgba(3,5,12,.25)),linear-gradient(0deg,rgba(3,5,12,.84),transparent 65%),var(--cr-hero-image)!important;animation:crThemeSceneA 26s ease-in-out infinite!important}
-body[class*="cr-theme-"] .hero-image:after{background-image:linear-gradient(90deg,rgba(3,5,12,.85),rgba(3,5,12,.25)),linear-gradient(0deg,rgba(3,5,12,.82),transparent 65%),var(--cr-hero-image-alt)!important;animation:crThemeSceneB 26s ease-in-out infinite!important}
+body[class*="cr-theme-"] .hero-image:after{background-image:linear-gradient(90deg,rgba(3,5,12,.85),rgba(3,5,12,.25)),linear-gradient(0deg,rgba(3,5,12,.82),transparent 65%),var(--cr-hero-image-alt)!important;animation:crThemeSceneB 26s ease-in-out infinite!important}\n/* Preserve the existing Tacoma Nights hero banner geometry and copy; seasonally swap only its scenic layers. */\nbody[class*="cr-theme-"] .hero-image{background-size:cover!important;background-position:center 48%!important;animation:crHeroKenBurns 34s ease-in-out infinite alternate!important;will-change:transform,background-position}\nbody[class*="cr-theme-"] .hero-image:before,body[class*="cr-theme-"] .hero-image:after{background-size:cover!important;background-position:center 48%!important}\nbody.cr-theme-halloween .hero-image:after{filter:saturate(1.18) contrast(1.08)}\nbody.cr-theme-thanksgiving .hero-image:after{filter:saturate(1.2) sepia(.12)}\nbody.cr-theme-christmas .hero-image:before{filter:saturate(1.15) contrast(1.04)}\nbody.cr-theme-newyear .hero-image:after{filter:saturate(1.25) contrast(1.08)}
 body.cr-theme-default{--cr-hero-image:url('https://commons.wikimedia.org/wiki/Special:FilePath/Tacoma_Narrows_Bridge_Panorama.jpg?width=2400');--cr-hero-image-alt:url('https://commons.wikimedia.org/wiki/Special:FilePath/Downtown_Tacoma_skyline_from_Pacific_Avenue_%26_32nd_Street_%282024%29.jpg?width=2200')}
 body.cr-theme-halloween{--cr-hero-image:url('https://images.unsplash.com/photo-1509557965875-b88c97052f0e?auto=format&fit=crop&w=2400&q=85');--cr-hero-image-alt:url('https://images.unsplash.com/photo-1475738198235-4b30fcf6a3b9?auto=format&fit=crop&w=2400&q=85')}
 body.cr-theme-thanksgiving{--cr-hero-image:url('https://images.unsplash.com/photo-1506368249639-73a05d6f6488?auto=format&fit=crop&w=2400&q=85');--cr-hero-image-alt:url('https://images.unsplash.com/photo-1515003197210-e0cd7184f8b5?auto=format&fit=crop&w=2400&q=85')}
@@ -75,7 +75,7 @@ body.cr-theme-newyear .button-primary{color:#171124;background:linear-gradient(1
 @keyframes crFogMove{from{transform:translateX(-8%) translateY(0)}to{transform:translateX(8%) translateY(-26px)}}
 @keyframes crAmbientPulse{from{opacity:.45;transform:scale(1)}to{opacity:1;transform:scale(1.08)}}
 @keyframes crThemeSceneA{0%,25%{opacity:0}35%,60%{opacity:1}70%,100%{opacity:0}}
-@keyframes crThemeSceneB{0%,58%{opacity:0}68%,90%{opacity:1}100%{opacity:0}}
+@keyframes crThemeSceneB{0%,58%{opacity:0}68%,90%{opacity:1}100%{opacity:0}}\n@keyframes crHeroKenBurns{from{transform:scale(1);background-position:center 44%}to{transform:scale(1.055);background-position:center 54%}}
 @media(max-width:520px){.cr-theme-picker{right:9px;bottom:9px}.cr-theme-toggle{min-height:44px;padding:9px 11px}.cr-theme-toggle .cr-theme-word{display:none}.cr-theme-menu{width:min(310px,calc(100vw - 18px))}}
 @media(prefers-reduced-motion:reduce){.cr-theme-atmosphere,.cr-theme-atmosphere *{animation:none!important;display:none!important}body[class*="cr-theme-"] .hero-image,body[class*="cr-theme-"] .hero-image:before,body[class*="cr-theme-"] .hero-image:after{animation:none!important}}
 `;document.head.appendChild(s);
@@ -91,11 +91,7 @@ function setTheme(id){
  let layer=document.querySelector('.cr-theme-atmosphere');
  if(!layer){layer=document.createElement('div');layer.className='cr-theme-atmosphere';layer.setAttribute('aria-hidden','true');document.body.appendChild(layer)}
  layer.innerHTML='';
- if(t.id!=='default'){
-  const fog=document.createElement('div');fog.className='cr-theme-fog';layer.appendChild(fog);
-  const glyph=t.id==='christmas'?['❄','✧','❄','✦']:t.id==='thanksgiving'?['🍂','🍁','✧','🍂']:t.id==='halloween'?['🍂','✧','🦇','🍁']:['✦','✧','·','✦'];
-  for(let i=0;i<34;i++){const p=document.createElement('span');p.className='cr-theme-particle';p.textContent=glyph[i%glyph.length];p.style.setProperty('--x',(Math.random()*100)+'%');p.style.setProperty('--size',(8+Math.random()*15)+'px');p.style.setProperty('--opacity',(0.22+Math.random()*.5).toFixed(2));p.style.setProperty('--duration',(12+Math.random()*22)+'s');p.style.setProperty('--delay',(-Math.random()*32)+'s');layer.appendChild(p)}
- }
+ const fog=document.createElement('div');fog.className='cr-theme-fog';layer.appendChild(fog);\n const glyph=t.id==='christmas'?['❄','❄','✧','❄','✦']:t.id==='thanksgiving'?['🍂','🍁','🍂','✧','🍁']:t.id==='halloween'?['🍂','🦇','✧','🍁','🍂']:t.id==='newyear'?['✦','✧','✧','✦','·']:['✧','✦','·','✦'];\n const count=t.id==='default'?12:42;\n for(let i=0;i<count;i++){const p=document.createElement('span');p.className='cr-theme-particle';p.textContent=glyph[i%glyph.length];p.style.setProperty('--x',(Math.random()*100)+'%');p.style.setProperty('--size',(t.id==='christmas'?7+Math.random()*12:8+Math.random()*15)+'px');p.style.setProperty('--opacity',(0.2+Math.random()*.48).toFixed(2));p.style.setProperty('--duration',(t.id==='christmas'?8+Math.random()*14:12+Math.random()*22)+'s');p.style.setProperty('--delay',(-Math.random()*32)+'s');layer.appendChild(p)}
 }
 function mount(){
  if(!document.body||!location.pathname.includes('/tacoma-nights/'))return;
