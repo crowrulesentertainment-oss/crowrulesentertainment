@@ -91,6 +91,41 @@ html{scroll-behavior:smooth;scroll-padding-top:96px}
 <span class="weather-updated" id="weatherUpdated">Weather refreshes every 15 min</span>
 </div></section>
 <main class="wrap">
+<section class="cr-control-theme" aria-labelledby="cr-control-theme-title">
+<style>
+.cr-control-theme{--ct-accent:#9bdcff;margin:24px 0 30px;padding:clamp(18px,3vw,28px);border:1px solid #9bdcff42;background:linear-gradient(135deg,rgba(7,15,28,.96),rgba(12,20,32,.90));box-shadow:0 20px 65px #0005;position:relative;overflow:hidden}
+.cr-control-theme:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 100% 0,rgba(95,169,255,.15),transparent 55%)}
+.cr-control-theme>*{position:relative}.cr-control-theme-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}.cr-control-theme h2{font-size:clamp(2rem,4vw,3rem);margin:8px 0;color:#eff7ff}.cr-control-theme p{color:#bdc9d9;max-width:760px;margin-bottom:16px}.cr-control-theme-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.cr-control-theme-option{position:relative;min-height:132px;padding:14px 12px;text-align:left;border:1px solid #ffffff28;background:rgba(4,8,16,.7);color:#fff;cursor:pointer;transition:transform .2s,border-color .2s,background .2s}.cr-control-theme-option:hover{transform:translateY(-3px);border-color:var(--ct-accent);background:rgba(20,30,44,.92)}.cr-control-theme-option[aria-pressed=true]{border-color:var(--ct-accent);box-shadow:inset 0 0 0 1px var(--ct-accent),0 0 25px color-mix(in srgb,var(--ct-accent) 18%,transparent)}.cr-control-theme-option .ct-icon{display:block;font-size:25px;margin-bottom:9px}.cr-control-theme-option strong{display:block;font-size:.78rem;line-height:1.25}.cr-control-theme-option small{display:block;margin-top:6px;color:#b8c5d7;font-size:.66rem;line-height:1.45}.cr-control-theme-option .ct-active{display:block;margin-top:8px;color:var(--ct-accent);font-size:.59rem;letter-spacing:.12em;font-weight:900}.cr-control-theme-foot{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:15px;color:#b8c5d7;font-size:.75rem}.cr-control-theme-foot strong{color:#d9f4ff}.cr-control-theme-foot button{border:1px solid #ffffff40;background:transparent;color:#fff;padding:8px 12px;cursor:pointer;font:800 .67rem "DM Sans",sans-serif;letter-spacing:.08em;text-transform:uppercase}.cr-control-theme-foot button:hover{border-color:var(--ct-accent)}
+@media(max-width:900px){.cr-control-theme-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:560px){.cr-control-theme-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cr-control-theme-option{min-height:120px}}@media(prefers-reduced-motion:reduce){.cr-control-theme-option{transition:none}}
+</style>
+<div class="cr-control-theme-head"><div><p class="micro">SITE EXPERIENCE · SHARED APPEARANCE</p><h2 id="cr-control-theme-title">Cinematic Theme Control</h2><p>Choose the visual atmosphere for the entire Tacoma Nights website. Your selection is saved in this browser and follows you across the homepage, community, team, producer desk, crew chat, admin, and this control room.</p></div><span class="pill">5 GLOBAL THEMES</span></div>
+<div class="cr-control-theme-grid" role="group" aria-label="Choose the Tacoma Nights site theme">
+<button type="button" class="cr-control-theme-option" data-cr-control-theme="default" style="--ct-accent:#9bdcff" aria-pressed="false"><span class="ct-icon">🌃</span><strong>Tacoma Nights</strong><small>Rain-lit city nights and cool cinematic blue.</small><span class="ct-active"></span></button>
+<button type="button" class="cr-control-theme-option" data-cr-control-theme="halloween" style="--ct-accent:#ffb36b" aria-pressed="false"><span class="ct-icon">🎃</span><strong>Halloween</strong><small>Moonlight, drifting leaves, fog and ember glow.</small><span class="ct-active"></span></button>
+<button type="button" class="cr-control-theme-option" data-cr-control-theme="thanksgiving" style="--ct-accent:#ffc477" aria-pressed="false"><span class="ct-icon">🍁</span><strong>Thanksgiving</strong><small>Autumn leaves, amber light and fireside warmth.</small><span class="ct-active"></span></button>
+<button type="button" class="cr-control-theme-option" data-cr-control-theme="christmas" style="--ct-accent:#8ce8c2" aria-pressed="false"><span class="ct-icon">🎄</span><strong>Christmas</strong><small>Snowfall, evergreen tones and winter lights.</small><span class="ct-active"></span></button>
+<button type="button" class="cr-control-theme-option" data-cr-control-theme="newyear" style="--ct-accent:#f8d98b" aria-pressed="false"><span class="ct-icon">🎆</span><strong>New Year’s Eve</strong><small>Midnight sparkle, fireworks and gold-violet light.</small><span class="ct-active"></span></button>
+</div>
+<div class="cr-control-theme-foot"><span id="cr-control-theme-status" role="status" aria-live="polite">Loading your saved site theme…</span><button type="button" id="cr-control-theme-reset">Reset to default</button></div>
+<script>
+(function(){
+const key='crowrules-sitewide-theme-v1';
+const valid=['default','halloween','thanksgiving','christmas','newyear'];
+const labels={default:'Tacoma Nights · Default',halloween:'Halloween Cinematic',thanksgiving:'Thanksgiving Cinematic',christmas:'Christmas Cinematic',newyear:'New Year’s Eve Cinematic'};
+const buttons=[...document.querySelectorAll('[data-cr-control-theme]')];
+const status=document.getElementById('cr-control-theme-status');
+function saved(){try{const v=localStorage.getItem(key)||'default';return valid.includes(v)?v:'default'}catch{return'default'}}
+function paint(id){buttons.forEach(b=>{const active=b.dataset.crControlTheme===id;b.setAttribute('aria-pressed',String(active));const stamp=b.querySelector('.ct-active');if(stamp)stamp.textContent=active?'✓ ACTIVE':''});if(status)status.textContent='Active site theme: '+(labels[id]||labels.default)+' · saved for this browser.'}
+function apply(id){if(!valid.includes(id))id='default';try{localStorage.setItem(key,id)}catch{}if(window.CrowRulesThemes&&typeof window.CrowRulesThemes.setTheme==='function'){window.CrowRulesThemes.setTheme(id);paint(id)}else{paint(id);if(status)status.textContent='Theme saved. Reloading to apply the shared theme…';location.reload()}}
+buttons.forEach(b=>b.addEventListener('click',()=>apply(b.dataset.crControlTheme)));
+document.getElementById('cr-control-theme-reset')?.addEventListener('click',()=>apply('default'));
+window.addEventListener('storage',e=>{if(e.key===key)paint(saved())});
+const sync=()=>paint(saved());
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',sync,{once:true});else sync();
+setTimeout(sync,700);
+})();
+</script>
+</section>
 <section class="hero"><p class="micro">CROWRULES ENTERTAINMENT · PRIVATE OPERATIONS</p><h1>PREMIERE<br><span style="color:var(--lime)">CONTROL ROOM.</span></h1><p>Manage the next episode, publish crew profiles, and review community submissions from one place. This dashboard requires an authenticated Supabase user with an administrator role.</p><div id="globalStatus" class="notice" role="status" aria-live="polite">Connecting to secure operations…</div></section>
 <section id="authPanel" class="auth hidden"><p class="micro">ADMIN ACCESS</p><h2>Sign in.</h2><p class="small">Use your Tacoma Nights administrator account. Public visitors cannot access the private inbox or management controls.</p><form id="loginForm" class="fields"><label class="full">Email address<input name="email" type="email" autocomplete="username" required maxlength="254"></label><label class="full">Password<input name="password" type="password" autocomplete="current-password" required></label><div class="full actions"><button class="btn" id="loginBtn">Sign in securely ↗</button></div></form><p id="authMessage" class="small" role="status" aria-live="polite"></p></section>
 <div id="dashboard" class="hidden">
