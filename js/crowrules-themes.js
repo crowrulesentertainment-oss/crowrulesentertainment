@@ -1,11 +1,11 @@
-/* CrowRules Tacoma Nights Cinematic Theme System v5
+/* CrowRules Tacoma Nights Cinematic Theme System v6
  * Section-scoped cinematic seasonal system: Tacoma Nights pages only.
  * Keeps the existing hero/banner layout while changing its seasonal scene, atmosphere and motion.
  */
 (function(){
 'use strict';
-if(window.__CrowRulesThemeSwitcherV4Loaded)return;
-window.__CrowRulesThemeSwitcherV4Loaded=true;
+if(window.__CrowRulesThemeSwitcherV6Loaded)return;
+window.__CrowRulesThemeSwitcherV6Loaded=true;
 const KEY='crowrules-sitewide-theme-v1';
 const THEMES=[
  {id:'default',label:'Tacoma Nights · Default',icon:'🌃',desc:'Rain-slick Tacoma skyline, waterfront lights and deep Pacific Northwest blues',accent:'#9bdcff',glow:'rgba(75,155,220,.20)',panel:'rgba(7,15,28,.90)',ink:'#f0f7ff',muted:'#b7c6d8',photo:'https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=2400&q=85',hero:'https://commons.wikimedia.org/wiki/Special:FilePath/Tacoma_Narrows_Bridge_Panorama.jpg?width=2400',particles:'✦',labelText:'DEFAULT'},
@@ -121,7 +121,8 @@ function setTheme(id){
  document.querySelectorAll('.cr-theme-option').forEach(b=>{const yes=b.dataset.theme===t.id;b.setAttribute('aria-pressed',String(yes));const check=b.querySelector('.cr-theme-check');if(check)check.textContent=yes?'✓':''});
  const icon=document.querySelector('.cr-theme-current-icon');if(icon)icon.textContent=t.icon;
  const label=document.querySelector('.cr-theme-current-label');if(label)label.textContent=t.label;
- try{localStorage.setItem(KEY,t.id)}catch{}
+ try{if(localStorage.getItem(KEY)!==t.id)localStorage.setItem(KEY,t.id)}catch{}
+ try{window.dispatchEvent(new CustomEvent('crowrules:themechange',{detail:{theme:t.id}}))}catch{}
  let layer=document.querySelector('.cr-theme-atmosphere');
  if(!layer){layer=document.createElement('div');layer.className='cr-theme-atmosphere';layer.setAttribute('aria-hidden','true');document.body.appendChild(layer)}
  layer.innerHTML='';
@@ -142,9 +143,11 @@ function mount(){
  picker.querySelectorAll('.cr-theme-option').forEach(b=>b.addEventListener('click',()=>{setTheme(b.dataset.theme);picker.classList.remove('open');toggle.setAttribute('aria-expanded','false')}));
  document.addEventListener('click',e=>{if(!picker.contains(e.target)){picker.classList.remove('open');toggle.setAttribute('aria-expanded','false')}});
  document.addEventListener('keydown',e=>{if(e.key==='Escape'){picker.classList.remove('open');toggle.setAttribute('aria-expanded','false')}});
- window.addEventListener('storage',e=>{if(e.key===KEY)setTheme(e.newValue||'default')});
  setTheme(current());
 }
-window.CrowRulesThemes={setTheme,current, themes:THEMES.map(({id,label,icon,desc})=>({id,label,icon,desc}))};
+window.CrowRulesThemes={setTheme,current, key:KEY, themes:THEMES.map(({id,label,icon,desc})=>({id,label,icon,desc}))};
+/* Keep every open Tacoma Nights tab synchronized, including the Control Room's dedicated selector. */
+window.addEventListener('storage',e=>{if(e.key===KEY)setTheme(e.newValue||'default')});
+window.addEventListener('crowrules:themechange',e=>{const id=e.detail&&e.detail.theme;if(id&&current()!==id){try{localStorage.setItem(KEY,id)}catch{}}});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
 })();
