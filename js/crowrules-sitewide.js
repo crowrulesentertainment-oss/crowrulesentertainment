@@ -236,7 +236,21 @@ function installGlobalEvents(){
 
 
 async 
+function loadSitewideThemes(){
+ if(window.__CrowRulesThemeLoaderStarted)return;
+ window.__CrowRulesThemeLoaderStarted=true;
+ const existing=document.querySelector('script[data-crowrules-theme-system]');
+ if(existing)return;
+ const script=document.createElement('script');
+ script.src='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-themes.js?v=1';
+ script.async=true;
+ script.dataset.crowrulesThemeSystem='true';
+ script.onerror=()=>console.warn('[CrowRules sitewide] Theme selector failed to load');
+ document.head.appendChild(script);
+}
+
 async function boot(){
+ loadSitewideThemes();
  ensureFavicon();css();installGlobalEvents();mount({user:null,session:null,client:null});
  if(!location.pathname.includes('/podcasting/'))loadPodcastingNavigation();
  try{
