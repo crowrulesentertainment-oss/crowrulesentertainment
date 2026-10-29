@@ -45,6 +45,15 @@ body[class*="cr-theme-"] .hero-image{background-image:linear-gradient(90deg,rgba
 body[class*="cr-theme-"] .hero-image:before{background-image:linear-gradient(90deg,rgba(3,5,12,.83),rgba(3,5,12,.25)),linear-gradient(0deg,rgba(3,5,12,.84),transparent 65%),var(--cr-hero-image)!important;animation:crThemeSceneA 26s ease-in-out infinite!important}
 body[class*="cr-theme-"] .hero-image:after{background-image:linear-gradient(90deg,rgba(3,5,12,.85),rgba(3,5,12,.25)),linear-gradient(0deg,rgba(3,5,12,.82),transparent 65%),var(--cr-hero-image-alt)!important;animation:crThemeSceneB 26s ease-in-out infinite!important}
 /* Preserve the existing Tacoma Nights hero banner geometry and copy; seasonally swap only its scenic layers. */
+/* Hero image visibility fix: keep the image layer above the hero's own background, below all copy. */
+body[class*="cr-theme-"] .hero{isolation:isolate!important;position:relative!important;background:transparent!important}
+body[class*="cr-theme-"] .hero-image{z-index:0!important;inset:0!important;opacity:1!important;background-color:#171016!important;background-image:linear-gradient(90deg,rgba(3,5,12,.68),rgba(3,5,12,.20) 65%,rgba(3,5,12,.12)),linear-gradient(0deg,rgba(3,5,12,.72),transparent 65%),var(--cr-hero-image)!important;background-repeat:no-repeat!important;background-size:cover!important;background-position:center 48%!important}
+body[class*="cr-theme-"] .hero-image:before,body[class*="cr-theme-"] .hero-image:after{background-repeat:no-repeat!important;background-size:cover!important;background-position:center 48%!important}
+body[class*="cr-theme-"] .hero>.container{position:relative!important;z-index:3!important}
+body[class*="cr-theme-"] .hero-glow,body[class*="cr-theme-"] #particles{z-index:2!important;pointer-events:none!important}
+body.cr-theme-halloween .hero-image{background-image:linear-gradient(90deg,rgba(8,3,9,.62),rgba(8,3,9,.15) 65%,rgba(8,3,9,.1)),linear-gradient(0deg,rgba(8,3,9,.76),transparent 65%),url('https://images.unsplash.com/photo-1509557965875-b88c97052f0e?auto=format&fit=crop&w=2400&q=85')!important;background-color:#10080d!important}
+body.cr-theme-halloween .hero-image:before,body.cr-theme-halloween .hero-image:after{background-image:linear-gradient(90deg,rgba(8,3,9,.58),rgba(8,3,9,.16) 65%),linear-gradient(0deg,rgba(8,3,9,.75),transparent 65%),url('https://images.unsplash.com/photo-1509557965875-b88c97052f0e?auto=format&fit=crop&w=2400&q=85')!important}
+
 body[class*="cr-theme-"] .hero-image{background-size:cover!important;background-position:center 48%!important;animation:crHeroKenBurns 34s ease-in-out infinite alternate!important;will-change:transform,background-position}
 body[class*="cr-theme-"] .hero-image:before,body[class*="cr-theme-"] .hero-image:after{background-size:cover!important;background-position:center 48%!important}
 body.cr-theme-halloween .hero-image:after{filter:saturate(1.18) contrast(1.08)}
@@ -64,7 +73,7 @@ body[class*="cr-theme-"] .bubble,body[class*="cr-theme-"] .message.mine .bubble,
 body[class*="cr-theme-"] .eyebrow,body[class*="cr-theme-"] .hero h1 span,body[class*="cr-theme-"] .roomicon,body[class*="cr-theme-"] .count{color:var(--cr-scene-accent)!important}
 
 body.cr-theme-default{--cr-hero-image:url('https://commons.wikimedia.org/wiki/Special:FilePath/Tacoma_Narrows_Bridge_Panorama.jpg?width=2400');--cr-hero-image-alt:url('https://commons.wikimedia.org/wiki/Special:FilePath/Tacoma_Narrows_Bridge_Panorama.jpg?width=2400')}
-body.cr-theme-halloween{--cr-hero-image:url('https://images.unsplash.com/photo-1783712979237-76db91d52f3a?auto=format&fit=crop&fm=jpg&q=85&w=2400');--cr-hero-image-alt:url('https://images.unsplash.com/photo-1783712979237-76db91d52f3a?auto=format&fit=crop&fm=jpg&q=85&w=2400')}
+body.cr-theme-halloween{--cr-hero-image:url('https://images.unsplash.com/photo-1509557965875-b88c97052f0e?auto=format&fit=crop&w=2400&q=85');--cr-hero-image-alt:url('https://images.unsplash.com/photo-1509557965875-b88c97052f0e?auto=format&fit=crop&w=2400&q=85')}
 body.cr-theme-thanksgiving{--cr-hero-image:url('https://images.unsplash.com/photo-1515003197210-e0cd7184f8b5?auto=format&fit=crop&w=2400&q=85');--cr-hero-image-alt:url('https://images.unsplash.com/photo-1515003197210-e0cd7184f8b5?auto=format&fit=crop&w=2400&q=85')}
 body.cr-theme-christmas{--cr-hero-image:url('https://images.unsplash.com/photo-1482517967863-00e15c9b44be?auto=format&fit=crop&w=2400&q=85');--cr-hero-image-alt:url('https://images.unsplash.com/photo-1482517967863-00e15c9b44be?auto=format&fit=crop&w=2400&q=85')}
 body.cr-theme-newyear{--cr-hero-image:url('https://images.unsplash.com/photo-1467810563316-b5476525c0f9?auto=format&fit=crop&w=2400&q=85');--cr-hero-image-alt:url('https://images.unsplash.com/photo-1467810563316-b5476525c0f9?auto=format&fit=crop&w=2400&q=85')}
