@@ -242,10 +242,10 @@ function loadSitewideThemes(){
  if(!location.pathname.includes('/tacoma-nights/'))return;
  if(window.__CrowRulesThemeLoaderStarted)return;
  window.__CrowRulesThemeLoaderStarted=true;
- const existing=document.querySelector('script[data-crowrules-theme-system]');
+ const existing=document.querySelector('script[data-crowrules-theme-system],script[src*="crowrules-themes.js"]');
  if(existing)return;
  const script=document.createElement('script');
- script.src='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-themes.js?v=5';
+ script.src='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-themes.js?v=6';
  script.async=true;
  script.dataset.crowrulesThemeSystem='true';
  script.onerror=()=>console.warn('[CrowRules sitewide] Theme selector failed to load');
