@@ -98,7 +98,6 @@ body.cr-theme-newyear .button-primary{color:#171124;background:linear-gradient(1
 @keyframes crHeroKenBurns{from{transform:scale(1);background-position:center 44%}to{transform:scale(1.055);background-position:center 54%}}
 @media(max-width:520px){.cr-theme-picker{right:9px;bottom:9px}.cr-theme-toggle{min-height:44px;padding:9px 11px}.cr-theme-toggle .cr-theme-word{display:none}.cr-theme-menu{width:min(310px,calc(100vw - 18px))}}
 @media(prefers-reduced-motion:reduce){.cr-theme-atmosphere,.cr-theme-atmosphere *{animation:none!important;display:none!important}body[class*="cr-theme-"] .hero-image,body[class*="cr-theme-"] .hero-image:before,body[class*="cr-theme-"] .hero-image:after{animation:none!important}}
-`;
 /* Site-wide consistency layer: page-specific styles may define layouts, but the selected theme owns shared surfaces and accents. */
 body[class*="cr-theme-"]{color:var(--cr-scene-ink)!important}
 body[class*="cr-theme-"] :is(header,.mast,.masthead,.mastin,.top,.topbar,.top-bar,.navbar,.nav,.navigation,.site-header,.site-nav,.masthead,.bar,.toolbar,.sidebar,.sidecard,.card,.panel,.tile,.person,.record,.stat,.section-card,.feature-card,.modal,.dialog,.composer,.chat-panel,.chat-sidebar,.chat-shell,.chat-window,.message-list,.room,.room-card,.form-card,.form-panel,.control-card,.control-panel,.desk-panel,.admin-panel,.producer-panel,.state,.empty-state,.notice,.disclosure,.search,.search input,.searchbar,.search-box,.filters,.filterbar,.directory-card,.episode-card,.team-card,.community-card,.poll-card,.submission-card){background-color:var(--cr-scene-panel)!important;border-color:color-mix(in srgb,var(--cr-scene-accent) 30%,transparent)!important;color:var(--cr-scene-ink)}
@@ -111,8 +110,8 @@ body[class*="cr-theme-"] :is(input,textarea,select)::placeholder{color:var(--cr-
 body[class*="cr-theme-"] :is(.hero,.hero-section,.hero-panel,.hero-card,.hero-content,.hero-copy,.section,.mast,.mastin,.wrap>.toolbar){border-color:color-mix(in srgb,var(--cr-scene-accent) 25%,transparent)}
 body[class*="cr-theme-"] :is(.lime,.highlight,.accent,.brand b,.micro,.eyebrow,.role,.back){text-shadow:0 0 18px var(--cr-scene-glow)}
 body[class*="cr-theme-"] .cr-control-theme-option[aria-pressed="true"]{background:color-mix(in srgb,var(--cr-scene-accent) 15%,var(--cr-scene-panel))!important;border-color:var(--cr-scene-accent)!important}
-
-document.head.appendChild(s);
+`;
+ document.head.appendChild(s);
 }
 function setTheme(id){
  const t=THEMES.find(x=>x.id===id)||THEMES[0];
