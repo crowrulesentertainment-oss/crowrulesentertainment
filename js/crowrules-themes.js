@@ -38,6 +38,26 @@ function addStyles(){
 .cr-theme-atmosphere .cr-leaf.l2{left:43%;animation-delay:-7s;animation-duration:23s}.cr-theme-atmosphere .cr-leaf.l3{left:78%;animation-delay:-12s;animation-duration:20s}
 .cr-theme-atmosphere .cr-jack{position:absolute;bottom:5%;left:2%;font-size:clamp(24px,3vw,42px);filter:drop-shadow(0 0 16px #ff7c2b66);animation:crJackGlow 4s ease-in-out infinite}
 .cr-theme-atmosphere .cr-jack.j2{left:auto;right:3%;bottom:10%;font-size:clamp(19px,2.4vw,32px);animation-delay:-2s}
+
+/* Cross-page theme tokens and generic components: lets the selected theme follow users beyond one specific page layout. */
+:root{--cr-theme-accent:#78efff;--cr-theme-accent-soft:rgba(120,239,255,.14);--cr-theme-panel:rgba(8,12,20,.88);--cr-theme-border:rgba(120,239,255,.24);--cr-theme-ink:#eef6ff;--cr-theme-muted:#a9b8ca;--cr-theme-glow:rgba(120,239,255,.12)}
+body.cr-theme-default{--cr-theme-accent:#78efff;--cr-theme-accent-soft:rgba(120,239,255,.14);--cr-theme-panel:rgba(8,12,20,.88);--cr-theme-border:rgba(120,239,255,.24);--cr-theme-ink:#eef6ff;--cr-theme-muted:#a9b8ca;--cr-theme-glow:rgba(120,239,255,.12)}
+body.cr-theme-halloween{--cr-theme-accent:#ffad55;--cr-theme-accent-soft:rgba(255,155,61,.14);--cr-theme-panel:rgba(22,12,12,.92);--cr-theme-border:rgba(255,155,61,.28);--cr-theme-ink:#fff2e6;--cr-theme-muted:#c5ad9e;--cr-theme-glow:rgba(255,119,46,.15)}
+body.cr-theme-halloween :is(header,nav,aside,footer,.header,.navbar,.navigation,.site-nav,.site-header,.site-footer,.topbar,.top-bar,.sidebar,.panel,.card,.tile,.modal,.dialog,.dropdown-menu,.menu-panel,.content-card,.section-card,.feature-card,.widget,.chat-panel,.chat-sidebar,.composer,.chat-composer,.messages,.message-bubble,.hero-card,.info-card,.form-card,.form-panel){border-color:var(--cr-theme-border)}
+body.cr-theme-halloween :is(header,.header,.navbar,.navigation,.site-nav,.site-header,.topbar,.top-bar,.sidebar,nav[aria-label]){background-color:rgba(12,7,8,.92)}
+body.cr-theme-halloween :is(.panel,.card,.tile,.modal,.dialog,.dropdown-menu,.menu-panel,.content-card,.section-card,.feature-card,.widget,.chat-panel,.chat-sidebar,.composer,.chat-composer,.hero-card,.info-card,.form-card,.form-panel){background-color:var(--cr-theme-panel);box-shadow:0 16px 48px rgba(0,0,0,.28)}
+body.cr-theme-halloween :is(h1,h2,h3,h4,.eyebrow,.section-label,.kicker,.accent,.highlight,.brand-accent){text-shadow:0 0 25px rgba(255,119,46,.15)}
+body.cr-theme-halloween :is(a:not(.button):not(.btn),.accent,.highlight,.eyebrow,.section-label,.kicker){text-decoration-color:#ffad5570}
+body.cr-theme-halloween :is(button,.button,.btn,input[type=submit],input[type=button]){--button-accent:#ffad55}
+body.cr-theme-halloween :is(input,textarea,select){color:#fff2e6;background-color:rgba(10,7,8,.92);border-color:#70452f}
+body.cr-theme-halloween :is(input,textarea,select):focus{outline-color:#ffad55;box-shadow:0 0 0 3px rgba(255,155,61,.12)}
+body.cr-theme-halloween ::selection{background:#ff9b3d55;color:#fff}
+body.cr-theme-halloween :is(.cr-sitewide,.cr-sw-menu,.cr-sw-account-menu){--theme-accent:#ffad55}
+body.cr-theme-halloween :is(.cr-sw-brand b,.cr-sw-menu .cr-sw-heading,.cr-sw-menu a.cr-sw-current,.cr-sw-menu .chev){color:#ffad55}
+body.cr-theme-halloween :is(.cr-sw-drop>button:hover,.cr-sw-drop.open>button,.cr-sw-menu a:hover,.cr-sw-menu button:hover){background:#ff9b3d12;border-color:#ff9b3d33}
+body.cr-theme-halloween .cr-theme-toggle{border-color:#ff9b3d70;background:rgba(18,9,9,.96)}
+body.cr-theme-halloween .cr-theme-option[aria-pressed="true"]{background:#ff9b3d16;border-color:#ff9b3d70}
+
 body.cr-theme-halloween{background-color:#090608!important;background-image:linear-gradient(180deg,rgba(7,5,7,.62),rgba(7,5,7,.9)),url('https://images.unsplash.com/photo-1509557965875-b88c97052f0e?auto=format&fit=crop&w=2200&q=85')!important;background-position:center,center 30%!important;background-size:cover!important;background-attachment:fixed!important;--bg:#090608;--panel:rgba(24,14,13,.94);--panel-light:rgba(43,24,19,.9);--text:#fff2e6;--muted:#c5ad9e;--green:#ff9b3d;--green-bright:#ffc17b;--gold:#ffd18a;--border:rgba(255,157,76,.22);--danger:#ff8a72;--shadow:0 24px 70px rgba(0,0,0,.55)}
 body.cr-theme-halloween .cr-theme-atmosphere{z-index:0}
 body.cr-theme-halloween .site-header,body.cr-theme-halloween .site-visitor-strip,body.cr-theme-halloween .cr-sitewide,body.cr-theme-halloween .cr-sw-reopen,body.cr-theme-halloween .site-footer,body.cr-theme-halloween footer{border-color:#ff9b3d36}
@@ -78,6 +98,7 @@ function safeSet(id){try{localStorage.setItem(STORAGE_KEY,id)}catch{}}
 function setTheme(id){
  const theme=THEMES.find(t=>t.id===id)||THEMES[0];
  document.body.classList.toggle('cr-theme-halloween',theme.id==='halloween');
+ document.body.classList.toggle('cr-theme-default',theme.id==='default');
  document.documentElement.dataset.crowrulesTheme=theme.id;
  document.querySelectorAll('.cr-theme-option').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.theme===theme.id)));
  const label=document.querySelector('.cr-theme-current');if(label)label.textContent=theme.id==='default'?'CURRENT · DEFAULT':'CURRENT · HALLOWEEN';
@@ -104,5 +125,9 @@ function mount(){
  }
  setTheme(safeGet());
 }
+window.addEventListener('storage',event=>{if(event.key===STORAGE_KEY&&event.newValue){setTheme(event.newValue)}});
+try{if('BroadcastChannel'in window){const channel=new BroadcastChannel('crowrules-sitewide-themes');window.__CrowRulesThemeChannel=channel;channel.addEventListener('message',event=>{if(event.data&&event.data.type==='theme'&&event.data.id){setTheme(event.data.id)}})}}catch{}
+const originalSetTheme=setTheme;
+setTheme=function(id){originalSetTheme(id);try{window.__CrowRulesThemeChannel?.postMessage({type:'theme',id})}catch{}};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
 })();
