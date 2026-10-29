@@ -245,7 +245,7 @@ function loadSitewideThemes(){
  const existing=document.querySelector('script[data-crowrules-theme-system]');
  if(existing)return;
  const script=document.createElement('script');
- script.src='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-themes.js?v=4';
+ script.src='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-themes.js?v=5';
  script.async=true;
  script.dataset.crowrulesThemeSystem='true';
  script.onerror=()=>console.warn('[CrowRules sitewide] Theme selector failed to load');
