@@ -278,10 +278,9 @@ function setTheme(id){
 function mount(){
  if(!document.body||!location.pathname.includes('/tacoma-nights/'))return;
  addStyles();
- const isControlRoom=/\/tacoma-nights\/control-room\.html$/.test(location.pathname);
+ /* Theme changes are managed only by the authenticated Control Room selector. */
  loadGlobalTheme();
- if(!isControlRoom)return;
- if(document.querySelector('.cr-theme-picker'))return;
+ return;
  const picker=document.createElement('div');picker.className='cr-theme-picker';
  picker.innerHTML='<button class="cr-theme-toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Choose Tacoma Nights visual theme"><span class="cr-theme-icon cr-theme-current-icon">🌃</span><span class="cr-theme-word"><small>CHANGE SCENERY</small><span class="cr-theme-current-label">Tacoma Nights · Default</span></span><span aria-hidden="true">⌃</span></button><div class="cr-theme-menu" role="group" aria-label="Choose a cinematic theme"><div class="cr-theme-menu-title">TACOMA NIGHTS · CINEMATIC WORLDS</div>'+THEMES.map(t=>'<button class="cr-theme-option" type="button" data-theme="'+t.id+'" aria-pressed="false"><span class="cr-theme-option-icon">'+t.icon+'</span><span class="cr-theme-option-copy"><strong>'+esc(t.label)+'</strong><small>'+esc(t.desc)+'</small></span><span class="cr-theme-check" aria-hidden="true"></span></button>').join('')+'</div>';
  document.body.appendChild(picker);
