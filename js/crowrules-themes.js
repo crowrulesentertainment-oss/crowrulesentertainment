@@ -1,4 +1,4 @@
-/* CrowRules Tacoma Nights Cinematic Theme System v4
+/* CrowRules Tacoma Nights Cinematic Theme System v5
  * Section-scoped cinematic seasonal system: Tacoma Nights pages only.
  * Keeps the existing hero/banner layout while changing its seasonal scene, atmosphere and motion.
  */
@@ -98,7 +98,21 @@ body.cr-theme-newyear .button-primary{color:#171124;background:linear-gradient(1
 @keyframes crHeroKenBurns{from{transform:scale(1);background-position:center 44%}to{transform:scale(1.055);background-position:center 54%}}
 @media(max-width:520px){.cr-theme-picker{right:9px;bottom:9px}.cr-theme-toggle{min-height:44px;padding:9px 11px}.cr-theme-toggle .cr-theme-word{display:none}.cr-theme-menu{width:min(310px,calc(100vw - 18px))}}
 @media(prefers-reduced-motion:reduce){.cr-theme-atmosphere,.cr-theme-atmosphere *{animation:none!important;display:none!important}body[class*="cr-theme-"] .hero-image,body[class*="cr-theme-"] .hero-image:before,body[class*="cr-theme-"] .hero-image:after{animation:none!important}}
-`;document.head.appendChild(s);
+`;
+/* Site-wide consistency layer: page-specific styles may define layouts, but the selected theme owns shared surfaces and accents. */
+body[class*="cr-theme-"]{color:var(--cr-scene-ink)!important}
+body[class*="cr-theme-"] :is(header,.mast,.masthead,.mastin,.top,.topbar,.top-bar,.navbar,.nav,.navigation,.site-header,.site-nav,.masthead,.bar,.toolbar,.sidebar,.sidecard,.card,.panel,.tile,.person,.record,.stat,.section-card,.feature-card,.modal,.dialog,.composer,.chat-panel,.chat-sidebar,.chat-shell,.chat-window,.message-list,.room,.room-card,.form-card,.form-panel,.control-card,.control-panel,.desk-panel,.admin-panel,.producer-panel,.state,.empty-state,.notice,.disclosure,.search,.search input,.searchbar,.search-box,.filters,.filterbar,.directory-card,.episode-card,.team-card,.community-card,.poll-card,.submission-card){background-color:var(--cr-scene-panel)!important;border-color:color-mix(in srgb,var(--cr-scene-accent) 30%,transparent)!important;color:var(--cr-scene-ink)}
+body[class*="cr-theme-"] :is(h1,h2,h3,h4,h5,h6,.lime,.rust,.accent,.eyebrow,.micro,.role,.back,.brand b,.brand-mark,.count,.label,.kicker,.section-title,.section-heading,.section-label,.role-label,.stat strong,.person h2,.record h3,.status,.chip,.links a,.foot a,.nav a:hover,.active,.active a){color:var(--cr-scene-accent)!important}
+body[class*="cr-theme-"] :is(p,small,.muted,.bio,.description,.subtitle,.foot,.count,.meta,.help,.hint,.status-text,.comp,.personbody,.card p,.panel p){color:var(--cr-scene-muted)}
+body[class*="cr-theme-"] :is(button,.button,.btn,.primary,.send,.mark,.roomicon,.cr-control-theme-option,input[type=submit],input[type=button]){border-color:color-mix(in srgb,var(--cr-scene-accent) 48%,transparent)!important}
+body[class*="cr-theme-"] :is(button,.button,.btn,.primary,input[type=submit],input[type=button]){background-image:linear-gradient(135deg,color-mix(in srgb,var(--cr-scene-accent) 22%,var(--cr-scene-panel)),var(--cr-scene-panel))!important;color:var(--cr-scene-ink)!important}
+body[class*="cr-theme-"] :is(input,textarea,select,.search){background-color:color-mix(in srgb,var(--cr-scene-panel) 88%,#000)!important;border-color:color-mix(in srgb,var(--cr-scene-accent) 34%,transparent)!important;color:var(--cr-scene-ink)!important}
+body[class*="cr-theme-"] :is(input,textarea,select)::placeholder{color:var(--cr-scene-muted)!important}
+body[class*="cr-theme-"] :is(.hero,.hero-section,.hero-panel,.hero-card,.hero-content,.hero-copy,.section,.mast,.mastin,.wrap>.toolbar){border-color:color-mix(in srgb,var(--cr-scene-accent) 25%,transparent)}
+body[class*="cr-theme-"] :is(.lime,.highlight,.accent,.brand b,.micro,.eyebrow,.role,.back){text-shadow:0 0 18px var(--cr-scene-glow)}
+body[class*="cr-theme-"] .cr-control-theme-option[aria-pressed="true"]{background:color-mix(in srgb,var(--cr-scene-accent) 15%,var(--cr-scene-panel))!important;border-color:var(--cr-scene-accent)!important}
+
+document.head.appendChild(s);
 }
 function setTheme(id){
  const t=THEMES.find(x=>x.id===id)||THEMES[0];
