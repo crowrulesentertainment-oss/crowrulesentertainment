@@ -34,7 +34,9 @@ const THEMES=[
  {id:'juneteenth',label:'Juneteenth · Freedom & Heritage',icon:'✊🏿',desc:'Respectful heritage palette celebrating freedom, history and community',accent:'#f0c15b',glow:'rgba(202,48,55,.23)',panel:'rgba(20,12,13,.95)',ink:'#fff6e8',muted:'#d6c2b0',photo:'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=2400&q=85',hero:'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=2400&q=85',particles:'✦',labelText:'JUNETEENTH'}
 ];
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function current(){try{return localStorage.getItem(KEY)||'default'}catch{return'default'}}
+let activeTheme='halloween';
+function current(){return activeTheme}
+async function loadGlobalTheme(){try{const r=await fetch('https://cevylpnoexugwgygvtgu.supabase.co/rest/v1/tacoma_nights_show_settings?setting_key=eq.site_theme&select=show_title&limit=1',{headers:{apikey:'sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-',Authorization:'Bearer sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-','Cache-Control':'no-cache'},cache:'no-store'});if(!r.ok)throw Error('Global theme request failed: '+r.status);const rows=await r.json();const id=rows&&rows[0]&&rows[0].show_title;if(id&&THEMES.some(t=>t.id===id)){setTheme(id);return id}}catch(e){console.warn('[CrowRules theme] Could not load global theme; using Halloween Cinematic fallback.',e)}setTheme('halloween');return 'halloween'}
 function addStyles(){
  if(document.getElementById('cr-theme-v3-css'))return;
  const s=document.createElement('style');s.id='cr-theme-v3-css';s.textContent=`
@@ -257,13 +259,13 @@ body[class*="cr-theme-"] .cr-control-theme-option[aria-pressed="true"]{backgroun
  document.head.appendChild(s);
 }
 function setTheme(id){
- const t=THEMES.find(x=>x.id===id)||THEMES[0];
+ const t=THEMES.find(x=>x.id===id)||THEMES.find(x=>x.id==='halloween')||THEMES[0];
+ activeTheme=t.id;
  THEMES.forEach(x=>document.body.classList.toggle('cr-theme-'+x.id,x.id===t.id));
  document.documentElement.dataset.crowrulesTheme=t.id;
  document.querySelectorAll('.cr-theme-option').forEach(b=>{const yes=b.dataset.theme===t.id;b.setAttribute('aria-pressed',String(yes));const check=b.querySelector('.cr-theme-check');if(check)check.textContent=yes?'✓':''});
  const icon=document.querySelector('.cr-theme-current-icon');if(icon)icon.textContent=t.icon;
  const label=document.querySelector('.cr-theme-current-label');if(label)label.textContent=t.label;
- try{if(localStorage.getItem(KEY)!==t.id)localStorage.setItem(KEY,t.id)}catch{}
  try{window.dispatchEvent(new CustomEvent('crowrules:themechange',{detail:{theme:t.id}}))}catch{}
  let layer=document.querySelector('.cr-theme-atmosphere');
  if(!layer){layer=document.createElement('div');layer.className='cr-theme-atmosphere';layer.setAttribute('aria-hidden','true');document.body.appendChild(layer)}
@@ -276,7 +278,10 @@ function setTheme(id){
 function mount(){
  if(!document.body||!location.pathname.includes('/tacoma-nights/'))return;
  addStyles();
- if(document.querySelector('.cr-theme-picker')){setTheme(current());return}
+ const isControlRoom=/\/tacoma-nights\/control-room\.html$/.test(location.pathname);
+ loadGlobalTheme();
+ if(!isControlRoom)return;
+ if(document.querySelector('.cr-theme-picker'))return;
  const picker=document.createElement('div');picker.className='cr-theme-picker';
  picker.innerHTML='<button class="cr-theme-toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Choose Tacoma Nights visual theme"><span class="cr-theme-icon cr-theme-current-icon">🌃</span><span class="cr-theme-word"><small>CHANGE SCENERY</small><span class="cr-theme-current-label">Tacoma Nights · Default</span></span><span aria-hidden="true">⌃</span></button><div class="cr-theme-menu" role="group" aria-label="Choose a cinematic theme"><div class="cr-theme-menu-title">TACOMA NIGHTS · CINEMATIC WORLDS</div>'+THEMES.map(t=>'<button class="cr-theme-option" type="button" data-theme="'+t.id+'" aria-pressed="false"><span class="cr-theme-option-icon">'+t.icon+'</span><span class="cr-theme-option-copy"><strong>'+esc(t.label)+'</strong><small>'+esc(t.desc)+'</small></span><span class="cr-theme-check" aria-hidden="true"></span></button>').join('')+'</div>';
  document.body.appendChild(picker);
@@ -289,7 +294,6 @@ function mount(){
 }
 window.CrowRulesThemes={setTheme,current, key:KEY, themes:THEMES.map(({id,label,icon,desc})=>({id,label,icon,desc}))};
 /* Keep every open Tacoma Nights tab synchronized, including the Control Room's dedicated selector. */
-window.addEventListener('storage',e=>{if(e.key===KEY)setTheme(e.newValue||'default')});
-window.addEventListener('crowrules:themechange',e=>{const id=e.detail&&e.detail.theme;if(id&&current()!==id){try{localStorage.setItem(KEY,id)}catch{}}});
+window.addEventListener('crowrules:global-theme-updated',e=>{const id=e.detail&&e.detail.theme;if(id&&THEMES.some(t=>t.id===id))setTheme(id)});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
 })();
