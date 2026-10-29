@@ -27,7 +27,7 @@ function addStyles(){
  const s=document.createElement('style');s.id='cr-theme-v3-css';s.textContent=`
 :root{--cr-scene-accent:#9bdcff;--cr-scene-panel:rgba(7,15,28,.9);--cr-scene-ink:#f0f7ff;--cr-scene-muted:#b7c6d8;--cr-scene-glow:rgba(75,155,220,.2)}
 body[class*="cr-theme-"]{transition:background-color .6s ease,color .4s ease}
-body.cr-theme-default,body.cr-theme-halloween,body.cr-theme-thanksgiving,body.cr-theme-christmas,body.cr-theme-newyear{--cr-scene-accent:var(--cr-accent);--cr-scene-panel:var(--cr-panel);--cr-scene-ink:var(--cr-ink);--cr-scene-muted:var(--cr-muted);--cr-scene-glow:var(--cr-glow)}
+body.cr-theme-default,body.cr-theme-halloween,body.cr-theme-thanksgiving,body.cr-theme-christmas,body.cr-theme-newyear,body.cr-theme-valentines,body.cr-theme-easter,body.cr-theme-independence-day,body.cr-theme-mothers-day,body.cr-theme-fathers-day,body.cr-theme-juneteenth{--cr-scene-accent:var(--cr-accent);--cr-scene-panel:var(--cr-panel);--cr-scene-ink:var(--cr-ink);--cr-scene-muted:var(--cr-muted);--cr-scene-glow:var(--cr-glow)}
 body.cr-theme-default{--cr-accent:#9bdcff;--cr-panel:rgba(7,15,28,.91);--cr-ink:#f0f7ff;--cr-muted:#b7c6d8;--cr-glow:rgba(75,155,220,.2)}
 body.cr-theme-halloween{--cr-accent:#ffb36b;--cr-panel:rgba(24,11,12,.93);--cr-ink:#fff2e7;--cr-muted:#d1b6a8;--cr-glow:rgba(255,105,38,.22)}
 body.cr-theme-thanksgiving{--cr-accent:#ffc477;--cr-panel:rgba(27,16,11,.93);--cr-ink:#fff4e4;--cr-muted:#d5bda6;--cr-glow:rgba(219,113,39,.23)}
