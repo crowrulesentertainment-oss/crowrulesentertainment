@@ -36,7 +36,7 @@ const THEMES=[
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let activeTheme='halloween';
 function current(){return activeTheme}
-async function loadGlobalTheme(){try{const r=await fetch('https://cevylpnoexugwgygvtgu.supabase.co/rest/v1/tacoma_nights_site_settings?setting_key=eq.theme&select=setting_value&limit=1',{headers:{apikey:'sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-',Authorization:'Bearer sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-','Cache-Control':'no-cache'},cache:'no-store'});if(!r.ok)throw Error('Global theme request failed: '+r.status);const rows=await r.json();const id=rows&&rows[0]&&rows[0].setting_value;if(id&&THEMES.some(t=>t.id===id)){setTheme(id);return id}}catch(e){console.warn('[CrowRules theme] Could not load global theme; using Halloween Cinematic fallback.',e)}setTheme('halloween');return 'halloween'}
+async function loadGlobalTheme(){try{const r=await fetch('https://cevylpnoexugwgygvtgu.supabase.co/rest/v1/tacoma_nights_site_settings?setting_key=eq.theme&select=setting_value&limit=1',{headers:{apikey:'sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-','Cache-Control':'no-cache'},cache:'no-store'});if(!r.ok)throw Error('Global theme request failed: '+r.status);const rows=await r.json();const id=rows&&rows[0]&&rows[0].setting_value;if(id&&THEMES.some(t=>t.id===id)){setTheme(id);return id}}catch(e){console.warn('[CrowRules theme] Could not load global theme; using Halloween Cinematic fallback.',e)}setTheme('halloween');return 'halloween'}
 function addStyles(){
  if(document.getElementById('cr-theme-v3-css'))return;
  const s=document.createElement('style');s.id='cr-theme-v3-css';s.textContent=`
