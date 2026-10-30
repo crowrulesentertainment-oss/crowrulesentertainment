@@ -48,13 +48,31 @@ footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-s
 </div><label class="agree"><input type="checkbox" name="volunteer_acknowledgement" required><span>I understand this is currently a volunteer/community collaboration opportunity, not a paid position, and that applying does not guarantee selection or publication.</span></label><label class="agree"><input type="checkbox" name="contact_consent" required><span>I agree that Tacoma Nights may review this application and contact me about this opportunity. My contact details should not be published.</span></label><button class="btn primary" type="submit" style="width:100%;cursor:pointer">Submit remote host application ↗</button><div class="status" id="formStatus" role="status" aria-live="polite">Application submission is being prepared.</div><p class="fine">Your application should be handled privately by authorized production personnel. Do not submit passwords, payment details, government ID numbers, or other sensitive information.</p></form></div></section>
 </main>
 <footer><div class="wrap foot"><span>© CrowRules Entertainment · Tacoma Nights</span><span><a href="./">Back to Tacoma Nights</a> · One company. One universe.</span></div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* The application UI is ready. Connect the private application endpoint before accepting submissions. */
-document.getElementById("hostApplication").addEventListener("submit",function(event){
+const SUPABASE_URL="https://cevylpnoexugwgygvtgu.supabase.co";
+const SUPABASE_ANON_KEY="sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";
+const formClient=window.supabase?.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+document.getElementById("hostApplication").addEventListener("submit",async function(event){
  event.preventDefault();
+ const form=event.currentTarget,button=form.querySelector('button[type="submit"]');
  const status=document.getElementById("formStatus");
- status.className="status error";
- status.textContent="Online applications are not connected yet. Please check back soon; the form has not sent or stored your information.";
+ if(!formClient){status.className="status error";status.textContent="The application service could not load. Please try again later.";return;}
+ const fd=new FormData(form),payload={};
+ ["name","on_air_name","email","location","availability","format","interests","experience","setup","why"].forEach(k=>payload[k]=String(fd.get(k)||"").trim());
+ payload.volunteer_acknowledgement=fd.get("volunteer_acknowledgement")==="on";
+ payload.contact_consent=fd.get("contact_consent")==="on";
+ if(!payload.volunteer_acknowledgement||!payload.contact_consent){status.className="status error";status.textContent="Please confirm both acknowledgements before submitting.";return;}
+ button.disabled=true;button.textContent="Submitting securely…";status.className="status";status.textContent="Sending your application…";
+ try{
+  const {error}=await formClient.from("tacoma_nights_host_applications").insert(payload);
+  if(error)throw error;
+  form.reset();status.className="status success";status.textContent="Your application has been submitted. Thank you for your interest — the Tacoma Nights production team will review it.";
+ }catch(error){
+  console.error("Remote host application submission failed:",error);
+  status.className="status error";
+  status.textContent="We couldn't submit your application. The application database may not be configured yet. Please try again later.";
+ }finally{button.disabled=false;button.textContent="Submit remote host application ↗";}
 });
 </script>
 </body></html>
