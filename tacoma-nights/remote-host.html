@@ -45,6 +45,7 @@ footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-s
 <div class="field full"><label for="interests">What topics or segments interest you? *</label><textarea id="interests" name="interests" required maxlength="2500" placeholder="Tacoma and PNW stories, sports, community, interviews, culture, business, advice, or something completely different…"></textarea></div>
 <div class="field full"><label for="experience">Tell us about any hosting, speaking, video, podcast, or community experience</label><textarea id="experience" name="experience" maxlength="2500" placeholder="Experience is welcome but not required."></textarea></div>
 <div class="field full"><label for="setup">What equipment and internet setup do you have?</label><textarea id="setup" name="setup" maxlength="1500" placeholder="Computer or phone, microphone/headset, camera, internet reliability, and recording space."></textarea></div>
+<div class="field full"><label for="sample">Sample segment (audio or video, optional)</label><input id="sample" name="sample" type="file" accept="audio/mpeg,audio/mp3,audio/wav,audio/x-wav,audio/mp4,audio/x-m4a,audio/aac,audio/ogg,audio/webm,video/mp4,video/webm,video/quicktime,.mp3,.wav,.m4a,.aac,.ogg,.webm,.mp4,.mov"><small style="color:var(--muted)">Upload a short example of the kind of segment you'd like to contribute. Accepted: MP3, WAV, M4A, AAC, OGG, WEBM, MP4, MOV. Maximum file size: 100 MB. Your sample is stored privately and only reviewed by authorized Tacoma Nights administrators.</small><div class="status" id="sampleStatus" aria-live="polite"></div></div>
 <div class="field full"><label for="why">Why would you like to join Tacoma Nights? *</label><textarea id="why" name="why" required maxlength="2500" placeholder="What would you bring to the conversation?"></textarea></div>
 </div><label class="agree"><input type="checkbox" name="volunteer_acknowledgement" required><span>I understand this is currently a volunteer/community collaboration opportunity, not a paid position, and that applying does not guarantee selection or publication.</span></label><label class="agree"><input type="checkbox" name="contact_consent" required><span>I agree that Tacoma Nights may review this application and contact me about this opportunity. My contact details should not be published.</span></label><button class="btn primary" type="submit" style="width:100%;cursor:pointer">Submit remote host application ↗</button><div class="status" id="formStatus" role="status" aria-live="polite">Application submission is being prepared.</div><p class="fine">Your application should be handled privately by authorized production personnel. Do not submit passwords, payment details, government ID numbers, or other sensitive information.</p></form></div></section>
 </main>
@@ -63,16 +64,31 @@ document.getElementById("hostApplication").addEventListener("submit",async funct
  ["name","on_air_name","email","location","availability","format","interests","experience","setup","why"].forEach(k=>payload[k]=String(fd.get(k)||"").trim());
  payload.volunteer_acknowledgement=fd.get("volunteer_acknowledgement")==="on";
  payload.contact_consent=fd.get("contact_consent")==="on";
+ const sample=document.getElementById("sample").files[0]||null;
+ const sampleStatus=document.getElementById("sampleStatus");
+ const allowed=new Set(["audio/mpeg","audio/mp3","audio/wav","audio/x-wav","audio/mp4","audio/x-m4a","audio/aac","audio/ogg","audio/webm","video/mp4","video/webm","video/quicktime"]);
+ const ext=(sample?.name.split(".").pop()||"").toLowerCase();
+ const allowedExt=new Set(["mp3","wav","m4a","aac","ogg","webm","mp4","mov"]);
+ if(sample&&(sample.size>100*1024*1024||!allowedExt.has(ext)||(!allowed.has(sample.type)&&sample.type!==""))){status.className="status error";status.textContent="Please choose an MP3, WAV, M4A, AAC, OGG, WEBM, MP4, or MOV file no larger than 100 MB.";return;}
  if(!payload.volunteer_acknowledgement||!payload.contact_consent){status.className="status error";status.textContent="Please confirm both acknowledgements before submitting.";return;}
- button.disabled=true;button.textContent="Submitting securely…";status.className="status";status.textContent="Sending your application…";
+ button.disabled=true;button.textContent=sample?"Uploading sample…":"Submitting securely…";status.className="status";status.textContent=sample?"Uploading your sample privately…":"Sending your application…";
  try{
+  if(sample){
+   const cleanName=sample.name.normalize("NFKD").replace(/[^a-zA-Z0-9._-]+/g,"_").slice(-100)||("segment."+ext);
+   const samplePath="applications/"+crypto.randomUUID()+"/"+cleanName;
+   const {error:uploadError}=await formClient.storage.from("tacoma-host-samples").upload(samplePath,sample,{cacheControl:"3600",contentType:sample.type||"application/octet-stream",upsert:false});
+   if(uploadError)throw uploadError;
+   payload.sample_path=samplePath;payload.sample_original_name=sample.name;payload.sample_mime_type=sample.type||null;payload.sample_size_bytes=sample.size;
+   sampleStatus.textContent="Sample uploaded privately.";
+  }
+  button.textContent="Submitting application…";
   const {error}=await formClient.from("tacoma_nights_host_applications").insert(payload);
   if(error)throw error;
-  form.reset();status.className="status success";status.textContent="Your application has been submitted. Thank you for your interest — the Tacoma Nights production team will review it.";
+  form.reset();sampleStatus.textContent="";status.className="status success";status.textContent="Your application and sample have been submitted. Thank you — the Tacoma Nights production team will review them.";
  }catch(error){
   console.error("Remote host application submission failed:",error);
   status.className="status error";
-  status.textContent="We couldn't submit your application. The application database may not be configured yet. Please try again later.";
+  status.textContent="We couldn't complete your submission. Please try again later. "+(error?.message||"");
  }finally{button.disabled=false;button.textContent="Submit remote host application ↗";}
 });
 </script>
