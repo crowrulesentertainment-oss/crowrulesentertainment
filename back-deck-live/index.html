@@ -1883,60 +1883,37 @@
       async function loadEpisodes() {
         const button = $("#refreshEpisodes");
         button.disabled = true;
-        $("#archiveStatus").textContent = "Finding the newest published Back Deck Live video…";
+        $("#archiveStatus").textContent = "Loading the newest Back Deck Live episode…";
 
         try {
-          let latestVideos = [];
-          let latestError = null;
+          // The Back Deck Live episode library is the source of truth.
+          // Do not use the channel-wide YouTube uploads feed: it can include
+          // CrowRules videos that are not Back Deck Live episodes.
+          const data = await apiRequest("episodes");
+          const episodes = getArray(data, ["episodes", "results", "items"]);
+          state.episodes = sortEpisodes(
+            episodes.filter(item => item && typeof item === "object" && episodeVideoId(item))
+          );
 
-          // The public YouTube feed is authoritative for what was most recently published.
-          // Do not let older manually-entered episode records override it.
-          try {
-            const latestData = await apiRequest("youtube-latest");
-            latestVideos = getArray(latestData, ["videos", "items", "results"])
-              .filter(item => item && typeof item === "object")
-              .map(video => ({
-                ...video,
-                youtube_video_id: safeVideoId(
-                  video.youtube_video_id || video.video_id || video.id || video.youtube_id
-                ),
-                title: video.title || video.name || "Back Deck Live",
-                description: video.description || "The latest published conversation from Back Deck Live.",
-                published_at: video.published_at || video.publishedAt || video.created_at || null,
-                category: video.category || "Latest upload"
-              }))
-              .filter(video => video.youtube_video_id);
-          } catch (error) {
-            latestError = error;
-          }
-
-          if (latestVideos.length) {
-            state.episodes = sortEpisodes(latestVideos);
+          if (state.episodes.length) {
             showFeatured(state.episodes[0]);
-            $("#featuredKicker").textContent = "NEWEST PUBLISHED VIDEO";
-            $("#episodeStatus").textContent = "Automatically selected from the latest public uploads on CrowRules TV.";
+            $("#featuredKicker").textContent = "LATEST BACK DECK LIVE EPISODE";
+            $("#episodeStatus").textContent = "Showing the newest published Back Deck Live episode.";
           } else {
-            const data = await apiRequest("episodes");
-            const episodes = getArray(data, ["episodes", "results", "items"]);
-            state.episodes = sortEpisodes(episodes.filter(item => item && typeof item === "object"));
-            if (state.episodes.length) {
-              showFeatured(state.episodes[0]);
-              $("#episodeStatus").textContent = latestError
-                ? "Showing the newest episode record; the live YouTube upload feed is temporarily unavailable."
-                : "Showing the newest available episode.";
-            } else {
-              showFeatured(null);
-              $("#archiveStatus").textContent = "No public Back Deck Live videos were returned.";
-            }
+            showFeatured(null);
+            $("#episodeStatus").textContent = "No published Back Deck Live episodes are available yet.";
           }
 
           populateCategories(state.episodes);
           renderEpisodes();
+          if (!state.episodes.length) {
+            $("#archiveStatus").textContent = "No Back Deck Live videos were returned by the episode library.";
+          }
         } catch (error) {
           showFeatured(null, true);
           $("#episodeGrid").innerHTML =
-            '<div class="empty-state" style="grid-column:1/-1">The latest video feed could not be reached. You can still browse available videos on the CrowRules TV channel.</div>';
-          $("#archiveStatus").textContent = safeText(error.message, "Unable to load the latest video.");
+            '<div class="empty-state" style="grid-column:1/-1">The Back Deck Live episode library could not be reached. You can still browse the show on its YouTube playlist.</div>';
+          $("#archiveStatus").textContent = safeText(error.message, "Unable to load Back Deck Live episodes.");
         } finally {
           button.disabled = false;
         }
