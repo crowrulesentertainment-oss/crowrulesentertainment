@@ -81,6 +81,23 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
     <div style="display:flex;align-items:end;gap:8px"><button class="btn secondary" id="refreshButton" type="button">↻ Refresh</button><button class="btn secondary" id="signOutButton" type="button">Sign out</button></div>
   </div>
   <div class="stats" aria-label="Current loaded result counts"><div class="stat"><small>Loaded</small><strong id="countAll">0</strong></div><div class="stat"><small>New</small><strong id="countNew">0</strong></div><div class="stat"><small>Accepted</small><strong id="countAccepted">0</strong></div><div class="stat"><small>Declined</small><strong id="countDeclined">0</strong></div></div>
+  <div class="panel toolbar" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-top:0">
+    <button class="btn secondary" id="showSubmissions" type="button">Community submissions</button>
+    <button class="btn secondary" id="showCrew" type="button">Crew profiles</button>
+    <button class="btn secondary" id="showUploads" type="button">Crew uploads</button>
+  </div>
+  <section id="crewSection" class="hidden">
+    <div class="results-head"><h2>Crew profiles</h2><button class="btn primary" id="newCrew" type="button">＋ Add crew profile</button></div>
+    <p class="hint">Manage the public Tacoma Nights crew directory. Only profiles marked Published appear on the public site. Confirm portrait permission before publishing a crew photo.</p>
+    <p id="crewStatus" class="statusline" role="status" aria-live="polite"></p>
+    <div id="crewCards" class="cards"></div>
+  </section>
+  <section id="uploadsSection" class="hidden">
+    <div class="results-head"><h2>Crew member uploads</h2><button class="btn secondary" id="refreshUploads" type="button">↻ Refresh uploads</button></div>
+    <p class="hint">Private clip submissions from approved crew contributors. Previews use short-lived signed links. Files are not publicly exposed.</p>
+    <p id="uploadStatus" class="statusline" role="status" aria-live="polite"></p>
+    <div id="uploadCards" class="cards"></div>
+  </section>
   <div class="results-head"><h2>Incoming submissions</h2><span id="resultsMeta" class="meta">Sign in to load private records.</span></div>
   <p id="deskStatus" class="statusline" role="status" aria-live="polite"></p>
   <div id="submissionCards" class="cards"></div>
@@ -216,6 +233,103 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
     if(r.reviewed_at) card.appendChild(make("div","meta","Last reviewed: "+new Date(r.reviewed_at).toLocaleString()));
     return card;
   }
+
+  function switchSection(name){
+    $("#crewSection").classList.toggle("hidden",name!=="crew");
+    $("#uploadsSection").classList.toggle("hidden",name!=="uploads");
+    $("#submissionCards").classList.toggle("hidden",name!=="submissions");
+    document.querySelector(".results-head").classList.toggle("hidden",name!=="submissions");
+    document.querySelector(".stats").classList.toggle("hidden",name!=="submissions");
+    document.querySelectorAll("#desk > .toolbar button").forEach(b=>b.classList.toggle("primary",b.id===(name==="crew"?"showCrew":name==="uploads"?"showUploads":"showSubmissions")));
+    if(name==="crew")loadCrew();
+    if(name==="uploads")loadUploads();
+  }
+  async function loadCrew(){
+    setStatus($("#crewStatus"),"Loading crew profiles…");
+    try{const data=await api("admin-crew-list");renderCrew(data.crew||[]);setStatus($("#crewStatus"),"Loaded "+(data.crew||[]).length+" crew profiles.","ok");}
+    catch(e){setStatus($("#crewStatus"),e.message,"error");}
+  }
+  function renderCrew(rows){
+    const root=$("#crewCards");root.replaceChildren();
+    if(!rows.length){root.appendChild(make("div","empty","No crew profiles yet. Add your first profile when ready."));return;}
+    rows.forEach(r=>{
+      const card=make("article","panel submission"),top=make("div","submission-top"),left=make("div","");
+      left.append(make("h3","",r.display_name),make("div","meta",r.role_title+" · "+(r.is_published?"Published":"Draft")));
+      if(r.avatar_url){const img=make("img","");img.src=r.avatar_url;img.alt="Portrait of "+r.display_name;img.style.cssText="width:88px;height:88px;object-fit:cover;border-radius:14px;border:1px solid var(--line)";top.append(left,img);}else top.append(left);
+      card.append(top);
+      const form=make("div","edit-grid");
+      const name=make("input","field");name.value=r.display_name||"";name.maxLength=120;
+      const role=make("input","field");role.value=r.role_title||"";role.maxLength=120;
+      const bio=make("textarea","field");bio.rows=4;bio.value=r.bio||"";
+      const avatar=make("input","field");avatar.type="url";avatar.placeholder="https://…";avatar.value=r.avatar_url||"";
+      const portraitFile=make("input","field");portraitFile.type="file";portraitFile.accept="image/jpeg,image/png,image/webp,image/avif";
+      const profile=make("input","field");profile.type="url";profile.placeholder="Public profile URL";profile.value=r.profile_url||"";
+      const specialties=make("input","field");specialties.value=(r.specialties||[]).join(", ");specialties.placeholder="Hosting, interviews, community";
+      const sort=make("input","field");sort.type="number";sort.value=String(r.sort_order??0);
+      const volunteer=make("select","field");[["volunteer","Volunteer"],["staff","Staff"],["contributor","Contributor"],["guest","Guest"]].forEach(([v,l])=>{const o=make("option","",l);o.value=v;o.selected=v===(r.volunteer_status||"volunteer");volunteer.append(o);});
+      const disclosure=make("textarea","field");disclosure.rows=2;disclosure.value=r.compensation_disclosure||"";
+      const featured=make("input","");featured.type="checkbox";featured.checked=!!r.is_featured;
+      const published=make("input","");published.type="checkbox";published.checked=!!r.is_published;
+      const approved=make("input","");approved.type="checkbox";approved.checked=!!r.portrait_approved;
+      const field=(label,node,wide=false)=>{const wrap=make("div",wide?"":"");const l=make("label","",label);wrap.append(l,node);form.append(wrap);};
+      field("Display name",name);field("Role / title",role);field("Biography",bio,true);field("Avatar image URL",avatar,true);field("Upload new portrait",portraitFile,true);field("Public profile URL",profile,true);field("Specialties (comma separated)",specialties);field("Sort order",sort);field("Volunteer / contributor status",volunteer);field("Compensation disclosure",disclosure,true);
+      const flags=make("div","card-actions");
+      [[featured,"Featured"],[published,"Published"],[approved,"Portrait permission confirmed"]].forEach(([c,t])=>{const l=make("label","checkline");l.append(c,document.createTextNode(t));flags.append(l);});
+      card.append(form,flags);
+      const actions=make("div","card-actions"),save=make("button","btn primary","Save crew profile"),del=make("button","btn danger","Delete profile");
+      save.type=del.type="button";
+      save.onclick=async()=>{
+        save.disabled=true;
+        try{
+          let avatarUrl=avatar.value.trim();
+          if(portraitFile.files?.[0]){
+            if(!approved.checked)throw new Error("Confirm portrait permission before uploading a crew portrait.");
+            const file=portraitFile.files[0];
+            if(file.size>5*1024*1024)throw new Error("Portrait must be 5 MB or smaller.");
+            const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"")||"jpg";
+            const path="crew/"+r.id+"/"+crypto.randomUUID()+"."+ext;
+            const {error:upErr}=await client.storage.from("tacoma-nights-crew").upload(path,file,{upsert:false,contentType:file.type});
+            if(upErr)throw upErr;
+            avatarUrl=client.storage.from("tacoma-nights-crew").getPublicUrl(path).data.publicUrl;
+          }
+          await api("admin-crew-save",{method:"POST",body:{id:r.id,display_name:name.value.trim(),role_title:role.value.trim(),bio:bio.value.trim(),avatar_url:avatarUrl||null,profile_url:profile.value.trim()||null,specialties:specialties.value.split(",").map(x=>x.trim()).filter(Boolean),sort_order:Number(sort.value)||0,is_featured:featured.checked,is_published:published.checked,portrait_approved:approved.checked,volunteer_status:volunteer.value,compensation_disclosure:disclosure.value.trim()}});
+          setStatus($("#crewStatus"),"Saved "+name.value.trim()+".","ok");await loadCrew();
+        }catch(e){setStatus($("#crewStatus"),e.message,"error");}finally{save.disabled=false;}
+      };
+      del.onclick=async()=>{if(!confirm("Delete the crew profile for "+r.display_name+"?"))return;del.disabled=true;try{await api("admin-crew-delete",{method:"POST",body:{id:r.id}});setStatus($("#crewStatus"),"Crew profile deleted.","ok");await loadCrew();}catch(e){setStatus($("#crewStatus"),e.message,"error");}finally{del.disabled=false;}};
+      actions.append(save,del);card.append(actions);root.append(card);
+    });
+  }
+  $("#newCrew").addEventListener("click",async()=>{
+    const name=prompt("Crew member display name:");if(!name?.trim())return;
+    const role=prompt("Crew role / title:");if(!role?.trim())return;
+    const bio=prompt("Short public biography:");if(!bio?.trim())return;
+    try{await api("admin-crew-save",{method:"POST",body:{display_name:name.trim(),role_title:role.trim(),bio:bio.trim(),sort_order:999,is_featured:false,is_published:false,portrait_approved:false,volunteer_status:"volunteer",compensation_disclosure:"Volunteer role; no compensation is currently guaranteed."}});setStatus($("#crewStatus"),"Draft profile created. Complete its details below.","ok");await loadCrew();}
+    catch(e){setStatus($("#crewStatus"),e.message,"error");}
+  });
+  async function loadUploads(){
+    setStatus($("#uploadStatus"),"Loading crew uploads…");
+    try{const data=await api("admin-clip-list");renderUploads(data.uploads||[]);setStatus($("#uploadStatus"),"Loaded "+(data.uploads||[]).length+" crew uploads.","ok");}
+    catch(e){setStatus($("#uploadStatus"),e.message,"error");}
+  }
+  function renderUploads(rows){
+    const root=$("#uploadCards");root.replaceChildren();
+    if(!rows.length){root.append(make("div","empty","No crew member uploads have been submitted yet."));return;}
+    rows.forEach(r=>{
+      const card=make("article","panel submission"),top=make("div","submission-top"),left=make("div","");
+      left.append(make("h3","",r.title||r.original_filename),make("div","meta",(r.co_host_name||"Crew contributor")+(r.co_host_email?" · "+r.co_host_email:"")+" · "+new Date(r.created_at).toLocaleString()));
+      top.append(left,make("span","pill",r.episode_label||"Crew upload"));card.append(top);
+      card.append(make("div","meta",(r.original_filename||"File")+" · "+(Number(r.file_size||0)/1048576).toFixed(1)+" MB · "+(r.mime_type||"Unknown type")));
+      if(r.notes)card.append(make("div","message",r.notes));
+      if(r.preview_url){
+        const media=r.mime_type?.startsWith("video/")?make("video",""):r.mime_type?.startsWith("audio/")?make("audio",""):null;
+        if(media){media.controls=true;media.preload="metadata";media.src=r.preview_url;media.style.cssText="width:100%;max-height:420px;margin-top:12px";card.append(media);}
+        const link=make("a","","Open / download file");link.href=r.preview_url;link.target="_blank";link.rel="noopener noreferrer";link.style.display="inline-block";link.style.marginTop="12px";card.append(link);
+        card.append(make("div","meta","Private signed link expires in 10 minutes."));
+      }else card.append(make("div","meta","Preview unavailable: "+(r.preview_error||"No signed URL returned.")));
+      const del=make("button","btn danger","Delete upload and stored file");del.type="button";del.onclick=async()=>{if(!confirm("Permanently delete this uploaded file and its record?"))return;del.disabled=true;try{await api("admin-clip-delete",{method:"POST",body:{id:r.id}});setStatus($("#uploadStatus"),"Upload and stored file deleted.","ok");await loadUploads();}catch(e){setStatus($("#uploadStatus"),e.message,"error");}finally{del.disabled=false;}};card.append(del);root.append(card);
+    });
+  }
   async function signOut(showMessage=true) {
     try { await client.auth.signOut(); } catch {}
     session=null;records=[];
@@ -236,6 +350,10 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
       setStatus($("#loginStatus"),error.message||"Unable to sign in.","error");
     }finally{button.disabled=false;}
   });
+  $("#showSubmissions").addEventListener("click",()=>switchSection("submissions"));
+  $("#showCrew").addEventListener("click",()=>switchSection("crew"));
+  $("#showUploads").addEventListener("click",()=>switchSection("uploads"));
+  $("#refreshUploads").addEventListener("click",loadUploads);
   $("#refreshButton").addEventListener("click",loadRecords);
   $("#signOutButton").addEventListener("click",()=>signOut(true));
   $("#statusFilter").addEventListener("change",loadRecords);
