@@ -320,6 +320,7 @@
               </div>
             </div>
             <label class="checkline"><input id="episodePublished" type="checkbox"> Publish this episode on the public website</label>
+            <label class="checkline"><input id="episodeMainPlayer" type="checkbox" checked> Show this episode in the main player by default</label>
             <div class="toolbar">
               <button class="btn primary" type="submit">Save episode</button>
               <button class="btn hidden" id="episodeCancel" type="button">Cancel edit</button>
@@ -331,8 +332,8 @@
           <div class="section-heading"><h2>Episode library</h2><button class="btn" id="refreshEpisodes" type="button">Refresh</button></div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Episode</th><th>YouTube</th><th>Publication</th><th>Actions</th></tr></thead>
-              <tbody id="episodesRows"><tr><td colspan="4">Loading episodes…</td></tr></tbody>
+              <thead><tr><th>Episode</th><th>YouTube</th><th>Publication</th><th>Main player</th><th>Actions</th></tr></thead>
+              <tbody id="episodesRows"><tr><td colspan="5">Loading episodes…</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -695,7 +696,7 @@
       .order("published_at", { ascending: false });
 
     if (error) {
-      $("episodesRows").innerHTML = `<tr><td colspan="4">Could not load episodes: ${safe(error.message)}</td></tr>`;
+      $("episodesRows").innerHTML = `<tr><td colspan="5">Could not load episodes: ${safe(error.message)}</td></tr>`;
       return;
     }
 
@@ -707,17 +708,19 @@
         <td><strong>${safe(item.title)}</strong><br><span class="muted">${safe(item.category || "Back Deck Live")}</span></td>
         <td><a href="https://www.youtube.com/watch?v=${encodeURIComponent(item.youtube_video_id)}" target="_blank" rel="noopener noreferrer">Watch video ↗</a><br><span class="muted">${safe(item.youtube_video_id)}</span></td>
         <td><span class="status">${item.is_published ? "Published" : "Draft"}</span><br><span class="muted">${safe(formatDate(item.published_at))}</span></td>
+        <td><span class="status">${item.show_in_main_player !== false ? "Included" : "Hidden"}</span></td>
         <td><div class="toolbar">
           <button class="btn small" data-edit-episode="${safe(item.id)}" type="button">Edit</button>
           <button class="btn small danger" data-delete-episode="${safe(item.id)}" type="button">Delete</button>
         </div></td>
-      </tr>`).join("") : `<tr><td colspan="4">No episodes yet. Add your first episode above.</td></tr>`;
+      </tr>`).join("") : `<tr><td colspan="5">No episodes yet. Add your first episode above.</td></tr>`;
   }
 
   function resetEpisodeForm() {
     $("episodeForm").reset();
     $("episodeId").value = "";
     $("episodePublished").checked = false;
+    $("episodeMainPlayer").checked = true;
     $("episodeOrder").value = "100";
     $("episodeFormTitle").textContent = "Add an episode";
     $("episodeCancel").classList.add("hidden");
@@ -742,6 +745,7 @@
       $("episodeOrder").value = item.sort_order ?? 100;
       $("episodeDescription").value = item.description || "";
       $("episodePublished").checked = !!item.is_published;
+      $("episodeMainPlayer").checked = item.show_in_main_player !== false;
       $("episodeFormTitle").textContent = "Edit episode";
       $("episodeCancel").classList.remove("hidden");
       $("episodeForm").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -777,7 +781,8 @@
       published_at: publishedAt,
       description: $("episodeDescription").value.trim(),
       sort_order: Number($("episodeOrder").value || 100),
-      is_published: $("episodePublished").checked
+      is_published: $("episodePublished").checked,
+      show_in_main_player: $("episodeMainPlayer").checked
     };
 
     const result = id
