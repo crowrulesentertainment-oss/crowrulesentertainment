@@ -1895,13 +1895,16 @@
             episodes.filter(item => item && typeof item === "object" && episodeVideoId(item))
           );
 
-          if (state.episodes.length) {
-            showFeatured(state.episodes[0]);
+          const mainPlayerEpisodes = state.episodes.filter(item => item.show_in_main_player !== false);
+          if (mainPlayerEpisodes.length) {
+            showFeatured(mainPlayerEpisodes[0]);
             $("#featuredKicker").textContent = "LATEST BACK DECK LIVE EPISODE";
-            $("#episodeStatus").textContent = "Showing the newest published Back Deck Live episode.";
+            $("#episodeStatus").textContent = "Showing the newest published Back Deck Live episode enabled for the main player.";
           } else {
             showFeatured(null);
-            $("#episodeStatus").textContent = "No published Back Deck Live episodes are available yet.";
+            $("#episodeStatus").textContent = state.episodes.length
+              ? "Episodes are published, but none are enabled for the main player. Browse the archive below."
+              : "No published Back Deck Live episodes are available yet.";
           }
 
           populateCategories(state.episodes);
