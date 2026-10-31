@@ -1883,25 +1883,60 @@
       async function loadEpisodes() {
         const button = $("#refreshEpisodes");
         button.disabled = true;
-        $("#archiveStatus").textContent = "Loading episodes…";
+        $("#archiveStatus").textContent = "Finding the newest published Back Deck Live video…";
 
         try {
-          const data = await apiRequest("episodes");
-          const episodes = getArray(data, ["episodes", "results", "items"]);
-          state.episodes = sortEpisodes(episodes.filter(item => item && typeof item === "object"));
+          let latestVideos = [];
+          let latestError = null;
 
-          // Keep the featured player focused on the next live stream; archived episodes remain below.
-          showFeatured(null);
+          // The public YouTube feed is authoritative for what was most recently published.
+          // Do not let older manually-entered episode records override it.
+          try {
+            const latestData = await apiRequest("youtube-latest");
+            latestVideos = getArray(latestData, ["videos", "items", "results"])
+              .filter(item => item && typeof item === "object")
+              .map(video => ({
+                ...video,
+                youtube_video_id: safeVideoId(
+                  video.youtube_video_id || video.video_id || video.id || video.youtube_id
+                ),
+                title: video.title || video.name || "Back Deck Live",
+                description: video.description || "The latest published conversation from Back Deck Live.",
+                published_at: video.published_at || video.publishedAt || video.created_at || null,
+                category: video.category || "Latest upload"
+              }))
+              .filter(video => video.youtube_video_id);
+          } catch (error) {
+            latestError = error;
+          }
+
+          if (latestVideos.length) {
+            state.episodes = sortEpisodes(latestVideos);
+            showFeatured(state.episodes[0]);
+            $("#featuredKicker").textContent = "NEWEST PUBLISHED VIDEO";
+            $("#episodeStatus").textContent = "Automatically selected from the latest public uploads on CrowRules TV.";
+          } else {
+            const data = await apiRequest("episodes");
+            const episodes = getArray(data, ["episodes", "results", "items"]);
+            state.episodes = sortEpisodes(episodes.filter(item => item && typeof item === "object"));
+            if (state.episodes.length) {
+              showFeatured(state.episodes[0]);
+              $("#episodeStatus").textContent = latestError
+                ? "Showing the newest episode record; the live YouTube upload feed is temporarily unavailable."
+                : "Showing the newest available episode.";
+            } else {
+              showFeatured(null);
+              $("#archiveStatus").textContent = "No public Back Deck Live videos were returned.";
+            }
+          }
+
           populateCategories(state.episodes);
           renderEpisodes();
-          if (!state.episodes.length) {
-            $("#archiveStatus").textContent = "The API returned no episodes.";
-          }
         } catch (error) {
           showFeatured(null, true);
           $("#episodeGrid").innerHTML =
-            '<div class="empty-state" style="grid-column:1/-1">The episode service could not be reached. You can still browse available videos on the CrowRules TV channel.</div>';
-          $("#archiveStatus").textContent = safeText(error.message, "Unable to load episodes.");
+            '<div class="empty-state" style="grid-column:1/-1">The latest video feed could not be reached. You can still browse available videos on the CrowRules TV channel.</div>';
+          $("#archiveStatus").textContent = safeText(error.message, "Unable to load the latest video.");
         } finally {
           button.disabled = false;
         }
