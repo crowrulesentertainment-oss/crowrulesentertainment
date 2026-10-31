@@ -83,9 +83,25 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
   <div class="stats" aria-label="Current loaded result counts"><div class="stat"><small>Loaded</small><strong id="countAll">0</strong></div><div class="stat"><small>New</small><strong id="countNew">0</strong></div><div class="stat"><small>Accepted</small><strong id="countAccepted">0</strong></div><div class="stat"><small>Declined</small><strong id="countDeclined">0</strong></div></div>
   <div class="panel toolbar" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-top:0">
     <button class="btn secondary" id="showSubmissions" type="button">Community submissions</button>
+    <button class="btn secondary" id="showAudience" type="button">Audience submissions</button>
     <button class="btn secondary" id="showCrew" type="button">Crew profiles</button>
     <button class="btn secondary" id="showUploads" type="button">Crew uploads</button>
+    <button class="btn secondary" id="showTheme" type="button">Theme changer</button>
   </div>
+  <section id="themeSection" class="hidden">
+    <div class="results-head"><h2>Global Tacoma Nights theme</h2></div>
+    <p class="hint">Choose the visual theme used across Tacoma Nights pages. Preview it here, then save to publish the selection globally. The public theme system reads the shared setting.</p>
+    <div class="panel submission">
+      <label for="globalThemeSelect">Choose a theme</label>
+      <select class="field" id="globalThemeSelect" aria-describedby="themeDescription"></select>
+      <p id="themeDescription" class="hint"></p>
+      <div class="card-actions">
+        <button class="btn secondary" id="previewTheme" type="button">Preview theme</button>
+        <button class="btn primary" id="saveTheme" type="button">Save global theme</button>
+      </div>
+      <p id="themeStatus" class="statusline" role="status" aria-live="polite"></p>
+    </div>
+  </section>
   <section id="crewSection" class="hidden">
     <div class="results-head"><h2>Crew profiles</h2><button class="btn primary" id="newCrew" type="button">＋ Add crew profile</button></div>
     <p class="hint">Manage the public Tacoma Nights crew directory. Only profiles marked Published appear on the public site. Confirm portrait permission before publishing a crew photo.</p>
@@ -98,7 +114,7 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
     <p id="uploadStatus" class="statusline" role="status" aria-live="polite"></p>
     <div id="uploadCards" class="cards"></div>
   </section>
-  <div class="results-head"><h2>Incoming submissions</h2><span id="resultsMeta" class="meta">Sign in to load private records.</span></div>
+  <div class="results-head" id="submissionHeading"><h2 id="submissionHeadingTitle">Incoming submissions</h2><span id="resultsMeta" class="meta">Sign in to load private records.</span></div>
   <p id="deskStatus" class="statusline" role="status" aria-live="polite"></p>
   <div id="submissionCards" class="cards"></div>
   <p class="privacy-note">The list is capped at 250 records per request. Filter by status/type before refreshing if your queue grows. Internal notes are stored in the private submissions table and are never sent by the public submission endpoint.</p>
@@ -126,6 +142,7 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
   const typeNames = {topic_suggestion:"Topic suggestion",episode_question:"Episode question",guest_pitch:"Guest pitch",story_pitch:"Story pitch",crew_interest:"Crew interest"};
   let records = [];
   let session = null;
+  let activeSection = "submissions";
   const setStatus = (node, message, kind="") => { node.textContent = message; node.className = "statusline" + (kind ? " " + kind : ""); };
   const make = (tag, className, text) => { const node=document.createElement(tag); if(className) node.className=className; if(text !== undefined) node.textContent=String(text); return node; };
   async function api(action, options={}) {
@@ -168,22 +185,28 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
       setStatus($("#deskStatus"),error.message,"error");
     } finally { $("#refreshButton").disabled=false; }
   }
+  function audienceRecords() {
+    return records.filter(r=>["topic_suggestion","episode_question","guest_pitch","story_pitch"].includes(r.submission_type));
+  }
   function filteredRecords() {
+    const base=activeSection==="audience"?audienceRecords():records;
     const term=$("#searchFilter").value.trim().toLowerCase();
-    if(!term) return records;
-    return records.filter(r=>[r.full_name,r.email,r.subject,r.message,r.organization,r.interest_area,r.internal_notes].join(" ").toLowerCase().includes(term));
+    if(!term) return base;
+    return base.filter(r=>[r.full_name,r.email,r.subject,r.message,r.organization,r.interest_area,r.internal_notes].join(" ").toLowerCase().includes(term));
   }
   function updateStats() {
-    $("#countAll").textContent=records.length;
-    $("#countNew").textContent=records.filter(r=>r.status==="new").length;
-    $("#countAccepted").textContent=records.filter(r=>r.status==="accepted").length;
-    $("#countDeclined").textContent=records.filter(r=>r.status==="declined").length;
+    const base=activeSection==="audience"?audienceRecords():records;
+    $("#countAll").textContent=base.length;
+    $("#countNew").textContent=base.filter(r=>r.status==="new").length;
+    $("#countAccepted").textContent=base.filter(r=>r.status==="accepted").length;
+    $("#countDeclined").textContent=base.filter(r=>r.status==="declined").length;
   }
   function renderRecords() {
     updateStats();
     const host=$("#submissionCards"); host.replaceChildren();
     const shown=filteredRecords();
-    $("#resultsMeta").textContent="Showing "+shown.length+" of "+records.length+" loaded.";
+    const total=activeSection==="audience"?audienceRecords().length:records.length;
+    $("#resultsMeta").textContent="Showing "+shown.length+" of "+total+" loaded.";
     if(!shown.length) { host.appendChild(make("div","empty","No submissions match these filters. Try another status, type, or search term.")); return; }
     for(const record of shown) host.appendChild(renderCard(record));
   }
@@ -235,14 +258,20 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
   }
 
   function switchSection(name){
+    activeSection=name;
     $("#crewSection").classList.toggle("hidden",name!=="crew");
     $("#uploadsSection").classList.toggle("hidden",name!=="uploads");
-    $("#submissionCards").classList.toggle("hidden",name!=="submissions");
-    document.querySelector(".results-head").classList.toggle("hidden",name!=="submissions");
-    document.querySelector(".stats").classList.toggle("hidden",name!=="submissions");
-    document.querySelectorAll("#desk > .toolbar button").forEach(b=>b.classList.toggle("primary",b.id===(name==="crew"?"showCrew":name==="uploads"?"showUploads":"showSubmissions")));
+    $("#themeSection").classList.toggle("hidden",name!=="theme");
+    $("#submissionCards").classList.toggle("hidden",!["submissions","audience"].includes(name));
+    $("#submissionHeading").classList.toggle("hidden",!["submissions","audience"].includes(name));
+    $(".stats").classList.toggle("hidden",!["submissions","audience"].includes(name));
+    $("#submissionHeadingTitle").textContent=name==="audience"?"Audience submissions":"Incoming submissions";
+    $("#typeFilter").value=name==="audience"?"":"";
+    document.querySelectorAll("#desk > .toolbar button").forEach(b=>b.classList.toggle("primary",b.id===(name==="crew"?"showCrew":name==="uploads"?"showUploads":name==="audience"?"showAudience":name==="theme"?"showTheme":"showSubmissions")));
     if(name==="crew")loadCrew();
     if(name==="uploads")loadUploads();
+    if(name==="theme")loadThemeControl();
+    if(name==="submissions"||name==="audience")renderRecords();
   }
   async function loadCrew(){
     setStatus($("#crewStatus"),"Loading crew profiles…");
@@ -351,8 +380,45 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
     }finally{button.disabled=false;}
   });
   $("#showSubmissions").addEventListener("click",()=>switchSection("submissions"));
+  $("#showAudience").addEventListener("click",()=>switchSection("audience"));
   $("#showCrew").addEventListener("click",()=>switchSection("crew"));
   $("#showUploads").addEventListener("click",()=>switchSection("uploads"));
+  $("#showTheme").addEventListener("click",()=>switchSection("theme"));
+  async function loadThemeControl(){
+    const select=$("#globalThemeSelect"),description=$("#themeDescription");
+    if(!select.options.length){
+      const themes=window.CrowRulesThemes?.themes||[];
+      themes.forEach(t=>{const option=make("option","",t.icon+" "+t.label);option.value=t.id;option.dataset.description=t.desc||"";select.append(option);});
+      select.addEventListener("change",()=>{description.textContent=select.selectedOptions[0]?.dataset.description||"";});
+    }
+    try{
+      const {data,error}=await client.from("tacoma_nights_site_settings").select("setting_value").eq("setting_key","theme").maybeSingle();
+      if(error)throw error;
+      const current=data?.setting_value||window.CrowRulesThemes?.current?.()||"default";
+      if([...select.options].some(o=>o.value===current))select.value=current;
+      description.textContent=select.selectedOptions[0]?.dataset.description||"";
+      setStatus($("#themeStatus"),"Current global theme: "+(select.selectedOptions[0]?.textContent||current)+".","ok");
+    }catch(e){setStatus($("#themeStatus"),"Could not load saved theme: "+e.message,"error");}
+  }
+  $("#previewTheme").addEventListener("click",()=>{
+    const id=$("#globalThemeSelect").value;
+    if(!id)return;
+    window.CrowRulesThemes?.setTheme(id);
+    setStatus($("#themeStatus"),"Previewing "+($("#globalThemeSelect").selectedOptions[0]?.textContent||id)+". This has not been published.","ok");
+  });
+  $("#saveTheme").addEventListener("click",async()=>{
+    const id=$("#globalThemeSelect").value,button=$("#saveTheme");
+    if(!id){setStatus($("#themeStatus"),"Choose a theme first.","error");return;}
+    button.disabled=true;
+    try{
+      const {error}=await client.from("tacoma_nights_site_settings").upsert({setting_key:"theme",setting_value:id,updated_at:new Date().toISOString()},{onConflict:"setting_key"});
+      if(error)throw error;
+      window.CrowRulesThemes?.setTheme(id);
+      window.dispatchEvent(new CustomEvent("crowrules:global-theme-updated",{detail:{theme:id}}));
+      setStatus($("#themeStatus"),"Global theme saved. Tacoma Nights pages will use this selection.","ok");
+    }catch(e){setStatus($("#themeStatus"),"Theme was not saved: "+e.message,"error");}
+    finally{button.disabled=false;}
+  });
   $("#refreshUploads").addEventListener("click",loadUploads);
   $("#refreshButton").addEventListener("click",loadRecords);
   $("#signOutButton").addEventListener("click",()=>signOut(true));
