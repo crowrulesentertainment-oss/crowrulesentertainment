@@ -9,7 +9,10 @@
  const p=Object.fromEntries(parts.map(x=>[x.type,x.value]));
  const y=Number(p.year),month=Number(p.month),day=Number(p.day);
  const currentYear=month>2||(month===2&&day>14)?y+1:y;
+ const eventDay=new Date(Date.UTC(currentYear,1,14)).toLocaleDateString("en-US",{weekday:"long",timeZone:"UTC"});
  const target=new Date(currentYear+"-02-14T00:00:00-08:00").getTime();
+ const eventYear=$("#eventYear");if(eventYear)eventYear.textContent=String(currentYear);
+ const eventWeekday=$("#eventWeekday");if(eventWeekday)eventWeekday.textContent="VALENTINE'S DAY · "+eventDay.toUpperCase();
  const hero=$("#heroSeasonYear");if(hero)hero.textContent="FEBRUARY 14, "+currentYear+" · TACOMA, WA";
  const footer=$("#footerYear");if(footer)footer.textContent=String(new Date().getFullYear());
  const units={days:$("#days"),hours:$("#hours"),minutes:$("#minutes"),seconds:$("#seconds")};
