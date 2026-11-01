@@ -13,10 +13,12 @@
  const renderArchive=rows=>{const host=$("seasonArchive");if(!host)return;host.replaceChildren();if(!rows?.length){empty(host,"Annual season archives will appear here as each celebration is completed.");return;}rows.sort((a,b)=>b.season_year-a.season_year).forEach(s=>{const card=add(host,"article","archive-card");add(card,"div","archive-year",String(s.season_year));add(card,"small","",s.display_name||("LOVE IS LOCAL "+s.season_year).toUpperCase());add(card,"h3","",s.theme||"Celebrating Tacoma, together.");add(card,"p","",s.highlights||"A year of local connections, stories and community.");add(card,"span","archive-status",String(s.status||"PLANNING").toUpperCase());});};
  async function load(){
   const featured=$("featuredListings"),feed=$("communityFeed"),eventsHost=$("approvedEvents"),gallery=$("photoGallery");
-  const [businesses,content,seasons]=await Promise.all([
+  const [businesses,content,seasons,contentCount,listingCount]=await Promise.all([
    client.from("valentines_featured_listings").select("id,name,description,category,website_url,address,image_url,display_label,season_year").eq("is_published",true).eq("season_year",year).order("sort_order").limit(12),
    client.from("valentines_public_content").select("id,submission_type,title,body,submitter_name,organization,category,website_url,address,event_start,event_end,registration_url,created_at,season_year").eq("season_year",year).order("created_at",{ascending:false}).limit(100),
-   client.from("valentines_seasons").select("season_year,display_name,event_date,theme,status,highlights").order("season_year",{ascending:false}).limit(30)
+   client.from("valentines_seasons").select("season_year,display_name,event_date,theme,status,highlights").order("season_year",{ascending:false}).limit(30),
+   client.from("valentines_public_content").select("id",{count:"exact",head:true}).eq("season_year",year),
+   client.from("valentines_featured_listings").select("id",{count:"exact",head:true}).eq("is_published",true).eq("season_year",year)
   ]);
   if(featured){featured.replaceChildren();if(businesses.error||!businesses.data?.length)empty(featured,"Featured businesses will appear here as listings are approved for the "+year+" season.");else businesses.data.slice(0,6).forEach(x=>{const card=add(featured,"article","feed-card");if(x.image_url&&/^https?:\/\//i.test(x.image_url)){const img=add(card,"img","feed-image");img.src=x.image_url;img.alt=x.name+" — Tacoma community partner";img.loading="lazy";}add(card,"small","feed-kicker",x.display_label||x.category||"TACOMA BUSINESS");add(card,"h3","",x.name);add(card,"p","",x.description);if(x.address)add(card,"p","feed-meta",x.address);link(card,x.website_url,"Visit website");});}
   const rows=content.data||[];
@@ -25,7 +27,7 @@
    const events=rows.filter(x=>x.submission_type==="event"),stories=rows.filter(x=>["love_message","story"].includes(x.submission_type));
    if(eventsHost){eventsHost.replaceChildren();if(!events.length)empty(eventsHost,"Community events will appear here as organizers submit details and the team approves them.");else events.slice(0,9).forEach(x=>makeContentCard(eventsHost,x,"COMMUNITY EVENT"));}
    if(feed){feed.replaceChildren();if(!stories.length)empty(feed,"Approved Love Wall messages and Tacoma stories will appear here.");else stories.slice(0,9).forEach(x=>makeContentCard(feed,x,x.submission_type==="love_message"?"LOVE WALL":"TACOMA LOVE STORY"));}
-   const counter=$("communityCounter");if(counter)counter.textContent=String(rows.length+(businesses.data||[]).length);
+   const counter=$("communityCounter");if(counter)counter.textContent=String((contentCount.count||rows.length)+(listingCount.count||(businesses.data||[]).length));
   }
   const images=(businesses.data||[]).filter(x=>x.image_url&&/^https?:\/\//i.test(x.image_url));
   if(gallery){gallery.replaceChildren();if(!images.length)empty(gallery,"Approved community photographs will appear here as local partners add images to their featured listings.");else images.forEach(x=>{const card=add(gallery,"article","photo-card"),img=add(card,"img");img.src=x.image_url;img.alt=x.name+" — approved Tacoma community gallery photograph";img.loading="lazy";const info=add(card,"div");add(info,"small","",x.category||"LOCAL LOVE");add(info,"h3","",x.name);add(info,"p","",x.description);link(info,x.website_url,"Visit local partner");});}
