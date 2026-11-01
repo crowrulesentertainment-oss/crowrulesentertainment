@@ -46,3 +46,36 @@ https://crowrulesentertainment-oss.github.io/crowrulesentertainment/tacoma-night
 - [ ] Test mobile navigation and reduced-motion setting.
 - [ ] Confirm contact links open a correctly addressed email draft.
 - [ ] Replace any image URL that is unavailable or unsuitable before promotion.
+
+
+## Supabase-backed moderation (connected)
+
+Project: `cevylpnoexugwgygvtgu` (CrowRules Entertainment Supabase project)
+
+- `admin.html` — administrator sign-in and Control Room
+- `admin.js` / `admin.css` — moderation queue, private contact lookup, and featured listing management
+- `submit.html` — public business, event, Love Wall, and story intake
+- `submit.js` — inserts pending submissions and writes contact email separately
+- `public-content.js` — reads only approved content and published featured listings for the public homepage
+- `supabase-config.js` — browser URL and publishable key only; no service-role key
+- `supabase-setup.sql` — reproducible database schema, grants, and RLS policies
+
+### Admin access
+
+The dashboard accepts the CrowRules administrator session whose trusted Supabase `app_metadata.role` is `admin`. The project administrator account was checked and already has this role. Password and Google OAuth sign-in are available; Google OAuth must have the GitHub Pages callback URL allowed in Supabase Auth settings.
+
+### Security model
+
+- All submissions begin as `pending`; public visitors cannot approve or edit them.
+- Admin-only policies use trusted `app_metadata.role`, never user-editable metadata.
+- Submitter email is stored separately in `valentines_submission_contacts`; only admins can read it.
+- The public feed is a `security_invoker` view over approved, consented submissions.
+- Featured listings are public only when `is_published=true`.
+- The browser contains only the Supabase publishable key. Never add a service-role or secret key to GitHub Pages.
+
+### Public links
+
+- Main experience: `index.html`
+- Submit: `submit.html` (supports `?type=business|event|love_message|story`)
+- Admin: `admin.html`
+
