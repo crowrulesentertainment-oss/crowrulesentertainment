@@ -56,9 +56,9 @@ create index if not exists valentines_featured_source_submission_idx on public.v
 alter table public.valentines_featured_listings enable row level security;
 
 drop policy if exists "Valentines admins manage submissions" on public.valentines_submissions;
-drop policy if exists "Public can view approved valentines submissions" on public.valentines_submissions;
-create policy "Valentines admins read all submissions" on public.valentines_submissions for select to authenticated
-using (((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin');
+drop policy if exists "Valentines admins read all submissions" on public.valentines_submissions;
+drop policy if exists "Anonymous can view approved valentines submissions" on public.valentines_submissions;
+drop policy if exists "Members can view approved valentines submissions" on public.valentines_submissions;
 create policy "Valentines admins update submissions" on public.valentines_submissions for update to authenticated
 using (((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin')
 with check (((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin');
@@ -66,10 +66,8 @@ create policy "Valentines admins delete submissions" on public.valentines_submis
 using (((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin');
 create policy "Public can submit pending valentines content" on public.valentines_submissions for insert to anon,authenticated
 with check (status='pending' and consent_to_publish=true and reviewed_at is null and reviewed_by is null and review_notes is null);
-create policy "Anonymous can view approved valentines submissions" on public.valentines_submissions for select to anon
-using (status='approved' and consent_to_publish=true);
-create policy "Members can view approved valentines submissions" on public.valentines_submissions for select to authenticated
-using (status='approved' and consent_to_publish=true and (((select auth.jwt()) -> 'app_metadata' ->> 'role') is distinct from 'admin'));
+create policy "Read approved or admin valentines submissions" on public.valentines_submissions for select to anon,authenticated
+using ((status='approved' and consent_to_publish=true) or (((select auth.jwt()) -> 'app_metadata' ->> 'role')='admin'));
 
 drop policy if exists "Valentines admins manage private contacts" on public.valentines_submission_contacts;
 create policy "Valentines admins read private contacts" on public.valentines_submission_contacts for select to authenticated
@@ -84,12 +82,11 @@ with check (true);
 
 drop policy if exists "Public can view published valentines listings" on public.valentines_featured_listings;
 drop policy if exists "Valentines admins manage featured listings" on public.valentines_featured_listings;
-create policy "Anonymous can view published valentines listings" on public.valentines_featured_listings for select to anon
-using (is_published=true);
-create policy "Members can view published valentines listings" on public.valentines_featured_listings for select to authenticated
-using (is_published=true and (((select auth.jwt()) -> 'app_metadata' ->> 'role') is distinct from 'admin'));
-create policy "Valentines admins read all featured listings" on public.valentines_featured_listings for select to authenticated
-using (((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin');
+drop policy if exists "Anonymous can view published valentines listings" on public.valentines_featured_listings;
+drop policy if exists "Members can view published valentines listings" on public.valentines_featured_listings;
+drop policy if exists "Valentines admins read all featured listings" on public.valentines_featured_listings;
+create policy "Read published or admin valentines listings" on public.valentines_featured_listings for select to anon,authenticated
+using (is_published=true or (((select auth.jwt()) -> 'app_metadata' ->> 'role')='admin'));
 create policy "Valentines admins insert featured listings" on public.valentines_featured_listings for insert to authenticated
 with check (((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin');
 create policy "Valentines admins update featured listings" on public.valentines_featured_listings for update to authenticated
