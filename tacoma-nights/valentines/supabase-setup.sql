@@ -59,6 +59,10 @@ drop policy if exists "Valentines admins manage submissions" on public.valentine
 drop policy if exists "Valentines admins read all submissions" on public.valentines_submissions;
 drop policy if exists "Anonymous can view approved valentines submissions" on public.valentines_submissions;
 drop policy if exists "Members can view approved valentines submissions" on public.valentines_submissions;
+drop policy if exists "Valentines admins update submissions" on public.valentines_submissions;
+drop policy if exists "Valentines admins delete submissions" on public.valentines_submissions;
+drop policy if exists "Public can submit pending valentines content" on public.valentines_submissions;
+drop policy if exists "Read approved or admin valentines submissions" on public.valentines_submissions;
 create policy "Valentines admins update submissions" on public.valentines_submissions for update to authenticated
 using (((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin')
 with check (((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin');
@@ -70,6 +74,10 @@ create policy "Read approved or admin valentines submissions" on public.valentin
 using ((status='approved' and consent_to_publish=true) or (((select auth.jwt()) -> 'app_metadata' ->> 'role')='admin'));
 
 drop policy if exists "Valentines admins manage private contacts" on public.valentines_submission_contacts;
+drop policy if exists "Valentines admins read private contacts" on public.valentines_submission_contacts;
+drop policy if exists "Valentines admins update private contacts" on public.valentines_submission_contacts;
+drop policy if exists "Valentines admins delete private contacts" on public.valentines_submission_contacts;
+drop policy if exists "Public can attach contact to submission" on public.valentines_submission_contacts;
 create policy "Valentines admins read private contacts" on public.valentines_submission_contacts for select to authenticated
 using (((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin');
 create policy "Valentines admins update private contacts" on public.valentines_submission_contacts for update to authenticated
@@ -85,6 +93,10 @@ drop policy if exists "Valentines admins manage featured listings" on public.val
 drop policy if exists "Anonymous can view published valentines listings" on public.valentines_featured_listings;
 drop policy if exists "Members can view published valentines listings" on public.valentines_featured_listings;
 drop policy if exists "Valentines admins read all featured listings" on public.valentines_featured_listings;
+drop policy if exists "Read published or admin valentines listings" on public.valentines_featured_listings;
+drop policy if exists "Valentines admins insert featured listings" on public.valentines_featured_listings;
+drop policy if exists "Valentines admins update featured listings" on public.valentines_featured_listings;
+drop policy if exists "Valentines admins delete featured listings" on public.valentines_featured_listings;
 create policy "Read published or admin valentines listings" on public.valentines_featured_listings for select to anon,authenticated
 using (is_published=true or (((select auth.jwt()) -> 'app_metadata' ->> 'role')='admin'));
 create policy "Valentines admins insert featured listings" on public.valentines_featured_listings for insert to authenticated
