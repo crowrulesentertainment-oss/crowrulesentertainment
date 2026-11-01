@@ -79,3 +79,17 @@ The dashboard accepts the CrowRules administrator session whose trusted Supabase
 - Submit: `submit.html` (supports `?type=business|event|love_message|story`)
 - Admin: `admin.html`
 
+
+
+## Annual tradition and live community experience
+
+Love Is Local is an annual Tacoma Community Hub / Tacoma Nights tradition held every February 14. The public page remains year-round; its countdown automatically targets the next February 14 in Tacoma time. Submissions and featured listings are assigned to a season year, so each year's content can be curated separately and prior seasons remain in the archive.
+
+- Annual seasons are stored in `valentines_seasons` (2027 and 2028 are seeded).
+- Submissions and featured listings have a `season_year`; new records default to the next upcoming February 14 season in Pacific time.
+- The public page displays the current upcoming season, approved community content, approved local-partner photographs, and the annual season archive.
+- Supabase Realtime refreshes the public content when submissions, featured listings, or season records change.
+- The photo gallery uses images on published featured listings. Add only images with permission and publish them through the Admin Control Room.
+- Each season is archived by setting its status to `archived` and entering season highlights in `valentines_seasons`.
+
+Apply the annual extension at the end of `supabase-setup.sql` when setting up a fresh environment. The live CrowRules Supabase project already has this extension applied.
