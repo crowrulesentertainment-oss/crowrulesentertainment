@@ -99,6 +99,7 @@ $("seasonList").addEventListener("click",e=>{
  const b=e.target.closest("button[data-season-action]");if(!b)return;
  const card=b.closest("[data-year]"),s=state.seasons.find(x=>String(x.season_year)===card.dataset.year);if(s)editSeason(s);
 });
+resetListing();
 document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===b));document.querySelectorAll(".panel").forEach(panel=>panel.classList.toggle("hidden",panel.id!==b.dataset.panel));}));
 if(ensureClient()){client.auth.getSession().then(({data,error})=>{if(error){setConnection("● AUTH ERROR");say("loginMessage",error.message,"error");return;}verifySession(data.session);});client.auth.onAuthStateChange((_event,session)=>{setTimeout(()=>verifySession(session),0);});}
 })();
