@@ -17,7 +17,7 @@
  const grid=$("calendarGrid"),results=$("calendarResults");if(!grid||!results)return;
  const y=calendarMonth.getFullYear(),m=calendarMonth.getMonth(),monthName=new Intl.DateTimeFormat("en-US",{month:"long",year:"numeric"}).format(calendarMonth);$("calendarMonth").textContent=monthName;
  const search=($("calendarSearch")?.value||"").trim().toLowerCase(),category=$("calendarCategory")?.value||"all";
- const monthEvents=calendarEvents.filter(e=>{if(!e.event_start)return false;const d=new Date(e.event_start);return d.getFullYear()===y&&d.getMonth()===m;});
+ const monthEvents=calendarEvents.filter(e=>{if(!e.event_start)return false;const d=localParts(new Date(e.event_start));return d.year===y&&d.month-1===m;});
  const filtered=monthEvents.filter(e=>(category==="all"||e.category===category)&&(!search||[e.title,e.body,e.category,e.organization,e.address].filter(Boolean).join(" ").toLowerCase().includes(search)));
  const first=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate();grid.replaceChildren();
  for(let i=0;i<first;i++){const blank=add(grid,"div","calendar-day is-blank");blank.setAttribute("aria-hidden","true");}
