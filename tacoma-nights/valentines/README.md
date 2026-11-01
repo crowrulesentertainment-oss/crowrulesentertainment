@@ -24,7 +24,7 @@ The Supabase database contains:
 
 ## Live community features
 
-- Supabase Realtime refreshes the public feed when submissions, featured listings or season records change.
+- Supabase Realtime refreshes the public feed when submissions, featured listings or season records change.\n- The community calendar displays approved, dated event submissions with month navigation, category filtering, keyword search and day selection. Volunteer opportunities and family activities can be submitted as event categories; only approved listings appear.
 - Only approved, consented submissions are shown publicly.
 - Featured businesses appear only when published by an administrator.
 - The gallery uses photographs added to published featured listings. Use only images the business or photographer has authorized CrowRules to publish.
