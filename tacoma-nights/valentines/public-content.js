@@ -10,7 +10,15 @@
  let seasonsCache=[];
  const client=cfg&&create?create(cfg.url,cfg.publishableKey):null;
  const setLive=msg=>{const n=$("liveStatus");if(n){n.replaceChildren();const dot=add(n,"span","live-dot");dot.setAttribute("aria-hidden","true");add(n,"span","",msg);}};
- let calendarEvents=[],calendarMonth=new Date(new Date().toLocaleString("en-US",{timeZone:"America/Los_Angeles"}));calendarMonth.setDate(1);let selectedCalendarDate="";
+ 
+let itinerary=[];
+const plannerText=x=>[x.title||x.name,x.category,x.organization,x.address,date(x.event_start),x.website_url||x.registration_url].filter(Boolean).join(" | ");
+const renderPlanner=()=>{const list=$("plannerStops");if(!list)return;list.replaceChildren();$("plannerEmpty").hidden=itinerary.length>0;$("plannerCount").textContent=itinerary.length+" "+(itinerary.length===1?"stop":"stops");itinerary.forEach((x,i)=>{const li=add(list,"li","planner-stop"),head=add(li,"div","planner-stop-head");add(head,"span","planner-stop-number",String(i+1).padStart(2,"0"));add(head,"strong","",x.title||x.name);const meta=[x.kind,x.category,x.address,date(x.event_start)].filter(Boolean).join(" · ");if(meta)add(li,"p","planner-stop-meta",meta);if(x.body)add(li,"p","planner-stop-body",x.body);const controls=add(li,"div","planner-stop-controls");const actions=[["↑",i>0,()=>{[itinerary[i-1],itinerary[i]]=[itinerary[i],itinerary[i-1]];renderPlanner();}],["↓",i<itinerary.length-1,()=>{[itinerary[i+1],itinerary[i]]=[itinerary[i],itinerary[i+1]];renderPlanner();}],["Remove",true,()=>{itinerary.splice(i,1);renderPlanner();}]];actions.forEach(([label,enabled,fn])=>{const b=add(controls,"button","",label);b.type="button";b.disabled=!enabled;b.addEventListener("click",fn);});});};
+const addToPlanner=(x,kind)=>{if(itinerary.some(i=>i.id===x.id&&i.kind===kind)){$("plannerStatus").textContent="That stop is already in your plan.";return;}itinerary.push({...x,kind});renderPlanner();$("plannerStatus").textContent=(x.title||x.name)+" added.";};
+const renderPlannerSources=(events,businesses)=>{const host=$("plannerSources");if(!host)return;host.replaceChildren();const all=[...(events||[]).map(x=>({...x,kind:"Approved event"})),...(businesses||[]).map(x=>({...x,kind:"Published local partner",title:x.name}))];if(!all.length){empty(host,"No approved events or published local partners are available for this season yet.");return;}all.forEach(x=>{const card=add(host,"article","planner-source");add(card,"small","feed-kicker",x.kind.toUpperCase()+(x.category?" · "+x.category.toUpperCase():""));add(card,"h4","",x.title||x.name);add(card,"p","",x.body||x.description||"");const meta=[x.organization,x.address,date(x.event_start)].filter(Boolean).join(" · ");if(meta)add(card,"p","feed-meta",meta);const b=add(card,"button","planner-add","Add to my plan +");b.type="button";b.addEventListener("click",()=>addToPlanner(x,x.kind));});};
+const wirePlanner=()=>{$("plannerClear")?.addEventListener("click",()=>{itinerary=[];renderPlanner();$("plannerStatus").textContent="Your itinerary has been cleared.";});$("plannerCopy")?.addEventListener("click",async()=>{if(!itinerary.length){$("plannerStatus").textContent="Add a stop before copying.";return;}try{await navigator.clipboard.writeText("LOVE IS LOCAL · MY TACOMA ITINERARY\n"+itinerary.map((x,i)=>(i+1)+". "+plannerText(x)).join("\n"));$("plannerStatus").textContent="Itinerary copied.";}catch(e){$("plannerStatus").textContent="Copy is unavailable here. Use Print itinerary instead.";}});$("plannerPrint")?.addEventListener("click",()=>{if(!itinerary.length){$("plannerStatus").textContent="Add a stop before printing.";return;}window.print();});};
+
+let calendarEvents=[],calendarMonth=new Date(new Date().toLocaleString("en-US",{timeZone:"America/Los_Angeles"}));calendarMonth.setDate(1);let selectedCalendarDate="";
  const localParts=d=>{const p=Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:"America/Los_Angeles",year:"numeric",month:"numeric",day:"numeric"}).formatToParts(d).map(x=>[x.type,x.value]));return {year:+p.year,month:+p.month,day:+p.day};};
  const localKey=value=>{const p=localParts(new Date(value));return p.year+"-"+String(p.month).padStart(2,"0")+"-"+String(p.day).padStart(2,"0");};
  const renderCalendar=()=>{
@@ -43,7 +51,7 @@
    client.from("valentines_public_content").select("id",{count:"exact",head:true}).eq("season_year",year),
    client.from("valentines_featured_listings").select("id",{count:"exact",head:true}).eq("is_published",true).eq("season_year",year)
   ]);
-  if(featured){featured.replaceChildren();if(businesses.error||!businesses.data?.length)empty(featured,"Featured businesses will appear here as listings are approved for the "+year+" season.");else businesses.data.slice(0,6).forEach(x=>{const card=add(featured,"article","feed-card");if(x.image_url&&/^https?:\/\//i.test(x.image_url)){const img=add(card,"img","feed-image");img.src=x.image_url;img.alt=x.name+" — Tacoma community partner";img.loading="lazy";}add(card,"small","feed-kicker",x.display_label||x.category||"TACOMA BUSINESS");add(card,"h3","",x.name);add(card,"p","",x.description);if(x.address)add(card,"p","feed-meta",x.address);link(card,x.website_url,"Visit website");});}
+  renderPlannerSources((content.data||[]).filter(x=>x.submission_type==="event"&&x.event_start),businesses.data||[]);const plannerLabel=$("plannerSeasonLabel");if(plannerLabel)plannerLabel.textContent="Love Is Local "+year;if(featured){featured.replaceChildren();if(businesses.error||!businesses.data?.length)empty(featured,"Featured businesses will appear here as listings are approved for the "+year+" season.");else businesses.data.slice(0,6).forEach(x=>{const card=add(featured,"article","feed-card");if(x.image_url&&/^https?:\/\//i.test(x.image_url)){const img=add(card,"img","feed-image");img.src=x.image_url;img.alt=x.name+" — Tacoma community partner";img.loading="lazy";}add(card,"small","feed-kicker",x.display_label||x.category||"TACOMA BUSINESS");add(card,"h3","",x.name);add(card,"p","",x.description);if(x.address)add(card,"p","feed-meta",x.address);link(card,x.website_url,"Visit website");});}
   const rows=content.data||[];
   if(content.error){empty(feed,"Approved community stories will appear here.");empty(eventsHost,"Approved community events will appear here.");setLive("COMMUNITY FEED TEMPORARILY UNAVAILABLE");}
   else {
@@ -59,6 +67,8 @@
  }
  if(!client){["featuredListings","communityFeed","approvedEvents","photoGallery","calendarResults","calendarGrid"].forEach(id=>empty($(id),"Community listings will appear here as approved submissions are published."));renderArchive([]);setLive("COMMUNITY CONNECTION UNAVAILABLE");return;}
  wireCalendar();
+ wirePlanner();
+ renderPlanner();
  load();
  $("publicSeasonSelect")?.addEventListener("change",e=>selectSeason(e.target.value));
  $("seasonArchive")?.addEventListener("click",e=>{const b=e.target.closest("[data-season-year]");if(b)selectSeason(b.dataset.seasonYear);});
