@@ -127,3 +127,46 @@ grant select on table public.valentines_public_content to anon,authenticated;
 
 comment on table public.valentines_submission_contacts is 'Private contact email for Love Is Local submissions. Only administrators can read it; public can insert it.';
 comment on view public.valentines_public_content is 'SECURITY INVOKER public projection. RLS restricts it to approved submissions; private contact data is stored separately.';
+
+-- Annual season and live update extension (applied to the connected CrowRules project).
+create table if not exists public.valentines_seasons (
+ season_year integer primary key check (season_year between 2027 and 2100),
+ display_name text not null,event_date date not null,theme text,
+ status text not null default 'planning' check(status in ('planning','open','live','archived')),
+ highlights text,created_at timestamptz not null default now(),updated_at timestamptz not null default now()
+);
+alter table public.valentines_seasons enable row level security;
+drop policy if exists "Read valentines seasons" on public.valentines_seasons;
+create policy "Read valentines seasons" on public.valentines_seasons for select to anon,authenticated using(true);
+drop policy if exists "Admins manage valentines seasons" on public.valentines_seasons;
+create policy "Admins manage valentines seasons" on public.valentines_seasons for all to authenticated
+using (((select auth.jwt())->'app_metadata'->>'role')='admin')
+with check (((select auth.jwt())->'app_metadata'->>'role')='admin');
+grant select on public.valentines_seasons to anon,authenticated;
+grant insert,update,delete on public.valentines_seasons to authenticated;
+alter table public.valentines_submissions add column if not exists season_year integer;
+alter table public.valentines_featured_listings add column if not exists season_year integer;
+update public.valentines_submissions set season_year=2027 where season_year is null;
+update public.valentines_featured_listings set season_year=2027 where season_year is null;
+alter table public.valentines_submissions alter column season_year set default (
+case when (now() at time zone 'America/Los_Angeles')::date <= make_date(extract(year from now() at time zone 'America/Los_Angeles')::integer,2,14)
+then extract(year from now() at time zone 'America/Los_Angeles')::integer else extract(year from now() at time zone 'America/Los_Angeles')::integer+1 end);
+alter table public.valentines_featured_listings alter column season_year set default (
+case when (now() at time zone 'America/Los_Angeles')::date <= make_date(extract(year from now() at time zone 'America/Los_Angeles')::integer,2,14)
+then extract(year from now() at time zone 'America/Los_Angeles')::integer else extract(year from now() at time zone 'America/Los_Angeles')::integer+1 end);
+alter table public.valentines_submissions alter column season_year set not null;
+alter table public.valentines_featured_listings alter column season_year set not null;
+create index if not exists valentines_submissions_season_idx on public.valentines_submissions(season_year,status,submission_type);
+create index if not exists valentines_listings_season_idx on public.valentines_featured_listings(season_year,is_published,sort_order);
+insert into public.valentines_seasons(season_year,display_name,event_date,theme,status)
+values (2027,'Love Is Local 2027','2027-02-14','Celebrating Tacoma. Connecting Neighbors. Sharing Love.','open'),
+(2028,'Love Is Local 2028','2028-02-14','Another year of local love.','planning') on conflict(season_year) do nothing;
+create or replace view public.valentines_public_content with (security_invoker=true) as
+select id,submission_type,title,body,submitter_name,organization,category,website_url,address,event_start,event_end,registration_url,created_at,season_year
+from public.valentines_submissions where status='approved' and consent_to_publish=true;
+do $$
+begin
+ if not exists(select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='valentines_submissions') then alter publication supabase_realtime add table public.valentines_submissions; end if;
+ if not exists(select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='valentines_featured_listings') then alter publication supabase_realtime add table public.valentines_featured_listings; end if;
+ if not exists(select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='valentines_seasons') then alter publication supabase_realtime add table public.valentines_seasons; end if;
+end $$;
