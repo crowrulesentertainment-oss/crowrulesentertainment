@@ -3,7 +3,7 @@ const cfg=window.CROWRULES_SUPABASE;
 const {createClient}=window.supabase||{};
 const client=cfg&&createClient?createClient(cfg.url,cfg.publishableKey):null;
 const $=id=>document.getElementById(id);
-const state={user:null,rows:[],listings:[],type:"all",status:"pending"};
+const state={user:null,rows:[],contacts:{},listings:[],type:"all",status:"pending"};
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const say=(id,msg,kind="")=>{const n=$(id);if(n){n.textContent=msg;n.className="message "+kind;}};
 const setConnection=(s)=>{$("connectionState").textContent=s;$("connectionState").style.color=s.includes("SECURE")?"#a6d8b8":"#e58da2";};
@@ -18,13 +18,15 @@ async function verifySession(session){
 }
 async function refreshAll(){
  say("queueMessage","Loading submissions…");say("listingMessage","");
- const [sub,list]=await Promise.all([
+ const [sub,contacts,list]=await Promise.all([
   client.from("valentines_submissions").select("*").order("created_at",{ascending:false}).limit(250),
+  client.from("valentines_submission_contacts").select("submission_id,submitter_email"),
   client.from("valentines_featured_listings").select("*").order("sort_order").order("created_at",{ascending:false})
  ]);
  if(sub.error){say("queueMessage",sub.error.message,"error");return;}
+ if(contacts.error){say("queueMessage","Submissions loaded, but private contact records could not be loaded: "+contacts.error.message,"error");}
  if(list.error){say("listingMessage",list.error.message,"error");return;}
- state.rows=sub.data||[];state.listings=list.data||[];
+ state.rows=sub.data||[];state.contacts=Object.fromEntries((contacts.data||[]).map(x=>[x.submission_id,x]));state.listings=list.data||[];
  $("pendingCount").textContent=state.rows.filter(x=>x.status==="pending").length;
  $("approvedCount").textContent=state.rows.filter(x=>x.status==="approved").length;
  $("listingCount").textContent=state.listings.filter(x=>x.is_published).length;
@@ -35,7 +37,7 @@ function renderSubmissions(){
  const rows=state.rows.filter(x=>(state.type==="all"||x.submission_type===state.type)&&(state.status==="all"||x.status===state.status));
  const host=$("submissionList");
  if(!rows.length){host.innerHTML='<div class="empty">No submissions in this view yet.</div>';return;}
- host.innerHTML=rows.map(x=>`<article class="submission-card" data-id="${esc(x.id)}"><div class="submission-top"><span class="type-tag">${esc(x.submission_type.replace("_"," "))}</span><span class="status-tag ${esc(x.status)}">${esc(x.status)}</span></div><h3>${esc(x.title)}</h3><p>${esc(x.body)}</p><div class="meta"><span>By ${esc(x.submitter_name)}</span><span>${esc(x.organization||"Community member")}</span><span>${new Date(x.created_at).toLocaleString()}</span></div><div class="contact">PRIVATE CONTACT · ${esc(x.submitter_email)} ${x.website_url?" · "+esc(x.website_url):""} ${x.address?" · "+esc(x.address):""} ${x.event_start?" · "+new Date(x.event_start).toLocaleString():""}</div><div class="review-tools"><textarea class="review-notes" placeholder="Private moderator notes (never public)…">${esc(x.review_notes||"")}</textarea><div class="actions"><button class="btn primary" data-action="approved">Approve</button><button class="btn" data-action="rejected">Reject</button><button class="btn" data-action="archived">Archive</button>${x.submission_type==="business"?'<button class="btn" data-action="feature">Create listing</button>':""}</div></div></article>`).join("");
+ host.innerHTML=rows.map(x=>`<article class="submission-card" data-id="${esc(x.id)}"><div class="submission-top"><span class="type-tag">${esc(x.submission_type.replace("_"," "))}</span><span class="status-tag ${esc(x.status)}">${esc(x.status)}</span></div><h3>${esc(x.title)}</h3><p>${esc(x.body)}</p><div class="meta"><span>By ${esc(x.submitter_name)}</span><span>${esc(x.organization||"Community member")}</span><span>${new Date(x.created_at).toLocaleString()}</span></div><div class="contact">PRIVATE CONTACT · ${esc(state.contacts[x.id]?.submitter_email||"No contact email attached")} ${x.website_url?" · "+esc(x.website_url):""} ${x.address?" · "+esc(x.address):""} ${x.event_start?" · "+new Date(x.event_start).toLocaleString():""}</div><div class="review-tools"><textarea class="review-notes" placeholder="Private moderator notes (never public)…">${esc(x.review_notes||"")}</textarea><div class="actions"><button class="btn primary" data-action="approved">Approve</button><button class="btn" data-action="rejected">Reject</button><button class="btn" data-action="archived">Archive</button>${x.submission_type==="business"?'<button class="btn" data-action="feature">Create listing</button>':""}</div></div></article>`).join("");
 }
 async function updateSubmission(id,status,notes){
  const {error}=await client.from("valentines_submissions").update({status,review_notes:notes||null,reviewed_at:new Date().toISOString(),reviewed_by:state.user.id,updated_at:new Date().toISOString()}).eq("id",id);
