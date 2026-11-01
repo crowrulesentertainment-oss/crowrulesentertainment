@@ -61,3 +61,8 @@ For a fresh setup, run `supabase-setup.sql` in the Supabase SQL Editor. It inclu
 
 - Tacoma Nights home: ../index.html
 - Tacoma Nights Community Hub: ../community.html
+
+
+## Personal Tacoma itinerary planner
+
+Visitors can add the selected season's approved dated events and published featured local partners to a temporary personal itinerary, reorder or remove stops, copy it, or print it. The plan is not saved to Supabase or shared. No unverified events, prices, travel times, or offers are generated.
