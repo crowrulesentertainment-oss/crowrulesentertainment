@@ -41,7 +41,7 @@ async function load(){
 function render(){
  const active=subs.filter(x=>x.status==='active'),trial=subs.filter(x=>x.status==='trialing'),cancel=subs.filter(x=>x.cancel_at_period_end&&x.status==='active');
  const currencies=[...new Set(active.map(x=>(x.currency||'usd').toLowerCase()))];
- const mrrBy=currencies.map(cur=>({cur,total:active.filter(x=>(x.currency||'usd').toLowerCase()===cur).reduce((a,x)=>{const v=Number(x.price_cents||0);return a+(String(x.billing_interval||'month').toLowerCase().startsWith('year')?v/12:v)},0)}));
+ const mrrBy=currencies.map(cur=>({cur,total:active.filter(x=>(x.currency||'usd').toLowerCase()===cur).reduce((a,x)=>{const v=Number(x.price_cents||0);return a+((['year','annual'].some(prefix=>String(x.billing_interval||'month').toLowerCase().startsWith(prefix)))?v/12:v)},0)}));
  const paid=payouts.filter(x=>x.status==='paid'),pending=payouts.filter(x=>['pending','in_transit','processing'].includes(String(x.status||'').toLowerCase()));
  const totalPaid=paid.reduce((a,x)=>a+Number(x.amount||0),0),totalPending=pending.reduce((a,x)=>a+Number(x.amount||0),0);
  const payoutCur=[...new Set([...paid,...pending].map(x=>(x.currency||'usd').toLowerCase()))];
