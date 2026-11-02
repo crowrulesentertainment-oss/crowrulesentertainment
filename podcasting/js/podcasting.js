@@ -71,6 +71,25 @@ async function listenerProfileSettings(){
   if(profile.visibility==="public")$("#lp-share").innerHTML='<p><a class="btn" href="listener.html?id='+encodeURIComponent(user.id)+'" target="_blank">View Public Listener Profile ↗</a></p>';
  }catch(e){h.innerHTML='<div class="empty error">'+esc(e.message)+'</div>'}
 }
+async function listenerCommunity(){
+ const h=$("#listener-community");if(!h)return;
+ try{
+  await boot();let follows=[];
+  if(user){const fr=await db.from("podcast_listener_follows").select("followed_id").eq("follower_id",user.id);if(fr.error)throw fr.error;follows=(fr.data||[]).map(x=>String(x.followed_id))}
+  h.innerHTML='<section class="panel"><span class="eyebrow">FIND YOUR PEOPLE</span><h2>Meet the Listeners.</h2><p class="muted">Discover public listener profiles and follow people who share your podcast interests.</p><form id="community-search-form" class="actions"><input id="community-search" type="search" placeholder="Search listener names…" style="flex:1;min-width:180px"><button class="btn primary">Search</button></form><p class="muted">'+(user?'You are signed in. Follow listeners to build your community.':'Sign in to follow listeners and build your community.')+'</p></section><div id="community-results" class="cards" style="margin-top:18px"></div>';
+  const render=async(term)=>{
+   const target=$("#community-results");target.innerHTML='<div class="panel">Discovering public listeners…</div>';
+   let q=db.from("podcast_listener_profiles").select("user_id,display_name,bio,avatar_url").eq("visibility","public").order("display_name").limit(60);
+   if(user)q=q.neq("user_id",user.id);
+   if(term)q=q.ilike("display_name","%"+term.replace(/[,%()]/g," ").trim()+"%");
+   const r=await q;if(r.error)throw r.error;
+   target.innerHTML=(r.data||[]).map(p=>'<article class="card"><div class="actions" style="align-items:center">'+(p.avatar_url?'<img src="'+esc(p.avatar_url)+'" alt="" style="width:54px;height:54px;object-fit:cover;border-radius:50%">':'<span class="glyph">CR</span>')+'<span class="badge">LISTENER</span></div><h3>'+esc(p.display_name)+'</h3><p class="muted">'+esc(p.bio||"CrowRules Podcasting listener")+'</p><div class="actions"><a class="btn" href="listener.html?id='+encodeURIComponent(p.user_id)+'">View Profile</a>'+(user?'<button class="btn '+(follows.includes(String(p.user_id))?'':'primary')+'" data-social-follow="'+esc(p.user_id)+'">'+(follows.includes(String(p.user_id))?'Following · Unfollow':'＋ Follow')+'</button>':'<a class="btn" href="login.html">Sign in to Follow</a>')+'</div></article>').join("")||'<div class="empty" style="grid-column:1/-1">No public listeners found. Try another name.</div>';
+   target.querySelectorAll("[data-social-follow]").forEach(b=>b.onclick=async()=>{const id=b.dataset.socialFollow,active=follows.includes(String(id));b.disabled=true;try{const x=active?await db.from("podcast_listener_follows").delete().eq("follower_id",user.id).eq("followed_id",id):await db.from("podcast_listener_follows").insert({follower_id:user.id,followed_id:id});if(x.error)throw x.error;follows=active?follows.filter(v=>v!==String(id)):[...follows,String(id)];await render($("#community-search").value.trim())}catch(e){b.disabled=false;b.textContent="Could not update";console.error(e)}});
+  };
+  $("#community-search-form").onsubmit=e=>{e.preventDefault();render($("#community-search").value.trim()).catch(err=>h.innerHTML='<div class="empty error">'+esc(err.message)+'</div>')};
+  await render("");
+ }catch(e){h.innerHTML='<div class="empty error">'+esc(e.message)+'</div>'}
+}
 async function publicListener(){
  const h=$("#public-listener");if(!h)return;try{await boot();const id=new URLSearchParams(location.search).get("id");if(!id){h.innerHTML='<div class="empty">No listener profile was specified.</div>';return}
  const r=await db.from("podcast_listener_profiles").select("user_id,display_name,bio,avatar_url,show_favorites,favorite_podcast_ids,updated_at").eq("user_id",id).eq("visibility","public").maybeSingle();
@@ -78,10 +97,25 @@ async function publicListener(){
  const p=r.data,ids=(p.show_favorites?p.favorite_podcast_ids||[]:[]).map(String),shows=ids.length?await db.from("podcasts").select("id,title,category,description,artwork_url,slug").in("id",ids).eq("status","published"):({data:[],error:null});
  if(shows.error)throw shows.error;const cards=(shows.data||[]).map(x=>'<article class="card"><div class="art">'+(x.artwork_url?'<img src="'+esc(x.artwork_url)+'" alt="" loading="lazy">':'<span class="glyph">CR</span>')+'</div><span class="badge">'+esc(x.category||"Podcast")+'</span><h3>'+esc(x.title)+'</h3><p class="muted">'+esc(x.description||"")+'</p><a class="btn" href="podcast.html?id='+encodeURIComponent(x.id)+'">Explore Show</a></article>').join("");
  document.title=esc(p.display_name)+" — CrowRules Listener";h.innerHTML='<section class="panel" style="text-align:center;padding:clamp(22px,5vw,48px)">'+(p.avatar_url?'<img src="'+esc(p.avatar_url)+'" alt="" style="width:112px;height:112px;object-fit:cover;border-radius:50%;border:2px solid #62efff;margin:0 auto 18px">':'<div class="hero-panel" style="width:112px;height:112px;min-height:112px;border-radius:50%;margin:0 auto 18px"><b>CR</b></div>')+'<span class="badge">CROWRULES LISTENER</span><h1>'+esc(p.display_name)+'</h1><p class="muted" style="max-width:620px;margin:0 auto">'+esc(p.bio||"A member of the CrowRules Podcasting community.")+'</p></section>'+(cards?'<section style="margin-top:25px"><span class="eyebrow">LISTENING TASTE</span><h2>Favorite Podcasts</h2><div class="cards">'+cards+'</div></section>':'<div class="panel" style="margin-top:20px"><p class="muted">This listener has not shared favorite podcasts.</p></div>')+'<p class="muted" style="text-align:center;margin-top:24px">One company. One universe.</p>';
+ if(user&&user.id!==id){
+  const [fc,following,existing]=await Promise.all([
+   db.from("podcast_listener_follows").select("*",{count:"exact",head:true}).eq("followed_id",id),
+   db.from("podcast_listener_follows").select("*",{count:"exact",head:true}).eq("follower_id",id),
+   db.from("podcast_listener_follows").select("follower_id").eq("follower_id",user.id).eq("followed_id",id).maybeSingle()
+  ]);
+  if(fc.error)throw fc.error;if(following.error)throw following.error;if(existing.error)throw existing.error;
+  const stats=document.createElement("p");stats.className="muted";stats.textContent=(fc.count||0)+" followers · "+(following.count||0)+" following";
+  const panel=h.querySelector(".panel");if(panel)panel.appendChild(stats);
+  const b=document.createElement("button");b.className="btn "+(existing.data?"":"primary");b.textContent=existing.data?"Following · Unfollow":"＋ Follow Listener";if(panel)panel.appendChild(b);
+  b.onclick=async()=>{b.disabled=true;const x=existing.data?await db.from("podcast_listener_follows").delete().eq("follower_id",user.id).eq("followed_id",id):await db.from("podcast_listener_follows").insert({follower_id:user.id,followed_id:id});if(x.error){b.disabled=false;b.textContent="Could not update";return}await publicListener()};
+ }else{
+  const [fc,following]=await Promise.all([db.from("podcast_listener_follows").select("*",{count:"exact",head:true}).eq("followed_id",id),db.from("podcast_listener_follows").select("*",{count:"exact",head:true}).eq("follower_id",id)]);
+  if(fc.error)throw fc.error;if(following.error)throw following.error;const panel=h.querySelector(".panel");if(panel){const stats=document.createElement("p");stats.className="muted";stats.textContent=(fc.count||0)+" followers · "+(following.count||0)+" following";panel.appendChild(stats)}
+ }
  }catch(e){h.innerHTML='<div class="empty error">'+esc(e.message)+'</div>'}
 }
 async function library(){await renderListeningDashboard($("#library"))}
 async function home(){await renderListeningDashboard($("#home-listening"))}
 
-document.addEventListener("DOMContentLoaded",()=>({directory,detail,login,signup,account,profile,create,subs,library,home,listenerProfileSettings,publicListener}[document.body.dataset.page]?.()));
+document.addEventListener("DOMContentLoaded",()=>({directory,detail,login,signup,account,profile,create,subs,library,home,listenerProfileSettings,publicListener,listenerCommunity}[document.body.dataset.page]?.()));
 })();
