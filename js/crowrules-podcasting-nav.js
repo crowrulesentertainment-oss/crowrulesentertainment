@@ -6,7 +6,7 @@ window.__CrowRulesPodcastingNavV8=true;
 (function loadUniversalPlayer(){
  if(document.querySelector('script[data-cr-universal-player]'))return;
  const s=document.createElement('script');
- s.src='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-universal-player.js?v=1';
+ s.src='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-universal-player.js?v=2';
  s.defer=true;s.dataset.crUniversalPlayer='true';
  document.head.appendChild(s);
 })();
