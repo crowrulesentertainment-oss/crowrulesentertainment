@@ -15,7 +15,7 @@ const scriptBase=(()=>{
  const s=[...document.scripts].find(x=>/crowrules-podcasting-nav\.js(?:\?|$)/.test(x.src));
  return s?new URL(".",s.src).href:new URL("../js/",location.href).href;
 })();
-const CONFIG_URL=new URL("crowrules-podcasting-nav-config.js?v=13",scriptBase).href;
+const CONFIG_URL=new URL("crowrules-podcasting-nav-config.js?v=14",scriptBase).href;
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const onPodcasting=location.pathname.replace(/\\/g,"/").includes("/podcasting/");
 const state={config:null,drop:null,memberRole:null,membershipType:null,roles:new Set(["public"])};
