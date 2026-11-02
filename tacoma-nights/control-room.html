@@ -286,14 +286,14 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
 <section class="panel production-workspace" id="productionWorkspace"><div class="panelhead"><div><p class="micro">00 / WEEKLY PRODUCTION · PRIVATE</p><h2>Episode production desk</h2><p>Plan topics, research stories, write scripts, coordinate contributors, track recording and approve the final edit. Changes save to the Tacoma Nights Supabase workspace.</p></div><span class="pill">Admin only · Supabase</span></div><div class="production-phase"><div class="stat"><strong id="productionEpisodeCount">—</strong><span>Episodes planned</span></div>
 <div class="stat"><strong id="productionTaskCount">—</strong><span>Open tasks</span></div><div class="stat"><strong id="productionApprovalCount">—</strong><span>Awaiting edit approval</span></div></div><div class="ai-studio" id="aiEpisodeStudio">
  <div class="ai-studio-head"><div><p class="micro">00A / AI-ASSISTED EDITORIAL ROOM</p><h3>Episode brainstorming studio</h3><p>Turn the selected weekly topic into a production-ready creative brief. Build a tailored prompt, use ChatGPT to develop the materials, then bring the results back into this episode plan.</p></div><span class="pill">Topic-to-production workflow</span></div>
- <div class="ai-studio-note"><strong>HOW THIS WORKS</strong><span>This version uses a secure copy-and-paste handoff to ChatGPT. It does not send private episode information to an unconfigured AI API or expose an API key in the website. Generate the prompt here, run it in ChatGPT, paste the deliverables below and apply them to the episode form.</span></div>
+ <div class="ai-studio-note"><strong>HOW THIS WORKS</strong><span>Direct AI generation runs through a private Supabase Edge Function. Your OpenAI key stays on the server, never in this page. Generate all six drafts here, review them, apply them to the episode form and save when ready. Copy/paste with ChatGPT remains available as a fallback.</span></div>
  <div class="fields ai-inputs">
   <label>Episode tone<select id="aiTone"><option>Warm, conversational and community-focused</option><option>Balanced, thoughtful and journalistic</option><option>Inspirational and uplifting</option><option>Energetic, entertaining and opinion-led</option><option>Serious, compassionate and respectful</option></select></label>
   <label>Target runtime<select id="aiRuntime"><option value="45">45 minutes</option><option value="60" selected>60 minutes</option><option value="75">75 minutes</option><option value="90">90 minutes</option><option value="custom">Flexible / no fixed runtime</option></select></label>
   <label class="full">Guest names, roles or desired perspectives<input id="aiGuests" maxlength="500" placeholder="Optional — e.g. Tacoma small-business owner, local youth advocate"></label>
   <label class="full">Additional direction / questions to explore<textarea id="aiDirection" rows="3" maxlength="1800" placeholder="Optional — include a local angle, a viewer question, a perspective to include or anything to avoid."></textarea></label>
  </div>
- <div class="actions"><button class="btn" type="button" id="aiBuildPrompt">Build episode AI prompt ↗</button><button class="btn ghost" type="button" id="aiCopyPrompt" disabled>Copy prompt</button><button class="btn ghost" type="button" id="aiOpenChatGPT">Open ChatGPT ↗</button></div>
+ <div class="actions"><button class="btn" type="button" id="aiBuildPrompt">Build episode AI prompt ↗</button><button class="btn" type="button" id="aiGenerateDirect">Generate complete package with AI ✦</button><button class="btn ghost" type="button" id="aiCopyPrompt" disabled>Copy prompt</button><button class="btn ghost" type="button" id="aiOpenChatGPT">Open ChatGPT ↗</button></div>
  <label class="ai-prompt-label">YOUR CUSTOM EPISODE PROMPT<textarea id="aiPrompt" rows="9" readonly placeholder="Choose a topic above or load an episode, then build your AI prompt."></textarea></label>
  <div class="ai-output-head"><div><p class="micro">00B / AI DELIVERABLES</p><h3>Bring the episode package back here</h3><p>Paste each section from the AI response into its matching field. You can edit everything before applying it.</p></div></div>
  <div class="fields ai-output-fields">
@@ -580,6 +580,41 @@ function buildEpisodeAIPrompt(){
  $('aiCopyPrompt').disabled=false;
  say($('aiStudioStatus'),'Custom AI prompt prepared for “'+title+'”. Copy it into ChatGPT, request the full episode package, then paste the results into the six deliverable fields below.');
 }
+async function generateEpisodeAIPackage(){
+ const button=$('aiGenerateDirect');
+ if(!db){say($('aiStudioStatus'),'Supabase is not ready. Refresh and sign in again.',true);return;}
+ if(!latestEpisodeAIPrompt)buildEpisodeAIPrompt();
+ if(!latestEpisodeAIPrompt)return;
+ const {data:{session},error:sessionError}=await db.auth.getSession();
+ if(sessionError||!session?.access_token){say($('aiStudioStatus'),'Your admin session has expired. Sign in again.',true);return;}
+ if(!isAdmin(session.user)){say($('aiStudioStatus'),'Administrator access is required.',true);return;}
+ setBusy(button,true,'Generating episode package…');
+ say($('aiStudioStatus'),'Sending the episode brief to the secure AI service. This can take up to a minute…');
+ try{
+  const response=await fetch(URL+'/functions/v1/tacoma-nights-ai',{
+   method:'POST',
+   headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token,'apikey':KEY},
+   body:JSON.stringify({prompt:latestEpisodeAIPrompt}),
+   signal:AbortSignal.timeout(120000)
+  });
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(result.error||'AI generation failed (HTTP '+response.status+').');
+  const pack=result.package||{};
+  const fields=[
+   ['aiResearchOutput',pack.research_outline],
+   ['aiQuestionsOutput',pack.guest_questions],
+   ['aiSegmentsOutput',pack.segment_talking_points],
+   ['aiScriptOutput',pack.host_script],
+   ['aiYouTubeOutput',pack.youtube_package],
+   ['aiThumbnailOutput',pack.thumbnail_concepts]
+  ];
+  for(const [id,value] of fields){if(typeof value!=='string'||!value.trim())throw new Error('The AI service returned an incomplete package. Please try again.');$(id).value=value;}
+  say($('aiStudioStatus'),'AI package generated successfully. Review all six drafts, then apply them to the episode form. Nothing has been saved or approved yet.');
+ }catch(err){
+  console.error('Tacoma Nights AI generation failed:',err);
+  say($('aiStudioStatus'),err.name==='TimeoutError'?'Generation took too long. Try again or use the ChatGPT copy/paste fallback.':(err.message||'AI generation failed. Check the AI service configuration.'),true);
+ }finally{setBusy(button,false,'Generate complete package with AI ✦');}
+}
 async function copyEpisodeAIPrompt(){
  if(!latestEpisodeAIPrompt){buildEpisodeAIPrompt();if(!latestEpisodeAIPrompt)return;}
  try{await navigator.clipboard.writeText(latestEpisodeAIPrompt);say($('aiStudioStatus'),'Episode prompt copied. Open ChatGPT and paste it into a new message.');}
@@ -633,7 +668,7 @@ $('avatarFile').addEventListener('change',()=>{const file=$('avatarFile').files[
 $('clipsList').addEventListener('click',e=>{const d=e.target.closest('[data-download-asset]'),c=e.target.closest('[data-download-clip]'),o=e.target.closest('[data-open-clip]'),x=e.target.closest('[data-delete-clip]');if(d)downloadAsset(d.dataset.downloadAsset,d);if(c)openPrivateClip(c.dataset.downloadClip,c,true);if(o)openPrivateClip(o.dataset.openClip,o,false);if(x)deleteClipSubmission(x.dataset.deleteClip,x);});$('newCrewBtn').addEventListener('click',clearCrewForm);$('cancelCrewBtn').addEventListener('click',clearCrewForm);$('crewRefreshBtn').addEventListener('click',()=>loadCrew().catch(e=>say($('crewFormStatus'),e.message,true)));$('inboxRefreshBtn').addEventListener('click',()=>loadSubmissions().catch(e=>say($('globalStatus'),e.message,true)));$('reloadBtn').addEventListener('click',loadAll);$('submissionFilter').addEventListener('change',renderSubmissions);
 $('crewList').addEventListener('click',async e=>{const edit=e.target.closest('[data-edit-crew]'),del=e.target.closest('[data-delete-crew]');if(edit){const p=crewCache.find(x=>x.id===edit.dataset.editCrew);if(!p)return;const f=$('crewForm');for(const k of ['id','display_name','role_title','bio','avatar_url','profile_url','sort_order'])f.elements[k].value=p[k]??'';f.elements.is_featured.checked=!!p.is_featured;f.elements.is_published.checked=!!p.is_published;$('avatarFile').value='';updateAvatarPreview(p.avatar_url||'');f.scrollIntoView({behavior:'smooth',block:'start'});return;}if(del){const p=crewCache.find(x=>x.id===del.dataset.deleteCrew);if(!p||!confirm('Delete crew profile for '+p.display_name+'? This cannot be undone.'))return;try{const {error}=await db.from('tacoma_nights_crew').delete().eq('id',p.id);if(error)throw error;await loadCrew();say($('crewFormStatus'),'Crew profile deleted.');}catch(err){say($('crewFormStatus'),err.message,true);}}});
 $('submissionList').addEventListener('click',async e=>{const del=e.target.closest('[data-delete-submission]');if(del){const id=del.dataset.deleteSubmission,record=submissionsCache.find(x=>x.id===id);if(!record||!confirm('PERMANENTLY DELETE this community submission?\n\n'+(record.subject||record.submission_type)+' from '+(record.full_name||'unknown sender')+'\n\nThis cannot be undone.'))return;setBusy(del,true,'Deleting…');try{const {data:deletedRow,error}=await db.from('tacoma_nights_submissions').delete().eq('id',id).select('id').maybeSingle();if(error)throw error;if(!deletedRow)throw new Error('No submission was deleted. Refresh the inbox and confirm your administrator session.');submissionsCache=submissionsCache.filter(x=>x.id!==id);renderSubmissions();$('statNew').textContent=submissionsCache.filter(x=>x.status==='new').length;say($('globalStatus'),'Community submission deleted permanently.');}catch(err){say($('globalStatus'),'Delete failed: '+(err.message||'Check administrator permissions.'),true);}finally{del.disabled=false;del.textContent='Delete submission ×';}return;}const button=e.target.closest('[data-save-submission]');if(!button)return;const card=button.closest('[data-submission]'),id=button.dataset.saveSubmission,status=card.querySelector('[data-status]').value,notes=card.querySelector('[data-notes]').value;setBusy(button,true);try{const {error}=await db.from('tacoma_nights_submissions').update({status,internal_notes:notes,reviewed_at:new Date().toISOString()}).eq('id',id);if(error)throw error;await loadSubmissions();say($('globalStatus'),'Submission review saved.');}catch(err){say($('globalStatus'),err.message||'Could not save review.',true);}finally{setBusy(button,false,'Save review');}});
-function init(){$('aiBuildPrompt').addEventListener('click',buildEpisodeAIPrompt);$('aiCopyPrompt').addEventListener('click',copyEpisodeAIPrompt);$('aiOpenChatGPT').addEventListener('click',()=>{if(!latestEpisodeAIPrompt)buildEpisodeAIPrompt();if(latestEpisodeAIPrompt){copyEpisodeAIPrompt();window.open('https://chatgpt.com/','_blank','noopener,noreferrer');}});$('aiApplyPackage').addEventListener('click',applyEpisodeAIPackage);$('aiClearOutputs').addEventListener('click',clearEpisodeAIOutputs);initTopicCenter();if(!window.supabase?.createClient){say($('globalStatus'),'The Supabase client could not load. Refresh the page or try again later.',true);return;}db=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});window.__tacomaNightsDB=db;window.dispatchEvent(new Event('tacoma-nights-db-ready'));initTacomaLocalInfo();initVisitorCounter();db.auth.getSession().then(({data})=>verifySession(data.session)).catch(()=>showSignedOut());db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT')showSignedOut();else if(session&&event==='SIGNED_IN')verifySession(session);});}
+function init(){$('aiBuildPrompt').addEventListener('click',buildEpisodeAIPrompt);$('aiGenerateDirect').addEventListener('click',generateEpisodeAIPackage);$('aiCopyPrompt').addEventListener('click',copyEpisodeAIPrompt);$('aiOpenChatGPT').addEventListener('click',()=>{if(!latestEpisodeAIPrompt)buildEpisodeAIPrompt();if(latestEpisodeAIPrompt){copyEpisodeAIPrompt();window.open('https://chatgpt.com/','_blank','noopener,noreferrer');}});$('aiApplyPackage').addEventListener('click',applyEpisodeAIPackage);$('aiClearOutputs').addEventListener('click',clearEpisodeAIOutputs);initTopicCenter();if(!window.supabase?.createClient){say($('globalStatus'),'The Supabase client could not load. Refresh the page or try again later.',true);return;}db=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});window.__tacomaNightsDB=db;window.dispatchEvent(new Event('tacoma-nights-db-ready'));initTacomaLocalInfo();initVisitorCounter();db.auth.getSession().then(({data})=>verifySession(data.session)).catch(()=>showSignedOut());db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT')showSignedOut();else if(session&&event==='SIGNED_IN')verifySession(session);});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
 </script></body></html>
