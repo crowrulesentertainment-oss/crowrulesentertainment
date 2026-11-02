@@ -1,9 +1,9 @@
-/* CrowRules Podcasting Navigation Configuration V10 */
+/* CrowRules Podcasting Navigation Configuration V11 */
 (()=>{
  const script=document.currentScript;
  const base=script?new URL("../podcasting/",script.src).href:new URL("../podcasting/",location.href).href;
  window.CROWRULES_PODCAST_NAV_CONFIG={
-  version:10,
+  version:11,
   base,
   groups:[
    {id:"creator",title:"CREATOR STUDIO",items:[
@@ -27,6 +27,7 @@
     {label:"My Listening Library",file:"my-library.html",icon:"♫",roles:["member","creator","admin"]},
     {label:"Listener Profile",file:"listener-profile-settings.html",icon:"◎",roles:["member","creator","admin"]},
     {label:"Listener Community",file:"listener-community.html",icon:"♧",roles:["public","member","creator","admin"]},
+    {label:"Activity Feed",file:"listener-activity.html",icon:"◷",roles:["member","creator","admin"]},
     {label:"Discover",file:"discover.html",roles:["public","member","creator","admin"]},
     {label:"Following",file:"following.html",roles:["member","creator","admin"]},
     {label:"Favorites",file:"favorites.html",roles:["member","creator","admin"]},
