@@ -1,9 +1,9 @@
-/* CrowRules Podcasting Navigation Configuration V8 */
+/* CrowRules Podcasting Navigation Configuration V9 */
 (()=>{
  const script=document.currentScript;
  const base=script?new URL("../podcasting/",script.src).href:new URL("../podcasting/",location.href).href;
  window.CROWRULES_PODCAST_NAV_CONFIG={
-  version:8,
+  version:9,
   base,
   groups:[
    {id:"creator",title:"CREATOR STUDIO",items:[
