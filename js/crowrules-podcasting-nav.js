@@ -3,6 +3,13 @@
 "use strict";
 if(window.__CrowRulesPodcastingNavV8)return;
 window.__CrowRulesPodcastingNavV8=true;
+(function loadUniversalPlayer(){
+ if(document.querySelector('script[data-cr-universal-player]'))return;
+ const s=document.createElement('script');
+ s.src='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-universal-player.js?v=1';
+ s.defer=true;s.dataset.crUniversalPlayer='true';
+ document.head.appendChild(s);
+})();
 
 const scriptBase=(()=>{
  const s=[...document.scripts].find(x=>/crowrules-podcasting-nav\.js(?:\?|$)/.test(x.src));
