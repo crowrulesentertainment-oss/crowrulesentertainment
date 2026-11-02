@@ -25,8 +25,12 @@ function libraryState(){try{return JSON.parse(localStorage.getItem(LIB_KEY)||'{"
 function saveLibrary(x){try{localStorage.setItem(LIB_KEY,JSON.stringify(x))}catch{}}
 async function loadCloudLibrary(){
  const local=libraryState();if(!user)return local;
- const legacy=[...local.saved.map(id=>({user_id:user.id,item_type:"episode",item_id:id})),...local.followed.map(id=>({user_id:user.id,item_type:"podcast",item_id:id}))];
- if(legacy.length){const migrated=await db.from("podcast_listener_library").upsert(legacy,{onConflict:"user_id,item_type,item_id",ignoreDuplicates:true});if(migrated.error)throw migrated.error}
+ const migrationKey=LIB_KEY+"-migrated-"+user.id;
+ if(!localStorage.getItem(migrationKey)){
+  const legacy=[...local.saved.map(id=>({user_id:user.id,item_type:"episode",item_id:id})),...local.followed.map(id=>({user_id:user.id,item_type:"podcast",item_id:id}))];
+  if(legacy.length){const migrated=await db.from("podcast_listener_library").upsert(legacy,{onConflict:"user_id,item_type,item_id",ignoreDuplicates:true});if(migrated.error)throw migrated.error}
+  try{localStorage.setItem(migrationKey,"1")}catch{}
+ }
  const r=await db.from("podcast_listener_library").select("item_type,item_id").eq("user_id",user.id);
  if(r.error)throw r.error;
  const cloud={saved:(r.data||[]).filter(x=>x.item_type==="episode").map(x=>String(x.item_id)),followed:(r.data||[]).filter(x=>x.item_type==="podcast").map(x=>String(x.item_id))};
