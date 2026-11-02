@@ -18,6 +18,8 @@ create table if not exists public.podcast_listener_notifications (
  unique(user_id,event_key)
 );
 alter table public.podcast_listener_notifications enable row level security;
+revoke all on table public.podcast_listener_notifications from anon;
+grant select,insert,update,delete on table public.podcast_listener_notifications to authenticated;
 drop policy if exists "Listeners read own notifications" on public.podcast_listener_notifications;
 create policy "Listeners read own notifications" on public.podcast_listener_notifications for select to authenticated using ((select auth.uid())=user_id);
 drop policy if exists "Listeners create own notifications" on public.podcast_listener_notifications;
