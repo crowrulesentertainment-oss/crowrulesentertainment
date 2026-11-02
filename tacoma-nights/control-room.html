@@ -564,13 +564,16 @@ async function decideHostApplication(id,decision,button){
 }
 async function openHostApplicationSample(id,button){
  const record=hostApplicationsCache.find(x=>x.id===id);if(!record?.sample_path||!String(record.sample_path).startsWith('applications/'))return;
+ const popup=window.open('about:blank','_blank');
+ if(!popup){say($('hostApplicationsStatus'),'Your browser blocked the sample window. Allow pop-ups for this site and try again.',true);return;}
+ popup.opener=null;popup.document.title='Opening private Tacoma Nights sample…';popup.document.body.textContent='Preparing a secure, temporary sample link…';
  setBusy(button,true);
  try{
   const {data,error}=await db.storage.from('tacoma-host-samples').createSignedUrl(record.sample_path,300);
   if(error)throw error;if(!data?.signedUrl)throw new Error('A private sample link could not be created.');
-  window.open(data.signedUrl,'_blank','noopener,noreferrer');
+  popup.location.href=data.signedUrl;
   say($('hostApplicationsStatus'),'Private sample link created. It expires in five minutes.');
- }catch(err){say($('hostApplicationsStatus'),err.message||'Could not open the private sample.',true);}
+ }catch(err){popup.close();say($('hostApplicationsStatus'),err.message||'Could not open the private sample.',true);}
  finally{setBusy(button,false,'Open private sample ↗');}
 }
 async function saveHostApplicationNotes(id,button){
