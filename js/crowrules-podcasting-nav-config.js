@@ -24,6 +24,7 @@
    {id:"listener",title:"LISTENER",items:[
     {label:"Join Podcasting",file:"signup.html",icon:"✦",roles:["public"]},
     {label:"Podcasts",file:"podcasts.html",roles:["public","member","creator","admin"]},
+    {label:"My Listening Library",file:"my-library.html",icon:"♫",roles:["member","creator","admin"]},
     {label:"Discover",file:"discover.html",roles:["public","member","creator","admin"]},
     {label:"Following",file:"following.html",roles:["member","creator","admin"]},
     {label:"Favorites",file:"favorites.html",roles:["member","creator","admin"]},
