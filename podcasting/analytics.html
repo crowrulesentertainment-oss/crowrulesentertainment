@@ -1,4 +1,72 @@
-<!doctype html><html lang="en"><head>
-<link rel="icon" type="image/svg+xml" href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/favicon.svg?v=1">
-<link rel="shortcut icon" href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/favicon.svg?v=1"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#05060b"><title>Analytics — CrowRules Podcasting</title><link rel="stylesheet" href="css/podcasting.css?v=20261004-1"><script src="js/podcasting.js?v=20261004-1" defer></script><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
-<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=5" defer></script><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-podcasting-nav.js?v=2" defer></script></head><body data-page="generic"><main class="page"><div class="wrap"><section class="hero"><div><div class="eyebrow">CREATOR STUDIO</div><h1>Numbers With Signal</h1><p>Audience and performance intelligence.</p></div><div class="hero-panel"><b>CROW</b><span>Podcasting Network</span></div></section><div class="statgrid"><div class="stat"><b>—</b><span>Plays</span></div><div class="stat"><b>—</b><span>Minutes</span></div><div class="stat"><b>—</b><span>Followers</span></div><div class="stat"><b>—</b><span>Completion</span></div></div></div></main></body></html>
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#05060b">
+<title>Creator Analytics — CrowRules Podcasting</title>
+<link rel="icon" href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/favicon.svg">
+<link rel="stylesheet" href="css/podcasting.css?v=20261102-analytics1">
+<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
+<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=5" defer></script>
+<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-podcasting-nav.js?v=2" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+.analytics-toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:16px 0}
+.analytics-toolbar select{min-width:150px}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.metric-card{padding:18px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(145deg,#111827dd,#080b13ee)}
+.metric-card b{display:block;font-size:clamp(25px,4vw,36px);letter-spacing:-.04em}.metric-card span{display:block;margin-top:5px;color:var(--muted);font-size:10px;letter-spacing:.13em;text-transform:uppercase}
+.analytics-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:15px;margin-top:15px}.analytics-panel{padding:20px;border:1px solid var(--line);border-radius:18px;background:#0b101a}
+.analytics-panel h2{margin:0 0 15px;font-size:18px}.chart{display:grid;gap:10px}.bar-row{display:grid;grid-template-columns:minmax(90px,1fr) 3fr 54px;gap:10px;align-items:center;font-size:12px}.bar-track{height:10px;background:#1b2638;border-radius:20px;overflow:hidden}.bar-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,#62efff,#a875ff)}.episode-row{padding:13px 0;border-bottom:1px solid #202b3b;display:flex;justify-content:space-between;gap:12px}.episode-row:last-child{border:0}.episode-row small{display:block;color:var(--muted);margin-top:4px}.muted-note{color:var(--muted);font-size:12px;line-height:1.6}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:11px;border-bottom:1px solid #202b3b;white-space:nowrap}th{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.1em}.statusline{color:var(--muted);font-size:13px}.empty-state{padding:28px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:14px}
+@media(max-width:800px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.analytics-grid{grid-template-columns:1fr}.bar-row{grid-template-columns:85px 1fr 45px}}
+</style></head>
+<body data-page="generic"><main class="page"><div class="wrap">
+<section class="hero"><div><div class="eyebrow">CREATOR STUDIO / PERFORMANCE</div><h1>Numbers With Signal</h1><p class="muted">Understand how your shows are growing, which episodes connect, and how listening develops over time.</p></div><div class="hero-panel"><b>CROW</b><span>CREATOR ANALYTICS</span></div></section>
+<div class="analytics-toolbar"><div><strong id="scopeTitle">Your podcast portfolio</strong><div id="status" class="statusline">Connecting to your secure CrowRules account…</div></div><div class="actions"><select id="period" aria-label="Analytics date range"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option><option value="all">All time</option></select><button class="btn" id="refresh">Refresh</button><button class="btn" id="export">Export CSV</button></div></div>
+<section class="metrics" id="metrics"><div class="metric-card"><b>—</b><span>Episode plays</span></div><div class="metric-card"><b>—</b><span>Listening hours</span></div><div class="metric-card"><b>—</b><span>New listeners</span></div><div class="metric-card"><b>—</b><span>Completions</span></div></section>
+<div class="analytics-grid"><section class="analytics-panel"><h2>Listening trend</h2><div id="trend" class="chart"><div class="empty-state">Loading analytics…</div></div></section><section class="analytics-panel"><h2>Top episodes</h2><div id="topEpisodes"><div class="empty-state">Loading episodes…</div></div></section></div>
+<section class="analytics-panel" style="margin-top:15px"><h2>Show performance</h2><div id="showsTable" class="table-wrap"><div class="empty-state">Loading show data…</div></div></section>
+<p class="muted-note" style="margin-top:14px">Privacy-first reporting: this dashboard shows aggregate episode activity only. It never displays individual listener identities or private listening histories. New analytics begin accumulating after this tracking upgrade; older episodes retain their existing play totals, but historical daily listening time and completion data cannot be reconstructed.</p>
+</div></main>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id);
+let db,user,rows=[],episodes=[],shows=[];
+const fmt=n=>Number(n||0).toLocaleString();
+const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const dateKey=d=>{const x=new Date(d+'T00:00:00Z');return x.toLocaleDateString(undefined,{month:'short',day:'numeric',timeZone:'UTC'})};
+async function boot(){for(let i=0;i<100;i++){if(window.CrowRulesAuth?.client){db=window.CrowRulesAuth.client;user=window.CrowRulesAuth.user||null;if(!user){const s=await db.auth.getSession();user=s.data?.session?.user||null}if(user)return}await new Promise(r=>setTimeout(r,100))}throw Error('Sign in through your CrowRules account to view creator analytics.')}
+function rangeStart(){const v=$('period').value;if(v==='all')return null;const d=new Date();d.setUTCDate(d.getUTCDate()-Number(v)+1);return d.toISOString().slice(0,10)}
+async function load(){
+ $('status').textContent='Loading your authorized podcast data…';
+ await boot();
+ const role=String(user.app_metadata?.role||'').toLowerCase(),isAdmin=['owner','super_admin','admin'].includes(role);
+ let q=db.from('podcasts').select('id,title,status,total_plays,listener_count,creator_id').order('title').limit(500);
+ const pr=await q;if(pr.error)throw pr.error;shows=pr.data||[];
+ if(!shows.length){$('status').textContent='No podcasts are assigned to this account yet.';renderEmpty();return}
+ const ids=shows.map(x=>x.id);
+ const er=await db.from('podcast_episodes').select('id,podcast_id,title,status,play_count,duration_seconds,published_at').in('podcast_id',ids).order('play_count',{ascending:false}).limit(1000);
+ if(er.error)throw er.error;episodes=er.data||[];
+ const start=rangeStart();let ar=db.from('podcast_episode_analytics_daily').select('episode_id,podcast_id,metric_date,plays,unique_listeners,completions,listening_seconds').in('podcast_id',ids).order('metric_date',{ascending:true}).limit(10000);
+ if(start)ar=ar.gte('metric_date',start);
+ const rr=await ar;if(rr.error)throw rr.error;rows=rr.data||[];
+ $('scopeTitle').textContent=isAdmin?'CrowRules platform overview':'Your podcast portfolio';
+ $('status').textContent=shows.length+' authorized show'+(shows.length===1?'':'s')+' · '+episodes.length+' episodes · refreshed '+new Date().toLocaleTimeString();
+ render();
+}
+function renderEmpty(){ $('metrics').innerHTML='<div class="metric-card"><b>0</b><span>Shows</span></div>'.repeat(4);$('trend').innerHTML='<div class="empty-state">No creator analytics yet.</div>';$('topEpisodes').innerHTML='<div class="empty-state">Create and publish episodes to begin.</div>';$('showsTable').innerHTML='';}
+function render(){
+ const plays=rows.reduce((a,x)=>a+Number(x.plays||0),0),listeners=rows.reduce((a,x)=>a+Number(x.unique_listeners||0),0),completions=rows.reduce((a,x)=>a+Number(x.completions||0),0),seconds=rows.reduce((a,x)=>a+Number(x.listening_seconds||0),0);
+ const historicalPlays=episodes.reduce((a,x)=>a+Number(x.play_count||0),0);
+ $('metrics').innerHTML=[[''+fmt(historicalPlays),'Episode plays (all-time totals)'],[ (seconds/3600).toFixed(1),'Tracked listening hours'],[fmt(listeners),'New listener starts'],[fmt(completions),'Completions']].map(x=>'<div class="metric-card"><b>'+x[0]+'</b><span>'+x[1]+'</span></div>').join('');
+ const days={};rows.forEach(x=>{const k=x.metric_date;days[k]=(days[k]||0)+Number(x.plays||0)});
+ const series=Object.entries(days).sort((a,b)=>a[0].localeCompare(b[0])).slice(-14),max=Math.max(1,...series.map(x=>x[1]));
+ $('trend').innerHTML=series.length?series.map(([d,n])=>'<div class="bar-row"><span>'+dateKey(d)+'</span><div class="bar-track"><div class="bar-fill" style="width:'+Math.max(2,n/max*100)+'%"></div></div><strong>'+fmt(n)+'</strong></div>').join(''):'<div class="empty-state">Daily listening trends will appear as listeners play episodes after this upgrade.</div>';
+ const epRows=episodes.slice().sort((a,b)=>Number(b.play_count||0)-Number(a.play_count||0)).slice(0,8);
+ $('topEpisodes').innerHTML=epRows.length?epRows.map(e=>'<div class="episode-row"><div><strong>'+safe(e.title)+'</strong><small>'+safe(shows.find(s=>s.id===e.podcast_id)?.title||'Podcast')+'</small></div><strong>'+fmt(e.play_count)+'</strong></div>').join(''):'<div class="empty-state">No episodes available.</div>';
+ $('showsTable').innerHTML='<table><thead><tr><th>Show</th><th>Status</th><th>Episodes</th><th>All-time plays</th><th>Followers</th><th>Tracked hours</th><th>Completions</th></tr></thead><tbody>'+shows.map(s=>{const es=episodes.filter(e=>e.podcast_id===s.id),rs=rows.filter(r=>r.podcast_id===s.id);return '<tr><td><strong>'+safe(s.title)+'</strong></td><td>'+safe(s.status)+'</td><td>'+fmt(es.length)+'</td><td>'+fmt(es.reduce((a,e)=>a+Number(e.play_count||0),0))+'</td><td>'+fmt(s.listener_count)+'</td><td>'+(rs.reduce((a,r)=>a+Number(r.listening_seconds||0),0)/3600).toFixed(1)+'</td><td>'+fmt(rs.reduce((a,r)=>a+Number(r.completions||0),0))+'</td></tr>'}).join('')+'</tbody></table>';
+}
+function exportCsv(){const header=['Show','Episode','Date','Plays','New listener starts','Completions','Listening seconds'];const data=rows.map(r=>{const e=episodes.find(x=>x.id===r.episode_id),s=shows.find(x=>x.id===r.podcast_id);return [s?.title||'',e?.title||'',r.metric_date,r.plays,r.unique_listeners,r.completions,r.listening_seconds]});const csv=[header,...data].map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');const a=document.createElement('a'),url=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.href=url;a.download='crowrules-podcast-analytics.csv';a.click();URL.revokeObjectURL(url)}
+$('refresh').addEventListener('click',()=>load().catch(e=>$('status').textContent=e.message));
+$('period').addEventListener('change',()=>load().catch(e=>$('status').textContent=e.message));
+$('export').addEventListener('click',exportCsv);
+load().catch(e=>{$('status').textContent=e.message;$('metrics').innerHTML='<div class="empty-state" style="grid-column:1/-1">'+safe(e.message)+'</div>';$('trend').innerHTML='';$('topEpisodes').innerHTML='';$('showsTable').innerHTML=''});
+})();
+</script></body></html>
