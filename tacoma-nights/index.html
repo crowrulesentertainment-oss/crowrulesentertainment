@@ -1259,7 +1259,7 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
 @media(max-width:900px){.production-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.production-intro{grid-template-columns:1fr}}
 @media(max-width:580px){.production-grid{grid-template-columns:1fr}.production-day,.production-day-content{min-height:230px}.production-footer{align-items:flex-start;flex-direction:column}.production-countdown small{text-align:left}}
 
-</style>
+.archive-health{display:flex;gap:10px;margin:14px 0 8px;padding:12px 14px;border:1px solid rgba(184,220,246,.16);border-radius:12px;background:rgba(13,23,38,.72);color:#c8d7e5;font-size:.84rem}.archive-health-dot{width:9px;height:9px;flex:0 0 auto;margin-top:5px;border-radius:50%;background:#e7b975}.archive-health[data-state="complete"] .archive-health-dot{background:#82d9a5}.archive-health[data-state="partial"] .archive-health-dot{background:#e7b975}.archive-health[data-state="unavailable"] .archive-health-dot{background:#e87852}.archive-health-copy{line-height:1.5}</style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js" defer></script>
@@ -1489,7 +1489,7 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
           <div class="empty-state">Loading the episode archive…</div>
         </div>
         <div class="archive-pagination" id="archivePagination" hidden><button class="button button-secondary button-small" id="archivePrevious" type="button">← Previous</button><span class="archive-page-label" id="archivePageLabel">Page 1</span><button class="button button-secondary button-small" id="archiveNext" type="button">Next →</button></div>
-        <p class="status-line" id="archiveStatus" role="status" aria-live="polite"></p>
+        <div class="archive-health" id="archiveHealth" data-state="checking" role="status" aria-live="polite"><span class="archive-health-dot" aria-hidden="true"></span><span class="archive-health-copy">Checking archive synchronization…</span></div><p class="status-line" id="archiveStatus" role="status" aria-live="polite"></p>
       </div>
     </section>
 
@@ -2233,6 +2233,13 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
         try {
           const data = await apiRequest("episodes");
           const episodes = getArray(data, ["episodes", "results", "items"]);
+          const verification = data.verification || {};
+          const health = $("#archiveHealth");
+          if (health) {
+            const healthState = ["complete","partial","unavailable"].includes(verification.status) ? verification.status : "partial";
+            health.dataset.state = healthState;
+            const copy = health.querySelector(".archive-health-copy");
+            if (copy) copy.textContent = (healthState === "complete" ? "FULL PLAYLIST VERIFIED" : healthState === "partial" ? "PARTIAL ARCHIVE — CHECK REQUIRED" : "ARCHIVE UNAVAILABLE") + " · " + Number(verification.totalResults ?? episodes.length).toLocaleString("en-US") + " episodes · " + Number(verification.curatedCount ?? 0).toLocaleString("en-US") + " manually curated · " + safeText(verification.message, "Archive verification details unavailable.");
           state.discoverySource = data.source === "youtube_playlist_feed" || data.source === "youtube_data_api" || data.playlistId === PLAYLIST_ID;
           state.completePlaylist = data.completePlaylist === true && data.source === "youtube_data_api";
           state.currentPage = 1;
