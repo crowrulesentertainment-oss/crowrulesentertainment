@@ -681,6 +681,13 @@
       background: rgba(255,255,255,.02);
     }
 
+    .archive-sort-label{display:flex;align-items:center;gap:9px;color:var(--muted);font-size:.8rem;font-weight:700}
+    .archive-sort-label select{min-width:180px}
+    .archive-summary{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:-8px 0 18px;color:var(--muted);font-size:.82rem}
+    .archive-summary strong{color:var(--green-bright);font-variant-numeric:tabular-nums}
+    .archive-sort-note{color:var(--gold);font-size:.76rem}
+    @media(max-width:650px){.archive-sort-label{width:100%;justify-content:space-between}.archive-sort-label select{flex:1}}
+
     /* Crew */
     .crew-grid {
       display: grid;
@@ -1168,9 +1175,21 @@
           <select class="field" id="categoryFilter" aria-label="Filter episodes by category">
             <option value="">All topics</option>
           </select>
+          <label class="archive-sort-label" for="episodeSort">Sort by
+            <select class="field" id="episodeSort" aria-label="Sort episodes">
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="popular">Most popular</option>
+              <option value="title">Title A–Z</option>
+            </select>
+          </label>
           <button class="button button-secondary" id="refreshEpisodes" type="button">↻ Refresh episodes</button>
         </div>
 
+        <div class="archive-summary">
+          <span id="archiveResultsCount"><strong>0</strong> episodes</span>
+          <span class="archive-sort-note" id="archiveSortNote" aria-live="polite"></span>
+        </div>
         <div class="episode-grid" id="episodeGrid" aria-live="polite">
           <div class="empty-state">Loading the episode archive…</div>
         </div>
@@ -1826,9 +1845,9 @@
         const grid = $("#episodeGrid");
         const search = $("#episodeSearch").value.trim().toLowerCase();
         const category = $("#categoryFilter").value;
-
+        const sort = $("#episodeSort")?.value || "newest";
         const featuredId = state.featured ? episodeVideoId(state.featured) : "";
-        const episodes = state.episodes.filter(episode => {
+        let episodes = state.episodes.filter(episode => {
           const id = episodeVideoId(episode);
           const isFeatured = featuredId && id === featuredId;
           const matchesSearch = [
@@ -1840,8 +1859,24 @@
           return !isFeatured && matchesSearch && matchesCategory;
         });
 
-        grid.replaceChildren();
+        const dateOf = episode => Date.parse(episode.published_at || episode.created_at || "") || 0;
+        const viewsOf = episode => {
+          const value = Number(episode.view_count ?? episode.views ?? episode.views_count ?? episode.statistics?.viewCount ?? episode.popularity);
+          return Number.isFinite(value) && value >= 0 ? value : null;
+        };
+        let sortNote = "";
+        if (sort === "oldest") episodes.sort((a,b) => dateOf(a)-dateOf(b));
+        else if (sort === "title") episodes.sort((a,b) => episodeTitle(a).localeCompare(episodeTitle(b)));
+        else if (sort === "popular") {
+          const hasViews = episodes.some(item => viewsOf(item) !== null);
+          if (hasViews) episodes.sort((a,b) => (viewsOf(b) ?? -1)-(viewsOf(a) ?? -1) || dateOf(b)-dateOf(a));
+          else {
+            episodes.sort((a,b) => dateOf(b)-dateOf(a));
+            sortNote = "View totals aren't available yet — showing newest first.";
+          }
+        } else episodes.sort((a,b) => dateOf(b)-dateOf(a));
 
+        grid.replaceChildren();
         if (!episodes.length) {
           const empty = document.createElement("div");
           empty.className = "empty-state";
@@ -1855,6 +1890,10 @@
         }
 
         $("#archiveStatus").textContent = `${episodes.length} episode${episodes.length === 1 ? "" : "s"} shown`;
+        const count = $("#archiveResultsCount");
+        if (count) count.innerHTML = `<strong>${episodes.length}</strong> of <strong>${state.episodes.filter(item => !(featuredId && episodeVideoId(item) === featuredId)).length}</strong> archive episodes`;
+        const note = $("#archiveSortNote");
+        if (note) note.textContent = sortNote;
       }
 
       async function loadEpisodes() {
@@ -2529,6 +2568,7 @@
       function setupEvents() {
         $("#episodeSearch").addEventListener("input", renderEpisodes);
         $("#categoryFilter").addEventListener("change", renderEpisodes);
+        $("#episodeSort").addEventListener("change", renderEpisodes);
         $("#refreshEpisodes").addEventListener("click", loadEpisodes);
         $("#refreshStats").addEventListener("click", loadSubscriberStats);
         $("#shareEpisode").addEventListener("click", shareEpisode);
