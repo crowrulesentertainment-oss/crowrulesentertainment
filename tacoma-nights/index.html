@@ -1264,7 +1264,51 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-themes.js?v=12" defer></script>
-<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=5" defer></script></head>
+<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=5" defer></script>
+  <!-- Tacoma Nights reliability and accessibility refresh -->
+  <style id="tacoma-nights-refresh">
+    :root{--green:#8fd7f0;--green-bright:#c8f1ff;--gold:#e7b975}
+    html{scroll-padding-top:92px}
+    .site-header{background:rgba(5,10,18,.94);border-bottom-color:rgba(143,215,240,.2)}
+    .nav-more-menu{max-height:min(70vh,520px);overflow:auto}
+    .nav-more-menu a:focus-visible,.nav-more summary:focus-visible{outline:2px solid var(--green-bright);outline-offset:3px}
+    .button-primary{color:#07131b;background:linear-gradient(135deg,#c8f1ff,#83c9e8)}
+    .button-primary:hover{background:#e1f8ff}
+    .panel{background:linear-gradient(145deg,rgba(15,29,46,.96),rgba(7,14,25,.97));border-color:rgba(143,215,240,.18)}
+    .feature-strip{background:rgba(7,15,26,.96)}
+    .strip-item strong{color:#e9f7ff}
+    .section-heading .eyebrow{color:#c8f1ff}
+    input,textarea,select{max-width:100%}
+    .chat-room:focus-visible,.episode-card a:focus-visible{outline:2px solid var(--green-bright);outline-offset:3px}
+    .status-error,.error,.form-status.error{overflow-wrap:anywhere}
+    @media(max-width:960px){
+      .nav{position:relative;min-height:68px}
+      .nav-toggle{display:inline-flex;align-items:center;justify-content:center}
+      .nav-links{display:none;position:absolute;top:calc(100% + 1px);left:-20px;right:-20px;z-index:150;align-items:stretch;gap:4px;padding:14px 20px 18px;background:rgba(5,10,18,.985);border-bottom:1px solid var(--border);box-shadow:0 18px 35px rgba(0,0,0,.35);white-space:normal}
+      .nav-links.is-open{display:flex;flex-direction:column}
+      .nav-links>a,.nav-more>summary{padding:12px;border-radius:9px}
+      .nav-links>a:hover,.nav-more>summary:hover{background:rgba(143,215,240,.08)}
+      .nav-more-menu{position:static;min-width:0;margin:4px 0 6px 12px;box-shadow:none;background:rgba(15,27,42,.98)}
+      .nav-links .nav-subscribe{justify-content:center;margin-top:6px}
+    }
+    @media(max-width:720px){
+      .container{width:min(100% - 28px,var(--max))}
+      .section{padding:64px 0}
+      .feature-strip-inner{grid-template-columns:1fr}
+      .strip-item{padding:15px 18px;border-right:0;border-bottom:1px solid var(--border)}
+      .strip-item:last-child{border-bottom:0}
+      .episode-layout{grid-template-columns:minmax(0,1fr)}
+      .hero{min-height:620px}
+      .hero h1{font-size:clamp(2.8rem,13vw,5.2rem)}
+      .hero-meta{gap:10px 16px}
+      .panel-inner{padding:19px}
+    }
+    @media(prefers-reduced-motion:reduce){
+      *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+    }
+  </style>
+
+</head>
 
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -3174,5 +3218,66 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
       document.addEventListener("DOMContentLoaded", init);
     })();
   </script>
+
+  <script id="tacoma-nights-resilience">
+  (() => {
+    "use strict";
+    const nav = document.querySelector(".nav-links");
+    const toggle = document.querySelector(".nav-toggle");
+    if (nav && toggle) {
+      toggle.setAttribute("aria-expanded","false");
+      toggle.setAttribute("aria-controls","primary-navigation");
+      nav.id = nav.id || "primary-navigation";
+      const close = () => { nav.classList.remove("is-open"); toggle.setAttribute("aria-expanded","false"); };
+      toggle.addEventListener("click", () => {
+        const open = !nav.classList.contains("is-open");
+        nav.classList.toggle("is-open",open);
+        toggle.setAttribute("aria-expanded",String(open));
+      });
+      nav.addEventListener("click", event => {
+        if (event.target.closest("a")) close();
+      });
+      document.addEventListener("click", event => {
+        if (!nav.contains(event.target) && !toggle.contains(event.target)) close();
+      });
+      document.addEventListener("keydown", event => {
+        if (event.key === "Escape") { close(); toggle.focus(); }
+      });
+      window.addEventListener("resize", () => {
+        if (window.innerWidth > 960) close();
+      }, {passive:true});
+    }
+    // Make external destinations safer without changing existing destinations or embeds.
+    document.querySelectorAll('a[target="_blank"]').forEach(link => {
+      const rel = new Set((link.getAttribute("rel") || "").split(/\s+/).filter(Boolean));
+      rel.add("noopener"); rel.add("noreferrer");
+      link.setAttribute("rel",[...rel].join(" "));
+    });
+    // Prevent a permanent loading impression if a remote feed stalls. Existing
+    // successful loaders replace these placeholders before this watchdog fires.
+    window.setTimeout(() => {
+      const fallbacks = [
+        ["#episodeGrid", "The episode archive is taking longer than expected to load. Use the YouTube archive link or try Refresh all videos."],
+        ["#crewGrid", "Crew profiles are temporarily unavailable. Please try again shortly."],
+        ["#subscriberCount", "Stats temporarily unavailable"]
+      ];
+      fallbacks.forEach(([selector,message]) => {
+        const node = document.querySelector(selector);
+        if (!node) return;
+        const text = (node.textContent || "").toLowerCase();
+        if (/(loading|connecting|checking)/.test(text) && !node.querySelector("iframe,video")) {
+          node.setAttribute("data-load-fallback","true");
+          node.textContent = message;
+          node.classList.add("muted");
+        }
+      });
+    }, 18000);
+    // Expose a visible, accessible state when the page returns from a suspended tab.
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) window.dispatchEvent(new Event("tacoma-nights-page-resume"));
+    });
+  })();
+  </script>
+
 </body>
 </html>
