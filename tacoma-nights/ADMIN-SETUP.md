@@ -69,3 +69,10 @@ The page URL is not a security boundary. Authorization is enforced by the API on
 ### Producer Desk command-centre enhancement
 
 The Producer Desk overview now loads episode, task, guest, asset, story, event, and partner collections together and presents operational KPIs, overdue and blocked work, upcoming dated tasks, guest follow-ups due within seven days, episode pipeline status, and collection health. Collection failures are shown instead of silently appearing as zero. The record browser uses readable summaries and metadata while retaining the existing JSON editor and secured save/delete API. Quick links are available for the weekly tracker and specialist production tools.
+
+
+### Guest relationship management enhancement
+
+The Guest Booking Desk in `producer.html` now supports outreach-history entries, a reusable eight-step guest preparation checklist, quick episode assignment, and visible follow-up/checklist summaries on guest cards. The history and checklist are serialized into the existing `guests.private_notes` field with a version marker; legacy plain-text private notes are preserved as the notes portion when the CRM format is first saved. Episode assignment uses the existing `guests.episode_id` field and resolves against current episode records. No new tables or API routes are introduced. Outreach notes and guest preparation details remain private and should not be copied into public episode descriptions.
+
+Live Supabase sign-in, save permissions, and database persistence still require an authorized browser-session test.
