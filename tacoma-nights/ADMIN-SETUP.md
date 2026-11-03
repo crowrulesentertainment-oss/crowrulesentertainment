@@ -10,6 +10,25 @@
 - UI includes status/type filters, local search, queue counts, refresh, save, accept/decline shortcuts, and sign-out.
 - The browser uses only the project's publishable key. The service-role key must remain server-side in Supabase secrets.
 
+
+## Tacoma Nights Producer Desk
+
+Private show-operations workspace:
+https://crowrulesentertainment-oss.github.io/crowrulesentertainment/tacoma-nights/producer.html
+
+The Producer Desk uses the same Supabase Auth sign-in and trusted `app_metadata.role = admin` check as the other private production tools. It provides the production overview, episode records, archive curation, tasks, guest booking, and verified episode assets through the secured `tacoma-nights-api` admin data endpoints.
+
+The left-side **Show operations** shortcuts connect the existing specialist workspaces:
+- `episode-planner.html` — rundown, segment timing, and episode preparation.
+- `control-room.html` — premiere settings and crew directory controls.
+- `remote-host-admin.html` — private remote-host submission review.
+- `remote-host-operations.html` — remote-host assignment and delivery operations.
+- `team.html` — public crew directory preview.
+- `upload.html` — remote-host clip upload portal.
+- `admin.html` — general Tacoma Nights public submission review.
+
+The Producer Desk is an authenticated navigation and coordination hub; linked specialist pages retain their own authorization checks. A link being visible does not grant access. The public site does not link to this private page, and the page is marked noindex.
+
 ## Access prerequisites
 
 1. In Supabase Dashboard, open **Authentication → Users** and confirm the intended staff member has an account.
