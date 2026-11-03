@@ -81,3 +81,12 @@ Live Supabase sign-in, save permissions, and database persistence still require 
 ### Guest communications & follow-up centre
 
 The Producer Desk overview now includes a guest action queue split into overdue/due-today reminders, reminders due in the next seven days, and currently booked guests. Each guest can be opened from the queue. A message-template builder creates editable invitation, booking-confirmation, recording-reminder, and post-show thank-you drafts, with guest and assigned-episode details filled in where available. Templates are copied only when an administrator chooses the copy action; no email or message is sent automatically. The queue uses existing guest follow-up and booking fields and does not add database tables or API routes.
+
+
+### Guest self-service portal
+
+The private guest portal is `guest-portal.html`. In the Producer Desk guest cards, choose **Create guest portal link**. Each link is a random 256-bit token, stored only as a SHA-256 hash, expires after 30 days, and can be replaced (which revokes the previous active link). Guests can review limited episode details, submit up to eight availability windows, complete preparation fields, leave a producer note, and confirm they reviewed the details. No guest account or Producer Desk access is required.
+
+The dedicated Supabase Edge Function `tacoma-guest-portal` handles token validation, guest submissions, admin link creation, and admin submission review. Admin actions require a valid Supabase Auth bearer token with trusted `app_metadata.role = admin`. The `tacoma_nights_guest_portal_links` table has RLS enabled and direct `anon`/`authenticated` grants revoked. Only a hash of the invitation token is stored. The producer copies and sends the generated URL manually; no email is sent automatically.
+
+Before using with real guests, test a valid invitation end-to-end, verify a replacement link revokes the old one, verify expired links are rejected, and confirm ordinary authenticated accounts cannot use admin actions. Live browser submission testing has not yet been completed.
