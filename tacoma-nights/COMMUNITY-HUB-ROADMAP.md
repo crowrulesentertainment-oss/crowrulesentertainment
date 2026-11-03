@@ -71,3 +71,17 @@ A private Producer Desk is available at `producer.html`. It supports authenticat
 
 ## Immediate next priority
 Episode archive reliability: full YouTube playlist synchronization, manual Producer Desk curation, and visible public archive verification. Watchlists, analytics, and newsletter delivery remain deferred until archive verification is complete.
+
+
+## Implementation checkpoint — November 2, 2026
+
+- [x] Supabase `tacoma-nights-api` deployed as version 20.
+- [x] Public API merges manually curated production episodes only when `status = published` and the YouTube video ID is valid.
+- [x] Server rejects publishing an episode without a valid 11-character YouTube video ID.
+- [x] Homepage includes a visible archive verification panel driven by API verification metadata.
+- [x] Producer Desk includes a dedicated Public Episode Archive collection for published records.
+- [x] Roadmap priorities reordered so archive reliability precedes watchlists, analytics, and newsletter delivery.
+- [ ] GitHub Pages deployment for commit `98cbb28b6fc86cc384b0c14e860af38e68f172b5` was queued at the time of this checkpoint; confirm its final result.
+- [ ] Confirm the YouTube API secret is configured and verify the live API reports a complete playlist sync.
+- [ ] Confirm Episode 3 appears using its exact YouTube video ID; no episode ID has been guessed or inserted.
+- [ ] Create at least one verified manual archive record through the Producer Desk after confirming its exact video ID.
