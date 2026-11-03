@@ -16,6 +16,8 @@
 Private show-operations workspace:
 https://crowrulesentertainment-oss.github.io/crowrulesentertainment/tacoma-nights/producer.html
 
+The unified weekly production tracker is available at `production-tracker.html`. It reads the existing `episodes` and `tasks` collections through the secured admin API, calculates six production milestones from the saved episode status and YouTube video ID, and allows admins to update episode/task statuses. Tasks appear under an episode when `tasks.episode_id` matches that episode's record ID. It does not create tables, infer a YouTube upload from a schedule, or mark an episode archived automatically.
+
 The Producer Desk uses the same Supabase Auth sign-in and trusted `app_metadata.role = admin` check as the other private production tools. It provides the production overview, episode records, archive curation, tasks, guest booking, and verified episode assets through the secured `tacoma-nights-api` admin data endpoints.
 
 The left-side **Show operations** shortcuts connect the existing specialist workspaces:
