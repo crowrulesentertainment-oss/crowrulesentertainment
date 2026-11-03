@@ -2035,7 +2035,9 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
           const response = await fetch(url.href, {
             method: options.method || "GET",
             headers: {
-              "Content-Type": "application/json",
+              // GET requests do not need a JSON content type; omitting it avoids
+              // an unnecessary CORS preflight. POST requests still send JSON.
+              ...(options.method === "POST" ? { "Content-Type": "application/json" } : {}),
               ...(options.headers || {})
             },
             body: options.body ? JSON.stringify(options.body) : undefined,
@@ -3127,6 +3129,13 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
             .on("presence", { event: "join" }, updateCount)
             .on("presence", { event: "leave" }, updateCount)
             .subscribe(async connection => {
+          // Do not leave the public strip spinning forever if a browser or
+          // network keeps the Realtime channel from reaching SUBSCRIBED.
+          window.setTimeout(() => {
+            if (status && /connecting/i.test(status.textContent || "")) {
+              setState(null, "Live count is taking longer than expected · retry the page", false);
+            }
+          }, 12000);
               if (connection === "SUBSCRIBED") {
                 try {
                   const tracked = await channel.track({ visitorId, page: "public-site", onlineAt: new Date().toISOString() });
@@ -3150,22 +3159,37 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
       }
 
       async function init() {
-        setupSiteVisitorCounter();
+        // Start the three public content requests first. A failure in an optional
+        // enhancement (navigation, particles, chat, or presence) must never stop
+        // the episode archive, subscriber panel, or crew directory from loading.
         loadSavedEpisodes();
-        setupNavigation();
-        setupRevealAnimations();
-        setupParticles();
-        setupHeroConditions();
-        setupEvents();
-        setupPublicChat();
         updateSavedOnlyButton();
-
-        // Load independently so a problem with one endpoint doesn't block the others.
-        await Promise.allSettled([
+        const contentLoads = Promise.allSettled([
           loadEpisodes(),
           loadSubscriberStats(),
           loadCrew()
         ]);
+
+        const enhancements = [
+          ["visitor counter", setupSiteVisitorCounter],
+          ["navigation", setupNavigation],
+          ["reveal animations", setupRevealAnimations],
+          ["background particles", setupParticles],
+          ["Tacoma conditions", setupHeroConditions],
+          ["page controls", setupEvents],
+          ["public chat", setupPublicChat]
+        ];
+        for (const [name, initialize] of enhancements) {
+          try {
+            const result = initialize();
+            if (result && typeof result.catch === "function") {
+              result.catch(error => console.warn("Tacoma Nights " + name + " initialization failed:", error));
+            }
+          } catch (error) {
+            console.warn("Tacoma Nights " + name + " initialization failed:", error);
+          }
+        }
+        await contentLoads;
       }
 
 
