@@ -65,3 +65,7 @@ The page URL is not a security boundary. Authorization is enforced by the API on
 - Public Tacoma Nights: `https://crowrulesentertainment-oss.github.io/crowrulesentertainment/tacoma-nights/`
 - Private review desk: `https://crowrulesentertainment-oss.github.io/crowrulesentertainment/tacoma-nights/admin.html`
 - Supabase project: `https://supabase.com/dashboard/project/cevylpnoexugwgygvtgu`
+
+### Producer Desk command-centre enhancement
+
+The Producer Desk overview now loads episode, task, guest, asset, story, event, and partner collections together and presents operational KPIs, overdue and blocked work, upcoming dated tasks, guest follow-ups due within seven days, episode pipeline status, and collection health. Collection failures are shown instead of silently appearing as zero. The record browser uses readable summaries and metadata while retaining the existing JSON editor and secured save/delete API. Quick links are available for the weekly tracker and specialist production tools.
