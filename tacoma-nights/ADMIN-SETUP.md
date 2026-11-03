@@ -76,3 +76,8 @@ The Producer Desk overview now loads episode, task, guest, asset, story, event, 
 The Guest Booking Desk in `producer.html` now supports outreach-history entries, a reusable eight-step guest preparation checklist, quick episode assignment, and visible follow-up/checklist summaries on guest cards. The history and checklist are serialized into the existing `guests.private_notes` field with a version marker; legacy plain-text private notes are preserved as the notes portion when the CRM format is first saved. Episode assignment uses the existing `guests.episode_id` field and resolves against current episode records. No new tables or API routes are introduced. Outreach notes and guest preparation details remain private and should not be copied into public episode descriptions.
 
 Live Supabase sign-in, save permissions, and database persistence still require an authorized browser-session test.
+
+
+### Guest communications & follow-up centre
+
+The Producer Desk overview now includes a guest action queue split into overdue/due-today reminders, reminders due in the next seven days, and currently booked guests. Each guest can be opened from the queue. A message-template builder creates editable invitation, booking-confirmation, recording-reminder, and post-show thank-you drafts, with guest and assigned-episode details filled in where available. Templates are copied only when an administrator chooses the copy action; no email or message is sent automatically. The queue uses existing guest follow-up and booking fields and does not add database tables or API routes.
