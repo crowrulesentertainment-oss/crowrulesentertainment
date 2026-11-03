@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#08111d">
+<title>Tacoma Nights Insights | CrowRules Entertainment</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#08111d;--panel:#101e30;--line:rgba(184,220,246,.18);--text:#eef7ff;--muted:#9fb1c4;--cyan:#c8f1ff;--gold:#e7b975}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,rgba(50,100,150,.2),transparent 42%),var(--bg);color:var(--text);font:16px/1.6 "DM Sans",sans-serif}.wrap{width:min(1100px,calc(100% - 32px));margin:auto}.top{padding:34px 0 24px;border-bottom:1px solid var(--line)}.eyebrow{color:var(--cyan);font-size:.72rem;font-weight:800;letter-spacing:.17em;text-transform:uppercase}h1,h2,h3{font-family:Manrope,sans-serif;line-height:1.15}h1{font-size:clamp(2rem,5vw,3.5rem);margin:8px 0}h2{font-size:1.25rem}p{color:var(--muted)}.panel{padding:24px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,rgba(17,33,52,.96),rgba(8,17,29,.98));margin:24px 0}.form{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end}.field{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:10px;background:#07101b;color:var(--text)}label{display:block;font-size:.82rem;font-weight:700;margin-bottom:6px}.button{border:0;border-radius:10px;padding:13px 18px;background:linear-gradient(135deg,#c8f1ff,#83c9e8);color:#07131b;font-weight:800;cursor:pointer}.button.secondary{background:transparent;color:var(--text);border:1px solid var(--line)}.status{min-height:24px;color:var(--muted);font-size:.9rem}.hidden{display:none!important}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.metric{padding:20px;border:1px solid var(--line);border-radius:14px;background:rgba(3,10,18,.45)}.metric strong{display:block;font:800 2rem Manrope,sans-serif;color:var(--cyan)}.metric span{font-size:.8rem;color:var(--muted)}.cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}.list{display:grid;gap:12px}.bar-row{display:grid;grid-template-columns:minmax(110px,1fr) minmax(100px,2fr) 42px;gap:10px;align-items:center;font-size:.82rem}.bar{height:9px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}.bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#5da9ce,#c8f1ff)}.muted{color:var(--muted)}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}a{color:var(--cyan)}footer{padding:28px 0 50px;color:var(--muted);font-size:.82rem}@media(max-width:760px){.metrics{grid-template-columns:repeat(2,1fr)}.cols,.form{grid-template-columns:1fr}}@media(max-width:420px){.metrics{grid-template-columns:1fr 1fr}.metric strong{font-size:1.55rem}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body><header class="top"><div class="wrap"><span class="eyebrow">CrowRules Entertainment · Private</span><h1>Tacoma Nights Insights</h1><p>Audience activity, episode engagement, community referrals, and recruitment interest. This dashboard is restricted to Tacoma Nights administrators.</p><a href="./">← Back to Tacoma Nights</a></div></header>
+<main class="wrap">
+<section class="panel" id="authPanel"><h2>Administrator sign-in</h2><p>Sign in with the Supabase account that has the <code>app_metadata.role = admin</code> claim.</p><form id="loginForm" class="form"><div><label for="email">Email address</label><input class="field" id="email" type="email" autocomplete="username" required maxlength="254"></div><div><label for="password">Password</label><input class="field" id="password" type="password" autocomplete="current-password" required></div><button class="button" id="loginButton">Sign in</button></form><p class="status" id="authStatus" role="status"></p></section>
+<section id="dashboard" class="hidden">
+<div class="panel"><div style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap"><div><span class="eyebrow">Last 30 days</span><h2>Audience overview</h2><p class="muted" id="rangeLabel">Loading analytics…</p></div><div class="actions"><button class="button secondary" id="refreshButton">Refresh data</button><button class="button secondary" id="logoutButton">Sign out</button></div></div><p class="status" id="dataStatus" role="status"></p><div class="metrics"><div class="metric"><strong id="pageViews">—</strong><span>Page visits</span></div><div class="metric"><strong id="episodeOpens">—</strong><span>Episode opens</span></div><div class="metric"><strong id="outboundClicks">—</strong><span>YouTube click-outs</span></div><div class="metric"><strong id="recruitmentClicks">—</strong><span>Recruitment interest</span></div></div></div>
+<div class="cols"><section class="panel"><h2>Top episodes</h2><div id="topEpisodes" class="list muted">No data yet.</div></section><section class="panel"><h2>Referral sources</h2><div id="referrals" class="list muted">No data yet.</div></section></div>
+<div class="panel"><h2>Recent activity</h2><div id="recentEvents" class="list muted">No data yet.</div><p class="muted">Analytics are first-party, event-based counts. No IP addresses, names, or email addresses are collected in this dashboard. Counts may exclude visitors who block browser requests.</p></div>
+</section></main><footer class="wrap">CrowRules Entertainment · Tacoma Nights · <a href="./">Public show website</a></footer>
+<script>
+(() => {
+"use strict";
+const URL="https://cevylpnoexugwgygvtgu.supabase.co";
+const KEY="sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";
+const $=id=>document.getElementById(id);
+const db=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const say=(id,message)=>{$(id).textContent=message;};
+const safe=(value)=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function isAdmin(user){return user?.app_metadata?.role==="admin";}
+function renderBars(target,items,labelFn){
+ const root=$(target);root.replaceChildren();
+ if(!items.length){root.textContent="No activity recorded yet.";return;}
+ const max=Math.max(1,...items.map(x=>x.count));
+ items.forEach(item=>{const row=document.createElement("div");row.className="bar-row";const label=document.createElement("span");label.textContent=labelFn(item);const track=document.createElement("div");track.className="bar";const fill=document.createElement("i");fill.style.width=(item.count/max*100)+"%";track.append(fill);const count=document.createElement("strong");count.textContent=item.count;row.append(label,track,count);root.append(row);});
+}
+function aggregate(rows,keyFn){const map=new Map();rows.forEach(row=>{const key=keyFn(row)||"Direct / unknown";map.set(key,(map.get(key)||0)+1);});return [...map.entries()].map(([label,count])=>({label,count})).sort((a,b)=>b.count-a.count).slice(0,8);}
+async function loadData(){
+ say("dataStatus","Loading the last 30 days…");
+ const since=new Date(Date.now()-30*86400000).toISOString();
+ const {data,error}=await db.from("tacoma_nights_analytics_events").select("event_type,youtube_video_id,page_path,created_at,metadata").gte("created_at",since).order("created_at",{ascending:false}).limit(1000);
+ if(error){say("dataStatus","Could not load analytics: "+error.message);return;}
+ const rows=data||[];
+ const count=(type)=>rows.filter(row=>row.event_type===type).length;
+ $("pageViews").textContent=rows.filter(row=>row.event_type==="event_click"&&row.metadata?.action==="page_view").length.toLocaleString();
+ $("episodeOpens").textContent=count("episode_open").toLocaleString();
+ $("outboundClicks").textContent=count("episode_outbound_click").toLocaleString();
+ $("recruitmentClicks").textContent=count("guest_pitch").toLocaleString();
+ $("rangeLabel").textContent=rows.length+" recorded events · "+new Date(since).toLocaleDateString()+" – today";
+ const episodes=aggregate(rows.filter(row=>row.event_type==="episode_open"),row=>row.youtube_video_id||row.metadata?.label||"Episode");
+ renderBars("topEpisodes",episodes,item=>item.label);
+ const refs=aggregate(rows,row=>row.metadata?.referrer_host||"Direct / unknown");
+ renderBars("referrals",refs,item=>item.label);
+ const recent=$("recentEvents");recent.replaceChildren();
+ rows.slice(0,12).forEach(row=>{const item=document.createElement("div");item.style.cssText="display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid rgba(184,220,246,.1)";const left=document.createElement("span");left.textContent=(row.event_type||"event").replaceAll("_"," ");const right=document.createElement("span");right.className="muted";right.textContent=new Date(row.created_at).toLocaleString();item.append(left,right);recent.append(item);});
+ if(!rows.length)recent.textContent="No events recorded in this period yet.";
+ say("dataStatus","Analytics loaded. Up to 1,000 most recent events are included.");
+}
+async function showSession(session){
+ if(!session){$("authPanel").classList.remove("hidden");$("dashboard").classList.add("hidden");return;}
+ const {data,error}=await db.auth.getUser();
+ if(error||!isAdmin(data?.user)){await db.auth.signOut();$("authPanel").classList.remove("hidden");$("dashboard").classList.add("hidden");say("authStatus","This account does not have the administrator role.");return;}
+ $("authPanel").classList.add("hidden");$("dashboard").classList.remove("hidden");await loadData();
+}
+$("loginForm").addEventListener("submit",async event=>{event.preventDefault();$("loginButton").disabled=true;say("authStatus","Signing in…");const {data,error}=await db.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});$("loginButton").disabled=false;if(error){say("authStatus",error.message);return;}await showSession(data.session);});
+$("refreshButton").addEventListener("click",loadData);
+$("logoutButton").addEventListener("click",async()=>{await db.auth.signOut();$("dashboard").classList.add("hidden");$("authPanel").classList.remove("hidden");say("authStatus","Signed out.");});
+db.auth.getSession().then(({data})=>showSession(data.session));
+})();
+</script></body></html>
