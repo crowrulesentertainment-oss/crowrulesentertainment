@@ -112,9 +112,9 @@ async function renderOverview(){
  const run=++overviewRun, keys=['episodes','tasks','guests','assets','stories','events','partners'];
  $('stats').innerHTML='<div class="stat"><small>Loading command centre…</small><strong>…</strong></div>';
  $('records').innerHTML='<div class="panel">Gathering production records…</div>';
- const results=await Promise.all(keys.map(async k=>{try{const d=await api('admin-data-list','GET',{table:defs[k].table});return [k,d.items||[],null]}catch(e){return [k,[],e.message]}}));
+ const results=await Promise.all(keys.map(async k=>{try{const d=await api('admin-data-list','GET',{table:defs[k].table});return [k,Array.isArray(d.items)?d.items:[],null]}catch(e){return [k,[],e.message]}}));
  if(run!==overviewRun)return;
- const data=Object.fromEntries(results.map(([k,v])=>[k,v]));
+ const data=Object.fromEntries(results.map(([k,v])=>[k,[null,v]]));
  const count=k=>data[k][1].length;
  const eps=data.episodes[1],tasks=data.tasks[1],guests=data.guests[1],assets=data.assets[1];window.__tnEpisodes=eps;
  const activeEps=eps.filter(x=>!['published','archived'].includes(String(x.status||'').toLowerCase()));
