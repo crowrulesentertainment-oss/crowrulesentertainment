@@ -67,3 +67,7 @@ A private Producer Desk is available at `producer.html`. It supports authenticat
 - [ ] Add transactional email for newsletter confirmation/unsubscribe only after a verified sender/domain and compliant mailing workflow are configured. Do not collect newsletter signups as active without confirmation.
 - [ ] Complete owner-scoped watchlist routes/UI, analytics ingestion and dashboard, transcript/clip display, episode companion pages, and actual email delivery.
 - [ ] Add persistent rate limiting, retention/deletion rules, audit log for admin changes, and backups for operational data.
+
+
+## Immediate next priority
+Episode archive reliability: full YouTube playlist synchronization, manual Producer Desk curation, and visible public archive verification. Watchlists, analytics, and newsletter delivery remain deferred until archive verification is complete.
