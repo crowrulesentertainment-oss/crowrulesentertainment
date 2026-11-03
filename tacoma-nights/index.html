@@ -3124,11 +3124,6 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
             auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
           });
           setState(null, "Connecting to live visitors…", false);
-          channel = visitorClient.channel("tacoma-nights-sitewide-live-visitors", { config: { presence: { key: sessionId } } })
-            .on("presence", { event: "sync" }, updateCount)
-            .on("presence", { event: "join" }, updateCount)
-            .on("presence", { event: "leave" }, updateCount)
-            .subscribe(async connection => {
           // Do not leave the public strip spinning forever if a browser or
           // network keeps the Realtime channel from reaching SUBSCRIBED.
           window.setTimeout(() => {
@@ -3136,6 +3131,11 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
               setState(null, "Live count is taking longer than expected · retry the page", false);
             }
           }, 12000);
+          channel = visitorClient.channel("tacoma-nights-sitewide-live-visitors", { config: { presence: { key: sessionId } } })
+            .on("presence", { event: "sync" }, updateCount)
+            .on("presence", { event: "join" }, updateCount)
+            .on("presence", { event: "leave" }, updateCount)
+            .subscribe(async connection => {
               if (connection === "SUBSCRIBED") {
                 try {
                   const tracked = await channel.track({ visitorId, page: "public-site", onlineAt: new Date().toISOString() });
