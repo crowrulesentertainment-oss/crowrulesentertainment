@@ -33,6 +33,7 @@
     {label:"Activity Feed",file:"listener-activity.html",icon:"◷",roles:["member","creator","admin"]},
     {label:"Notifications",file:"notifications.html",icon:"♢",roles:["member","creator","admin"]},
     {label:"Discover",file:"discover.html",roles:["public","member","creator","admin"]},
+    {label:"Platform Features",file:"features.html",icon:"✦",roles:["public","member","creator","admin"]},
     {label:"Charts & Rankings",file:"rankings.html",icon:"↗",roles:["public","member","creator","admin"]},
     {label:"Podcasting Awards",file:"awards.html",icon:"🏆",roles:["public","member","creator","admin"]},
     {label:"Guest Lounge",file:"guest-lounge.html",icon:"◉",roles:["public","member","creator","admin"]},
