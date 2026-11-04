@@ -53,7 +53,7 @@ footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-s
 <div class="field full"><label for="segment_name_idea">Proposed segment name idea</label><input id="segment_name_idea" name="segment_name_idea" maxlength="120" placeholder="e.g. The 253 Spotlight, Neighbor’s Mic, Tacoma Then & Now"><small style="color:var(--muted)">Have an idea for a recurring feature? Give it a working title. This is optional — you can also develop an idea with the production team.</small></div>
 <div class="field full"><label for="experience">Tell us about any hosting, speaking, video, podcast, or community experience</label><textarea id="experience" name="experience" maxlength="2500" placeholder="Experience is welcome but not required."></textarea></div>
 <div class="field full"><label for="setup">What equipment and internet setup do you have?</label><textarea id="setup" name="setup" maxlength="1500" placeholder="Computer or phone, microphone/headset, camera, internet reliability, and recording space."></textarea></div>
-<div class="field full"><label for="sample">Sample segment (audio or video, optional)</label><input id="sample" name="sample" type="file" accept="audio/mpeg,audio/mp3,audio/wav,audio/x-wav,audio/mp4,audio/x-m4a,audio/aac,audio/ogg,audio/webm,video/mp4,video/webm,video/quicktime,.mp3,.wav,.m4a,.aac,.ogg,.webm,.mp4,.mov"><small style="color:var(--muted)">Upload a short example of the kind of segment you'd like to contribute. Accepted: MP3, WAV, M4A, AAC, OGG, WEBM, MP4, MOV. Maximum file size: 500 MB. Large files upload in resumable chunks. Your sample is stored privately and only reviewed by authorized Tacoma Nights administrators.</small><div class="status" id="sampleStatus" aria-live="polite">No sample selected. You can submit without an attachment.</div></div>
+<div class="field full"><label for="sample">Sample segment (audio or video, optional)</label><input id="sample" name="sample" type="file" accept="audio/mpeg,audio/mp3,audio/wav,audio/x-wav,audio/mp4,audio/x-m4a,audio/aac,audio/ogg,audio/webm,video/mp4,video/webm,video/quicktime,.mp3,.wav,.m4a,.aac,.ogg,.webm,.mp4,.mov"><small style="color:var(--muted)">Upload a short example of the kind of segment you'd like to contribute. Accepted: MP3, WAV, M4A, AAC, OGG, WEBM, MP4, MOV. Maximum file size: 50 GB. Large files upload in resumable chunks. Your sample is stored privately and only reviewed by authorized Tacoma Nights administrators.</small><div class="status" id="sampleStatus" aria-live="polite">No sample selected. You can submit without an attachment.</div></div>
 <div class="field full"><label for="why">Why would you like to join Tacoma Nights? *</label><textarea id="why" name="why" required maxlength="2500" placeholder="What would you bring to the conversation?"></textarea></div>
 </div><label class="agree"><input type="checkbox" name="volunteer_acknowledgement" required><span>I understand that participation is currently a volunteer/community collaboration opportunity, not a paid position. Future paid roles may be considered if CrowRules Entertainment grows and becomes financially able, but compensation is not guaranteed. Applying does not guarantee selection or publication.</span></label><label class="agree"><input type="checkbox" name="contact_consent" required><span>I agree that Tacoma Nights may review this application and contact me about this opportunity. My contact details should not be published.</span></label><button class="btn primary" type="submit" style="width:100%;cursor:pointer">Submit remote host application ↗</button><div class="status" id="formStatus" role="status" aria-live="polite">Ready when you are. Complete the form and submit your application.</div><p class="fine">Your application should be handled privately by authorized production personnel. Do not submit passwords, payment details, government ID numbers, or other sensitive information.</p></form></div></section>
 </main>
@@ -108,9 +108,9 @@ footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-s
       return;
     }
     const ext = extensionOf(file);
-    if (!allowedExtensions.has(ext) || file.size > 500 * 1024 * 1024) {
+    if (!allowedExtensions.has(ext) || file.size > 50 * 1024 * 1024 * 1024) {
       sampleStatus.className = "status error";
-      sampleStatus.textContent = "That file can't be used. Choose MP3, WAV, M4A, AAC, OGG, WEBM, MP4, or MOV up to 500 MB.";
+      sampleStatus.textContent = "That file can't be used. Choose MP3, WAV, M4A, AAC, OGG, WEBM, MP4, or MOV up to 50 GB.";
       sampleInput.value = "";
       return;
     }
@@ -160,8 +160,8 @@ footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-s
     let uploadedPath = null;
     if (sample) {
       const ext = extensionOf(sample);
-      if (!allowedExtensions.has(ext) || sample.size > 500 * 1024 * 1024) {
-        setStatus("Choose a supported audio/video file no larger than 500 MB.", "error");
+      if (!allowedExtensions.has(ext) || sample.size > 50 * 1024 * 1024 * 1024) {
+        setStatus("Choose a supported audio/video file no larger than 50 GB.", "error");
         return;
       }
     }
@@ -197,7 +197,7 @@ footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-s
               removeFingerprintOnSuccess: true,
               chunkSize: 6 * 1024 * 1024,
               metadata: {
-                bucketName: "tacoma-host-samples",
+                bucketName: "tacoma-nights-clips",
                 objectName: uploadedPath,
                 contentType,
                 cacheControl: "3600"
@@ -219,7 +219,7 @@ footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-s
             }).catch(reject);
           });
         } else {
-          const { error: uploadError } = await db.storage.from("tacoma-host-samples")
+          const { error: uploadError } = await db.storage.from("tacoma-nights-clips")
             .upload(uploadedPath, sample, { cacheControl:"3600", contentType, upsert:false });
           if (uploadError) throw uploadError;
         }
@@ -242,7 +242,7 @@ footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-s
       // Avoid leaving an orphaned private upload if the database insert fails.
       if (uploadedPath) {
         try {
-          const { error: cleanupError } = await db.storage.from("tacoma-host-samples").remove([uploadedPath]);
+          const { error: cleanupError } = await db.storage.from("tacoma-nights-clips").remove([uploadedPath]);
           if (cleanupError) console.warn("Sample cleanup could not be completed:", cleanupError);
         } catch (cleanupError) {
           console.warn("Sample cleanup could not be completed:", cleanupError);
