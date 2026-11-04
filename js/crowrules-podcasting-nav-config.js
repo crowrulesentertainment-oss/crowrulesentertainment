@@ -7,7 +7,8 @@
   base,
   groups:[
    {id:"creator",title:"CREATOR STUDIO",items:[
-    {label:"Studio",file:"creator-dashboard.html",icon:"⌂",roles:["creator","admin"]},
+    {label:"Studio",file:"creator-dashboard-v2.html",icon:"⌂",roles:["creator","admin"]},
+    {label:"Recording Studio",file:"studio.html",icon:"🎙",roles:["creator","admin"]},
     {label:"My Podcasts",file:"podcasts.html",icon:"◉",roles:["creator","admin"]},
     {label:"Create Podcast",file:"create-podcast.html",icon:"＋",roles:["creator","admin"]},
     {label:"Create Episode",file:"create-episode.html",icon:"＋",roles:["creator","admin"]},
@@ -32,6 +33,11 @@
     {label:"Activity Feed",file:"listener-activity.html",icon:"◷",roles:["member","creator","admin"]},
     {label:"Notifications",file:"notifications.html",icon:"♢",roles:["member","creator","admin"]},
     {label:"Discover",file:"discover.html",roles:["public","member","creator","admin"]},
+    {label:"Charts & Rankings",file:"rankings.html",icon:"↗",roles:["public","member","creator","admin"]},
+    {label:"Podcasting Awards",file:"awards.html",icon:"🏆",roles:["public","member","creator","admin"]},
+    {label:"Guest Lounge",file:"guest-lounge.html",icon:"◉",roles:["public","member","creator","admin"]},
+    {label:"Creator Community",file:"community.html",icon:"♧",roles:["member","creator","admin"]},
+    {label:"Recording Studio",file:"studio.html",icon:"🎙",roles:["creator","admin"]},
     {label:"Following",file:"following.html",roles:["member","creator","admin"]},
     {label:"Favorites",file:"favorites.html",roles:["member","creator","admin"]},
     {label:"Listening History",file:"history.html",roles:["member","creator","admin"]}
