@@ -74,7 +74,6 @@ footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-s
     mp3:"audio/mpeg", wav:"audio/wav", m4a:"audio/mp4", aac:"audio/aac",
     ogg:"audio/ogg", webm:"video/webm", mp4:"video/mp4", mov:"video/quicktime"
   };
-  const allowedMimeTypes = new Set(Object.values(mimeByExtension));
   let submitting = false;
   let client = null;
 
@@ -164,10 +163,6 @@ footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-s
         setStatus("Choose a supported audio/video file no larger than 100 MB.", "error");
         return;
       }
-      if (sample.type && !allowedMimeTypes.has(sample.type)) {
-        setStatus("That file type isn't supported. Please choose one of the listed audio/video formats.", "error");
-        return;
-      }
     }
 
     submitting = true;
@@ -181,7 +176,9 @@ footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-s
         const ext = extensionOf(sample);
         const safeName = sample.name.normalize("NFKD").replace(/[^a-zA-Z0-9._-]+/g, "_").slice(-100) || ("segment." + ext);
         uploadedPath = "applications/" + randomId() + "/" + safeName;
-        const contentType = sample.type || mimeByExtension[ext] || "application/octet-stream";
+        // Use the extension map instead of the browser-reported MIME type.
+        // Browsers report inconsistent MIME values for valid audio formats such as M4A/WAV.
+        const contentType = mimeByExtension[ext];
         const { error: uploadError } = await db.storage.from("tacoma-host-samples")
           .upload(uploadedPath, sample, { cacheControl:"3600", contentType, upsert:false });
         if (uploadError) throw uploadError;
@@ -225,5 +222,5 @@ footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-s
   });
   setStatus("Ready when you are. Complete the form and submit your application.");
 })();
-</script>>
+</script>
 </body></html>
