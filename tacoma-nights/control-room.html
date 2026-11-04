@@ -409,7 +409,7 @@ body:before{opacity:.3;background:radial-gradient(ellipse at 50% 0%,#52677e22,tr
 <section class="panel" id="hostApplicationsPanel">
  <div class="panelhead"><div><p class="micro">05 / TALENT &amp; RECRUITMENT</p><h2>Remote host applications</h2><p>Review private applications submitted through the public Remote Host page. Approvals and denials are recorded in Supabase. Only administrators can access this inbox.</p></div><button class="btn ghost" id="hostApplicationsRefresh" type="button">Refresh applications</button></div>
  <div class="host-app-stats"><div><strong id="hostAppsNew">0</strong><span>AWAITING REVIEW</span></div><div><strong id="hostAppsApproved">0</strong><span>APPROVED</span></div><div><strong id="hostAppsDenied">0</strong><span>DENIED</span></div><div><strong id="hostAppsTotal">0</strong><span>TOTAL</span></div></div>
- <div class="toolbar"><label>Filter applications<select id="hostApplicationFilter"><option value="all">All applications</option><option value="new">Awaiting review</option><option value="approved">Approved</option><option value="denied">Denied</option></select></label><label>Search applicants<input id="hostApplicationSearch" type="search" placeholder="Name, email, location or topic"></label></div>
+ <div class="toolbar"><label>Filter applications<select id="hostApplicationFilter"><option value="all">All applications</option><option value="new">Awaiting review</option><option value="accepted">Accepted</option><option value="declined">Declined</option></select></label><label>Search applicants<input id="hostApplicationSearch" type="search" placeholder="Name, email, location or topic"></label></div>
  <div id="hostApplicationsStatus" class="notice" role="status" aria-live="polite">Remote host applications will appear here.</div>
  <div id="hostApplicationsList" class="list host-application-list"><div class="item"><p>Sign in as an administrator to load applications.</p></div></div>
 </section>
@@ -521,37 +521,37 @@ async function loadHostApplications(){
  const {data,error}=await db.from('tacoma_nights_host_applications').select('id,name,on_air_name,email,location,availability,format,interests,experience,setup,why,volunteer_acknowledgement,contact_consent,status,created_at,internal_notes,reviewed_at,reviewed_by,sample_path,sample_original_name,sample_mime_type,sample_size_bytes').order('created_at',{ascending:false}).limit(300);
  if(error)throw error;
  hostApplicationsCache=data||[];
- $('hostAppsNew').textContent=hostApplicationsCache.filter(x=>!['approved','denied'].includes(x.status)).length;
- $('hostAppsApproved').textContent=hostApplicationsCache.filter(x=>x.status==='approved').length;
- $('hostAppsDenied').textContent=hostApplicationsCache.filter(x=>x.status==='denied').length;
+ $('hostAppsNew').textContent=hostApplicationsCache.filter(x=>!['accepted','declined'].includes(x.status)).length;
+ $('hostAppsApproved').textContent=hostApplicationsCache.filter(x=>x.status==='accepted').length;
+ $('hostAppsDenied').textContent=hostApplicationsCache.filter(x=>x.status==='declined').length;
  $('hostAppsTotal').textContent=hostApplicationsCache.length;
  renderHostApplications();
  say($('hostApplicationsStatus'),'Loaded '+hostApplicationsCache.length+' remote host application(s). Applicant contact details and sample files are private.');
 }
 function renderHostApplications(){
  const filter=$('hostApplicationFilter').value,query=$('hostApplicationSearch').value.trim().toLowerCase();
- const rows=hostApplicationsCache.filter(a=>(filter==='all'||(filter==='new'?!['approved','denied'].includes(a.status):a.status===filter))&&(!query||[a.name,a.on_air_name,a.email,a.location,a.interests,a.why].join(' ').toLowerCase().includes(query)));
+ const rows=hostApplicationsCache.filter(a=>(filter==='all'||(filter==='new'?!['accepted','declined'].includes(a.status):a.status===filter))&&(!query||[a.name,a.on_air_name,a.email,a.location,a.interests,a.why].join(' ').toLowerCase().includes(query)));
  const list=$('hostApplicationsList');
  if(!rows.length){list.innerHTML='<div class="item"><p>No remote host applications match this filter.</p></div>';return;}
  list.innerHTML=rows.map(a=>{
-  const pending=!['approved','denied'].includes(a.status);
+  const pending=!['accepted','declined'].includes(a.status);
   const sample=a.sample_path&&String(a.sample_path).startsWith('applications/')?'<button class="btn ghost" type="button" data-host-sample="'+esc(a.id)+'">Open private sample ↗</button>':'<span class="itemmeta">No sample attached</span>';
-  return '<article class="item host-application" data-host-application="'+esc(a.id)+'"><div class="itemtop"><div><span class="pill '+(a.status==='approved'?'':'off')+'">'+esc(a.status||'new')+'</span><h3>'+esc(a.name)+'</h3><p class="itemmeta">'+esc(a.email)+' · '+esc(a.location)+' · '+esc(mediaDate(a.created_at))+'</p></div></div>'+
+  return '<article class="item host-application" data-host-application="'+esc(a.id)+'"><div class="itemtop"><div><span class="pill '+(a.status==='accepted'?'':'off')+'">'+esc(a.status||'new')+'</span><h3>'+esc(a.name)+'</h3><p class="itemmeta">'+esc(a.email)+' · '+esc(a.location)+' · '+esc(mediaDate(a.created_at))+'</p></div></div>'+
   (a.on_air_name?'<p><strong>On-air name:</strong> '+esc(a.on_air_name)+'</p>':'')+
   '<div class="host-application-details"><p><strong>Availability</strong><br>'+esc(a.availability)+'</p><p><strong>Participation</strong><br>'+esc(a.format)+'</p></div>'+
   '<p><strong>Topics / segments</strong><br>'+esc(a.interests)+'</p><p><strong>Why Tacoma Nights?</strong><br>'+esc(a.why)+'</p>'+
   (a.experience?'<p><strong>Experience</strong><br>'+esc(a.experience)+'</p>':'')+(a.setup?'<p><strong>Equipment / internet</strong><br>'+esc(a.setup)+'</p>':'')+
   '<div class="host-sample-row">'+sample+(a.sample_original_name?'<span class="itemmeta">'+esc(a.sample_original_name)+' · '+esc(formatBytes(a.sample_size_bytes))+'</span>':'')+'</div>'+
   '<label class="host-review-notes">Private administrator notes<textarea data-host-notes rows="3" maxlength="5000" placeholder="Interview notes, decision rationale, follow-up…">'+esc(a.internal_notes||'')+'</textarea></label>'+
-  '<div class="host-review-actions">'+(pending?'<button class="btn" type="button" data-host-decision="approved" data-id="'+esc(a.id)+'">✓ Approve application</button><button class="btn danger" type="button" data-host-decision="denied" data-id="'+esc(a.id)+'">Deny application</button>':'<span class="itemmeta">Reviewed '+esc(mediaDate(a.reviewed_at))+'</span><button class="btn ghost" type="button" data-host-reopen="'+esc(a.id)+'">Return to review</button>')+
+  '<div class="host-review-actions">'+(pending?'<button class="btn" type="button" data-host-decision="accepted" data-id="'+esc(a.id)+'">✓ Approve application</button><button class="btn danger" type="button" data-host-decision="declined" data-id="'+esc(a.id)+'">Deny application</button>':'<span class="itemmeta">Reviewed '+esc(mediaDate(a.reviewed_at))+'</span><button class="btn ghost" type="button" data-host-reopen="'+esc(a.id)+'">Return to review</button>')+
   '<button class="btn ghost" type="button" data-host-save-notes="'+esc(a.id)+'">Save notes</button></div></article>';
  }).join('');
 }
 async function decideHostApplication(id,decision,button){
  const record=hostApplicationsCache.find(x=>x.id===id);if(!record)return;
  const card=button.closest('[data-host-application]'),notes=card?.querySelector('[data-host-notes]')?.value||'';
- if(!['approved','denied','new'].includes(decision))return;
- const label=decision==='approved'?'approve':decision==='denied'?'deny':'return to review';
+ if(!['accepted','declined','new'].includes(decision))return;
+ const label=decision==='accepted'?'accept':decision==='declined'?'decline':'return to review';
  if(!confirm('Are you sure you want to '+label+' the remote host application from '+record.name+'?'))return;
  setBusy(button,true);
  try{
@@ -560,7 +560,7 @@ async function decideHostApplication(id,decision,button){
   if(error)throw error;if(!data)throw new Error('No application was updated. Refresh the inbox and verify administrator permissions.');
   await loadHostApplications();say($('hostApplicationsStatus'),'Application status updated to '+decision+'. The decision and review timestamp were saved.');
  }catch(err){say($('hostApplicationsStatus'),err.message||'Could not save the application decision.',true);}
- finally{setBusy(button,false,decision==='approved'?'✓ Approve application':decision==='denied'?'Deny application':'Return to review');}
+ finally{setBusy(button,false,decision==='accepted'?'✓ Approve application':decision==='declined'?'Deny application':'Return to review');}
 }
 async function openHostApplicationSample(id,button){
  const record=hostApplicationsCache.find(x=>x.id===id);if(!record?.sample_path||!String(record.sample_path).startsWith('applications/'))return;
