@@ -1,0 +1,61 @@
+name: CrowRules Podcasting Experience V2
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "podcasting/**"
+      - "js/crowrules-podcasting-nav-config.js"
+      - ".github/workflows/podcasting-v2-validate.yml"
+  workflow_dispatch:
+jobs:
+  validate-and-package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out proposed upgrade
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check JavaScript syntax
+        run: node --check podcasting/js/experience-v2.js
+      - name: Validate HTML documents parse
+        run: |
+          python - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+          class Check(HTMLParser):
+              pass
+          files = [
+              "podcasting/index.html", "podcasting/show.html", "podcasting/discover.html",
+              "podcasting/rankings.html", "podcasting/awards.html", "podcasting/guest-lounge.html",
+              "podcasting/community.html", "podcasting/studio.html",
+              "podcasting/creator-dashboard-v2.html", "podcasting/features.html"
+          ]
+          for name in files:
+              parser = Check()
+              parser.feed(Path(name).read_text(encoding="utf-8"))
+              parser.close()
+              print("OK:", name)
+          PY
+      - name: Package complete V2 website bundle
+        run: |
+          zip -r crowrules-podcasting-experience-v2.zip \
+            podcasting/index.html \
+            podcasting/index-legacy-20261103.html \
+            podcasting/css/podcasting.css \
+            podcasting/css/experience-v2.css \
+            podcasting/js/podcasting.js \
+            podcasting/js/experience-v2.js \
+            podcasting/show.html podcasting/discover.html podcasting/rankings.html \
+            podcasting/awards.html podcasting/guest-lounge.html podcasting/community.html \
+            podcasting/studio.html podcasting/creator-dashboard-v2.html podcasting/features.html \
+            podcasting/EXPERIENCE-V2-BLUEPRINT.md \
+            podcasting/database/EXPERIENCE-V2-DATABASE-NOTES.md \
+            js/crowrules-podcasting-nav.js js/crowrules-podcasting-nav-config.js
+      - name: Upload downloadable package
+        uses: actions/upload-artifact@v4
+        with:
+          name: crowrules-podcasting-experience-v2
+          path: crowrules-podcasting-experience-v2.zip
+          retention-days: 30
