@@ -2498,49 +2498,100 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
         return card;
       }
 
-      async function loadCrew() {
+      let crewLoadPromise = null;
+      let crewRetryTimer = null;
+
+      function renderCrewProfiles(crew) {
         const grid = $("#crewGrid");
         grid.replaceChildren();
-        const loading = document.createElement("div");
-        loading.className = "empty-state";
-        loading.style.gridColumn = "1 / -1";
-        loading.textContent = "Loading crew profiles…";
-        grid.appendChild(loading);
-        $("#crewStatus").textContent = "";
-
-        try {
-          const data = await apiRequest("crew");
-          const crew = getArray(data, ["crew", "members", "results", "items"]);
-          state.crew = crew.filter(member => member && typeof member === "object");
-
-          grid.replaceChildren();
-
-          if (!state.crew.length) {
-            const empty = document.createElement("div");
-            empty.className = "empty-state";
-            empty.style.gridColumn = "1 / -1";
-            empty.textContent = "Crew profiles are not published yet. Check back as the Tacoma Nights team grows.";
-            grid.appendChild(empty);
-            $("#crewStatus").textContent = "No published Tacoma Nights crew profiles were returned by the API.";
-            return;
-          }
-
-          state.crew
-            .sort((a, b) => Number(a.sort_order ?? 999) - Number(b.sort_order ?? 999))
-            .forEach(member => grid.appendChild(createCrewCard(member)));
-
-          $("#crewStatus").textContent = `${state.crew.length} crew profile${state.crew.length === 1 ? "" : "s"} loaded.`;
-        } catch (error) {
-          grid.replaceChildren();
-          const empty = document.createElement("div");
-          empty.className = "empty-state";
-          empty.style.gridColumn = "1 / -1";
-          empty.textContent = "Crew profiles could not be loaded. Check the crew API configuration and try again.";
-          grid.appendChild(empty);
-          $("#crewStatus").textContent = safeText(error.message, "Unable to load crew profiles.");
-        }
+        crew
+          .slice()
+          .sort((a, b) => Number(a.sort_order ?? 999) - Number(b.sort_order ?? 999))
+          .forEach(member => grid.appendChild(createCrewCard(member)));
+        $("#crewStatus").textContent = `${crew.length} crew profile${crew.length === 1 ? "" : "s"} loaded.`;
       }
 
+      function showCrewRetry(message) {
+        const grid = $("#crewGrid");
+        // Never remove a previously successful set of cards because a refresh failed.
+        if (!grid.children.length || grid.querySelector(".crew-loading")) {
+          grid.replaceChildren();
+          const notice = document.createElement("div");
+          notice.className = "empty-state";
+          notice.style.gridColumn = "1 / -1";
+          notice.textContent = "Crew profiles are taking longer than expected to load.";
+          grid.appendChild(notice);
+        }
+        const status = $("#crewStatus");
+        status.replaceChildren(document.createTextNode(message + " "));
+        const retry = document.createElement("button");
+        retry.type = "button";
+        retry.className = "button button-secondary button-small";
+        retry.textContent = "Retry Loading";
+        retry.addEventListener("click", () => loadCrew({ manual: true }));
+        status.appendChild(retry);
+      }
+
+      async function loadCrew(options = {}) {
+        if (crewLoadPromise) return crewLoadPromise;
+        const grid = $("#crewGrid");
+        const hasProfiles = Boolean(state.crew?.length);
+        if (!hasProfiles) {
+          grid.replaceChildren();
+          const loading = document.createElement("div");
+          loading.className = "empty-state crew-loading";
+          loading.style.gridColumn = "1 / -1";
+          loading.textContent = "Loading crew profiles…";
+          grid.appendChild(loading);
+        }
+        $("#crewStatus").textContent = hasProfiles ? "Checking for crew profile updates…" : "";
+
+        crewLoadPromise = (async () => {
+          try {
+            const data = await apiRequest("crew");
+            const crew = getArray(data, ["crew", "members", "results", "items"])
+              .filter(member => member && typeof member === "object");
+            if (!crew.length) {
+              if (state.crew?.length) {
+                renderCrewProfiles(state.crew);
+                $("#crewStatus").textContent = "Showing the last successfully loaded crew profiles. The latest refresh returned no profiles.";
+              } else {
+                grid.replaceChildren();
+                const empty = document.createElement("div");
+                empty.className = "empty-state";
+                empty.style.gridColumn = "1 / -1";
+                empty.textContent = "Crew profiles are not published yet. Check back as the Tacoma Nights team grows.";
+                grid.appendChild(empty);
+                $("#crewStatus").textContent = "No published Tacoma Nights crew profiles were returned by the API.";
+              }
+              return;
+            }
+            state.crew = crew;
+            renderCrewProfiles(state.crew);
+            if (crewRetryTimer) {
+              clearTimeout(crewRetryTimer);
+              crewRetryTimer = null;
+            }
+          } catch (error) {
+            console.warn("Tacoma Nights crew profiles could not be refreshed:", error);
+            if (state.crew?.length) {
+              renderCrewProfiles(state.crew);
+              $("#crewStatus").textContent = "Showing saved crew profiles. Live refresh is temporarily unavailable.";
+            } else {
+              showCrewRetry("Crew profiles are temporarily unavailable.");
+              if (!options.manual && !crewRetryTimer) {
+                crewRetryTimer = window.setTimeout(() => {
+                  crewRetryTimer = null;
+                  loadCrew({ manual: true });
+                }, 3000);
+              }
+            }
+          } finally {
+            crewLoadPromise = null;
+          }
+        })();
+        return crewLoadPromise;
+      }
       async function submitCommunityForm(event) {
         event.preventDefault();
 
@@ -3324,7 +3375,6 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
     window.setTimeout(() => {
       const fallbacks = [
         ["#episodeGrid", "The episode archive is taking longer than expected to load. Use the YouTube archive link or try Refresh all videos."],
-        ["#crewGrid", "Crew profiles are temporarily unavailable. Please try again shortly."],
         ["#subscriberCount", "Stats temporarily unavailable"]
       ];
       fallbacks.forEach(([selector,message]) => {
