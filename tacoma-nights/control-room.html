@@ -620,7 +620,7 @@ function renderCrew(){const list=$('crewList');if(!crewCache.length){list.innerH
 async function loadSubmissions(){const {data,error}=await db.from('tacoma_nights_submissions').select('id,submission_type,full_name,email,organization,interest_area,portfolio_url,subject,message,status,internal_notes,created_at,reviewed_at').order('created_at',{ascending:false}).limit(200);if(error)throw error;submissionsCache=data||[];$('statNew').textContent=submissionsCache.filter(x=>x.status==='new').length;renderSubmissions();}
 
 async function loadHostApplications(){
- const {data,error}=await db.from('tacoma_nights_host_applications').select('id,name,on_air_name,short_bio,email,location,availability,format,volunteer_positions,segment_categories,segment_frequency,role_details,interests,segment_name_idea,experience,setup,why,volunteer_acknowledgement,contact_consent,status,created_at,internal_notes,reviewed_at,reviewed_by,sample_path,sample_original_name,sample_mime_type,sample_size_bytes').order('created_at',{ascending:false}).limit(300);
+ const {data,error}=await db.from('tacoma_nights_host_applications').select('id,name,on_air_name,short_bio,email,location,availability,format,volunteer_positions,segment_categories,segment_frequency,role_details,interests,segment_name_idea,experience,setup,why,volunteer_acknowledgement,contact_consent,status,created_at,internal_notes,reviewed_at,reviewed_by,sample_path,sample_original_name,sample_mime_type,sample_size_bytes,avatar_path').order('created_at',{ascending:false}).limit(300);
  if(error)throw error;
  hostApplicationsCache=data||[];
  $('hostAppsNew').textContent=hostApplicationsCache.filter(x=>!['accepted','declined'].includes(x.status)).length;
@@ -642,6 +642,7 @@ function renderHostApplications(){
  list.innerHTML=rows.map(a=>{
   const pending=!['accepted','declined'].includes(a.status);
   const sample=a.sample_path&&String(a.sample_path).startsWith('applications/')?'<button class="btn ghost" type="button" data-host-sample="'+esc(a.id)+'">Open private sample ↗</button>':'<span class="itemmeta">No sample attached</span>';
+   const avatar=a.avatar_path&&String(a.avatar_path).startsWith('applications/')?'<button class="btn ghost" type="button" data-host-avatar="'+esc(a.id)+'">View profile avatar ↗</button>':'<span class="itemmeta">No profile avatar attached</span>';
   const sampleMeta=a.sample_original_name?'<div class="host-file-meta"><b>'+esc(a.sample_original_name)+'</b><span>'+esc(formatBytes(a.sample_size_bytes))+(a.sample_mime_type?' · '+esc(a.sample_mime_type):'')+'</span></div>':'';
   return '<article class="item host-application" data-host-application="'+esc(a.id)+'">'+
    '<div class="host-app-header"><div><span class="pill '+(a.status==='accepted'?'':'off')+'">'+esc(a.status||'new')+'</span><h3>'+esc(a.name)+'</h3><p class="itemmeta">'+esc(a.email)+' · '+esc(a.location)+' · Submitted '+esc(mediaDate(a.created_at))+'</p></div><div class="host-app-contact">'+(a.on_air_name?'<span>ON-AIR NAME</span><b>'+esc(a.on_air_name)+'</b>':'<span>NO ON-AIR NAME PROVIDED</span>')+'</div></div>'+
@@ -653,7 +654,8 @@ function renderHostApplications(){
    '<div class="host-app-section"><div class="host-app-section-title">04 · Experience & equipment</div>'+textField('Hosting, speaking, video, podcast or community experience',a.experience)+textField('Equipment and internet setup',a.setup)+'</div>'+
    '<div class="host-app-section"><div class="host-app-section-title">05 · Motivation & confirmations</div>'+textField('Why they want to join Tacoma Nights',a.why)+
     '<div class="host-confirmations"><span>Volunteer opportunity acknowledged: <b>'+yesNo(a.volunteer_acknowledgement)+'</b></span><span>Contact consent: <b>'+yesNo(a.contact_consent)+'</b></span></div></div>'+
-   '<div class="host-app-section"><div class="host-app-section-title">06 · Sample segment</div><div class="host-sample-row">'+sample+sampleMeta+'</div></div>'+
+    '<div class="host-app-section"><div class="host-app-section-title">06 · Profile avatar</div><div class="host-sample-row">'+avatar+'</div><p class="itemmeta">Private applicant photo. Confirm permission before adding it to a public crew profile.</p></div>'+
+    '<div class="host-app-section"><div class="host-app-section-title">07 · Sample segment</div><div class="host-sample-row">'+sample+sampleMeta+'</div></div>'+
    '<label class="host-review-notes">Private administrator notes<textarea data-host-notes rows="3" maxlength="5000" placeholder="Interview notes, decision rationale, follow-up…">'+esc(a.internal_notes||'')+'</textarea></label>'+
    '<div class="host-review-actions">'+(pending?'<button class="btn" type="button" data-host-decision="accepted" data-id="'+esc(a.id)+'">✓ Approve application</button><button class="btn danger" type="button" data-host-decision="declined" data-id="'+esc(a.id)+'">Deny application</button>':'<span class="itemmeta">Reviewed '+esc(mediaDate(a.reviewed_at))+'</span><button class="btn ghost" type="button" data-host-reopen="'+esc(a.id)+'">Return to review</button>')+
    '<button class="btn ghost" type="button" data-host-save-notes="'+esc(a.id)+'">Save notes</button><button class="btn danger" type="button" data-host-delete="'+esc(a.id)+'">Delete permanently</button></div></article>';
@@ -680,10 +682,10 @@ async function deleteHostApplication(id,button){
  if(!confirm('PERMANENTLY DELETE the remote host application from '+label+'?\n\nThis removes the application record from Supabase and attempts to remove its uploaded sample file from the private storage buckets. This cannot be undone.'))return;
  setBusy(button,true,'Deleting…');
  try{
-  if(record.sample_path&&String(record.sample_path).startsWith('applications/')){
-   const paths=[record.sample_path];
+  const paths=[record.sample_path,record.avatar_path].filter(path=>path&&String(path).startsWith('applications/'));
+  if(paths.length){
    const removals=await Promise.all([db.storage.from('tacoma-nights-clips').remove(paths),db.storage.from('tacoma-host-samples').remove(paths)]);
-   const failed=removals.find(x=>x.error);if(failed?.error)throw new Error('The sample file could not be removed, so the application record was kept. '+failed.error.message);
+   const failed=removals.find(x=>x.error);if(failed?.error)throw new Error('The uploaded attachment could not be removed, so the application record was kept. '+failed.error.message);
   }
   const {data,error}=await db.from('tacoma_nights_host_applications').delete().eq('id',id).select('id').maybeSingle();
   if(error)throw error;if(!data)throw new Error('No application was deleted. Refresh the inbox and verify administrator permissions.');
@@ -717,7 +719,21 @@ async function openHostApplicationSample(id,button){
  }catch(err){popup.close();say($('hostApplicationsStatus'),err.message||'Could not open the private sample.',true);}
  finally{setBusy(button,false,'Open private sample ↗');}
 }
-async function saveHostApplicationNotes(id,button){
+async function openHostApplicationAvatar(id,button){
+  const record=hostApplicationsCache.find(x=>x.id===id);if(!record?.avatar_path||!String(record.avatar_path).startsWith('applications/'))return;
+  const popup=window.open('about:blank','_blank');
+  if(!popup){say($('hostApplicationsStatus'),'Your browser blocked the avatar window. Allow pop-ups for this site and try again.',true);return;}
+  popup.opener=null;popup.document.title='Opening private profile avatar…';popup.document.body.textContent='Preparing a secure, temporary image link…';
+  setBusy(button,true);
+  try{
+   const {data,error}=await db.storage.from('tacoma-nights-clips').createSignedUrl(record.avatar_path,300);
+   if(error)throw error;if(!data?.signedUrl)throw new Error('A private avatar link could not be created.');
+   popup.location.href=data.signedUrl;
+   say($('hostApplicationsStatus'),'Private profile avatar link created. It expires in five minutes.');
+  }catch(err){popup.close();say($('hostApplicationsStatus'),err.message||'Could not open the private profile avatar.',true);}
+  finally{setBusy(button,false,'View profile avatar ↗');}
+ }
+ async function saveHostApplicationNotes(id,button){
  const card=button.closest('[data-host-application]'),notes=card?.querySelector('[data-host-notes]')?.value||'';
  setBusy(button,true);
  try{const {data,error}=await db.from('tacoma_nights_host_applications').update({internal_notes:notes}).eq('id',id).select('id').maybeSingle();if(error)throw error;if(!data)throw new Error('No application was updated.');await loadHostApplications();say($('hostApplicationsStatus'),'Private review notes saved.');}
@@ -917,7 +933,7 @@ $('clipsList').addEventListener('click',e=>{const d=e.target.closest('[data-down
 $('hostApplicationsRefresh').addEventListener('click',()=>loadHostApplications().catch(e=>say($('hostApplicationsStatus'),e.message,true)));
 $('hostApplicationFilter').addEventListener('change',renderHostApplications);
 $('hostApplicationSearch').addEventListener('input',renderHostApplications);
-$('hostApplicationsList').addEventListener('click',e=>{const decision=e.target.closest('[data-host-decision]'),sample=e.target.closest('[data-host-sample]'),notes=e.target.closest('[data-host-save-notes]'),reopen=e.target.closest('[data-host-reopen]'),del=e.target.closest('[data-host-delete]');if(decision){decideHostApplication(decision.dataset.id,decision.dataset.hostDecision,decision);return;}if(sample){openHostApplicationSample(sample.dataset.hostSample,sample);return;}if(notes){saveHostApplicationNotes(notes.dataset.hostSaveNotes,notes);return;}if(reopen){decideHostApplication(reopen.dataset.hostReopen,'new',reopen);return;}if(del){deleteHostApplication(del.dataset.hostDelete,del);}});
+$('hostApplicationsList').addEventListener('click',e=>{const decision=e.target.closest('[data-host-decision]'),sample=e.target.closest('[data-host-sample]'),avatar=e.target.closest('[data-host-avatar]'),notes=e.target.closest('[data-host-save-notes]'),reopen=e.target.closest('[data-host-reopen]'),del=e.target.closest('[data-host-delete]');if(decision){decideHostApplication(decision.dataset.id,decision.dataset.hostDecision,decision);return;}if(sample){openHostApplicationSample(sample.dataset.hostSample,sample);return;}if(avatar){openHostApplicationAvatar(avatar.dataset.hostAvatar,avatar);return;}if(notes){saveHostApplicationNotes(notes.dataset.hostSaveNotes,notes);return;}if(reopen){decideHostApplication(reopen.dataset.hostReopen,'new',reopen);return;}if(del){deleteHostApplication(del.dataset.hostDelete,del);}});
 $('reloadBtn').addEventListener('click',loadAll);$('submissionFilter').addEventListener('change',renderSubmissions);
 $('crewList').addEventListener('click',async e=>{const edit=e.target.closest('[data-edit-crew]'),del=e.target.closest('[data-delete-crew]');if(edit){const p=crewCache.find(x=>x.id===edit.dataset.editCrew);if(!p)return;const f=$('crewForm');for(const k of ['id','display_name','role_title','bio','avatar_url','profile_url','sort_order'])f.elements[k].value=p[k]??'';f.elements.is_featured.checked=!!p.is_featured;f.elements.is_published.checked=!!p.is_published;f.elements.public_name_approved.checked=!!p.public_name_approved;f.elements.portrait_approved.checked=!!p.portrait_approved;f.elements.links_approved.checked=!!p.links_approved;$('avatarFile').value='';updateAvatarPreview(p.avatar_url||'');f.scrollIntoView({behavior:'smooth',block:'start'});return;}if(del){const p=crewCache.find(x=>x.id===del.dataset.deleteCrew);if(!p||!confirm('Delete crew profile for '+p.display_name+'? This cannot be undone.'))return;try{const {error}=await db.from('tacoma_nights_crew').delete().eq('id',p.id);if(error)throw error;await loadCrew();say($('crewFormStatus'),'Crew profile deleted.');}catch(err){say($('crewFormStatus'),err.message,true);}}});
 $('submissionList').addEventListener('click',async e=>{const del=e.target.closest('[data-delete-submission]');if(del){const id=del.dataset.deleteSubmission,record=submissionsCache.find(x=>x.id===id);if(!record||!confirm('PERMANENTLY DELETE this community submission?\n\n'+(record.subject||record.submission_type)+' from '+(record.full_name||'unknown sender')+'\n\nThis cannot be undone.'))return;setBusy(del,true,'Deleting…');try{const {data:deletedRow,error}=await db.from('tacoma_nights_submissions').delete().eq('id',id).select('id').maybeSingle();if(error)throw error;if(!deletedRow)throw new Error('No submission was deleted. Refresh the inbox and confirm your administrator session.');submissionsCache=submissionsCache.filter(x=>x.id!==id);renderSubmissions();$('statNew').textContent=submissionsCache.filter(x=>x.status==='new').length;say($('globalStatus'),'Community submission deleted permanently.');}catch(err){say($('globalStatus'),'Delete failed: '+(err.message||'Check administrator permissions.'),true);}finally{del.disabled=false;del.textContent='Delete submission ×';}return;}const button=e.target.closest('[data-save-submission]');if(!button)return;const card=button.closest('[data-submission]'),id=button.dataset.saveSubmission,status=card.querySelector('[data-status]').value,notes=card.querySelector('[data-notes]').value;setBusy(button,true);try{const {error}=await db.from('tacoma_nights_submissions').update({status,internal_notes:notes,reviewed_at:new Date().toISOString()}).eq('id',id);if(error)throw error;await loadSubmissions();say($('globalStatus'),'Submission review saved.');}catch(err){say($('globalStatus'),err.message||'Could not save review.',true);}finally{setBusy(button,false,'Save review');}});
