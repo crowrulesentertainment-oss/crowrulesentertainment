@@ -546,7 +546,7 @@ function renderCrew(){const list=$('crewList');if(!crewCache.length){list.innerH
 async function loadSubmissions(){const {data,error}=await db.from('tacoma_nights_submissions').select('id,submission_type,full_name,email,organization,interest_area,portfolio_url,subject,message,status,internal_notes,created_at,reviewed_at').order('created_at',{ascending:false}).limit(200);if(error)throw error;submissionsCache=data||[];$('statNew').textContent=submissionsCache.filter(x=>x.status==='new').length;renderSubmissions();}
 
 async function loadHostApplications(){
- const {data,error}=await db.from('tacoma_nights_host_applications').select('id,name,on_air_name,email,location,availability,format,volunteer_positions,segment_categories,segment_frequency,role_details,interests,segment_name_idea,experience,setup,why,volunteer_acknowledgement,contact_consent,status,created_at,internal_notes,reviewed_at,reviewed_by,sample_path,sample_original_name,sample_mime_type,sample_size_bytes').order('created_at',{ascending:false}).limit(300);
+ const {data,error}=await db.from('tacoma_nights_host_applications').select('id,name,on_air_name,short_bio,email,location,availability,format,volunteer_positions,segment_categories,segment_frequency,role_details,interests,segment_name_idea,experience,setup,why,volunteer_acknowledgement,contact_consent,status,created_at,internal_notes,reviewed_at,reviewed_by,sample_path,sample_original_name,sample_mime_type,sample_size_bytes').order('created_at',{ascending:false}).limit(300);
  if(error)throw error;
  hostApplicationsCache=data||[];
  $('hostAppsNew').textContent=hostApplicationsCache.filter(x=>!['accepted','declined'].includes(x.status)).length;
@@ -559,7 +559,7 @@ async function loadHostApplications(){
 }
 function renderHostApplications(){
  const filter=$('hostApplicationFilter').value,query=$('hostApplicationSearch').value.trim().toLowerCase();
- const rows=hostApplicationsCache.filter(a=>(filter==='all'||(filter==='new'?!['accepted','declined'].includes(a.status):a.status===filter))&&(!query||[a.name,a.on_air_name,a.email,a.location,a.interests,a.why,a.role_details,a.segment_name_idea,...(a.volunteer_positions||[]),...(a.segment_categories||[])].join(' ').toLowerCase().includes(query)));
+ const rows=hostApplicationsCache.filter(a=>(filter==='all'||(filter==='new'?!['accepted','declined'].includes(a.status):a.status===filter))&&(!query||[a.name,a.on_air_name,a.short_bio,a.email,a.location,a.interests,a.why,a.role_details,a.segment_name_idea,...(a.volunteer_positions||[]),...(a.segment_categories||[])].join(' ').toLowerCase().includes(query)));
  const list=$('hostApplicationsList');
  if(!rows.length){list.innerHTML='<div class="item"><p>No remote host applications match this filter.</p></div>';return;}
  const textField=(label,value)=>value?'<div class="host-detail"><b>'+label+'</b><p>'+esc(value)+'</p></div>':'';
@@ -571,7 +571,7 @@ function renderHostApplications(){
   const sampleMeta=a.sample_original_name?'<div class="host-file-meta"><b>'+esc(a.sample_original_name)+'</b><span>'+esc(formatBytes(a.sample_size_bytes))+(a.sample_mime_type?' · '+esc(a.sample_mime_type):'')+'</span></div>':'';
   return '<article class="item host-application" data-host-application="'+esc(a.id)+'">'+
    '<div class="host-app-header"><div><span class="pill '+(a.status==='accepted'?'':'off')+'">'+esc(a.status||'new')+'</span><h3>'+esc(a.name)+'</h3><p class="itemmeta">'+esc(a.email)+' · '+esc(a.location)+' · Submitted '+esc(mediaDate(a.created_at))+'</p></div><div class="host-app-contact">'+(a.on_air_name?'<span>ON-AIR NAME</span><b>'+esc(a.on_air_name)+'</b>':'<span>NO ON-AIR NAME PROVIDED</span>')+'</div></div>'+
-   '<div class="host-app-section"><div class="host-app-section-title">01 · Contact & availability</div><div class="host-application-details">'+textField('Full name',a.name)+textField('Preferred on-air name',a.on_air_name)+textField('Email address',a.email)+textField('City / region',a.location)+textField('Typical availability',a.availability)+textField('Preferred participation',a.format)+'</div></div>'+
+   '<div class="host-app-section"><div class="host-app-section-title">01 · Contact & availability</div><div class="host-application-details">'+textField('Full name',a.name)+textField('Preferred on-air name',a.on_air_name)+textField('Short bio',a.short_bio)+textField('Email address',a.email)+textField('City / region',a.location)+textField('Typical availability',a.availability)+textField('Preferred participation',a.format)+'</div></div>'+
    '<div class="host-app-section"><div class="host-app-section-title">02 · Volunteer roles</div><b class="host-field-label">Positions of interest</b>'+tagList(a.volunteer_positions)+'</div>'+
    '<div class="host-app-section"><div class="host-app-section-title">03 · Segment interests</div><b class="host-field-label">Categories selected</b>'+tagList(a.segment_categories)+
     textField('Preferred segment frequency',a.segment_frequency)+textField('Proposed segment name',a.segment_name_idea)+textField('Additional role details',a.role_details)+
