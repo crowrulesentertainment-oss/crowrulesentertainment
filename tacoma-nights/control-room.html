@@ -582,7 +582,7 @@ function renderHostApplications(){
    '<div class="host-app-section"><div class="host-app-section-title">06 · Sample segment</div><div class="host-sample-row">'+sample+sampleMeta+'</div></div>'+
    '<label class="host-review-notes">Private administrator notes<textarea data-host-notes rows="3" maxlength="5000" placeholder="Interview notes, decision rationale, follow-up…">'+esc(a.internal_notes||'')+'</textarea></label>'+
    '<div class="host-review-actions">'+(pending?'<button class="btn" type="button" data-host-decision="accepted" data-id="'+esc(a.id)+'">✓ Approve application</button><button class="btn danger" type="button" data-host-decision="declined" data-id="'+esc(a.id)+'">Deny application</button>':'<span class="itemmeta">Reviewed '+esc(mediaDate(a.reviewed_at))+'</span><button class="btn ghost" type="button" data-host-reopen="'+esc(a.id)+'">Return to review</button>')+
-   '<button class="btn ghost" type="button" data-host-save-notes="'+esc(a.id)+'">Save notes</button></div></article>';
+   '<button class="btn ghost" type="button" data-host-save-notes="'+esc(a.id)+'">Save notes</button><button class="btn danger" type="button" data-host-delete="'+esc(a.id)+'">Delete permanently</button></div></article>';
  }).join('');
 }
 async function decideHostApplication(id,decision,button){
@@ -600,6 +600,30 @@ async function decideHostApplication(id,decision,button){
  }catch(err){say($('hostApplicationsStatus'),err.message||'Could not save the application decision.',true);}
  finally{setBusy(button,false,decision==='accepted'?'✓ Approve application':decision==='declined'?'Deny application':'Return to review');}
 }
+async function deleteHostApplication(id,button){
+ const record=hostApplicationsCache.find(x=>x.id===id);if(!record)return;
+ const label=record.name||record.email||'this applicant';
+ if(!confirm('PERMANENTLY DELETE the remote host application from '+label+'?\n\nThis removes the application record from Supabase and attempts to remove its uploaded sample file from the private storage buckets. This cannot be undone.'))return;
+ setBusy(button,true,'Deleting…');
+ try{
+  if(record.sample_path&&String(record.sample_path).startsWith('applications/')){
+   const paths=[record.sample_path];
+   const removals=await Promise.all([db.storage.from('tacoma-nights-clips').remove(paths),db.storage.from('tacoma-host-samples').remove(paths)]);
+   const failed=removals.find(x=>x.error);if(failed?.error)throw new Error('The sample file could not be removed, so the application record was kept. '+failed.error.message);
+  }
+  const {data,error}=await db.from('tacoma_nights_host_applications').delete().eq('id',id).select('id').maybeSingle();
+  if(error)throw error;if(!data)throw new Error('No application was deleted. Refresh the inbox and verify administrator permissions.');
+  hostApplicationsCache=hostApplicationsCache.filter(x=>x.id!==id);
+  $('hostAppsNew').textContent=hostApplicationsCache.filter(x=>!['accepted','declined'].includes(x.status)).length;
+  $('hostAppsApproved').textContent=hostApplicationsCache.filter(x=>x.status==='accepted').length;
+  $('hostAppsDenied').textContent=hostApplicationsCache.filter(x=>x.status==='declined').length;
+  $('hostAppsTotal').textContent=hostApplicationsCache.length;
+  $('statHostApps').textContent=hostApplicationsCache.length;
+  renderHostApplications();
+  say($('hostApplicationsStatus'),'Application permanently deleted from Supabase'+(record.sample_path?' (sample cleanup also completed).':'.'));
+ }catch(err){say($('hostApplicationsStatus'),err.message||'Could not delete the application.',true);button.disabled=false;button.textContent='Delete permanently';}
+}
+
 async function openHostApplicationSample(id,button){
  const record=hostApplicationsCache.find(x=>x.id===id);if(!record?.sample_path||!String(record.sample_path).startsWith('applications/'))return;
  const popup=window.open('about:blank','_blank');
@@ -816,7 +840,7 @@ $('clipsList').addEventListener('click',e=>{const d=e.target.closest('[data-down
 $('hostApplicationsRefresh').addEventListener('click',()=>loadHostApplications().catch(e=>say($('hostApplicationsStatus'),e.message,true)));
 $('hostApplicationFilter').addEventListener('change',renderHostApplications);
 $('hostApplicationSearch').addEventListener('input',renderHostApplications);
-$('hostApplicationsList').addEventListener('click',e=>{const decision=e.target.closest('[data-host-decision]'),sample=e.target.closest('[data-host-sample]'),notes=e.target.closest('[data-host-save-notes]'),reopen=e.target.closest('[data-host-reopen]');if(decision){decideHostApplication(decision.dataset.id,decision.dataset.hostDecision,decision);return;}if(sample){openHostApplicationSample(sample.dataset.hostSample,sample);return;}if(notes){saveHostApplicationNotes(notes.dataset.hostSaveNotes,notes);return;}if(reopen){decideHostApplication(reopen.dataset.hostReopen,'new',reopen);}});
+$('hostApplicationsList').addEventListener('click',e=>{const decision=e.target.closest('[data-host-decision]'),sample=e.target.closest('[data-host-sample]'),notes=e.target.closest('[data-host-save-notes]'),reopen=e.target.closest('[data-host-reopen]'),del=e.target.closest('[data-host-delete]');if(decision){decideHostApplication(decision.dataset.id,decision.dataset.hostDecision,decision);return;}if(sample){openHostApplicationSample(sample.dataset.hostSample,sample);return;}if(notes){saveHostApplicationNotes(notes.dataset.hostSaveNotes,notes);return;}if(reopen){decideHostApplication(reopen.dataset.hostReopen,'new',reopen);return;}if(del){deleteHostApplication(del.dataset.hostDelete,del);}});
 $('reloadBtn').addEventListener('click',loadAll);$('submissionFilter').addEventListener('change',renderSubmissions);
 $('crewList').addEventListener('click',async e=>{const edit=e.target.closest('[data-edit-crew]'),del=e.target.closest('[data-delete-crew]');if(edit){const p=crewCache.find(x=>x.id===edit.dataset.editCrew);if(!p)return;const f=$('crewForm');for(const k of ['id','display_name','role_title','bio','avatar_url','profile_url','sort_order'])f.elements[k].value=p[k]??'';f.elements.is_featured.checked=!!p.is_featured;f.elements.is_published.checked=!!p.is_published;$('avatarFile').value='';updateAvatarPreview(p.avatar_url||'');f.scrollIntoView({behavior:'smooth',block:'start'});return;}if(del){const p=crewCache.find(x=>x.id===del.dataset.deleteCrew);if(!p||!confirm('Delete crew profile for '+p.display_name+'? This cannot be undone.'))return;try{const {error}=await db.from('tacoma_nights_crew').delete().eq('id',p.id);if(error)throw error;await loadCrew();say($('crewFormStatus'),'Crew profile deleted.');}catch(err){say($('crewFormStatus'),err.message,true);}}});
 $('submissionList').addEventListener('click',async e=>{const del=e.target.closest('[data-delete-submission]');if(del){const id=del.dataset.deleteSubmission,record=submissionsCache.find(x=>x.id===id);if(!record||!confirm('PERMANENTLY DELETE this community submission?\n\n'+(record.subject||record.submission_type)+' from '+(record.full_name||'unknown sender')+'\n\nThis cannot be undone.'))return;setBusy(del,true,'Deleting…');try{const {data:deletedRow,error}=await db.from('tacoma_nights_submissions').delete().eq('id',id).select('id').maybeSingle();if(error)throw error;if(!deletedRow)throw new Error('No submission was deleted. Refresh the inbox and confirm your administrator session.');submissionsCache=submissionsCache.filter(x=>x.id!==id);renderSubmissions();$('statNew').textContent=submissionsCache.filter(x=>x.status==='new').length;say($('globalStatus'),'Community submission deleted permanently.');}catch(err){say($('globalStatus'),'Delete failed: '+(err.message||'Check administrator permissions.'),true);}finally{del.disabled=false;del.textContent='Delete submission ×';}return;}const button=e.target.closest('[data-save-submission]');if(!button)return;const card=button.closest('[data-submission]'),id=button.dataset.saveSubmission,status=card.querySelector('[data-status]').value,notes=card.querySelector('[data-notes]').value;setBusy(button,true);try{const {error}=await db.from('tacoma_nights_submissions').update({status,internal_notes:notes,reviewed_at:new Date().toISOString()}).eq('id',id);if(error)throw error;await loadSubmissions();say($('globalStatus'),'Submission review saved.');}catch(err){say($('globalStatus'),err.message||'Could not save review.',true);}finally{setBusy(button,false,'Save review');}});
