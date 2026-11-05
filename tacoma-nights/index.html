@@ -2226,11 +2226,11 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
           ? `https://www.youtube.com/watch?v=${encodeURIComponent(id)}`
           : PLAYLIST_URL;
 
-        $("#episodeStatus").textContent = fallback
-          ? "The episode library could not be loaded. Open the Tacoma Nights playlist to browse available episodes."
-          : episode
-            ? "Featured from the episode library."
-             : "Open the Tacoma Nights playlist for the latest episodes.";
+        $("#episodeStatus").textContent = override?.video_id
+          ? "Featured video selected by the Tacoma Nights team."
+          : fallback
+            ? "The episode library could not be loaded. Open the Tacoma Nights playlist to browse available episodes."
+            : episode ? "Featured from the episode library." : "Open the Tacoma Nights playlist for the latest episodes.";
 
         $("#shareEpisode").disabled = !id;
       }
@@ -2392,7 +2392,8 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
             populateCategories(state.episodes);
             renderEpisodes();
           } else {
-            showFeatured(null);
+            if (state.featuredOverride?.video_id) showFeatured(null);
+            else showFeatured(null);
             populateCategories([]);
             renderEpisodes();
             $("#archiveStatus").textContent = "No episodes were found in the Tacoma Nights playlist feed.";
