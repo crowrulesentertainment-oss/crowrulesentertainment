@@ -56,7 +56,11 @@ footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-s
 .formbox button[type=submit]{margin-top:20px;min-height:54px;font-size:.94rem;box-shadow:0 12px 30px rgba(111,187,198,.13)}
 .formbox button[type=submit]:disabled{opacity:.65;cursor:wait;transform:none}
 .formbox .fine{line-height:1.55}
-#sampleStatus,#formStatus{line-height:1.5}
+#sampleStatus,#formStatus,#avatarStatus{line-height:1.5}
+.avatar-upload{display:grid;grid-template-columns:84px minmax(0,1fr);gap:15px;align-items:center;padding:15px;border:1px solid rgba(169,229,237,.18);border-radius:13px;background:rgba(5,11,17,.48)}
+.avatar-preview{width:84px;height:84px;object-fit:cover;border-radius:50%;border:2px solid rgba(169,229,237,.45);background:#101923}
+.avatar-help{color:var(--muted);font-size:.78rem;line-height:1.5}
+@media(max-width:540px){.avatar-upload{grid-template-columns:1fr}.avatar-preview{width:76px;height:76px}}
 @media(min-width:1000px){.choice-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:540px){.formbox{padding:19px 15px}.fields{gap:16px}.choice-grid{grid-template-columns:1fr}.choice{min-height:42px}.form-section-heading{padding-top:15px}}
 .category-guide-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:14px 0 16px}
@@ -91,6 +95,7 @@ footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-s
 <div class="field"><label for="name">Full name *</label><input id="name" name="name" autocomplete="name" required maxlength="100" placeholder="Your name"></div>
 <div class="field"><label for="onair">Preferred on-air name</label><input id="onair" name="on_air_name" maxlength="80" placeholder="What viewers should call you"></div>
 <div class="field full"><label for="short_bio">Short bio <span style="color:var(--muted);font-weight:500">(optional)</span></label><textarea id="short_bio" name="short_bio" maxlength="600" rows="3" placeholder="In a few sentences, tell viewers and the production team who you are, what you're interested in, and what perspective you bring."></textarea><small style="color:var(--muted)">Up to 600 characters. This helps us get to know you and may help shape a future crew introduction if you are selected.</small></div>
+<div class="field full"><label for="avatar">Profile avatar <span style="color:var(--muted);font-weight:500">(optional)</span></label><div class="avatar-upload"><img id="avatarPreview" class="avatar-preview" src="https://placehold.co/168x168/101923/a9e5ed?text=PHOTO" alt="Profile avatar preview"><div><input id="avatar" name="avatar" type="file" accept="image/jpeg,image/png,image/webp,image/avif"><p class="avatar-help">Upload a clear headshot or profile photo. JPG, PNG, WebP or AVIF · maximum 5 MB. Your photo is stored privately with your application and is not published automatically.</p><div class="status" id="avatarStatus" aria-live="polite">No profile photo selected. You can submit without one.</div></div></div></div>
 <div class="field"><label for="email">Email address *</label><input id="email" name="email" type="email" autocomplete="email" required maxlength="254" placeholder="you@example.com"></div>
 <div class="field"><label for="location">City / region *</label><input id="location" name="location" required maxlength="120" placeholder="City, State / Province"></div>
 <div class="field"><label for="availability">Typical availability *</label><select id="availability" name="availability" required><option value="">Choose one</option><option>Weekday evenings</option><option>Weekends</option><option>Flexible / varies</option><option>By advance scheduling</option></select></div>
@@ -164,8 +169,13 @@ footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-s
   const status = document.getElementById("formStatus");
   const sampleInput = document.getElementById("sample");
   const sampleStatus = document.getElementById("sampleStatus");
-  if (!form || !status || !sampleInput) return;
+  const avatarInput = document.getElementById("avatar");
+  const avatarStatus = document.getElementById("avatarStatus");
+  const avatarPreview = document.getElementById("avatarPreview");
+  if (!form || !status || !sampleInput || !avatarInput || !avatarStatus) return;
 
+  const allowedAvatarTypes = new Set(["image/jpeg","image/png","image/webp","image/avif"]);
+  const avatarExtensions = {"image/jpeg":"jpg","image/png":"png","image/webp":"webp","image/avif":"avif"};
   const allowedExtensions = new Set(["mp3","wav","m4a","aac","ogg","webm","mp4","mov"]);
   const mimeByExtension = {
     mp3:"audio/mpeg", wav:"audio/wav", m4a:"audio/mp4", aac:"audio/aac",
@@ -196,6 +206,25 @@ footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-s
   function extensionOf(file) {
     return (file.name.split(".").pop() || "").toLowerCase();
   }
+  avatarInput.addEventListener("change", () => {
+    const file = avatarInput.files && avatarInput.files[0];
+    if (!file) {
+      avatarStatus.className = "status";
+      avatarStatus.textContent = "No profile photo selected. You can submit without one.";
+      if (avatarPreview) avatarPreview.src = "https://placehold.co/168x168/101923/a9e5ed?text=PHOTO";
+      return;
+    }
+    if (!allowedAvatarTypes.has(file.type) || file.size > 5 * 1024 * 1024) {
+      avatarStatus.className = "status error";
+      avatarStatus.textContent = "Choose a JPG, PNG, WebP or AVIF image no larger than 5 MB.";
+      avatarInput.value = "";
+      return;
+    }
+    avatarStatus.className = "status";
+    avatarStatus.textContent = "Ready to upload: " + file.name + " (" + (file.size / 1024 / 1024).toFixed(1) + " MB).";
+    if (avatarPreview) avatarPreview.src = URL.createObjectURL(file);
+  });
+
   sampleInput.addEventListener("change", () => {
     const file = sampleInput.files && sampleInput.files[0];
     if (!file) {
@@ -259,8 +288,14 @@ footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-s
       return;
     }
 
+    const avatar = avatarInput.files && avatarInput.files[0];
+    if (avatar && (!allowedAvatarTypes.has(avatar.type) || avatar.size > 5 * 1024 * 1024)) {
+      setStatus("Choose a JPG, PNG, WebP or AVIF profile photo no larger than 5 MB.", "error");
+      return;
+    }
     const sample = sampleInput.files && sampleInput.files[0];
     let uploadedPath = null;
+    let uploadedAvatarPath = null;
     if (sample) {
       const ext = extensionOf(sample);
       if (!allowedExtensions.has(ext) || sample.size > 50 * 1024 * 1024 * 1024) {
@@ -273,9 +308,19 @@ footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-s
     const button = form.querySelector('button[type="submit"]');
     const originalButtonText = button ? button.textContent : "Submit remote host application ↗";
     if (button) { button.disabled = true; button.textContent = sample ? "Uploading sample…" : "Submitting securely…"; }
-    setStatus(sample ? "Uploading your sample to private storage…" : "Sending your application securely…");
+    setStatus(avatar || sample ? "Uploading your attachments securely…" : "Sending your application securely…");
 
     try {
+      if (avatar) {
+        const ext = avatarExtensions[avatar.type];
+        uploadedAvatarPath = "applications/" + randomId() + "/avatar." + ext;
+        const { error: avatarUploadError } = await db.storage.from("tacoma-nights-clips")
+          .upload(uploadedAvatarPath, avatar, { cacheControl:"3600", contentType:avatar.type, upsert:false });
+        if (avatarUploadError) throw avatarUploadError;
+        payload.avatar_path = uploadedAvatarPath;
+        avatarStatus.className = "status";
+        avatarStatus.textContent = "Profile photo uploaded securely.";
+      }
       if (sample) {
         const ext = extensionOf(sample);
         const safeName = sample.name.normalize("NFKD").replace(/[^a-zA-Z0-9._-]+/g, "_").slice(-100) || ("segment." + ext);
@@ -339,16 +384,20 @@ footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-s
       form.reset();
       sampleStatus.className = "status";
       sampleStatus.textContent = "No sample selected. You can submit without an attachment.";
+      avatarStatus.className = "status";
+      avatarStatus.textContent = "No profile photo selected. You can submit without one.";
+      if (avatarPreview) avatarPreview.src = "https://placehold.co/168x168/101923/a9e5ed?text=PHOTO";
       setStatus("Application submitted successfully. Thank you — the Tacoma Nights production team will review it and contact you if there's a next step.", "success");
     } catch (error) {
       console.error("Remote host application error:", error);
       // Avoid leaving an orphaned private upload if the database insert fails.
-      if (uploadedPath) {
+      const cleanupPaths = [uploadedPath, uploadedAvatarPath].filter(Boolean);
+      if (cleanupPaths.length) {
         try {
-          const { error: cleanupError } = await db.storage.from("tacoma-nights-clips").remove([uploadedPath]);
-          if (cleanupError) console.warn("Sample cleanup could not be completed:", cleanupError);
+          const { error: cleanupError } = await db.storage.from("tacoma-nights-clips").remove(cleanupPaths);
+          if (cleanupError) console.warn("Attachment cleanup could not be completed:", cleanupError);
         } catch (cleanupError) {
-          console.warn("Sample cleanup could not be completed:", cleanupError);
+          console.warn("Attachment cleanup could not be completed:", cleanupError);
         }
       }
       const message = String(error && error.message || "");
