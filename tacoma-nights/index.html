@@ -1986,6 +1986,8 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
           const PLAYLIST_ID = "PLYK7RQq4_mhw";
       const PLAYLIST_URL = `https://www.youtube.com/playlist?list=${PLAYLIST_ID}`;
       const FALLBACK_VIDEO_ID = "";
+      const SUPABASE_URL = "https://cevylpnoexugwgygvtgu.supabase.co";
+      const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";
       const DEFAULT_GOAL = 1000;
 
       const $ = (selector, root = document) => root.querySelector(selector);
@@ -1998,6 +2000,7 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
         pageSize: 24,
         crew: [],
         featured: null,
+        featuredOverride: null,
         categories: new Set(),
         savedEpisodes: new Set(),
         savedOnly: false,
@@ -2202,8 +2205,9 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
       function showFeatured(episode, fallback = false) {
         state.featured = episode || null;
 
-        const id = episode ? episodeVideoId(episode) : FALLBACK_VIDEO_ID;
-        const title = episode ? episodeTitle(episode) : "Tacoma Nights — featured video";
+        const override = state.featuredOverride;
+        const id = override?.video_id ? safeVideoId(override.video_id) : (episode ? episodeVideoId(episode) : FALLBACK_VIDEO_ID);
+        const title = override?.video_id ? safeText(override.title, "Tacoma Nights — Featured Video") : (episode ? episodeTitle(episode) : "Tacoma Nights — featured video");
         setFeaturedFrame(id, title);
 
         $("#featuredKicker").textContent = episode
@@ -2211,13 +2215,11 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
           : "Tacoma Nights · Featured video";
 
         $("#featuredTitle").textContent = title;
-        $("#featuredDescription").textContent = episode
-          ? episodeDescription(episode)
-           : "Watch Tacoma Nights episodes and conversations from the official playlist.";
+        $("#featuredDescription").textContent = override?.video_id
+          ? safeText(override.description, "Watch Tacoma Nights episodes and conversations from the official playlist.")
+          : episode ? episodeDescription(episode) : "Watch Tacoma Nights episodes and conversations from the official playlist.";
 
-        $("#featuredDate").textContent = episode
-          ? formatDate(episode.published_at || episode.created_at)
-          : "";
+        $("#featuredDate").textContent = override?.video_id ? "Featured video" : episode ? formatDate(episode.published_at || episode.created_at) : "";
 
         const watchLink = $("#watchOnYouTube");
         watchLink.href = id
@@ -2333,12 +2335,27 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
           : (state.discoverySource ? "Playlist loaded; no videos match the current filters." : "Open the official Tacoma Nights playlist if videos are not available.");
       }
 
+      async function loadFeaturedVideoOverride() {
+        try {
+          const url = SUPABASE_URL + "/rest/v1/tacoma_nights_site_settings?select=setting_value&setting_key=eq.featured_video&limit=1";
+          const response = await fetch(url, {headers:{"apikey":SUPABASE_PUBLISHABLE_KEY,"Authorization":"Bearer "+SUPABASE_PUBLISHABLE_KEY},cache:"no-store"});
+          if(!response.ok) throw new Error("Settings request failed ("+response.status+").");
+          const rows = await response.json();
+          const value = Array.isArray(rows) ? rows[0]?.setting_value : null;
+          state.featuredOverride = value && safeVideoId(value.video_id) ? value : null;
+        } catch(error) {
+          state.featuredOverride = null;
+          console.warn("Tacoma Nights featured video setting unavailable:", error);
+        }
+      }
+
       async function loadEpisodes() {
         const button = $("#refreshEpisodes");
         button.disabled = true;
         $("#archiveStatus").textContent = "Loading episodes…";
 
         try {
+          await loadFeaturedVideoOverride();
           const data = await apiRequest("episodes");
           const episodes = getArray(data, ["episodes", "results", "items"]);
           const verification = data.verification || {};
@@ -2361,12 +2378,16 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
 
           if (state.episodes.length) {
             // Newest valid published episode first; fall back to the channel video if none has an ID.
+            if (state.featuredOverride?.video_id) {
+              showFeatured(null);
+            } else {
             const newest = state.episodes.find(item => episodeVideoId(item));
             if (newest) {
               showFeatured(newest);
             } else {
               showFeatured(null);
               $("#episodeStatus").textContent = "Episodes loaded, but none has a valid Tacoma Nights video ID.";
+            }
             }
             populateCategories(state.episodes);
             renderEpisodes();
@@ -2377,7 +2398,8 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
             $("#archiveStatus").textContent = "No episodes were found in the Tacoma Nights playlist feed.";
           }
         } catch (error) {
-          showFeatured(null, true);
+          await loadFeaturedVideoOverride();
+          if (state.featuredOverride?.video_id) showFeatured(null); else showFeatured(null, true);
           $("#episodeGrid").innerHTML =
             '<div class="empty-state" style="grid-column:1/-1">The episode service could not be reached. Open the Tacoma Nights playlist to browse available episodes.</div>';
           $("#archiveStatus").textContent = safeText(error.message, "Unable to load episodes.");
