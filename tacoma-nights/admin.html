@@ -87,7 +87,27 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
     <button class="btn secondary" id="showCrew" type="button">Crew profiles</button>
     <button class="btn secondary" id="showUploads" type="button">Crew uploads</button>
     <button class="btn secondary" id="showTheme" type="button">Theme changer</button>
+    <button class="btn secondary" id="showVideo" type="button">Main video</button>
   </div>
+  <section id="videoSection" class="hidden">
+    <div class="results-head"><h2>Main homepage video</h2></div>
+    <p class="hint">Choose the video shown in the featured video player on the public Tacoma Nights homepage. A manual selection takes priority over the newest episode until you clear it.</p>
+    <div class="panel submission">
+      <label for="featuredVideoUrl">YouTube video URL or video ID</label>
+      <input class="field" id="featuredVideoUrl" type="text" maxlength="500" placeholder="https://www.youtube.com/watch?v=XXXXXXXXXXX">
+      <label for="featuredVideoTitle">Video title</label>
+      <input class="field" id="featuredVideoTitle" type="text" maxlength="180" placeholder="Tacoma Nights — Featured Video">
+      <label for="featuredVideoDescription">Description</label>
+      <textarea class="field" id="featuredVideoDescription" rows="3" maxlength="1200" placeholder="A short description shown beneath the featured video."></textarea>
+      <div class="card-actions">
+        <button class="btn secondary" id="previewFeaturedVideo" type="button">Preview video</button>
+        <button class="btn primary" id="saveFeaturedVideo" type="button">Publish main video</button>
+        <button class="btn danger" id="clearFeaturedVideo" type="button">Clear manual selection</button>
+      </div>
+      <div id="featuredVideoPreview" class="hidden" style="margin-top:16px;max-width:760px;aspect-ratio:16/9;background:#050706;border-radius:12px;overflow:hidden"></div>
+      <p id="featuredVideoStatus" class="statusline" role="status" aria-live="polite"></p>
+    </div>
+  </section>
   <section id="themeSection" class="hidden">
     <div class="results-head"><h2>Global Tacoma Nights theme</h2></div>
     <p class="hint">Choose the visual theme used across Tacoma Nights pages. Preview it here, then save to publish the selection globally. The public theme system reads the shared setting.</p>
@@ -262,15 +282,17 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
     $("#crewSection").classList.toggle("hidden",name!=="crew");
     $("#uploadsSection").classList.toggle("hidden",name!=="uploads");
     $("#themeSection").classList.toggle("hidden",name!=="theme");
+    $("#videoSection").classList.toggle("hidden",name!=="video");
     $("#submissionCards").classList.toggle("hidden",!["submissions","audience"].includes(name));
     $("#submissionHeading").classList.toggle("hidden",!["submissions","audience"].includes(name));
     $(".stats").classList.toggle("hidden",!["submissions","audience"].includes(name));
     $("#submissionHeadingTitle").textContent=name==="audience"?"Audience submissions":"Incoming submissions";
     $("#typeFilter").value=name==="audience"?"":"";
-    document.querySelectorAll("#desk > .toolbar button").forEach(b=>b.classList.toggle("primary",b.id===(name==="crew"?"showCrew":name==="uploads"?"showUploads":name==="audience"?"showAudience":name==="theme"?"showTheme":"showSubmissions")));
+    document.querySelectorAll("#desk > .toolbar button").forEach(b=>b.classList.toggle("primary",b.id===(name==="crew"?"showCrew":name==="uploads"?"showUploads":name==="audience"?"showAudience":name==="theme"?"showTheme":name==="video"?"showVideo":"showSubmissions")));
     if(name==="crew")loadCrew();
     if(name==="uploads")loadUploads();
     if(name==="theme")loadThemeControl();
+    if(name==="video")loadFeaturedVideoControl();
     if(name==="submissions"||name==="audience")loadRecords();
   }
   async function loadCrew(){
@@ -384,6 +406,76 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
   $("#showCrew").addEventListener("click",()=>switchSection("crew"));
   $("#showUploads").addEventListener("click",()=>switchSection("uploads"));
   $("#showTheme").addEventListener("click",()=>switchSection("theme"));
+  $("#showVideo").addEventListener("click",()=>switchSection("video"));
+  function extractYouTubeId(value){
+    const raw=String(value||"").trim();
+    if(/^[a-zA-Z0-9_-]{11}$/.test(raw))return raw;
+    try{
+      const url=new URL(raw);
+      let id="";
+      if(url.hostname==="youtu.be"||url.hostname.endsWith(".youtu.be"))id=url.pathname.split("/").filter(Boolean)[0]||"";
+      else if(url.hostname.includes("youtube.com")){
+        id=url.searchParams.get("v")||"";
+        if(!id){const parts=url.pathname.split("/").filter(Boolean);const at=parts.findIndex(x=>["embed","shorts","live"].includes(x));if(at>=0)id=parts[at+1]||"";}
+      }
+      return /^[a-zA-Z0-9_-]{11}$/.test(id)?id:"";
+    }catch{return "";}
+  }
+  function previewFeaturedVideo(){
+    const id=extractYouTubeId($("#featuredVideoUrl").value),host=$("#featuredVideoPreview");
+    host.replaceChildren();host.classList.remove("hidden");
+    if(!id){host.classList.add("hidden");setStatus($("#featuredVideoStatus"),"Enter a valid YouTube video URL or 11-character video ID.","error");return false;}
+    const frame=document.createElement("iframe");
+    frame.src="https://www.youtube-nocookie.com/embed/"+encodeURIComponent(id)+"?rel=0&modestbranding=1";
+    frame.title=$("#featuredVideoTitle").value.trim()||"Tacoma Nights featured video";
+    frame.allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+    frame.allowFullscreen=true;frame.referrerPolicy="strict-origin-when-cross-origin";
+    frame.style.cssText="width:100%;height:100%;border:0";
+    host.append(frame);
+    setStatus($("#featuredVideoStatus"),"Preview ready. This has not been published.","ok");
+    return true;
+  }
+  async function loadFeaturedVideoControl(){
+    setStatus($("#featuredVideoStatus"),"Loading current homepage video…");
+    try{
+      const {data,error}=await client.from("tacoma_nights_site_settings").select("setting_value").eq("setting_key","featured_video").maybeSingle();
+      if(error)throw error;
+      const value=data?.setting_value||{};
+      $("#featuredVideoUrl").value=value.video_id||"";
+      $("#featuredVideoTitle").value=value.title||"";
+      $("#featuredVideoDescription").value=value.description||"";
+      const active=!!value.video_id;
+      setStatus($("#featuredVideoStatus"),active?"Manual homepage video is active: "+(value.title||value.video_id)+".":"No manual override. Homepage automatically features the latest available episode.","ok");
+      if(active)previewFeaturedVideo();else $("#featuredVideoPreview").classList.add("hidden");
+    }catch(e){setStatus($("#featuredVideoStatus"),"Could not load homepage video settings: "+e.message,"error");}
+  }
+  $("#previewFeaturedVideo").addEventListener("click",previewFeaturedVideo);
+  $("#saveFeaturedVideo").addEventListener("click",async()=>{
+    const id=extractYouTubeId($("#featuredVideoUrl").value),button=$("#saveFeaturedVideo");
+    if(!id){setStatus($("#featuredVideoStatus"),"Enter a valid YouTube video URL or 11-character video ID.","error");return;}
+    const value={video_id:id,title:$("#featuredVideoTitle").value.trim()||"Tacoma Nights — Featured Video",description:$("#featuredVideoDescription").value.trim()||"Watch Tacoma Nights episodes and conversations from Tacoma and the Pacific Northwest.",updated_at:new Date().toISOString()};
+    button.disabled=true;setStatus($("#featuredVideoStatus"),"Publishing homepage video…");
+    try{
+      const {error}=await client.from("tacoma_nights_site_settings").upsert({setting_key:"featured_video",setting_value:value,updated_at:new Date().toISOString()},{onConflict:"setting_key"});
+      if(error)throw error;
+      setStatus($("#featuredVideoStatus"),"Homepage video published. The public Tacoma Nights homepage will now use this video.","ok");
+      previewFeaturedVideo();
+    }catch(e){setStatus($("#featuredVideoStatus"),"Video was not published: "+e.message,"error");}
+    finally{button.disabled=false;}
+  });
+  $("#clearFeaturedVideo").addEventListener("click",async()=>{
+    const button=$("#clearFeaturedVideo");
+    if(!confirm("Clear the manual homepage video and return to automatic latest-episode selection?"))return;
+    button.disabled=true;setStatus($("#featuredVideoStatus"),"Clearing manual homepage video…");
+    try{
+      const {error}=await client.from("tacoma_nights_site_settings").upsert({setting_key:"featured_video",setting_value:{video_id:"",title:"",description:""},updated_at:new Date().toISOString()},{onConflict:"setting_key"});
+      if(error)throw error;
+      $("#featuredVideoUrl").value="";$("#featuredVideoTitle").value="";$("#featuredVideoDescription").value="";
+      $("#featuredVideoPreview").replaceChildren();$("#featuredVideoPreview").classList.add("hidden");
+      setStatus($("#featuredVideoStatus"),"Manual selection cleared. The homepage will automatically feature the latest available episode.","ok");
+    }catch(e){setStatus($("#featuredVideoStatus"),"Could not clear selection: "+e.message,"error");}
+    finally{button.disabled=false;}
+  });
   async function loadThemeControl(){
     const select=$("#globalThemeSelect"),description=$("#themeDescription");
     if(!select.options.length){
