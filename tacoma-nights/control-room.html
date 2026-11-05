@@ -407,6 +407,14 @@ body:before{opacity:.3;background:radial-gradient(ellipse at 50% 0%,#52677e22,tr
 <label>Status<select name="status"><option value="playlist">Playlist fallback</option><option value="scheduled">Scheduled</option><option value="live">Live now</option><option value="ended">Ended / replay</option></select></label>
 <label class="full checkline"><input name="is_published" type="checkbox" checked><span>Publish these settings to the public Tacoma Nights page</span></label>
 </div><div class="actions"><button class="btn" type="submit">Save premiere settings ↗</button><button class="btn ghost" type="button" id="reloadBtn">Refresh dashboard</button></div></form><p id="premiereStatus" class="small" role="status" aria-live="polite"></p></section>
+<section class="panel" id="featuredVideoPanel"><div class="panelhead"><div><p class="micro">01A / HOMEPAGE FEATURE</p><h2>On the air in Tacoma</h2><p>Manage the main video displayed beneath “Come for the conversation.” on the public Tacoma Nights homepage. This is separate from the premiere countdown and episode archive.</p></div><span class="pill">Homepage video</span></div>
+<form id="featuredVideoForm"><div class="fields">
+<label class="full">YouTube video URL or ID<input name="video_url" maxlength="500" placeholder="https://www.youtube.com/watch?v=XXXXXXXXXXX" autocomplete="off"></label>
+<label class="full">Featured video title<input name="title" maxlength="180" placeholder="Tacoma Nights — The People Behind the 253"></label>
+<label class="full">Description shown below the video<textarea name="description" rows="3" maxlength="1200" placeholder="A short introduction to this featured conversation…"></textarea></label>
+</div><div class="actions"><button class="btn ghost" id="previewFeaturedVideoBtn" type="button">Preview video</button><button class="btn" id="saveFeaturedVideoBtn" type="submit">Publish homepage video ↗</button><button class="btn ghost" id="clearFeaturedVideoBtn" type="button">Restore automatic episode selection</button></div></form>
+<div id="featuredVideoPreview" class="hidden" style="margin-top:18px;max-width:760px;aspect-ratio:16/9;background:#050706;border:1px solid var(--line);border-radius:12px;overflow:hidden"></div>
+<p id="featuredVideoStatus" class="small" role="status" aria-live="polite">Loading homepage video settings…</p></section>
 <section class="panel" id="crewPanel"><div class="panelhead"><div><p class="micro">02 / PEOPLE</p><h2>Crew directory</h2><p>Approving a remote host application automatically creates a draft here. Drafts stay hidden until you review them and confirm permission for each public detail. Only publish names, portraits and links with permission.</p></div><button class="btn ghost" id="newCrewBtn" type="button">+ New profile</button></div>
 <form id="crewForm"><input type="hidden" name="id"><div class="fields">
 <label>Display name *<input name="display_name" required maxlength="100"></label><label>Role / title *<input name="role_title" required maxlength="100" placeholder="Producer, editor, reporter…"></label>
@@ -544,6 +552,68 @@ function showSignedOut(){currentUser=null;$('dashboard').classList.add('hidden')
 function withTimeout(promise,ms,message){let timer;return Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error(message)),ms);})]).finally(()=>clearTimeout(timer));}
 async function verifySession(session){if(!session?.access_token){showSignedOut();return false;}if(authVerificationPromise)return authVerificationPromise;authVerificationPromise=(async()=>{try{const {data,error}=await withTimeout(db.auth.getUser(session.access_token),12000,'Supabase identity verification timed out. Check your connection and retry.');if(error||!data.user){showSignedOut();say($('authMessage'),error?.message||'Your session could not be verified. Please sign in again.',true);return false;}if(!isAdmin(data.user)){await db.auth.signOut({scope:'local'});showSignedOut();say($('authMessage'),'This account is signed in but is not authorized as a Tacoma Nights administrator. Ask the project owner to set app_metadata.role = admin.',true);return false;}showDashboard(data.user);return true;}catch(err){showSignedOut();say($('globalStatus'),err.message||'Secure session verification failed. Please retry.',true);return false;}})();try{return await authVerificationPromise;}finally{authVerificationPromise=null;}}
 async function loadPremiere(){const {data,error}=await db.from('tacoma_nights_show_settings').select('*').eq('setting_key','premiere').maybeSingle();if(error)throw error;const f=$('premiereForm');if(data){f.elements.show_title.value=data.show_title||'Tacoma Nights';f.elements.youtube_video_id.value=data.youtube_video_id||'';f.elements.premiere_at.value=localInputDate(data.premiere_at);f.elements.status.value=data.status||'playlist';f.elements.is_published.checked=!!data.is_published;$('statShow').textContent=(data.status||'playlist').toUpperCase();}else{$('statShow').textContent='NOT SET';}}
+function extractFeaturedYouTubeId(value){
+ const raw=String(value||'').trim();
+ if(/^[A-Za-z0-9_-]{11}$/.test(raw))return raw;
+ try{
+  const u=new URL(raw);let id='';
+  if(u.hostname==='youtu.be'||u.hostname.endsWith('.youtu.be'))id=u.pathname.split('/').filter(Boolean)[0]||'';
+  else if(u.hostname==='youtube.com'||u.hostname.endsWith('.youtube.com')){
+   id=u.searchParams.get('v')||'';
+   if(!id){const parts=u.pathname.split('/').filter(Boolean),at=parts.findIndex(x=>['embed','shorts','live'].includes(x));if(at>=0)id=parts[at+1]||'';}
+  }
+  return /^[A-Za-z0-9_-]{11}$/.test(id)?id:'';
+ }catch{return '';}
+}
+function previewFeaturedHomepageVideo(){
+ const f=$('featuredVideoForm'),id=extractFeaturedYouTubeId(f.elements.video_url.value),box=$('featuredVideoPreview');
+ box.replaceChildren();box.classList.remove('hidden');
+ if(!id){box.classList.add('hidden');say($('featuredVideoStatus'),'Enter a valid YouTube video URL or 11-character video ID.',true);return false;}
+ const frame=document.createElement('iframe');
+ frame.src='https://www.youtube-nocookie.com/embed/'+encodeURIComponent(id)+'?rel=0&modestbranding=1';
+ frame.title=f.elements.title.value.trim()||'Tacoma Nights featured video';
+ frame.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+ frame.allowFullscreen=true;frame.referrerPolicy='strict-origin-when-cross-origin';
+ frame.style.cssText='display:block;width:100%;height:100%;border:0';
+ box.append(frame);say($('featuredVideoStatus'),'Preview loaded. The public homepage has not been changed yet.');return true;
+}
+async function loadFeaturedVideoControl(){
+ try{
+  const {data,error}=await db.from('tacoma_nights_site_settings').select('setting_value').eq('setting_key','featured_video').maybeSingle();
+  if(error)throw error;
+  const value=data?.setting_value||{},f=$('featuredVideoForm');
+  f.elements.video_url.value=value.video_id||'';
+  f.elements.title.value=value.title||'';
+  f.elements.description.value=value.description||'';
+  if(value.video_id){say($('featuredVideoStatus'),'Manual homepage video is active: '+(value.title||value.video_id)+'.');}
+  else say($('featuredVideoStatus'),'Automatic mode is active. The homepage features the latest available episode.');
+ }catch(err){say($('featuredVideoStatus'),'Could not load homepage video settings: '+(err.message||'Unknown error'),true);throw err;}
+}
+$('previewFeaturedVideoBtn').addEventListener('click',previewFeaturedHomepageVideo);
+$('featuredVideoForm').addEventListener('submit',async e=>{
+ e.preventDefault();const f=e.currentTarget,button=$('saveFeaturedVideoBtn'),id=extractFeaturedYouTubeId(f.elements.video_url.value);
+ if(!id){say($('featuredVideoStatus'),'Enter a valid YouTube video URL or 11-character video ID.',true);return;}
+ const value={video_id:id,title:f.elements.title.value.trim()||'Tacoma Nights — Featured Video',description:f.elements.description.value.trim()||'Watch Tacoma Nights episodes and conversations from Tacoma and the Pacific Northwest.',updated_at:new Date().toISOString()};
+ setBusy(button,true);
+ try{
+  const {error}=await db.from('tacoma_nights_site_settings').upsert({setting_key:'featured_video',setting_value:value,updated_at:new Date().toISOString()},{onConflict:'setting_key'});
+  if(error)throw error;
+  previewFeaturedHomepageVideo();
+  say($('featuredVideoStatus'),'Homepage video published. “On the air in Tacoma” will now play this selection beneath “Come for the conversation.”');
+ }catch(err){say($('featuredVideoStatus'),'Could not publish homepage video: '+(err.message||'Unknown error'),true);}
+ finally{setBusy(button,false,'Publish homepage video ↗');}
+});
+$('clearFeaturedVideoBtn').addEventListener('click',async()=>{
+ if(!confirm('Restore automatic latest-episode selection on the public homepage?'))return;
+ const button=$('clearFeaturedVideoBtn');setBusy(button,true);
+ try{
+  const {error}=await db.from('tacoma_nights_site_settings').upsert({setting_key:'featured_video',setting_value:{video_id:'',title:'',description:''},updated_at:new Date().toISOString()},{onConflict:'setting_key'});
+  if(error)throw error;
+  const f=$('featuredVideoForm');f.reset();$('featuredVideoPreview').replaceChildren();$('featuredVideoPreview').classList.add('hidden');
+  say($('featuredVideoStatus'),'Manual selection cleared. The homepage will automatically feature the latest available episode.');
+ }catch(err){say($('featuredVideoStatus'),'Could not restore automatic selection: '+(err.message||'Unknown error'),true);}
+ finally{setBusy(button,false,'Restore automatic episode selection');}
+});
 async function loadCrew(){const {data,error}=await db.from('tacoma_nights_crew').select('*').order('sort_order',{ascending:true}).order('display_name',{ascending:true}).limit(100);if(error)throw error;crewCache=data||[];$('statCrew').textContent=crewCache.filter(x=>x.is_published).length;renderCrew();}
 function renderCrew(){const list=$('crewList');if(!crewCache.length){list.innerHTML='<div class="item"><p>No crew profiles yet. Add the first approved profile above.</p></div>';return;}list.innerHTML=crewCache.map(p=>'<article class="item"><div class="itemtop"><div class="personline">'+(p.avatar_url?'<img class="roster-photo" src="'+esc(p.avatar_url)+'" alt="" loading="lazy">':'')+'<div><h3>'+esc(p.display_name)+'</h3><p class="itemmeta">'+esc(p.role_title)+' · ORDER '+esc(p.sort_order)+'</p></div></div><div><span class="pill '+(!p.is_published?'off':'')+'">'+(p.is_published?'Published':'Draft')+'</span>'+(p.source_application_id?'<span class="pill">Approved application</span>':'')+(p.is_featured?'<span class="pill">Featured</span>':'')+'</div></div><p>'+esc(p.bio||'No bio added.')+'</p>'+(p.source_application_id?'<p class="itemmeta">Created automatically from an approved remote host application. Confirm permissions before publishing.</p>':'')+'<div class="actions"><button class="btn ghost" type="button" data-edit-crew="'+esc(p.id)+'">Edit profile</button><button class="btn danger" type="button" data-delete-crew="'+esc(p.id)+'">Delete</button></div></article>').join('');}
 async function loadSubmissions(){const {data,error}=await db.from('tacoma_nights_submissions').select('id,submission_type,full_name,email,organization,interest_area,portfolio_url,subject,message,status,internal_notes,created_at,reviewed_at').order('created_at',{ascending:false}).limit(200);if(error)throw error;submissionsCache=data||[];$('statNew').textContent=submissionsCache.filter(x=>x.status==='new').length;renderSubmissions();}
@@ -831,7 +901,7 @@ $('productionEpisodeForm').addEventListener('submit',async e=>{e.preventDefault(
 $('duplicateProductionEpisode').addEventListener('click',async()=>{if(!selectedProductionEpisode){say($('productionFormStatus'),'Select an existing episode from the archive before duplicating it.',true);return;}const button=$('duplicateProductionEpisode');setBusy(button,true);try{const copy={...selectedProductionEpisode};delete copy.id;delete copy.created_at;delete copy.updated_at;copy.title=(copy.title||'Tacoma Nights episode')+' — Copy';copy.episode_number=null;copy.episode_date=null;copy.premiere_at=null;copy.status='planning';copy.script_status='draft';copy.script_approved_by=null;copy.script_approved_at=null;copy.recording_status='not_started';copy.editing_status='not_started';copy.editing_approved=false;copy.editing_approved_by=null;copy.editing_approved_at=null;copy.created_by=currentUser?.id||null;const {data,error}=await db.from('tacoma_nights_episode_plans').insert(copy).select('*').single();if(error)throw error;selectedProductionEpisode=data;await loadProductionEpisodes();await loadProductionTasks(data.id);say($('productionFormStatus'),'Episode duplicated as a new planning draft. Update the title, number and date, then save.');}catch(err){say($('productionFormStatus'),err.message||'Could not duplicate this episode.',true);}finally{setBusy(button,false,'Duplicate selected episode');}});$('newProductionEpisode').addEventListener('click',clearProductionForm);
 $('refreshProduction').addEventListener('click',async()=>{try{await loadProductionEpisodes();if(selectedProductionEpisode)await loadProductionTasks(selectedProductionEpisode.id);say($('productionFormStatus'),'Production workspace refreshed.');}catch(err){say($('productionFormStatus'),err.message||'Refresh failed.',true);}});
 
-async function loadAll(){say($('globalStatus'),'Loading secure dashboard data…');try{await Promise.all([loadPremiere(),loadCrew(),loadSubmissions(),loadHostApplications(),loadAssets(),loadClipUploads(),loadProductionEpisodes()]);say($('globalStatus'),'Control room connected · premiere, production, crew, community inbox, remote host applications and media library loaded.');}catch(e){console.error(e);say($('globalStatus'),'Some data could not load. Confirm the admin role and Supabase policies, then refresh. '+(e.message||''),true);}}
+async function loadAll(){say($('globalStatus'),'Loading secure dashboard data…');try{await Promise.all([loadPremiere(),loadFeaturedVideoControl(),loadCrew(),loadSubmissions(),loadHostApplications(),loadAssets(),loadClipUploads(),loadProductionEpisodes()]);say($('globalStatus'),'Control room connected · premiere, production, crew, community inbox, remote host applications and media library loaded.');}catch(e){console.error(e);say($('globalStatus'),'Some data could not load. Confirm the admin role and Supabase policies, then refresh. '+(e.message||''),true);}}
 function updateAvatarPreview(url){const img=$('avatarPreview');if(img)img.src=url||'https://placehold.co/172x172/202b23/e9e5d9?text=AVATAR';}
 function clearCrewForm(){const f=$('crewForm');f.reset();f.elements.id.value='';f.elements.sort_order.value='0';$('avatarFile').value='';updateAvatarPreview('');$('crewFormStatus').textContent='';}
 $('loginForm').addEventListener('submit',async e=>{e.preventDefault();const f=e.currentTarget,button=$('loginBtn');setBusy(button,true);say($('authMessage'),'Signing in…');try{const {data,error}=await db.auth.signInWithPassword({email:f.elements.email.value.trim(),password:f.elements.password.value});if(error)throw error;await verifySession(data.session);}catch(err){say($('authMessage'),err.message||'Sign-in failed.',true);}finally{setBusy(button,false,'Sign in securely ↗');}});
