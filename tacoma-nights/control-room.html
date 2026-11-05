@@ -25,7 +25,7 @@ html{scroll-behavior:smooth;scroll-padding-top:96px}
 .panelhead{align-items:center}
 .media-library{border-color:#d7f36a40;background:linear-gradient(145deg,#1b251e,#131a16 72%);position:relative;overflow:hidden}
 .media-library:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(var(--lime),#e87852);opacity:.9}
-.media-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 20px}
+.media-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 20px}
 .media-metric{background:#0e1511;border:1px solid #ffffff16;padding:17px 19px;min-width:0}
 .media-metric span{display:block;color:var(--muted);font-size:.62rem;font-weight:800;letter-spacing:.13em}
 .media-metric strong{display:block;font:800 clamp(1.9rem,4vw,3rem)/1 "Barlow Condensed";color:var(--lime);margin:9px 0 4px}
@@ -51,7 +51,7 @@ html{scroll-behavior:smooth;scroll-padding-top:96px}
 .media-empty strong{font:700 1.5rem "Barlow Condensed";text-transform:uppercase;color:var(--paper)}
 .media-empty span{font-size:.82rem;max-width:520px}
 #clipsStatus{margin:14px 0 0}
-@media(max-width:800px){.media-tools{grid-template-columns:1fr 1fr}.media-tools label:first-child{grid-column:1/-1}.media-grid{grid-template-columns:1fr}.media-summary{grid-template-columns:repeat(3,minmax(0,1fr))}.media-metric{padding:13px}}
+@media(max-width:800px){.media-tools{grid-template-columns:1fr 1fr}.media-tools label:first-child{grid-column:1/-1}.media-grid{grid-template-columns:1fr}.media-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.media-metric{padding:13px}}
 @media(max-width:480px){.media-tools{grid-template-columns:1fr}.media-tools label:first-child{grid-column:auto}.media-summary{grid-template-columns:1fr}.media-metric{display:grid;grid-template-columns:1fr auto;align-items:center;gap:4px 12px}.media-metric strong{grid-column:2;grid-row:1/3;margin:0}.media-metric small{grid-column:1}.media-card-actions{display:grid;grid-template-columns:1fr}.media-card-actions .btn{width:100%}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.media-card,.panel{transition:none}}
 
@@ -434,6 +434,7 @@ body:before{opacity:.3;background:radial-gradient(ellipse at 50% 0%,#52677e22,tr
 <div class="media-metric"><span>CO-HOST SUBMISSIONS</span><strong id="mediaClipCount">—</strong><small>Private recordings</small></div>
 <div class="media-metric"><span>EPISODE ASSETS</span><strong id="mediaAssetCount">—</strong><small>Links and references</small></div>
 <div class="media-metric"><span>LIBRARY TOTAL</span><strong id="mediaTotalCount">—</strong><small>Records loaded</small></div>
+<div class="media-metric"><span>SEGMENT UPLOAD CLIPS</span><strong id="mediaSegmentClipCount">—</strong><small>Uploads assigned to an episode / segment</small></div>
 </div>
 <div class="media-tools">
 <label>Search the library<input id="clipSearch" type="search" placeholder="Search title, contributor, episode, filename, URL…" autocomplete="off"></label>
@@ -743,7 +744,8 @@ function renderAssets(){
   return true;
  });
  rows.sort((a,b)=>sort==='title'?String(a.display_title||'').localeCompare(String(b.display_title||'')):sort==='oldest'?new Date(a.display_date||0)-new Date(b.display_date||0):sort==='largest'?(Number(b.file_size)||0)-(Number(a.file_size)||0):new Date(b.display_date||0)-new Date(a.display_date||0));
- $('mediaClipCount').textContent=clipUploadsCache.length.toLocaleString();$('mediaAssetCount').textContent=assetsCache.length.toLocaleString();$('mediaTotalCount').textContent=(clipUploadsCache.length+assetsCache.length).toLocaleString();
+ const segmentClipCount=clipUploadsCache.filter(a=>String(a.episode_label||'').trim()).length;
+ $('mediaClipCount').textContent=clipUploadsCache.length.toLocaleString();$('mediaAssetCount').textContent=assetsCache.length.toLocaleString();$('mediaTotalCount').textContent=(clipUploadsCache.length+assetsCache.length).toLocaleString();$('mediaSegmentClipCount').textContent=segmentClipCount.toLocaleString();
  const list=$('clipsList');if(!rows.length){list.innerHTML='<div class="media-empty"><strong>No matching media found</strong><span>Try another search or change the library filter. Refresh to fetch the latest submissions.</span></div>';say($('clipsStatus'),'Showing 0 items · '+clipUploadsCache.length+' co-host submissions · '+assetsCache.length+' episode assets.');return;}
  list.innerHTML=rows.map(a=>{
   const isUpload=a.record_kind==='clip-upload',url=String(a.url||'').trim(),valid=url.startsWith('https://'),type=String(a.asset_type||'asset').replaceAll('_',' ');
