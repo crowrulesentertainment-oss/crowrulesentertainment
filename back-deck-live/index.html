@@ -270,6 +270,18 @@
       filter: saturate(.82) contrast(1.08);
     }
 
+    .hero-footage .managed-hero-player {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: max(100%, 177.78vh);
+      height: max(100%, 56.25vw);
+      min-width: 100%; min-height: 100%;
+      transform: translate(-50%, -50%) scale(1.08);
+      border: 0; opacity: .82;
+      filter: saturate(.82) contrast(1.08);
+      object-fit: cover; pointer-events: none;
+    }
+
     .hero-shade {
       position: absolute;
       z-index: -4;
@@ -1940,37 +1952,47 @@
 
 
       async function loadManagedHeroVideo() {
+        const container = document.querySelector(".hero-footage");
+        if (!container || !authClient) return;
         try {
           const { data, error } = await authClient.from("back_deck_main_video")
-            .select("video_type,youtube_video_id,video_url,title").eq("setting_key","main").maybeSingle();
-          if (error || !data) return;
-          const container = document.querySelector(".hero-footage");
-          if (!container) return;
-          container.replaceChildren();
-          if (data.video_type === "upload" && data.video_url) {
-            const video=document.createElement("video");
-            video.src=data.video_url; video.autoplay=true; video.muted=true; video.loop=true;
-            video.playsInline=true; video.preload="metadata"; video.setAttribute("aria-label",data.title||"Back Deck Live show footage");
-            video.style.cssText="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.82;filter:saturate(.82) contrast(1.08)";
-            container.appendChild(video);
-          } else if (/^[A-Za-z0-9_-]{11}$/.test(data.youtube_video_id||"")) {
-            const id=data.youtube_video_id;
-            const frame=document.createElement("iframe");
-            frame.src="https://www.youtube-nocookie.com/embed/"+encodeURIComponent(id)+"?autoplay=1&mute=1&controls=0&loop=1&playlist="+encodeURIComponent(id)+"&playsinline=1&rel=0&modestbranding=1";
-            frame.title=data.title||"Back Deck Live show footage"; frame.loading="eager"; frame.tabIndex=-1;
-            frame.allow="autoplay; encrypted-media; picture-in-picture";
-            frame.referrerPolicy="strict-origin-when-cross-origin"; container.appendChild(frame);
+            .select("video_type,youtube_video_id,video_url,title")
+            .eq("setting_key", "main").maybeSingle();
+          if (error) throw error;
+          if (!data) return; // Keep the original homepage footage as a fallback.
+          const title = data.title || "Back Deck Live show footage";
+          let player = null;
+          if (data.video_type === "upload" && data.video_url && /^https:\/\//i.test(data.video_url)) {
+            player = document.createElement("video");
+            player.src = data.video_url;
+            player.autoplay = true; player.muted = true; player.loop = true;
+            player.playsInline = true; player.preload = "metadata";
+            player.setAttribute("aria-label", title);
+          } else if (data.video_type === "youtube" && /^[A-Za-z0-9_-]{11}$/.test(data.youtube_video_id || "")) {
+            const id = data.youtube_video_id;
+            player = document.createElement("iframe");
+            player.src = "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(id) +
+              "?autoplay=1&mute=1&controls=0&loop=1&playlist=" + encodeURIComponent(id) +
+              "&playsinline=1&rel=0&modestbranding=1";
+            player.title = title; player.loading = "eager"; player.tabIndex = -1;
+            player.allow = "autoplay; encrypted-media; picture-in-picture";
+            player.referrerPolicy = "strict-origin-when-cross-origin";
           }
-        } catch (error) { console.warn("Could not load the managed Back Deck Live hero video.",error); }
+          if (!player) throw new Error("The saved main video setting is incomplete or unsupported.");
+          player.className = "managed-hero-player";
+          container.replaceChildren(player);
+        } catch (error) {
+          console.warn("Could not load the managed Back Deck Live hero video; keeping fallback footage.", error);
+        }
       }
 
-      function renderSubscriberStats(data) {
-        const countValue = Number(
-          data.subscriberCount ?? data.subscriber_count ?? data.subscribers
-        );
-        const goalValue = Number(data.goal ?? data.subscriberGoal ?? DEFAULT_GOAL);
-        const validCount = Number.isFinite(countValue) && countValue >= 0;
-        const goal = Number.isFinite(goalValue) && goalValue > 0 ? goalValue : DEFAULT_GOAL;
+      function watchManagedHeroVideo() {
+        if (!authClient?.channel) return;
+        authClient.channel("back-deck-main-video-public-sync")
+          .on("postgres_changes", { event: "*", schema: "public", table: "back_deck_main_video", filter: "setting_key=eq.main" },
+            () => loadManagedHeroVideo())
+          .subscribe();
+      }
 
         $("#subscriberGoal").textContent = goal.toLocaleString("en-US");
 
@@ -2611,6 +2633,7 @@
       async function init() {
         startPublicLiveVisitorCounter();
         loadManagedHeroVideo();
+        watchManagedHeroVideo();
         setupNavigation();
         setupRevealAnimations();
         setupParticles();
