@@ -1938,6 +1938,32 @@
         }
       }
 
+
+      async function loadManagedHeroVideo() {
+        try {
+          const { data, error } = await authClient.from("back_deck_main_video")
+            .select("video_type,youtube_video_id,video_url,title").eq("setting_key","main").maybeSingle();
+          if (error || !data) return;
+          const container = document.querySelector(".hero-footage");
+          if (!container) return;
+          container.replaceChildren();
+          if (data.video_type === "upload" && data.video_url) {
+            const video=document.createElement("video");
+            video.src=data.video_url; video.autoplay=true; video.muted=true; video.loop=true;
+            video.playsInline=true; video.preload="metadata"; video.setAttribute("aria-label",data.title||"Back Deck Live show footage");
+            video.style.cssText="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.82;filter:saturate(.82) contrast(1.08)";
+            container.appendChild(video);
+          } else if (/^[A-Za-z0-9_-]{11}$/.test(data.youtube_video_id||"")) {
+            const id=data.youtube_video_id;
+            const frame=document.createElement("iframe");
+            frame.src="https://www.youtube-nocookie.com/embed/"+encodeURIComponent(id)+"?autoplay=1&mute=1&controls=0&loop=1&playlist="+encodeURIComponent(id)+"&playsinline=1&rel=0&modestbranding=1";
+            frame.title=data.title||"Back Deck Live show footage"; frame.loading="eager"; frame.tabIndex=-1;
+            frame.allow="autoplay; encrypted-media; picture-in-picture";
+            frame.referrerPolicy="strict-origin-when-cross-origin"; container.appendChild(frame);
+          }
+        } catch (error) { console.warn("Could not load the managed Back Deck Live hero video.",error); }
+      }
+
       function renderSubscriberStats(data) {
         const countValue = Number(
           data.subscriberCount ?? data.subscriber_count ?? data.subscribers
@@ -2584,6 +2610,7 @@
 
       async function init() {
         startPublicLiveVisitorCounter();
+        loadManagedHeroVideo();
         setupNavigation();
         setupRevealAnimations();
         setupParticles();
