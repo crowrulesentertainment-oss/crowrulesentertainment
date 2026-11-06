@@ -134,7 +134,7 @@ button.primary{background:linear-gradient(135deg,#f1cb88,#d99d4f);color:#17120b;
   <label class="field-label" for="qualityPreset">RENDER QUALITY</label><select id="qualityPreset"><option value="1080-high">1080p · High quality · 12 Mbps</option><option value="1080-balanced" selected>1080p · Balanced · 8 Mbps</option><option value="720-balanced">720p · Compact · 5 Mbps</option></select>
   <label class="check-row"><input id="includeMusic" type="checkbox" checked><span><b>Include background music</b><small>Uses the saved music track, trimmed to the ending runtime.</small></span></label>
   <label class="check-row"><input id="includeHighlights" type="checkbox" checked><span><b>Include uploaded highlight clips</b><small>Plays the uploaded clips in the Episode Highlights scene. Clip audio is not mixed into this master.</small></span></label>
-  <div class="export-specs"><div class="export-spec"><strong id="exportDuration">01:50</strong><span>ESTIMATED RUNTIME</span></div><div class="export-spec"><strong id="exportResolution">1920×1080</strong><span>OUTPUT FRAME</span></div><div class="export-spec"><strong>MP4</strong><span>FILE FORMAT</span></div><div class="export-spec"><strong>H.264</strong><span>VIDEO CODEC*</span></div></div>
+  <div class="export-specs"><div class="export-spec"><strong id="exportDuration">01:50</strong><span>ESTIMATED RUNTIME</span></div><div class="export-spec"><strong id="exportResolution">1920×1080</strong><span>OUTPUT FRAME</span></div><div class="export-spec"><strong>MP4</strong><span>FILE FORMAT</span></div><div class="export-spec"><strong id="exportCodec">H.264</strong><span>VIDEO CODEC</span></div></div>
   <div class="export-progress"><span id="exportProgressBar"></span></div><div class="status" id="exportStatus" role="status" aria-live="polite">Ready to render. The final file will be checked for a readable duration before delivery.</div>
   <button class="primary" id="exportMp4">⬇ Render & Save MP4</button><button id="saveFinishedVideo" class="primary" hidden>⬇ Download Finished MP4</button>
   <p class="export-help"><b>Direct save:</b> supported browsers let you choose the MP4 destination before rendering. Other browsers render the file first, verify its duration, then enable the download button. Large exports may require significant memory if direct save is unavailable.</p>
@@ -169,7 +169,7 @@ function syncRuntimeToMusic(){
 function listText(value){return String(value||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean).join('\n');}
 function applyCredits(v){
  data={...fallback,...(v||{})};
- setText('highlights',listText(data.episode_highlights)||'A collection of this week’s memorable moments');const highlightHost=$('highlightVideos');highlightHost.replaceChildren();(Array.isArray(data.highlight_assets)?data.highlight_assets:[]).forEach(asset=>{if(!asset.signed_url)return;const card=document.createElement('div');card.className='highlight-video-card';const video=document.createElement('video');video.controls=true;video.playsInline=true;video.preload='metadata';video.src=asset.signed_url;const caption=document.createElement('p');caption.textContent=asset.caption||asset.name||'Episode highlight';card.append(video,caption);highlightHost.append(card);});
+ setText('highlights',listText(data.episode_highlights)||'A collection of this week’s memorable moments');const highlightHost=$('highlightVideos');highlightHost.replaceChildren();(Array.isArray(data.highlight_assets)?data.highlight_assets:[]).forEach(asset=>{if(!asset.signed_url)return;const card=document.createElement('div');card.className='highlight-video-card';const video=document.createElement('video');video.controls=true;video.playsInline=true;video.preload='metadata';video.crossOrigin='anonymous';video.src=asset.signed_url;const caption=document.createElement('p');caption.textContent=asset.caption||asset.name||'Episode highlight';card.append(video,caption);highlightHost.append(card);});
  setText('guests',listText(data.guest_credits)||'Thank you to our guests');
  setText('contributors',listText(data.contributor_credits));
  setText('production',data.production_credits);setText('thanks',listText(data.special_thanks)?'SPECIAL THANKS\n'+listText(data.special_thanks):'');
@@ -230,6 +230,7 @@ function tick(now){if(!playing)return;if(previewOnly){elapsed=(now-startedAt)/10
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const exportClock=seconds=>{const n=Math.max(0,Math.floor(seconds));return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');};
 function exportTotal(){return scenes.reduce((sum,scene,index)=>sum+Math.max(0,duration(index)),0);}
+function updateExportSummary(){if($('exportDuration'))$('exportDuration').textContent=exportClock(exportTotal());if($('qualityPreset'))$('exportResolution').textContent=$('qualityPreset').value==='720-balanced'?'1280×720':'1920×1080';}
 function exportFileName(){let name=String($('outputFileName').value||'Tacoma-Nights-Ending-Credits').trim().replace(/[^a-z0-9 _-]/gi,'').replace(/\s+/g,'-').replace(/-+/g,'-');return (name||'Tacoma-Nights-Ending-Credits').replace(/\.mp4$/i,'')+'.mp4';}
 async function makeMusicBuffer(url,maxSeconds){
  if(!url)return null;
@@ -262,7 +263,7 @@ async function renderMp4(){
  const videos=[...$('highlightVideos').querySelectorAll('video')],videoMuted=videos.map(v=>v.muted);
  try{
   if(!stage.clientWidth||!stage.clientHeight)throw new Error('The program monitor is not visible. Refresh the page and sign in again.');
-  if(!window.VideoEncoder||!window.AudioEncoder)throw new Error('This browser does not expose WebCodecs encoders. Use the latest Microsoft Edge or Chrome.');
+  if(!window.VideoEncoder)throw new Error('This browser does not expose the WebCodecs video encoder. Use the latest Microsoft Edge or Chrome.');
   $('exportDuration').textContent=exportClock(total);
   const name=exportFileName();
   if(typeof window.showSaveFilePicker==='function'){
@@ -278,13 +279,13 @@ async function renderMp4(){
   const MB=await import('https://esm.sh/mediabunny@1.62.1');
   const {Output,Mp4OutputFormat,BufferTarget,StreamTarget,CanvasSource,AudioBufferSource,Quality,getFirstEncodableVideoCodec,getFirstEncodableAudioCodec,Input,BufferSource,BlobSource,ALL_FORMATS}=MB;
   const format=new Mp4OutputFormat();
-  videoCodec=await getFirstEncodableVideoCodec(format.getSupportedVideoCodecs(),{width:1920,height:1080});
+  videoCodec=await getFirstEncodableVideoCodec(['avc'],{width:1920,height:1080})||await getFirstEncodableVideoCodec(format.getSupportedVideoCodecs(),{width:1920,height:1080});
   if(!videoCodec)throw new Error('No MP4-compatible video encoder is available in this browser.');
   let audioCodec=null;
   if(includeMusic&&data.music_reference){
    try{
     audioBuffer=await makeMusicBuffer(data.music_reference,total);
-    audioCodec=await getFirstEncodableAudioCodec(format.getSupportedAudioCodecs());
+    audioCodec=await getFirstEncodableAudioCodec(['aac'])||await getFirstEncodableAudioCodec(format.getSupportedAudioCodecs());
     if(!audioCodec)throw new Error('No MP4-compatible audio encoder is available.');
    }catch(musicError){
     audioBuffer=null;
@@ -298,6 +299,7 @@ async function renderMp4(){
   const bitrate=preset==='1080-high'?12000000:preset==='720-balanced'?5000000:8000000;
   const width=preset==='720-balanced'?1280:1920,height=preset==='720-balanced'?720:1080;
   $('exportResolution').textContent=width+'×'+height;
+  $('exportCodec').textContent=videoCodec==='avc'?'H.264':String(videoCodec).toUpperCase();
   canvas.width=width;canvas.height=height;
   videoSource=new CanvasSource(canvas,{codec:videoCodec,quality:new Quality({bitrate}),latencyMode:'quality',hardwareAcceleration:'no-preference'});
   output.addVideoTrack(videoSource,{frameRate:fps});
@@ -391,6 +393,7 @@ $('saveFinishedVideo').addEventListener('click',()=>{
  $('exportStatus').textContent='Download requested · '+finishedExportName;
 });
 $('exportMp4').addEventListener('click',renderMp4);
+$('qualityPreset').addEventListener('change',updateExportSummary);
 $('play').addEventListener('click',play);
 $('pause').addEventListener('click',()=>{stop();$('playStatus').textContent='Paused · Scene '+(current+1);});
 $('next').addEventListener('click',()=>{stop();elapsed=0;showScene(current+1);updateProgress();});
