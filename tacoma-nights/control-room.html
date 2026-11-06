@@ -655,7 +655,7 @@ function previewFeaturedHomepageVideo(){
 }
 async function loadFeaturedVideoControl(){
  try{
-  const {data,error}=await db.from('tacoma_nights_site_settings').select('setting_value').eq('setting_key','featured_video').maybeSingle();
+  const {data,error}=await db.from('tacoma_nights_ending_credits').select('setting_value').eq('setting_key','featured_video').maybeSingle();
   if(error)throw error;
   const value=data?.setting_value||{},f=$('featuredVideoForm');
   f.elements.video_url.value=value.video_id||'';
@@ -672,7 +672,7 @@ $('featuredVideoForm').addEventListener('submit',async e=>{
  const value={video_id:id,title:f.elements.title.value.trim()||'Tacoma Nights — Featured Video',description:f.elements.description.value.trim()||'Watch Tacoma Nights episodes and conversations from Tacoma and the Pacific Northwest.',updated_at:new Date().toISOString()};
  setBusy(button,true);
  try{
-  const {error}=await db.from('tacoma_nights_site_settings').upsert({setting_key:'featured_video',setting_value:value,updated_at:new Date().toISOString()},{onConflict:'setting_key'});
+  const {error}=await db.from('tacoma_nights_ending_credits').upsert({setting_key:'featured_video',setting_value:value,updated_at:new Date().toISOString()},{onConflict:'setting_key'});
   if(error)throw error;
   previewFeaturedHomepageVideo();
   say($('featuredVideoStatus'),'Homepage video published. “On the air in Tacoma” will now play this selection beneath “Come for the conversation.”');
@@ -683,7 +683,7 @@ $('clearFeaturedVideoBtn').addEventListener('click',async()=>{
  if(!confirm('Restore automatic latest-episode selection on the public homepage?'))return;
  const button=$('clearFeaturedVideoBtn');setBusy(button,true);
  try{
-  const {error}=await db.from('tacoma_nights_site_settings').upsert({setting_key:'featured_video',setting_value:{video_id:'',title:'',description:''},updated_at:new Date().toISOString()},{onConflict:'setting_key'});
+  const {error}=await db.from('tacoma_nights_ending_credits').upsert({setting_key:'featured_video',setting_value:{video_id:'',title:'',description:''},updated_at:new Date().toISOString()},{onConflict:'setting_key'});
   if(error)throw error;
   const f=$('featuredVideoForm');f.reset();$('featuredVideoPreview').replaceChildren();$('featuredVideoPreview').classList.add('hidden');
   say($('featuredVideoStatus'),'Manual selection cleared. The homepage will automatically feature the latest available episode.');
@@ -1022,7 +1022,7 @@ function renderEndingCreditsPreview(){
  return lines.join('\n');
 }
 async function loadEndingCredits(){
- const {data,error}=await db.from('tacoma_nights_site_settings').select('setting_value').eq('setting_key','ending_credits').maybeSingle();
+ const {data,error}=await db.from('tacoma_nights_ending_credits').select('setting_value').eq('setting_key','master').maybeSingle();
  if(error)throw error;
  const value={...ENDING_CREDITS_DEFAULTS,...(data?.setting_value||{})};
  if(value.visual_storage_path){
@@ -1075,7 +1075,7 @@ $('endingMusicFile').addEventListener('change',e=>uploadEndingCreditsMedia('musi
 $('endingCreditsForm').addEventListener('submit',async e=>{
  e.preventDefault();const b=$('saveEndingCreditsBtn');setBusy(b,true);
  try{const value=endingCreditsValues();value.updated_at=new Date().toISOString();value.updated_by=currentUser?.id||null;
- const {error}=await db.from('tacoma_nights_site_settings').upsert({setting_key:'ending_credits',setting_value:value,updated_at:new Date().toISOString()},{onConflict:'setting_key'});
+ const {error}=await db.from('tacoma_nights_ending_credits').upsert({setting_key:'master',setting_value:value,updated_at:new Date().toISOString(),updated_by:currentUser?.id||null},{onConflict:'setting_key'});
  if(error)throw error;
  if(endingCreditsOldMediaToDelete.size){const paths=[...endingCreditsOldMediaToDelete];const removed=await db.storage.from('tacoma-nights-clips').remove(paths);if(removed.error)console.warn('Old ending-credit assets could not be cleaned up:',removed.error.message);endingCreditsOldMediaToDelete.clear();}
  say($('endingCreditsStatus'),'Ending credits saved. Uploaded background and music are attached to the master settings.');
