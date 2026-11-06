@@ -26,6 +26,18 @@ button,input{font:inherit}button{cursor:pointer;border:1px solid #ffffff35;borde
 .headline{font-size:clamp(22px,4.4vw,58px);font-weight:800;letter-spacing:.08em;text-transform:uppercase;line-height:1.08}
 .subline{font-size:clamp(12px,1.6vw,21px);color:#d7dee7;letter-spacing:.1em;margin-top:18px;line-height:1.5}
 .credits{font-size:clamp(12px,1.45vw,19px);line-height:1.8;white-space:pre-line;color:#e3e7ed;margin-top:15px}
+.scroll-scene{padding:5% 8%;overflow:hidden}
+.scroll-frame{position:relative;z-index:2;width:min(76%,1100px);height:100%;overflow:hidden;margin:auto;border-top:1px solid #e8b45c88;border-bottom:1px solid #e8b45c88;background:linear-gradient(180deg,#080d15dd,#080d15aa)}
+.scroll-heading{position:absolute;z-index:3;top:5%;left:5%;right:5%;font-size:clamp(18px,2.8vw,38px);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);text-align:center;text-shadow:0 3px 18px #000}
+.scroll-content{position:absolute;left:5%;right:5%;top:100%;white-space:pre-wrap;text-align:center;font-weight:600;line-height:1.65;color:#f1f0ec;text-shadow:0 3px 18px #000;animation:credits-roll var(--scroll-duration,28s) linear forwards}
+.scroll-content.size-small{font-size:clamp(12px,1.25vw,18px)}
+.scroll-content.size-medium{font-size:clamp(15px,1.65vw,23px)}
+.scroll-content.size-large{font-size:clamp(18px,2.1vw,29px)}
+.scroll-content.direction-down{top:auto;bottom:100%;animation-name:credits-roll-down}
+@keyframes credits-roll{from{transform:translateY(0)}to{transform:translateY(calc(-100% - 100vh))}}
+@keyframes credits-roll-down{from{transform:translateY(0)}to{transform:translateY(calc(100% + 100vh))}}
+.scroll-disabled{display:none!important}
+@media(max-width:650px){.scroll-frame{width:94%}.scroll-heading{font-size:clamp(14px,3vw,22px)}}
 .gold{color:var(--gold)}.divider{height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);width:58%;margin:24px auto}
 .controls{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:9px;margin:16px 0}
 .progress{height:4px;background:#ffffff22;margin:14px 0 6px;overflow:hidden}.progress span{display:block;height:100%;width:0;background:var(--gold)}
@@ -49,6 +61,7 @@ button,input{font:inherit}button{cursor:pointer;border:1px solid #ffffff35;borde
    <section class="scene" data-scene="1"><div class="scene-inner"><div class="eyebrow">This week's conversations</div><div class="headline">The moments<br><span class="gold">that brought us together.</span></div><div class="divider"></div><div class="credits" id="highlights"></div></div></section>
    <section class="scene" data-scene="2"><div class="scene-inner"><div class="eyebrow">The people behind the conversation</div><div class="headline">Featuring</div><div class="credits" id="guests"></div><div class="divider"></div><div class="credits" id="contributors"></div></div></section>
    <section class="scene" data-scene="3"><div class="scene-inner"><div class="eyebrow">Made possible by</div><div class="headline">Production credits</div><div class="credits" id="production"></div><div class="credits" id="thanks"></div></div></section>
+   <section class="scene scroll-scene" data-scene="4" id="scrollScene"><div class="scroll-frame"><div class="scroll-heading" id="scrollHeading">THE PEOPLE BEHIND THE PRODUCTION</div><div class="scroll-content size-medium" id="scrollContent">DIRECTED AND HOSTED BY\nJonathan Riehle</div></div></section>
    <section class="scene" data-scene="4"><div class="scene-inner"><div class="eyebrow">One company. One universe.</div><div class="logo" style="font-size:clamp(28px,5vw,68px)">CROWRULES<br>ENTERTAINMENT</div><div class="subline">INDEPENDENT STORIES. SHARED CONNECTIONS.</div></div></section>
    <section class="scene" data-scene="5"><div class="scene-inner"><div class="eyebrow" id="episodeLabel">Thank you for watching</div><div class="headline" id="episodeMessage">Keep the conversation going.</div><div class="credits" id="voiceover"></div><div class="subline" id="subscribe"></div></div></section>
    <section class="scene" data-scene="6"><div class="scene-inner"><div class="logo">TACOMA<br>NIGHTS</div><div class="divider"></div><div class="headline gold" id="finalHeadline">UNTIL NEXT FRIDAY.</div><div class="subline" id="finalTagline">The conversation doesn't end here.</div><div class="credits">CROWRULES ENTERTAINMENT<br>ONE COMPANY. ONE UNIVERSE.</div></div></section>
@@ -70,7 +83,7 @@ const SUPABASE_KEY="sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";
 const client=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const $=id=>document.getElementById(id);
 let scenes=[...document.querySelectorAll('.scene')],data={},current=0,playing=false,startedAt=0,elapsed=0,raf=0,exporting=false;
-const fallback={runtime_seconds:110,match_audio_length:false,episode_number:'',episode_title:'',episode_highlights:'',guest_credits:'',contributor_credits:'',special_thanks:'',production_credits:'A CrowRules Entertainment Production\nCreated and hosted by Jonathan Riehle\nProduced and edited by CrowRules Entertainment',closing_headline:'UNTIL NEXT FRIDAY.',closing_tagline:"The conversation doesn't end here.",subscribe_message:'Subscribe, follow and keep the conversation going.',closing_voiceover:'Thank you for spending part of your week with us. Keep the conversation going, keep supporting one another, and remember — our stories are what bring us together.'};
+const fallback={runtime_seconds:110,match_audio_length:false,scroll_enabled:true,scroll_title:'THE PEOPLE BEHIND THE PRODUCTION',scroll_direction:'up',scroll_duration_seconds:28,scroll_font_size:'medium',scroll_text:'DIRECTED AND HOSTED BY\\nJonathan Riehle\\n\\nA CROWRULES ENTERTAINMENT PRODUCTION\\nProduced and edited by CrowRules Entertainment\\n\\nONE COMPANY. ONE UNIVERSE.',episode_number:'',episode_title:'',episode_highlights:'',guest_credits:'',contributor_credits:'',special_thanks:'',production_credits:'A CrowRules Entertainment Production\nCreated and hosted by Jonathan Riehle\nProduced and edited by CrowRules Entertainment',closing_headline:'UNTIL NEXT FRIDAY.',closing_tagline:"The conversation doesn't end here.",subscribe_message:'Subscribe, follow and keep the conversation going.',closing_voiceover:'Thank you for spending part of your week with us. Keep the conversation going, keep supporting one another, and remember — our stories are what bring us together.'};
 function setText(id,value){$(id).textContent=String(value||'').trim();}
 function syncRuntimeToMusic(){
  const audio=$('music');
@@ -97,6 +110,12 @@ function applyCredits(v){
  setText('subscribe',data.subscribe_message);
  setText('finalHeadline',data.closing_headline);setText('finalTagline',data.closing_tagline);
  setText('episodeMeta',[data.episode_number,data.episode_title].filter(Boolean).join(' — ')||'Tacoma Nights · Master Ending Credits');
+ const scroll=$('scrollScene'),scrollContent=$('scrollContent');
+ scroll.classList.toggle('scroll-disabled',data.scroll_enabled===false);
+ setText('scrollHeading',data.scroll_title||'CREDITS');
+ setText('scrollContent',data.scroll_text||data.production_credits||'A CrowRules Entertainment Production');
+ scrollContent.className='scroll-content size-'+(['small','medium','large'].includes(data.scroll_font_size)?data.scroll_font_size:'medium')+(data.scroll_direction==='down'?' direction-down':'');
+ scroll.style.setProperty('--scroll-duration',Math.max(10,Math.min(300,Number(data.scroll_duration_seconds)||28))+'s');
  const backdrop=$('backdrop'),url=String(data.visual_reference||'').trim();
  if(/^https:\/\//i.test(url)){backdrop.style.backgroundImage='linear-gradient(180deg,#08111dbb,#05080fdd),url("'+url.replace(/["\\]/g,'')+'")';$('stage').dataset.bg='custom';}
  else {backdrop.style.backgroundImage='';delete $('stage').dataset.bg;}
@@ -125,8 +144,8 @@ async function verifyAndLoad(session){
  if(data.user.app_metadata?.role!=='admin'&&data.user.user_metadata?.role!=='admin')throw new Error('This account is not authorized as a Tacoma Nights administrator.');
  $('auth').hidden=true;$('app').hidden=false;await loadSaved();
 }
-function duration(i){const total=Math.max(30,Math.min(600,Number(data.runtime_seconds)||110));const weights=[10,20,20,15,15,20,10];return total*weights[i]/110;}
-function showScene(i){current=Math.max(0,Math.min(scenes.length-1,i));scenes.forEach((s,n)=>s.classList.toggle('active',n===current));$('playStatus').textContent='Scene '+(current+1)+' of '+scenes.length+' · '+['Opening identity','Episode highlights','Guests and contributors','Production credits','CrowRules signature','Closing message','Until next Friday'][current];}
+function duration(i){const total=Math.max(30,Math.min(600,Number(data.runtime_seconds)||110));const roll=Math.max(10,Math.min(300,Number(data.scroll_duration_seconds)||28));if(data.scroll_enabled!==false){if(i===4)return Math.min(roll,total-10);const weights=[10,14,12,12,0,12,12,8];return Math.max(1,(total-Math.min(roll,total-10))*weights[i]/80);}const weights=[10,14,12,12,0,12,12,8];return total*weights[i]/80;}
+function showScene(i){current=Math.max(0,Math.min(scenes.length-1,i));scenes.forEach((s,n)=>s.classList.toggle('active',n===current));if(current===4&&data.scroll_enabled!==false){const el=$('scrollContent');el.style.animation='none';void el.offsetHeight;el.style.animation='';}const names=['Opening identity','Episode highlights','Guests and contributors','Production credits','Scrolling credits','CrowRules signature','Closing message','Until next Friday'];$('playStatus').textContent='Scene '+(current+1)+' of '+scenes.length+' · '+names[current];}
 function updateProgress(){const total=Number(data.runtime_seconds)||110;const before=Array.from({length:current},(_,i)=>duration(i)).reduce((a,b)=>a+b,0);const pct=Math.min(100,(before+elapsed)/total*100);$('progressBar').style.width=pct+'%';}
 function tick(now){if(!playing)return;const dt=(now-startedAt)/1000;elapsed=dt;if(elapsed>=duration(current)){if(current>=scenes.length-1){stop();$('progressBar').style.width='100%';$('playStatus').textContent='Ending complete · Until next Friday.';return;}elapsed=0;startedAt=now;showScene(current+1);}updateProgress();raf=requestAnimationFrame(tick);}
 
@@ -158,9 +177,18 @@ async function exportVideo(kind){
   if(audio.src){try{audio.currentTime=0;await audio.play();}catch(e){}}
   const total=Math.max(30,Math.min(600,Number(data.runtime_seconds)||110));
   for(let i=0;i<shots.length;i++){
-   ctx.clearRect(0,0,1920,1080);ctx.drawImage(shots[i],0,0,1920,1080);
    $('exportStatus').textContent='Recording scene '+(i+1)+' of '+shots.length+'…';
-   await wait(duration(i)*1000);
+   if(i===4&&data.scroll_enabled!==false){
+    const end=Date.now()+duration(i)*1000;
+    while(Date.now()<end){
+     const frame=await html2canvas(stage,{backgroundColor:'#080b10',scale:1920/stage.clientWidth,width:stage.clientWidth,height:stage.clientHeight,useCORS:true,allowTaint:false,logging:false});
+     ctx.clearRect(0,0,1920,1080);ctx.drawImage(frame,0,0,1920,1080);
+     await wait(180);
+    }
+   }else{
+    ctx.clearRect(0,0,1920,1080);ctx.drawImage(shots[i],0,0,1920,1080);
+    await wait(duration(i)*1000);
+   }
   }
   recorder.stop();await finished;audio.pause();audio.loop=false;stream.getTracks().forEach(t=>t.stop());
   const blob=new Blob(chunks,{type:mime}),url=URL.createObjectURL(blob),a=document.createElement('a');
