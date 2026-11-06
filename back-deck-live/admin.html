@@ -276,6 +276,47 @@
 
       <!-- EPISODES -->
       <section id="episodesSection" class="admin-section">
+
+      <!-- MAIN HOMEPAGE VIDEO -->
+      <div class="panel" id="mainVideoManager">
+        <div class="eyebrow">Homepage feature</div>
+        <h2>Main video manager</h2>
+        <p>Choose the background video visitors see in the Back Deck Live homepage hero. This is separate from the episode archive player.</p>
+        <div class="grid">
+          <div class="field">
+            <label for="mainVideoType">Video source</label>
+            <select id="mainVideoType"><option value="youtube">YouTube URL</option><option value="upload">Upload video (MP4 / WebM)</option></select>
+          </div>
+          <div class="field" id="mainYoutubeField">
+            <label for="mainYoutubeUrl">YouTube video or livestream URL</label>
+            <input id="mainYoutubeUrl" type="url" placeholder="https://www.youtube.com/watch?v=..." />
+          </div>
+          <div class="field hidden" id="mainUploadField">
+            <label for="mainVideoFile">Choose video file (MP4 or WebM · max 512 MB)</label>
+            <input id="mainVideoFile" type="file" accept="video/mp4,video/webm,.mp4,.webm" />
+            <small class="muted">Large uploads may take a few minutes. Keep this page open until the upload finishes.</small>
+          </div>
+          <div class="field">
+            <label for="mainVideoTitle">Video title</label>
+            <input id="mainVideoTitle" maxlength="180" placeholder="Back Deck Live — Main Feature" />
+          </div>
+          <div class="field full">
+            <label for="mainVideoDescription">Description (optional)</label>
+            <textarea id="mainVideoDescription" maxlength="1000" placeholder="A short description for your featured video."></textarea>
+          </div>
+        </div>
+        <div class="field full">
+          <label>Preview</label>
+          <div id="mainVideoPreview" style="aspect-ratio:16/9;max-width:760px;background:#080e0c;border:1px solid var(--border);border-radius:12px;overflow:hidden;display:grid;place-items:center;color:var(--muted)">Choose a YouTube URL or video file to preview.</div>
+        </div>
+        <div class="toolbar">
+          <button class="btn primary" id="saveMainVideo" type="button">Save and publish main video</button>
+          <button class="btn" id="reloadMainVideo" type="button">Reload saved video</button>
+        </div>
+        <div id="mainVideoMessage" class="notice hidden" role="status" aria-live="polite"></div>
+        <p class="muted">The public homepage uses the saved video automatically. YouTube videos play muted in the hero background. Uploaded videos are stored in the Back Deck Live video bucket.</p>
+      </div>
+
         <div class="panel">
           <div class="section-heading">
             <div>
@@ -684,8 +725,101 @@
     });
   });
 
+
+  // Main homepage hero video manager.
+  const MAIN_VIDEO_BUCKET = "back-deck-main-video";
+  function youtubeIdFromUrl(value) {
+    try {
+      const url = new URL(value);
+      let id = "";
+      if (url.hostname === "youtu.be") id = url.pathname.split("/").filter(Boolean)[0] || "";
+      else if (/(^|\\.)youtube\\.com$/i.test(url.hostname)) {
+        id = url.searchParams.get("v") || (url.pathname.match(/\\/(?:embed|shorts|live)\\/([^/?]+)/) || [])[1] || "";
+      }
+      return /^[A-Za-z0-9_-]{11}$/.test(id) ? id : "";
+    } catch { return ""; }
+  }
+  function showMainVideoMessage(message, type="") {
+    const el=$("mainVideoMessage"); el.textContent=message;
+    el.className="notice"+(type?" "+type:""); el.classList.remove("hidden");
+  }
+  function previewMainVideo() {
+    const preview=$("mainVideoPreview"); preview.replaceChildren();
+    if ($("mainVideoType").value==="youtube") {
+      const id=youtubeIdFromUrl($("mainYoutubeUrl").value.trim());
+      if (!id) { preview.textContent="Paste a valid YouTube video or livestream URL."; return; }
+      const frame=document.createElement("iframe");
+      frame.src="https://www.youtube-nocookie.com/embed/"+encodeURIComponent(id)+"?autoplay=0&rel=0";
+      frame.title="Main video preview"; frame.allow="accelerometer; autoplay; encrypted-media; picture-in-picture";
+      frame.allowFullscreen=true; frame.style.cssText="width:100%;height:100%;border:0";
+      preview.appendChild(frame);
+    } else {
+      const file=$("mainVideoFile").files[0];
+      if (!file) { preview.textContent="Choose an MP4 or WebM video to preview."; return; }
+      const video=document.createElement("video"); video.controls=true; video.muted=true; video.playsInline=true;
+      video.src=URL.createObjectURL(file); video.style.cssText="width:100%;height:100%;object-fit:contain";
+      preview.appendChild(video);
+    }
+  }
+  function updateMainVideoFields() {
+    const upload=$("mainVideoType").value==="upload";
+    $("mainYoutubeField").classList.toggle("hidden",upload);
+    $("mainUploadField").classList.toggle("hidden",!upload);
+    previewMainVideo();
+  }
+  async function loadMainVideo() {
+    const {data,error}=await client.from("back_deck_main_video").select("*").eq("setting_key","main").maybeSingle();
+    if(error) throw error;
+    if(!data) return;
+    $("mainVideoType").value=data.video_type||"youtube";
+    $("mainYoutubeUrl").value=data.youtube_video_id ? "https://www.youtube.com/watch?v="+data.youtube_video_id : "";
+    $("mainVideoTitle").value=data.title||"";
+    $("mainVideoDescription").value=data.description||"";
+    updateMainVideoFields();
+    if(data.video_type==="upload" && data.video_url) {
+      const preview=$("mainVideoPreview"); preview.replaceChildren();
+      const video=document.createElement("video"); video.src=data.video_url; video.controls=true; video.muted=true;
+      video.style.cssText="width:100%;height:100%;object-fit:contain"; preview.appendChild(video);
+    }
+    showMainVideoMessage("Saved homepage video loaded.","success");
+  }
+  $("mainVideoType").addEventListener("change",updateMainVideoFields);
+  $("mainYoutubeUrl").addEventListener("input",previewMainVideo);
+  $("mainVideoFile").addEventListener("change",previewMainVideo);
+  $("reloadMainVideo").addEventListener("click",async()=>{try{await loadMainVideo();}catch(e){showMainVideoMessage("Could not load saved video: "+e.message,"error");}});
+  $("saveMainVideo").addEventListener("click",async()=>{
+    const button=$("saveMainVideo"); button.disabled=true; button.textContent="Publishing…";
+    try {
+      const type=$("mainVideoType").value; let videoUrl=null; let videoId=null;
+      if(type==="youtube") {
+        videoId=youtubeIdFromUrl($("mainYoutubeUrl").value.trim());
+        if(!videoId) throw new Error("Enter a valid YouTube video, Shorts, livestream, or youtu.be URL.");
+      } else {
+        const file=$("mainVideoFile").files[0];
+        if(!file) throw new Error("Choose an MP4 or WebM file first.");
+        if(!["video/mp4","video/webm"].includes(file.type)) throw new Error("Only MP4 and WebM videos are supported.");
+        if(file.size>512*1024*1024) throw new Error("The video must be 512 MB or smaller.");
+        const ext=file.type==="video/webm"?"webm":"mp4";
+        const path="homepage/"+crypto.randomUUID()+"."+ext;
+        showMainVideoMessage("Uploading video… Please keep this page open.");
+        const {error:uploadError}=await client.storage.from(MAIN_VIDEO_BUCKET).upload(path,file,{contentType:file.type,upsert:false});
+        if(uploadError) throw uploadError;
+        const {data:publicData}=client.storage.from(MAIN_VIDEO_BUCKET).getPublicUrl(path);
+        videoUrl=publicData.publicUrl;
+      }
+      const payload={setting_key:"main",video_type:type,youtube_video_id:videoId,video_url:videoUrl,
+        title:$("mainVideoTitle").value.trim()||"Back Deck Live",description:$("mainVideoDescription").value.trim(),
+        updated_at:new Date().toISOString(),updated_by:currentUser.id};
+      const {error}=await client.from("back_deck_main_video").upsert(payload,{onConflict:"setting_key"});
+      if(error) throw error;
+      showMainVideoMessage("Main homepage video saved and published. Refresh the public homepage to see it.","success");
+      await loadMainVideo();
+    } catch(error) { showMainVideoMessage("Could not publish main video: "+error.message,"error"); }
+    finally {button.disabled=false;button.textContent="Save and publish main video";}
+  });
+
   async function refreshAll() {
-    await Promise.all([loadEpisodes(), loadCrew(), loadSubmissions()]);
+    await Promise.all([loadEpisodes(), loadCrew(), loadSubmissions(), loadMainVideo().catch(error => showMainVideoMessage("Could not load saved video: "+error.message,"error"))]);
   }
 
   async function loadEpisodes() {
