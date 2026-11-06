@@ -55,19 +55,21 @@ button,input{font:inherit}button{cursor:pointer;border:1px solid #ffffff35;borde
   </div></div>
   <div class="progress"><span id="progressBar"></span></div><div class="status" id="playStatus">Ready · 7-scene master ending</div>
   <div class="controls"><button class="primary" id="play">▶ Play ending</button><button id="pause">Ⅱ Pause</button><button id="prev">← Previous</button><button id="next">Next →</button><button id="restart">↺ Restart</button><button id="reload">Reload saved credits</button></div>
+  <div class="controls"><button class="primary" id="exportMp4">⬇ Download MP4</button><button id="exportWebm">⬇ Download WebM</button></div><div class="status" id="exportStatus" role="status">Export the complete 7-scene ending as a video file.</div>
   <div class="small" style="text-align:center" id="episodeMeta"></div>
-  <div class="notes"><b style="color:var(--gold)">PRODUCTION NOTE</b><br>This page is a timed visual playback template for preview or OBS screen capture. It is not an MP4 renderer. For a finished YouTube export, capture the 16:9 stage at 1920×1080 and add recorded voiceover and original episode highlight footage in DaVinci Resolve. Uploaded background images and music are loaded from the private Tacoma Nights media vault using temporary signed links.</div>
+  <div class="notes"><b style="color:var(--gold)">PRODUCTION NOTE</b><br>Use Download MP4 when your browser supports MP4 recording, or Download WebM for broader compatibility. The export records the seven animated credit scenes at 1920×1080 and includes the uploaded background and music when the browser can capture them. Add recorded voiceover and original episode highlight footage in DaVinci Resolve for a fully produced episode-specific ending. Uploaded background images and music are loaded from the private Tacoma Nights media vault using temporary signed links.</div>
  </main>
 </div>
 <audio id="music" preload="none"></audio>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
 (()=>{'use strict';
 const SUPABASE_URL="https://cevylpnoexugwgygvtgu.supabase.co";
 const SUPABASE_KEY="sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";
 const client=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const $=id=>document.getElementById(id);
-let scenes=[...document.querySelectorAll('.scene')],data={},current=0,playing=false,startedAt=0,elapsed=0,raf=0;
+let scenes=[...document.querySelectorAll('.scene')],data={},current=0,playing=false,startedAt=0,elapsed=0,raf=0,exporting=false;
 const fallback={runtime_seconds:110,episode_number:'',episode_title:'',episode_highlights:'',guest_credits:'',contributor_credits:'',special_thanks:'',production_credits:'A CrowRules Entertainment Production\nCreated and hosted by Jonathan Riehle\nProduced and edited by CrowRules Entertainment',closing_headline:'UNTIL NEXT FRIDAY.',closing_tagline:"The conversation doesn't end here.",subscribe_message:'Subscribe, follow and keep the conversation going.',closing_voiceover:'Thank you for spending part of your week with us. Keep the conversation going, keep supporting one another, and remember — our stories are what bring us together.'};
 function setText(id,value){$(id).textContent=String(value||'').trim();}
 function listText(value){return String(value||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean).join('\n');}
@@ -114,8 +116,51 @@ function duration(i){const total=Math.max(30,Math.min(600,Number(data.runtime_se
 function showScene(i){current=Math.max(0,Math.min(scenes.length-1,i));scenes.forEach((s,n)=>s.classList.toggle('active',n===current));$('playStatus').textContent='Scene '+(current+1)+' of '+scenes.length+' · '+['Opening identity','Episode highlights','Guests and contributors','Production credits','CrowRules signature','Closing message','Until next Friday'][current];}
 function updateProgress(){const total=Number(data.runtime_seconds)||110;const before=Array.from({length:current},(_,i)=>duration(i)).reduce((a,b)=>a+b,0);const pct=Math.min(100,(before+elapsed)/total*100);$('progressBar').style.width=pct+'%';}
 function tick(now){if(!playing)return;const dt=(now-startedAt)/1000;elapsed=dt;if(elapsed>=duration(current)){if(current>=scenes.length-1){stop();$('progressBar').style.width='100%';$('playStatus').textContent='Ending complete · Until next Friday.';return;}elapsed=0;startedAt=now;showScene(current+1);}updateProgress();raf=requestAnimationFrame(tick);}
+
+function supportedMime(kind){
+ const choices=kind==='mp4'?['video/mp4;codecs="avc1.42E01E,mp4a.40.2"','video/mp4;codecs="avc1. Baseline"','video/mp4']:['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
+ return choices.find(x=>MediaRecorder.isTypeSupported(x))||'';
+}
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+async function exportVideo(kind){
+ if(exporting)return;
+ const mime=supportedMime(kind);
+ if(!mime){$('exportStatus').textContent=kind==='mp4'?'MP4 recording is not supported by this browser. Use Download WebM, then convert it to MP4 in DaVinci Resolve.':'This browser does not support WebM recording.';return;}
+ if(!window.html2canvas||!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream){$('exportStatus').textContent='This browser is missing a required video export feature. Try the latest Chrome or Edge.';return;}
+ exporting=true;stop();$('exportMp4').disabled=true;$('exportWebm').disabled=true;$('exportStatus').textContent='Preparing 1920 × 1080 scenes…';
+ const original=current,originalElapsed=elapsed,stage=$('stage'),canvas=document.createElement('canvas');canvas.width=1920;canvas.height=1080;
+ const ctx=canvas.getContext('2d');let shots=[];
+ try{
+  for(let i=0;i<scenes.length;i++){
+   showScene(i);await wait(900);
+   const shot=await html2canvas(stage,{backgroundColor:'#080b10',scale:1920/stage.clientWidth,width:stage.clientWidth,height:stage.clientHeight,useCORS:true,allowTaint:false,logging:false});
+   shots.push(shot);
+   $('exportStatus').textContent='Prepared scene '+(i+1)+' of '+scenes.length+'…';
+  }
+  const stream=canvas.captureStream(30),audio=$('music');
+  try{if(audio.src&&audio.captureStream){audio.loop=true;const audioStream=audio.captureStream();audioStream.getAudioTracks().forEach(t=>stream.addTrack(t));}}catch(e){}
+  const chunks=[],recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:12000000,audioBitsPerSecond:192000});
+  const finished=new Promise((resolve,reject)=>{recorder.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};recorder.onerror=()=>reject(new Error('The browser could not finish recording this video.'));recorder.onstop=resolve;});
+  recorder.start(1000);
+  if(audio.src){try{audio.currentTime=0;await audio.play();}catch(e){}}
+  const total=Math.max(30,Math.min(600,Number(data.runtime_seconds)||110));
+  for(let i=0;i<shots.length;i++){
+   ctx.clearRect(0,0,1920,1080);ctx.drawImage(shots[i],0,0,1920,1080);
+   $('exportStatus').textContent='Recording scene '+(i+1)+' of '+shots.length+'…';
+   await wait(duration(i)*1000);
+  }
+  recorder.stop();await finished;audio.pause();audio.loop=false;stream.getTracks().forEach(t=>t.stop());
+  const blob=new Blob(chunks,{type:mime}),url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download='Tacoma-Nights-Ending-Credits.'+(kind==='mp4'?'mp4':'webm');document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+  $('exportStatus').textContent=(kind==='mp4'?'MP4':'WebM')+' export complete · '+(blob.size/1024/1024).toFixed(1)+' MB';
+ }catch(err){$('exportStatus').textContent='Video export failed: '+(err.message||'Unknown error')+'. Try WebM or use OBS/DaVinci Resolve.';}
+ finally{showScene(original);elapsed=originalElapsed;updateProgress();exporting=false;$('exportMp4').disabled=false;$('exportWebm').disabled=false;}
+}
+
 function stop(){playing=false;cancelAnimationFrame(raf);$('music').pause();$('play').textContent='▶ Play ending';}
 function play(){if(playing)return;playing=true;startedAt=performance.now()-elapsed*1000;$('play').textContent='▶ Playing';const a=$('music');if(a.src){a.currentTime=0;a.play().catch(()=>{});}raf=requestAnimationFrame(tick);}
+$('exportMp4').addEventListener('click',()=>exportVideo('mp4'));
+$('exportWebm').addEventListener('click',()=>exportVideo('webm'));
 $('play').addEventListener('click',play);
 $('pause').addEventListener('click',()=>{stop();$('playStatus').textContent='Paused · Scene '+(current+1);});
 $('next').addEventListener('click',()=>{stop();elapsed=0;showScene(current+1);updateProgress();});
