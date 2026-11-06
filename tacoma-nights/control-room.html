@@ -520,7 +520,7 @@ I'm Jonathan Riehle. This is Tacoma Nights. Good night, everybody. And we'll see
    <label class="full">Special thanks — one person or organization per line<textarea name="special_thanks" rows="3" maxlength="3000" placeholder="Name or organization — optional note"></textarea></label>
    <label class="full">Episode-specific final message<textarea name="episode_message" rows="2" maxlength="1000" placeholder="Optional message that changes for this episode"></textarea></label>
    <label>Subscribe / follow message<input name="subscribe_message" maxlength="180" value="Subscribe, follow and keep the conversation going."></label>
-   <label>Credits target runtime (seconds)<input name="runtime_seconds" type="number" min="30" max="600" value="110"></label>
+   <label>Credits target runtime (seconds)<input name="runtime_seconds" type="number" min="1" max="3600" step="0.001" value="110"></label>
    <label class="full checkline"><input name="match_audio_length" type="checkbox"><span>Match the full credits runtime to the uploaded / linked music length</span></label>
    <p class="full small" id="endingAudioMatchStatus" role="status" aria-live="polite">Optional: enable this to set the credits duration from the selected music track automatically.</p>
   </div>
@@ -1094,10 +1094,10 @@ function syncEndingAudioLength(){
  const f=endingCreditsForm(),audio=$('endingMusicPreview'),field=f.elements.runtime_seconds,status=$('endingAudioMatchStatus');
  if(!f.elements.match_audio_length.checked){status.textContent='Manual duration is active. Turn on “Match the full credits runtime” to use the music track length.';return;}
  if(!Number.isFinite(audio.duration)||!audio.duration||!isFinite(audio.duration)){status.textContent='Select or upload an audio track and wait for its duration to load.';return;}
- const seconds=Math.round(audio.duration);
- if(seconds<30||seconds>600){status.textContent='The music is '+seconds+' seconds long. Credits matching supports tracks from 30 seconds to 10 minutes; adjust the music or use a manual runtime.';return;}
- field.value=String(seconds);
- status.textContent='Matched to music: '+Math.floor(seconds/60)+'m '+String(seconds%60).padStart(2,'0')+'s. The playback and video export will use this duration.';
+ const seconds=audio.duration;
+ if(seconds<=0||seconds>3600){status.textContent='The selected audio must be between 1 second and 60 minutes to match automatically.';return;}
+ field.value=seconds.toFixed(3);
+ status.textContent='Matched to the complete audio track: '+Math.floor(seconds/60)+'m '+(seconds%60).toFixed(1).padStart(4,'0')+'s. Audio plays once; credits finish with it.';
 }
 $('endingMusicPreview').addEventListener('loadedmetadata',syncEndingAudioLength);
 $('endingMusicPreview').addEventListener('durationchange',syncEndingAudioLength);
