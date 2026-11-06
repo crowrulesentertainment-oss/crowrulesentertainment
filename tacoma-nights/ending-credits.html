@@ -230,6 +230,41 @@ function tick(now){if(!playing)return;if(previewOnly){elapsed=(now-startedAt)/10
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const exportClock=seconds=>{const n=Math.max(0,Math.floor(seconds));return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');};
 function exportTotal(){return scenes.reduce((sum,scene,index)=>sum+Math.max(0,duration(index)),0);}
+
+async function captureStageForExport(stage,width){
+ return html2canvas(stage,{
+  backgroundColor:'#080b10',
+  scale:width/stage.clientWidth,
+  width:stage.clientWidth,
+  height:stage.clientHeight,
+  useCORS:true,
+  allowTaint:false,
+  logging:false,
+  onclone(doc){
+   const node=doc.querySelector('#stage');
+   if(!node)return;
+   const style=doc.createElement('style');
+   style.textContent=`
+    #stage .scene{transition:none!important}
+    #stage .scene.active{opacity:1!important;transform:none!important;filter:none!important;animation:none!important}
+    #stage .scene:not(.active){opacity:0!important}
+    #stage:after{opacity:.28!important}
+    #stage .scene-inner{opacity:1!important;filter:none!important}
+    #stage .logo,#stage .headline{color:#fff!important;text-shadow:0 4px 24px #000,0 0 12px #000!important}
+    #stage .eyebrow,#stage .scroll-heading{color:#f0c477!important;text-shadow:0 3px 20px #000!important}
+    #stage .subline,#stage .credits,#stage .scroll-content{color:#f1f4f8!important;text-shadow:0 3px 20px #000!important}
+    #stage .scroll-frame{background:linear-gradient(180deg,#080d15ee,#080d15cc)!important}
+   `;
+   doc.head.appendChild(style);
+   node.querySelectorAll('.scene.active').forEach(scene=>{
+    scene.style.setProperty('opacity','1','important');
+    scene.style.setProperty('transform','none','important');
+    scene.style.setProperty('filter','none','important');
+    scene.style.setProperty('animation','none','important');
+   });
+  }
+ });
+}
 function updateExportSummary(){if($('exportDuration'))$('exportDuration').textContent=exportClock(exportTotal());if($('qualityPreset'))$('exportResolution').textContent=$('qualityPreset').value==='720-balanced'?'1280×720':'1920×1080';}
 function exportFileName(){let name=String($('outputFileName').value||'Tacoma-Nights-Ending-Credits').trim().replace(/[^a-z0-9 _-]/gi,'').replace(/\s+/g,'-').replace(/-+/g,'-');return (name||'Tacoma-Nights-Ending-Credits').replace(/\.mp4$/i,'')+'.mp4';}
 async function makeMusicBuffer(url,maxSeconds){
@@ -312,7 +347,7 @@ async function renderMp4(){
   for(let i=0;i<scenes.length;i++){
    if(duration(i)<=0){shots[i]=null;continue;}
    showScene(i);await wait(1250);
-   const shot=await html2canvas(stage,{backgroundColor:'#080b10',scale:width/stage.clientWidth,width:stage.clientWidth,height:stage.clientHeight,useCORS:true,allowTaint:false,logging:false});
+   const shot=await captureStageForExport(stage,width);
    shots[i]=shot;
    $('exportProgressBar').style.width=((i+1)/scenes.length*8)+'%';
   }
@@ -334,7 +369,7 @@ async function renderMp4(){
     videos.forEach(video=>{video.muted=true;video.loop=true;video.playsInline=true;if(video.readyState>=2&&video.paused){const p=video.play();if(p&&p.catch)p.catch(()=>{});}});
    }
    if(sceneIndex===4&&data.scroll_enabled!==false&&(!scrollShot||performance.now()-lastScrollRefresh>400)){
-    try{scrollShot=await html2canvas(stage,{backgroundColor:'#080b10',scale:width/stage.clientWidth,width:stage.clientWidth,height:stage.clientHeight,useCORS:true,allowTaint:false,logging:false});lastScrollRefresh=performance.now();}catch(e){console.warn('Scroll refresh failed; using last frame:',e);}
+    try{scrollShot=await captureStageForExport(stage,width);lastScrollRefresh=performance.now();}catch(e){console.warn('Scroll refresh failed; using last frame:',e);}
    }
    const currentShot=sceneIndex===4&&scrollShot?scrollShot:shots[sceneIndex];
    if(!currentShot)throw new Error('Scene '+(sceneIndex+1)+' could not be rendered.');
