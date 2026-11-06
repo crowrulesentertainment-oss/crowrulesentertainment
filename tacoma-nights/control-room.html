@@ -317,6 +317,11 @@ body:before{opacity:.3;background:radial-gradient(ellipse at 50% 0%,#52677e22,tr
 .ending-meta b{display:block;color:#f0c477;font:800 1.25rem "Barlow Condensed"}
 .ending-meta small{font-size:.65rem;color:var(--muted);letter-spacing:.08em}
 .ending-help{font-size:.76rem;color:var(--muted);margin-top:5px}
+.ending-upload-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,.8fr);gap:12px;align-items:center;padding:16px;background:#090e15;border:1px solid #e8b45c35}
+.ending-upload-card>div{min-width:0}.ending-upload-card b{font-size:.72rem;letter-spacing:.12em;color:#f0c477}
+.ending-upload-card .small{margin:5px 0 0}.ending-audio-preview{width:100%;grid-column:1/-1;min-height:38px}
+.ending-background-preview{grid-column:1/-1;width:100%;max-height:320px;object-fit:contain;background:#05080d;border:1px solid #ffffff22}
+@media(max-width:700px){.ending-upload-card{grid-template-columns:1fr}}
 @media(max-width:700px){.ending-meta{grid-template-columns:repeat(2,minmax(0,1fr))}.ending-ratio{grid-template-columns:1fr}}
 
 </style><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
@@ -443,8 +448,22 @@ body:before{opacity:.3;background:radial-gradient(ellipse at 50% 0%,#52677e22,tr
    <label>Master project name<input name="master_name" maxlength="120" value="Tacoma Nights — Master Ending Credits"></label>
    <label>Episode number / identifier<input name="episode_number" maxlength="60" placeholder="EPISODE 005"></label>
    <label class="full">Episode title<input name="episode_title" maxlength="180" placeholder="The People Behind the 253"></label>
-   <label class="full">Permanent background music / track reference<input name="music_reference" maxlength="500" placeholder="Track name, licensed music library reference or private asset URL"></label>
-   <label class="full">Permanent visual / background asset reference<input name="visual_reference" maxlength="500" placeholder="Reusable Tacoma night footage or approved asset URL"></label>
+   <label class="full">Permanent background music / track reference<input name="music_reference" maxlength="500" placeholder="Optional external HTTPS audio URL or uploaded music will appear here"></label>
+   <input type="hidden" name="music_storage_path">
+   <div class="full ending-upload-card">
+    <div><b>UPLOAD ENDING CREDITS MUSIC</b><p class="small">MP3, M4A, AAC, WAV, OGG or WebM audio · maximum 100 MB. Uploads stay private.</p></div>
+    <label>Select music file<input id="endingMusicFile" type="file" accept="audio/mpeg,audio/mp4,audio/aac,audio/wav,audio/x-wav,audio/ogg,audio/webm"></label>
+    <audio id="endingMusicPreview" controls preload="none" class="ending-audio-preview"></audio>
+    <p id="endingMusicStatus" class="small" role="status" aria-live="polite">No new music upload selected.</p>
+   </div>
+   <label class="full">Permanent visual / background asset reference<input name="visual_reference" maxlength="500" placeholder="Optional external HTTPS image URL or uploaded background will appear here"></label>
+   <input type="hidden" name="visual_storage_path">
+   <div class="full ending-upload-card">
+    <div><b>UPLOAD ENDING CREDITS BACKGROUND IMAGE</b><p class="small">JPG, PNG or WebP · maximum 20 MB. A 16:9 image at 1920×1080 is recommended. Uploads stay private.</p></div>
+    <label>Select background image<input id="endingBackgroundFile" type="file" accept="image/jpeg,image/png,image/webp"></label>
+    <img id="endingBackgroundPreview" class="ending-background-preview" alt="Ending credits background preview" hidden>
+    <p id="endingBackgroundStatus" class="small" role="status" aria-live="polite">No new background upload selected.</p>
+   </div>
    <label class="full">Permanent production credits<textarea name="production_credits" rows="3" maxlength="2000">A CrowRules Entertainment Production
 Created and hosted by Jonathan Riehle
 Produced and edited by CrowRules Entertainment</textarea></label>
@@ -462,7 +481,7 @@ I'm Jonathan Riehle. This is Tacoma Nights. Good night, everybody. And we'll see
    <label>Subscribe / follow message<input name="subscribe_message" maxlength="180" value="Subscribe, follow and keep the conversation going."></label>
    <label>Credits target runtime (seconds)<input name="runtime_seconds" type="number" min="30" max="600" value="110"></label>
   </div>
-  <p class="ending-help">Permanent fields are reused each week. Replace only the episode-specific fields before exporting. Asset references are stored as references; this editor does not upload or render video files.</p>
+  <p class="ending-help">Permanent fields are reused each week. Replace only the episode-specific fields before exporting. Background images and music upload to the private Tacoma Nights media vault; the playback page uses temporary signed links. This editor does not render a final MP4.</p>
   <div class="actions"><button class="btn" id="saveEndingCreditsBtn" type="submit">Save ending credits ↗</button><button class="btn ghost" id="reloadEndingCreditsBtn" type="button">Reload saved settings</button><button class="btn ghost" id="previewEndingCreditsBtn" type="button">Refresh preview</button><button class="btn ghost" id="copyEndingCreditsBtn" type="button">Copy credits text</button><button class="btn danger" id="resetEndingCreditsBtn" type="button">Reset defaults</button></div>
  </form>
  <p id="endingCreditsStatus" class="notice" role="status" aria-live="polite">Ending credits settings will load after administrator sign-in.</p>
@@ -980,7 +999,7 @@ $('refreshProduction').addEventListener('click',async()=>{try{await loadProducti
 
 const ENDING_CREDITS_DEFAULTS={
  master_name:'Tacoma Nights — Master Ending Credits',episode_number:'',episode_title:'',
- music_reference:'',visual_reference:'',
+ music_reference:'',visual_reference:'',music_storage_path:'',visual_storage_path:'',
  production_credits:'A CrowRules Entertainment Production\nCreated and hosted by Jonathan Riehle\nProduced and edited by CrowRules Entertainment',
  closing_voiceover:"Every city has a story. Every person has a voice. And every conversation has the power to bring us closer together.\nThank you for spending part of your week with us.\nKeep the conversation going, keep supporting one another, and remember — our stories are what bring us together.\nI'm Jonathan Riehle. This is Tacoma Nights. Good night, everybody. And we'll see you next Friday.",
  closing_headline:'UNTIL NEXT FRIDAY.',closing_tagline:"The conversation doesn't end here.",
@@ -1004,22 +1023,69 @@ function renderEndingCreditsPreview(){
 }
 async function loadEndingCredits(){
  const {data,error}=await db.from('tacoma_nights_site_settings').select('setting_value').eq('setting_key','ending_credits').maybeSingle();
- if(error)throw error;applyEndingCreditsValues(data?.setting_value||ENDING_CREDITS_DEFAULTS);
- say($('endingCreditsStatus'),data?.setting_value?'Saved master ending credits loaded.':'Default master ending credits loaded. Customize and save to keep your settings.');
+ if(error)throw error;
+ const value={...ENDING_CREDITS_DEFAULTS,...(data?.setting_value||{})};
+ if(value.visual_storage_path){
+  const signed=await db.storage.from('tacoma-nights-clips').createSignedUrl(value.visual_storage_path,3600);
+  if(!signed.error&&signed.data?.signedUrl)value.visual_reference=signed.data.signedUrl;
+ }
+ if(value.music_storage_path){
+  const signed=await db.storage.from('tacoma-nights-clips').createSignedUrl(value.music_storage_path,3600);
+  if(!signed.error&&signed.data?.signedUrl)value.music_reference=signed.data.signedUrl;
+ }
+ applyEndingCreditsValues(value);
+ const bg=$('endingBackgroundPreview');if(value.visual_reference&&/^https:\/\//i.test(value.visual_reference)){bg.src=value.visual_reference;bg.hidden=false;}else{bg.removeAttribute('src');bg.hidden=true;}
+ const audio=$('endingMusicPreview');if(value.music_reference&&/^https:\/\//i.test(value.music_reference)){audio.src=value.music_reference;}else{audio.removeAttribute('src');}
+ say($('endingCreditsStatus'),data?.setting_value?'Saved master ending credits and media references loaded.':'Default master ending credits loaded. Customize and save to keep your settings.');
 }
 $('endingCreditsForm').addEventListener('input',renderEndingCreditsPreview);
+const endingCreditsOldMediaToDelete=new Set();
+async function uploadEndingCreditsMedia(kind,file){
+ const isImage=kind==='background';
+ const allowed=isImage?['image/jpeg','image/png','image/webp']:['audio/mpeg','audio/mp4','audio/aac','audio/wav','audio/x-wav','audio/ogg','audio/webm'];
+ const maxBytes=isImage?20*1024*1024:100*1024*1024;
+ const status=$(isImage?'endingBackgroundStatus':'endingMusicStatus');
+ const input=$(isImage?'endingBackgroundFile':'endingMusicFile');
+ if(!file)return;
+ if(!allowed.includes(file.type)){say(status,isImage?'Choose a JPG, PNG or WebP image.':'Choose a supported audio file (MP3, M4A, AAC, WAV, OGG or WebM).',true);input.value='';return;}
+ if(file.size>maxBytes){say(status,'File is too large. Maximum size: '+(isImage?'20 MB.':'100 MB.'),true);input.value='';return;}
+ const button=$('saveEndingCreditsBtn');button.disabled=true;
+ say(status,'Uploading '+file.name+'…');
+ try{
+  const ext=(file.name.split('.').pop()||'').toLowerCase().replace(/[^a-z0-9]/g,'')||(isImage?'jpg':'mp3');
+  const path='ending-credits/'+(isImage?'background':'music')+'/'+crypto.randomUUID()+'.'+ext;
+  const {data,error}=await db.storage.from('tacoma-nights-clips').upload(path,file,{contentType:file.type,cacheControl:'3600',upsert:false});
+  if(error)throw error;
+  const signed=await db.storage.from('tacoma-nights-clips').createSignedUrl(data.path,3600);
+  if(signed.error)throw signed.error;
+  const form=endingCreditsForm(),pathName=isImage?'visual_storage_path':'music_storage_path',urlName=isImage?'visual_reference':'music_reference';
+  const oldPath=form.elements[pathName].value;
+  if(oldPath&&oldPath!==data.path)endingCreditsOldMediaToDelete.add(oldPath);
+  form.elements[pathName].value=data.path;
+  form.elements[urlName].value=signed.data.signedUrl;
+  if(isImage){const img=$('endingBackgroundPreview');img.src=signed.data.signedUrl;img.hidden=false;}
+  else{$('endingMusicPreview').src=signed.data.signedUrl;}
+  say(status,'Uploaded securely: '+file.name+'. Click “Save ending credits” to keep this asset attached to the master.');
+  renderEndingCreditsPreview();
+ }catch(err){say(status,'Upload failed: '+(err.message||'Check Storage permissions and try again.'),true);}
+ finally{button.disabled=false;}
+}
+$('endingBackgroundFile').addEventListener('change',e=>uploadEndingCreditsMedia('background',e.target.files?.[0]));
+$('endingMusicFile').addEventListener('change',e=>uploadEndingCreditsMedia('music',e.target.files?.[0]));
 $('endingCreditsForm').addEventListener('submit',async e=>{
  e.preventDefault();const b=$('saveEndingCreditsBtn');setBusy(b,true);
  try{const value=endingCreditsValues();value.updated_at=new Date().toISOString();value.updated_by=currentUser?.id||null;
  const {error}=await db.from('tacoma_nights_site_settings').upsert({setting_key:'ending_credits',setting_value:value,updated_at:new Date().toISOString()},{onConflict:'setting_key'});
- if(error)throw error;say($('endingCreditsStatus'),'Ending credits settings saved securely. Permanent and episode-specific fields are ready for this episode.');
+ if(error)throw error;
+ if(endingCreditsOldMediaToDelete.size){const paths=[...endingCreditsOldMediaToDelete];const removed=await db.storage.from('tacoma-nights-clips').remove(paths);if(removed.error)console.warn('Old ending-credit assets could not be cleaned up:',removed.error.message);endingCreditsOldMediaToDelete.clear();}
+ say($('endingCreditsStatus'),'Ending credits saved. Uploaded background and music are attached to the master settings.');
  }catch(err){say($('endingCreditsStatus'),'Could not save ending credits: '+(err.message||'Unknown error'),true);}
  finally{setBusy(b,false,'Save ending credits ↗');}
 });
 $('reloadEndingCreditsBtn').addEventListener('click',async()=>{const b=$('reloadEndingCreditsBtn');setBusy(b,true,'Reload saved settings');try{await loadEndingCredits();}catch(e){say($('endingCreditsStatus'),e.message||'Could not reload settings.',true);}finally{setBusy(b,false,'Reload saved settings');}});
 $('previewEndingCreditsBtn').addEventListener('click',()=>{renderEndingCreditsPreview();say($('endingCreditsStatus'),'Preview refreshed from the current editable fields.');});
 $('copyEndingCreditsBtn').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(renderEndingCreditsPreview());say($('endingCreditsStatus'),'Credits text copied to clipboard.');}catch(e){say($('endingCreditsStatus'),'Clipboard access was unavailable. Select and copy the preview text instead.',true);}});
-$('resetEndingCreditsBtn').addEventListener('click',()=>{if(!confirm('Reset the editor to the original Tacoma Nights master defaults? Save afterward to replace the saved settings.'))return;applyEndingCreditsValues(ENDING_CREDITS_DEFAULTS);say($('endingCreditsStatus'),'Default values restored in the editor. Save to make this reset permanent.');});
+$('resetEndingCreditsBtn').addEventListener('click',()=>{if(!confirm('Reset the editor to the original Tacoma Nights master defaults? Save afterward to replace the saved settings. Uploaded files already in storage will not be deleted.'))return;applyEndingCreditsValues(ENDING_CREDITS_DEFAULTS);$('endingBackgroundPreview').hidden=true;$('endingBackgroundPreview').removeAttribute('src');$('endingMusicPreview').removeAttribute('src');$('endingBackgroundFile').value='';$('endingMusicFile').value='';say($('endingCreditsStatus'),'Default values restored in the editor. Save to make this reset permanent.');});
 
 async function loadAll(){say($('globalStatus'),'Loading secure dashboard data…');try{await Promise.all([loadPremiere(),loadFeaturedVideoControl(),loadEndingCredits(),loadCrew(),loadSubmissions(),loadHostApplications(),loadAssets(),loadClipUploads(),loadProductionEpisodes()]);say($('globalStatus'),'Control room connected · premiere, production, crew, community inbox, remote host applications and media library loaded.');}catch(e){console.error(e);say($('globalStatus'),'Some data could not load. Confirm the admin role and Supabase policies, then refresh. '+(e.message||''),true);}}
 function updateAvatarPreview(url){const img=$('avatarPreview');if(img)img.src=url||'https://placehold.co/172x172/202b23/e9e5d9?text=AVATAR';}
