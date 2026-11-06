@@ -318,16 +318,21 @@ async function renderMp4(){
   }
   await output.start();
   if(audioSource&&audioBuffer){$('exportStatus').textContent='Adding background music track…';await audioSource.add(audioBuffer);audioSource.close();}
-  let sceneIndex=0,sceneStart=0,previousShot=null,previousScene=-1,frameCount=0;
+  let sceneIndex=0,sceneStart=0,previousShot=null,previousScene=-1,frameCount=0,lastPlaybackScene=-1;
   for(let frameIndex=0;frameIndex<totalFrames;frameIndex++){
    const timestamp=frameIndex/fps;
    while(sceneIndex<scenes.length-1&&timestamp>=sceneStart+Math.max(0,duration(sceneIndex))){sceneStart+=Math.max(0,duration(sceneIndex));previousScene=sceneIndex;previousShot=shots[sceneIndex]||previousShot;sceneIndex++;}
    if(duration(sceneIndex)<=0){continue;}
    if(current!==sceneIndex)showScene(sceneIndex);
    const local=timestamp-sceneStart;
+   if(sceneIndex!==lastPlaybackScene){
+    if(sceneIndex===1&&includeHighlights)videos.forEach(video=>{try{video.currentTime=0;}catch(e){}});
+    if(sceneIndex!==1||!includeHighlights)videos.forEach(video=>video.pause());
+    lastPlaybackScene=sceneIndex;
+   }
    if(sceneIndex===1&&includeHighlights){
     videos.forEach(video=>{video.muted=true;video.loop=true;video.playsInline=true;if(video.readyState>=2&&video.paused){const p=video.play();if(p&&p.catch)p.catch(()=>{});}});
-   }else if(sceneIndex!==1){videos.forEach(video=>video.pause());}
+   }
    if(sceneIndex===4&&data.scroll_enabled!==false&&(!scrollShot||performance.now()-lastScrollRefresh>400)){
     try{scrollShot=await html2canvas(stage,{backgroundColor:'#080b10',scale:width/stage.clientWidth,width:stage.clientWidth,height:stage.clientHeight,useCORS:true,allowTaint:false,logging:false});lastScrollRefresh=performance.now();}catch(e){console.warn('Scroll refresh failed; using last frame:',e);}
    }
