@@ -233,39 +233,17 @@ const exportClock=seconds=>{const n=Math.max(0,Math.floor(seconds));return Strin
 function exportTotal(){return scenes.reduce((sum,scene,index)=>sum+Math.max(0,duration(index)),0);}
 
 async function captureStageForExport(stage,width){
+ // Capture the actual program monitor without export-only color, opacity,
+ // typography, or layout overrides. The preview is the master image.
  return html2canvas(stage,{
-  backgroundColor:'#080b10',
+  backgroundColor:null,
   scale:width/stage.clientWidth,
   width:stage.clientWidth,
   height:stage.clientHeight,
   useCORS:true,
   allowTaint:false,
   logging:false,
-  onclone(doc){
-   const node=doc.querySelector('#stage');
-   if(!node)return;
-   const style=doc.createElement('style');
-   style.textContent=`
-    #stage .scene{transition:none!important}
-    #stage .scene.active{opacity:1!important;transform:none!important;filter:none!important;animation:none!important}
-    #stage .scene:not(.active){opacity:0!important}
-    #stage:after{opacity:.28!important}
-    #stage .scene-inner{opacity:1!important;filter:none!important;text-rendering:geometricPrecision!important;-webkit-font-smoothing:antialiased!important}
-    #stage .logo,#stage .headline{opacity:1!important;text-shadow:0 2px 5px #000!important}
-    #stage .gold{color:#f0c477!important;text-shadow:0 2px 5px #000!important}
-    #stage .eyebrow,#stage .scroll-heading{color:#f0c477!important;text-shadow:0 2px 5px #000!important}
-    #stage .subline,#stage .credits,#stage .scroll-content{color:#f5f6f8!important;text-shadow:0 2px 5px #000!important}
-    #stage .scroll-frame{background:linear-gradient(180deg,#080d15ee,#080d15cc)!important}
-    #stage .scene,#stage .scene *{text-rendering:geometricPrecision!important;-webkit-font-smoothing:antialiased!important}
-   `;
-   doc.head.appendChild(style);
-   node.querySelectorAll('.scene.active').forEach(scene=>{
-    scene.style.setProperty('opacity','1','important');
-    scene.style.setProperty('transform','none','important');
-    scene.style.setProperty('filter','none','important');
-    scene.style.setProperty('animation','none','important');
-   });
-  }
+  foreignObjectRendering:false
  });
 }
 function selectedFormat(){return $('outputFormat').value==='webm'?'webm':'mp4';}
@@ -350,52 +328,50 @@ async function renderVideo(){
    output.addAudioTrack(audioSource);
   }
   if(typeof output.setMetadataTags==='function')output.setMetadataTags({title:'Tacoma Nights — Ending Credits',artist:'CrowRules Entertainment',comment:'One company. One universe.'});
-  $('exportStatus').textContent='Preparing '+scenes.length+' scenes · '+(directSave?'writing directly to the selected file':'preparing browser download')+'…';
-  for(let i=0;i<scenes.length;i++){
-   if(duration(i)<=0){shots[i]=null;continue;}
-   showScene(i);await wait(1250);
-   const shot=await captureStageForExport(stage,width);
-   shots[i]=shot;
-   $('exportProgressBar').style.width=((i+1)/scenes.length*8)+'%';
-  }
+  $('exportStatus').textContent='Rendering the live program monitor · matching the website preview…';
   await output.start();
   if(audioSource&&audioBuffer){$('exportStatus').textContent='Adding background music track…';await audioSource.add(audioBuffer);audioSource.close();}
-  let sceneIndex=0,sceneStart=0,previousShot=null,previousScene=-1,frameCount=0,lastPlaybackScene=-1;
+  let sceneIndex=-1,frameCount=0,lastPlaybackScene=-1,lastCapturedFrame=null;
+  const captureEvery=2; // 15 fresh program-monitor captures per second, encoded at 30 FPS.
+  const nextPaint=()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
   for(let frameIndex=0;frameIndex<totalFrames;frameIndex++){
    const timestamp=frameIndex/fps;
-   while(sceneIndex<scenes.length-1&&timestamp>=sceneStart+Math.max(0,duration(sceneIndex))){sceneStart+=Math.max(0,duration(sceneIndex));previousScene=sceneIndex;previousShot=shots[sceneIndex]||previousShot;sceneIndex++;}
-   if(duration(sceneIndex)<=0){continue;}
-   if(current!==sceneIndex)showScene(sceneIndex);
-   const local=timestamp-sceneStart;
+   let targetScene=0,sceneStart=0;
+   while(targetScene<scenes.length-1&&timestamp>=sceneStart+Math.max(0,duration(targetScene))){sceneStart+=Math.max(0,duration(targetScene));targetScene++;}
+   if(duration(targetScene)<=0)continue;
+   const local=Math.max(0,timestamp-sceneStart);
+   if(targetScene!==sceneIndex){
+    sceneIndex=targetScene;
+    showScene(sceneIndex);
+    await nextPaint();
+   }
+   elapsed=local;
+   updateProgress();
+   const activeScene=scenes[sceneIndex];
+   activeScene.getAnimations().forEach(animation=>{try{animation.currentTime=Math.min(local*1000,950);}catch(e){}});
+   if(sceneIndex===4&&data.scroll_enabled!==false){
+    $('scrollContent').getAnimations().forEach(animation=>{try{animation.currentTime=local*1000;}catch(e){}});
+   }
    if(sceneIndex!==lastPlaybackScene){
-    if(sceneIndex===1&&includeHighlights)videos.forEach(video=>{try{video.currentTime=0;}catch(e){}});
-    if(sceneIndex!==1||!includeHighlights)videos.forEach(video=>video.pause());
+    if(sceneIndex===1&&includeHighlights){
+     videos.forEach(video=>{video.muted=true;video.loop=true;video.playsInline=true;try{video.currentTime=0;}catch(e){}});
+     videos.forEach(video=>{if(video.readyState>=2&&video.paused){const p=video.play();if(p&&p.catch)p.catch(()=>{});}});
+    }else videos.forEach(video=>video.pause());
     lastPlaybackScene=sceneIndex;
    }
-   if(sceneIndex===1&&includeHighlights){
-    videos.forEach(video=>{video.muted=true;video.loop=true;video.playsInline=true;if(video.readyState>=2&&video.paused){const p=video.play();if(p&&p.catch)p.catch(()=>{});}});
+   // Sample the real DOM stage, including its original styling and live media.
+   if(frameIndex%captureEvery===0||!lastCapturedFrame){
+    await nextPaint();
+    lastCapturedFrame=await captureStageForExport(stage,width);
    }
-   if(sceneIndex===4&&data.scroll_enabled!==false&&(!scrollShot||performance.now()-lastScrollRefresh>400)){
-    try{scrollShot=await captureStageForExport(stage,width);lastScrollRefresh=performance.now();}catch(e){console.warn('Scroll refresh failed; using last frame:',e);}
-   }
-   const currentShot=sceneIndex===4&&scrollShot?scrollShot:shots[sceneIndex];
-   if(!currentShot)throw new Error('Scene '+(sceneIndex+1)+' could not be rendered.');
    ctx.clearRect(0,0,width,height);
-   const transitionSeconds=.75;
-   if(previousShot&&sceneIndex!==previousScene&&local<transitionSeconds){
-    ctx.globalAlpha=1;ctx.drawImage(previousShot,0,0,width,height);
-    ctx.globalAlpha=Math.max(0,Math.min(1,local/transitionSeconds));ctx.drawImage(currentShot,0,0,width,height);ctx.globalAlpha=1;
-   }else{ctx.drawImage(currentShot,0,0,width,height);}
-   if(sceneIndex===1&&includeHighlights){
-    const stageRect=stage.getBoundingClientRect(),scale=width/stage.clientWidth;
-    videos.forEach(video=>{if(video.readyState>=2){const rect=video.getBoundingClientRect();const x=(rect.left-stageRect.left)*scale,y=(rect.top-stageRect.top)*scale,w=rect.width*scale,h=rect.height*scale;try{ctx.drawImage(video,x,y,w,h);}catch(e){}}});
-   }
+   ctx.drawImage(lastCapturedFrame,0,0,width,height);
    await videoSource.add(timestamp,1/fps,{keyFrame:frameIndex===0||frameIndex%60===0});
    frameCount++;
    const pct=8+Math.min(88,((frameIndex+1)/totalFrames)*88);
    $('exportProgressBar').style.width=pct.toFixed(1)+'%';
-   $('exportStatus').textContent='Encoding MP4 · '+exportClock(timestamp)+' / '+exportClock(total)+' · frame '+frameCount.toLocaleString()+' of '+totalFrames.toLocaleString();
-   if(frameIndex%30===0)await wait(30);
+   $('exportStatus').textContent='Matching preview · '+exportClock(timestamp)+' / '+exportClock(total)+' · frame '+frameCount.toLocaleString()+' of '+totalFrames.toLocaleString();
+   if(frameIndex%30===0)await wait(10);
   }
   videos.forEach(video=>video.pause());
   videoSource.close();
@@ -408,7 +384,7 @@ async function renderVideo(){
    verifiedDuration=await input.computeDuration();input.dispose();
   }else{
    const buffer=target.buffer;
-   if(!buffer||!buffer.byteLength)throw new Error('The MP4 encoder returned an empty file.');
+   if(!buffer||!buffer.byteLength)throw new Error('The Video encoder returned an empty file.');
    const blob=new Blob([buffer],{type:mimeType});fileSize=blob.size;
    const input=new Input({source:new BufferSource(buffer),formats:ALL_FORMATS});
    verifiedDuration=await input.computeDuration();input.dispose();
@@ -416,11 +392,11 @@ async function renderVideo(){
    finishedExportUrl=URL.createObjectURL(blob);finishedExportName=name;finishedExportMime=mimeType;
    $('saveFinishedVideo').hidden=false;
   }
-  if(!Number.isFinite(verifiedDuration)||verifiedDuration<Math.max(1,total*.85))throw new Error('MP4 validation failed: expected about '+total.toFixed(1)+' seconds, but the file reports '+(Number(verifiedDuration)||0).toFixed(2)+' seconds.');
+  if(!Number.isFinite(verifiedDuration)||verifiedDuration<Math.max(1,total*.85))throw new Error('Video validation failed: expected about '+total.toFixed(1)+' seconds, but the file reports '+(Number(verifiedDuration)||0).toFixed(2)+' seconds.');
   $('exportProgressBar').style.width='100%';
   $('exportStatus').textContent=formatLabel+' complete and verified · '+exportClock(verifiedDuration)+' · '+(fileSize/1024/1024).toFixed(1)+' MB · '+frameCount.toLocaleString()+' frames · '+(directSave?'saved to your selected location':'ready to download');
  }catch(err){
-  console.error('MP4 render failed:',err);
+  console.error('Video render failed:',err);
   $('exportStatus').textContent=formatLabel+' render failed: '+(err.message||'Unknown error')+'. No unverified file was offered for download.';
   if(writable&&!finished){try{await writable.abort();}catch(e){}}
   if(output&&!finished){try{await output.cancel();}catch(e){}}
