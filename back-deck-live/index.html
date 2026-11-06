@@ -503,6 +503,42 @@
       align-items: start;
     }
 
+    /* YouTube live chat — dark player-style panel */
+    .live-chat-panel {
+      margin-bottom: 20px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 18px;
+      overflow: hidden;
+      background: #0f0f0f;
+      box-shadow: 0 18px 48px rgba(0,0,0,.32);
+    }
+    .live-chat-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 15px 17px;
+      color: #f1f1f1;
+      background: #181818;
+      border-bottom: 1px solid #303030;
+    }
+    .live-chat-heading strong { font: 700 .95rem "Manrope", sans-serif; }
+    .live-chat-heading span { color: #aaa; font-size: .72rem; }
+    .live-chat-frame { height: 510px; background: #0f0f0f; }
+    .live-chat-frame iframe { display:block; width:100%; height:100%; border:0; background:#0f0f0f; }
+    .live-chat-empty {
+      min-height: 250px;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      color: #aaa;
+      text-align: center;
+      background: #0f0f0f;
+    }
+    .live-chat-empty strong { display:block; margin-bottom:8px; color:#f1f1f1; }
+    .live-chat-empty a { color:#3ea6ff; text-decoration:underline; }
+    @media (max-width: 900px) { .live-chat-frame { height: 430px; } }
+
     .video-frame {
       position: relative;
       width: 100%;
@@ -1321,6 +1357,17 @@
           </article>
 
           <aside class="reveal">
+            <section class="live-chat-panel" aria-label="YouTube live chat">
+              <div class="live-chat-heading">
+                <strong>Live chat</strong>
+                <span>YOUTUBE · DARK THEME</span>
+              </div>
+              <div class="live-chat-frame" id="youtubeLiveChat">
+                <div class="live-chat-empty">
+                  <div><strong>Join the conversation</strong>Live chat will appear here when Back Deck Live is streaming on YouTube.</div>
+                </div>
+              </div>
+            </section>
             <div class="goal-card">
               <div class="goal-top">
                 <div>
@@ -1907,12 +1954,31 @@
         });
       }
 
+      function updateYouTubeLiveChat(videoId) {
+        const container = $("#youtubeLiveChat");
+        if (!container) return;
+        const id = safeVideoId(videoId);
+        if (!id) {
+          container.innerHTML = '<div class="live-chat-empty"><div><strong>Chat is ready for the next live show</strong>Open the <a href="' + STREAMS_URL + '" target="_blank" rel="noopener noreferrer">CrowRules TV live streams</a> on YouTube to join the conversation.</div></div>';
+          return;
+        }
+        const iframe = document.createElement("iframe");
+        iframe.src = "https://www.youtube.com/live_chat?v=" + encodeURIComponent(id) +
+          "&embed_domain=crowrulesentertainment-oss.github.io&dark_theme=1";
+        iframe.title = "Back Deck Live YouTube live chat";
+        iframe.loading = "lazy";
+        iframe.referrerPolicy = "strict-origin-when-cross-origin";
+        iframe.allow = "clipboard-write";
+        container.replaceChildren(iframe);
+      }
+
       function setFeaturedFrame(videoId, title) {
         const frame = $("#featuredVideo");
         const liveStream = videoId === "LIVE_STREAM";
         const id = liveStream ? "" : safeVideoId(videoId);
 
         if (!id && !liveStream) {
+          updateYouTubeLiveChat("");
           frame.replaceChildren();
           const placeholder = document.createElement("div");
           placeholder.className = "video-placeholder";
@@ -1938,6 +2004,7 @@
         iframe.allowFullscreen = true;
 
         frame.replaceChildren(iframe);
+        updateYouTubeLiveChat(id);
       }
 
       function showFeatured(episode, fallback = false) {
