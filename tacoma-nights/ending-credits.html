@@ -70,8 +70,20 @@ const SUPABASE_KEY="sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";
 const client=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const $=id=>document.getElementById(id);
 let scenes=[...document.querySelectorAll('.scene')],data={},current=0,playing=false,startedAt=0,elapsed=0,raf=0,exporting=false;
-const fallback={runtime_seconds:110,episode_number:'',episode_title:'',episode_highlights:'',guest_credits:'',contributor_credits:'',special_thanks:'',production_credits:'A CrowRules Entertainment Production\nCreated and hosted by Jonathan Riehle\nProduced and edited by CrowRules Entertainment',closing_headline:'UNTIL NEXT FRIDAY.',closing_tagline:"The conversation doesn't end here.",subscribe_message:'Subscribe, follow and keep the conversation going.',closing_voiceover:'Thank you for spending part of your week with us. Keep the conversation going, keep supporting one another, and remember — our stories are what bring us together.'};
+const fallback={runtime_seconds:110,match_audio_length:false,episode_number:'',episode_title:'',episode_highlights:'',guest_credits:'',contributor_credits:'',special_thanks:'',production_credits:'A CrowRules Entertainment Production\nCreated and hosted by Jonathan Riehle\nProduced and edited by CrowRules Entertainment',closing_headline:'UNTIL NEXT FRIDAY.',closing_tagline:"The conversation doesn't end here.",subscribe_message:'Subscribe, follow and keep the conversation going.',closing_voiceover:'Thank you for spending part of your week with us. Keep the conversation going, keep supporting one another, and remember — our stories are what bring us together.'};
 function setText(id,value){$(id).textContent=String(value||'').trim();}
+function syncRuntimeToMusic(){
+ const audio=$('music');
+ if(!data.match_audio_length)return false;
+ if(!Number.isFinite(audio.duration)||!audio.duration)return false;
+ const seconds=Math.round(audio.duration);
+ if(seconds<30||seconds>600){$('playStatus').textContent='Audio length is outside the 30-second to 10-minute matching range. Using the saved manual runtime.';return false;}
+ data.runtime_seconds=seconds;
+ $('playStatus').textContent='Credits matched to music · '+Math.floor(seconds/60)+'m '+String(seconds%60).padStart(2,'0')+'s total';
+ updateProgress();
+ return true;
+}
+
 function listText(value){return String(value||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean).join('\n');}
 function applyCredits(v){
  data={...fallback,...(v||{})};
@@ -89,8 +101,9 @@ function applyCredits(v){
  if(/^https:\/\//i.test(url)){backdrop.style.backgroundImage='linear-gradient(180deg,#08111dbb,#05080fdd),url("'+url.replace(/["\\]/g,'')+'")';$('stage').dataset.bg='custom';}
  else {backdrop.style.backgroundImage='';delete $('stage').dataset.bg;}
  const audio=$('music'),music=String(data.music_reference||'').trim();
- if(/^https:\/\//i.test(music)&&/\.(mp3|m4a|aac|ogg|wav)(\?|#|$)/i.test(music)){audio.src=music;audio.load();}else{audio.removeAttribute('src');audio.load();}
+ if(/^https:\/\//i.test(music)&&/\.(mp3|m4a|aac|ogg|wav|webm)(\?|#|$)/i.test(music)){audio.preload='metadata';audio.src=music;audio.load();}else{audio.removeAttribute('src');audio.load();}
  showScene(0);
+ if(data.match_audio_length){if(audio.readyState>=1)syncRuntimeToMusic();else $('playStatus').textContent='Reading music duration to match the ending credits…';}
 }
 async function loadSaved(){
  const {data:row,error}=await client.from('tacoma_nights_ending_credits').select('setting_value').eq('setting_key','master').maybeSingle();
@@ -159,6 +172,7 @@ async function exportVideo(kind){
 
 function stop(){playing=false;cancelAnimationFrame(raf);$('music').pause();$('play').textContent='▶ Play ending';}
 function play(){if(playing)return;playing=true;startedAt=performance.now()-elapsed*1000;$('play').textContent='▶ Playing';const a=$('music');if(a.src){a.currentTime=0;a.play().catch(()=>{});}raf=requestAnimationFrame(tick);}
+$('music').addEventListener('loadedmetadata',()=>{if(data.match_audio_length)syncRuntimeToMusic();});
 $('exportMp4').addEventListener('click',()=>exportVideo('mp4'));
 $('exportWebm').addEventListener('click',()=>exportVideo('webm'));
 $('play').addEventListener('click',play);
