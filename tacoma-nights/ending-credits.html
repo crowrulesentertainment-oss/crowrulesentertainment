@@ -92,7 +92,17 @@ function applyCredits(v){
 }
 async function loadSaved(){
  const {data:row,error}=await client.from('tacoma_nights_site_settings').select('setting_value').eq('setting_key','ending_credits').maybeSingle();
- if(error)throw error;applyCredits(row?.setting_value||fallback);$('playStatus').textContent=row?.setting_value?'Saved ending credits loaded.':'Default ending credits loaded — customize them in the Control Room.';
+ if(error)throw error;
+ const value={...(row?.setting_value||fallback)};
+ if(value.visual_storage_path){
+  const signed=await client.storage.from('tacoma-nights-clips').createSignedUrl(value.visual_storage_path,3600);
+  if(signed.error)throw signed.error;value.visual_reference=signed.data.signedUrl;
+ }
+ if(value.music_storage_path){
+  const signed=await client.storage.from('tacoma-nights-clips').createSignedUrl(value.music_storage_path,3600);
+  if(signed.error)throw signed.error;value.music_reference=signed.data.signedUrl;
+ }
+ applyCredits(value);$('playStatus').textContent=row?.setting_value?'Saved ending credits and private media loaded.':'Default ending credits loaded — customize them in the Control Room.';
 }
 async function verifyAndLoad(session){
  if(!session?.access_token)throw new Error('Please sign in again.');
