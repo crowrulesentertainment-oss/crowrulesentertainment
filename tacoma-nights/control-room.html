@@ -464,10 +464,43 @@ body:before{opacity:.3;background:radial-gradient(ellipse at 50% 0%,#52677e22,tr
     <img id="endingBackgroundPreview" class="ending-background-preview" alt="Ending credits background preview" hidden>
     <p id="endingBackgroundStatus" class="small" role="status" aria-live="polite">No new background upload selected.</p>
    </div>
+   <div class="full studio-divider"><span>07 / CREDIT CATEGORY VISIBILITY</span><small>Choose exactly which sections appear in this episode’s ending</small></div>
+   <div class="full fields">
+    <label class="checkline"><input name="show_highlights" type="checkbox" checked><span>Episode highlights</span></label>
+    <label class="checkline"><input name="show_guests" type="checkbox" checked><span>Featured guests</span></label>
+    <label class="checkline"><input name="show_contributors" type="checkbox" checked><span>Contributors / segments</span></label>
+    <label class="checkline"><input name="show_special_thanks" type="checkbox" checked><span>Special thanks</span></label>
+    <label class="checkline"><input name="show_production" type="checkbox" checked><span>Production company credits</span></label>
+    <label class="checkline"><input name="show_staff" type="checkbox" checked><span>Staff positions / crew roster</span></label>
+    <label class="checkline"><input name="show_episode_message" type="checkbox" checked><span>Episode-specific final message</span></label>
+    <label class="checkline"><input name="show_closing_voiceover" type="checkbox" checked><span>Closing voiceover text</span></label>
+    <label class="checkline"><input name="show_subscribe_message" type="checkbox" checked><span>Subscribe / follow message</span></label>
+   </div>
    <label class="full">Permanent production credits<textarea name="production_credits" rows="3" maxlength="2000">A CrowRules Entertainment Production
 Created and hosted by Jonathan Riehle
 Produced and edited by CrowRules Entertainment</textarea></label>
-   <div class="full studio-divider"><span>07 / EXPANDED ROLLING CREDITS</span><small>Build a longer end-title sequence with editable text and motion</small></div>
+   <label class="full">Staff positions and names — one per line, formatted POSITION — Name<textarea name="staff_credits" rows="8" maxlength="6000" placeholder="EXECUTIVE PRODUCER — Name
+PRODUCER — Name
+SHOWRUNNER — Name
+DIRECTOR — Name
+HOST — Name
+CO-HOST — Name
+ASSOCIATE PRODUCER — Name
+SEGMENT PRODUCER — Name
+PRODUCTION COORDINATOR — Name
+CAMERA OPERATOR — Name
+DIRECTOR OF PHOTOGRAPHY — Name
+AUDIO ENGINEER — Name
+VIDEO EDITOR — Name
+ASSISTANT EDITOR — Name
+WRITER / RESEARCHER — Name
+FIELD PRODUCER — Name
+REPORTER / CORRESPONDENT — Name
+GRAPHICS / MOTION DESIGN — Name
+MUSIC — Name
+SOCIAL MEDIA / PROMOTION — Name"></textarea></label>
+   <p class="full small">Available roles include executive producer, producer, showrunner, creator, director, host, co-host, associate producer, segment producer, production coordinator, camera operator, director of photography, audio engineer, editor, assistant editor, writer, researcher, field producer, reporter, correspondent, graphics, music, social media and marketing. Add custom positions whenever needed.</p>
+   <div class="full studio-divider"><span>08 / EXPANDED ROLLING CREDITS</span><small>Build a longer end-title sequence with editable text and motion</small></div>
    <label class="full checkline"><input name="scroll_enabled" type="checkbox" checked><span>Enable dedicated scrolling credits scene</span></label>
    <label>Scrolling credits heading<input name="scroll_title" maxlength="140" value="THE PEOPLE BEHIND THE PRODUCTION"></label>
    <label>Scroll direction<select name="scroll_direction"><option value="up">Upward — traditional film credits</option><option value="down">Downward</option></select></label>
@@ -1012,6 +1045,9 @@ const ENDING_CREDITS_DEFAULTS={
  music_reference:'',visual_reference:'',music_storage_path:'',visual_storage_path:'',match_audio_length:false,
  production_credits:'A CrowRules Entertainment Production\nCreated and hosted by Jonathan Riehle\nProduced and edited by CrowRules Entertainment',
  closing_voiceover:"Every city has a story. Every person has a voice. And every conversation has the power to bring us closer together.\nThank you for spending part of your week with us.\nKeep the conversation going, keep supporting one another, and remember — our stories are what bring us together.\nI'm Jonathan Riehle. This is Tacoma Nights. Good night, everybody. And we'll see you next Friday.",
+ show_highlights:true,show_guests:true,show_contributors:true,show_special_thanks:true,show_production:true,show_staff:true,show_episode_message:true,show_closing_voiceover:true,show_subscribe_message:true,
+ production_credits:'A CrowRules Entertainment Production\nCreated and hosted by Jonathan Riehle\nProduced and edited by CrowRules Entertainment',
+ staff_credits:'EXECUTIVE PRODUCER — Jonathan Riehle\nHOST — Jonathan Riehle\nPRODUCER — CrowRules Entertainment\nEDITOR — CrowRules Entertainment',
  scroll_enabled:true,scroll_title:'THE PEOPLE BEHIND THE PRODUCTION',scroll_direction:'up',scroll_duration_seconds:'28',scroll_font_size:'medium',scroll_text:'DIRECTED AND HOSTED BY\nJonathan Riehle\n\nA CROWRULES ENTERTAINMENT PRODUCTION\nProduced and edited by CrowRules Entertainment\n\nONE COMPANY. ONE UNIVERSE.',closing_headline:'UNTIL NEXT FRIDAY.',closing_tagline:"The conversation doesn't end here.",
  episode_highlights:'',guest_credits:'',contributor_credits:'',special_thanks:'',episode_message:'',
  subscribe_message:'Subscribe, follow and keep the conversation going.',runtime_seconds:'110'
@@ -1023,9 +1059,15 @@ function renderEndingCreditsPreview(){
  const v=endingCreditsValues(),lines=[];
  const add=(heading,value)=>{const clean=String(value||'').trim();if(clean){lines.push(heading);lines.push(clean);lines.push('');}};
  lines.push(v.episode_number||'TACOMA NIGHTS');if(v.episode_title)lines.push(v.episode_title);lines.push('');
- add('EPISODE HIGHLIGHTS',v.episode_highlights);add('FEATURING',v.guest_credits);add('CONTRIBUTORS',v.contributor_credits);add('SPECIAL THANKS',v.special_thanks);add('PRODUCTION',v.production_credits);
- if(v.episode_message)add('THIS WEEK',v.episode_message);
- lines.push(v.subscribe_message,'',v.closing_tagline,'',v.closing_headline,'','CROWRULES ENTERTAINMENT','ONE COMPANY. ONE UNIVERSE.');
+ if(v.show_highlights)add('EPISODE HIGHLIGHTS',v.episode_highlights);
+ if(v.show_guests)add('FEATURING',v.guest_credits);
+ if(v.show_contributors)add('CONTRIBUTORS',v.contributor_credits);
+ if(v.show_special_thanks)add('SPECIAL THANKS',v.special_thanks);
+ if(v.show_production)add('PRODUCTION',v.production_credits);
+ if(v.show_staff)add('STAFF & CREW',v.staff_credits);
+ if(v.show_episode_message&&v.episode_message)add('THIS WEEK',v.episode_message);
+ if(v.show_subscribe_message&&v.subscribe_message)lines.push(v.subscribe_message);
+ lines.push('',v.closing_tagline,'',v.closing_headline,'','CROWRULES ENTERTAINMENT','ONE COMPANY. ONE UNIVERSE.');
  const box=$('endingCreditsPreview');box.replaceChildren();
  const wrap=document.createElement('div'),logo=document.createElement('strong');logo.textContent='TACOMA NIGHTS';wrap.append(logo);
  const copy=document.createElement('p');copy.textContent=lines.join('\n');wrap.append(copy);box.append(wrap);
