@@ -186,10 +186,19 @@ async function exportVideo(kind){
   recorder.start(1000);
   if(audio.src){try{audio.loop=false;audio.currentTime=0;await audio.play();}catch(e){}}
   const total=Math.max(1,Math.min(3600,Number(data.runtime_seconds)||110));
-  const exportStart=performance.now();let sceneOffset=0;
+  const exportStart=performance.now();let sceneOffset=0;const highlightVideos=[...$('highlightVideos').querySelectorAll('video')];const originalVideoMuted=highlightVideos.map(v=>v.muted);
   for(let i=0;i<shots.length;i++){
    $('exportStatus').textContent='Recording scene '+(i+1)+' of '+shots.length+'…';$('exportProgressBar').style.width=(15+(i/shots.length)*80)+'%';
-   if(i===4&&data.scroll_enabled!==false){
+   if(i===1&&highlightVideos.length){
+    highlightVideos.forEach(video=>{video.muted=true;try{video.currentTime=0;}catch(e){}video.play().catch(()=>{});});
+    const end=exportStart+(sceneOffset+duration(i))*1000,stageRect=stage.getBoundingClientRect(),scale=1920/stage.clientWidth;
+    while(performance.now()<end){
+     ctx.clearRect(0,0,1920,1080);ctx.drawImage(shots[i],0,0,1920,1080);
+     highlightVideos.forEach(video=>{if(video.readyState>=2){const r=video.getBoundingClientRect();const x=(r.left-stageRect.left)*scale,y=(r.top-stageRect.top)*scale,w=r.width*scale,h=r.height*scale;try{ctx.drawImage(video,x,y,w,h);}catch(e){}}});
+     await wait(33);
+    }
+    highlightVideos.forEach((video,index)=>{video.pause();video.muted=originalVideoMuted[index];});
+   }else if(i===4&&data.scroll_enabled!==false){
     const end=exportStart+(sceneOffset+duration(i))*1000;
     while(performance.now()<end){
      const frame=await html2canvas(stage,{backgroundColor:'#080b10',scale:1920/stage.clientWidth,width:stage.clientWidth,height:stage.clientHeight,useCORS:true,allowTaint:false,logging:false});
@@ -208,7 +217,7 @@ async function exportVideo(kind){
   a.href=url;a.download='Tacoma-Nights-Ending-Credits.'+(kind==='mp4'?'mp4':'webm');document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
   $('exportProgressBar').style.width='100%';$('exportStatus').textContent=(kind==='mp4'?'MP4':'WebM')+' export complete · '+clock(total)+' · '+(blob.size/1024/1024).toFixed(1)+' MB';
  }catch(err){$('exportStatus').textContent='Video export failed: '+(err.message||'Unknown error')+'. Try WebM or use OBS/DaVinci Resolve.';}
- finally{showScene(original);elapsed=originalElapsed;updateProgress();if(!exporting)$('exportProgressBar').style.width='100%';exporting=false;$('exportMp4').disabled=false;$('exportWebm').disabled=false;}
+ finally{[...$('highlightVideos').querySelectorAll('video')].forEach(video=>{video.pause();});showScene(original);elapsed=originalElapsed;updateProgress();if(!exporting)$('exportProgressBar').style.width='100%';exporting=false;$('exportMp4').disabled=false;$('exportWebm').disabled=false;}
 }
 
 function stop(){playing=false;cancelAnimationFrame(raf);$('music').pause();$('play').textContent='▶ Play ending';}function seekTo(seconds){stop();previewOnly=false;const total=Math.max(1,Number(data.runtime_seconds)||110);let t=Math.max(0,Math.min(total-.001,Number(seconds)||0)),index=0;while(index<scenes.length-1&&t>=duration(index)){t-=duration(index);index++;}elapsed=t;showScene(index);if(data.match_audio_length&&$('music').src){try{$('music').currentTime=Math.min(totalElapsed(),$('music').duration||totalElapsed());}catch(e){}}updateProgress();}function previewCurrentScene(){stop();previewOnly=true;elapsed=0;showScene(current);updateProgress();const audio=$('music');if(audio.src){const offset=Array.from({length:current},(_,i)=>duration(i)).reduce((x,y)=>x+y,0);try{audio.currentTime=Math.min(offset,audio.duration||offset);audio.play().catch(()=>{});}catch(e){}}playing=true;startedAt=performance.now();$('play').textContent='▶ Previewing scene';raf=requestAnimationFrame(tick);}
