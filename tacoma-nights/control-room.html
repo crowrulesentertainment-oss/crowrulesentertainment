@@ -480,6 +480,8 @@ I'm Jonathan Riehle. This is Tacoma Nights. Good night, everybody. And we'll see
    <label class="full">Episode-specific final message<textarea name="episode_message" rows="2" maxlength="1000" placeholder="Optional message that changes for this episode"></textarea></label>
    <label>Subscribe / follow message<input name="subscribe_message" maxlength="180" value="Subscribe, follow and keep the conversation going."></label>
    <label>Credits target runtime (seconds)<input name="runtime_seconds" type="number" min="30" max="600" value="110"></label>
+   <label class="full checkline"><input name="match_audio_length" type="checkbox"><span>Match the full credits runtime to the uploaded / linked music length</span></label>
+   <p class="full small" id="endingAudioMatchStatus" role="status" aria-live="polite">Optional: enable this to set the credits duration from the selected music track automatically.</p>
   </div>
   <p class="ending-help">Permanent fields are reused each week. Replace only the episode-specific fields before exporting. Background images and music upload to the private Tacoma Nights media vault; the playback page uses temporary signed links. This editor does not render a final MP4.</p>
   <div class="actions"><button class="btn" id="saveEndingCreditsBtn" type="submit">Save ending credits ↗</button><button class="btn ghost" id="reloadEndingCreditsBtn" type="button">Reload saved settings</button><button class="btn ghost" id="previewEndingCreditsBtn" type="button">Refresh preview</button><button class="btn ghost" id="copyEndingCreditsBtn" type="button">Copy credits text</button><button class="btn danger" id="resetEndingCreditsBtn" type="button">Reset defaults</button></div>
@@ -999,7 +1001,7 @@ $('refreshProduction').addEventListener('click',async()=>{try{await loadProducti
 
 const ENDING_CREDITS_DEFAULTS={
  master_name:'Tacoma Nights — Master Ending Credits',episode_number:'',episode_title:'',
- music_reference:'',visual_reference:'',music_storage_path:'',visual_storage_path:'',
+ music_reference:'',visual_reference:'',music_storage_path:'',visual_storage_path:'',match_audio_length:false,
  production_credits:'A CrowRules Entertainment Production\nCreated and hosted by Jonathan Riehle\nProduced and edited by CrowRules Entertainment',
  closing_voiceover:"Every city has a story. Every person has a voice. And every conversation has the power to bring us closer together.\nThank you for spending part of your week with us.\nKeep the conversation going, keep supporting one another, and remember — our stories are what bring us together.\nI'm Jonathan Riehle. This is Tacoma Nights. Good night, everybody. And we'll see you next Friday.",
  closing_headline:'UNTIL NEXT FRIDAY.',closing_tagline:"The conversation doesn't end here.",
@@ -1007,8 +1009,8 @@ const ENDING_CREDITS_DEFAULTS={
  subscribe_message:'Subscribe, follow and keep the conversation going.',runtime_seconds:'110'
 };
 function endingCreditsForm(){return $('endingCreditsForm');}
-function endingCreditsValues(){const f=endingCreditsForm(),out={};for(const [k,v] of Object.entries(ENDING_CREDITS_DEFAULTS)){const el=f.elements[k];out[k]=el?(el.type==='number'?String(el.value||v):el.value.trim()):v;}return out;}
-function applyEndingCreditsValues(values){const f=endingCreditsForm(),v={...ENDING_CREDITS_DEFAULTS,...(values||{})};for(const k of Object.keys(ENDING_CREDITS_DEFAULTS)){if(f.elements[k])f.elements[k].value=v[k]??ENDING_CREDITS_DEFAULTS[k];}renderEndingCreditsPreview();}
+function endingCreditsValues(){const f=endingCreditsForm(),out={};for(const [k,v] of Object.entries(ENDING_CREDITS_DEFAULTS)){const el=f.elements[k];out[k]=el?(el.type==='checkbox'?el.checked:(el.type==='number'?String(el.value||v):el.value.trim())):v;}return out;}
+function applyEndingCreditsValues(values){const f=endingCreditsForm(),v={...ENDING_CREDITS_DEFAULTS,...(values||{})};for(const k of Object.keys(ENDING_CREDITS_DEFAULTS)){if(f.elements[k]){if(f.elements[k].type==='checkbox')f.elements[k].checked=!!v[k];else f.elements[k].value=v[k]??ENDING_CREDITS_DEFAULTS[k];}}renderEndingCreditsPreview();}
 function renderEndingCreditsPreview(){
  const v=endingCreditsValues(),lines=[];
  const add=(heading,value)=>{const clean=String(value||'').trim();if(clean){lines.push(heading);lines.push(clean);lines.push('');}};
@@ -1035,10 +1037,24 @@ async function loadEndingCredits(){
  }
  applyEndingCreditsValues(value);
  const bg=$('endingBackgroundPreview');if(value.visual_reference&&/^https:\/\//i.test(value.visual_reference)){bg.src=value.visual_reference;bg.hidden=false;}else{bg.removeAttribute('src');bg.hidden=true;}
- const audio=$('endingMusicPreview');if(value.music_reference&&/^https:\/\//i.test(value.music_reference)){audio.src=value.music_reference;}else{audio.removeAttribute('src');}
+ const audio=$('endingMusicPreview');if(value.music_reference&&/^https:\/\//i.test(value.music_reference)){audio.src=value.music_reference;audio.load();}else{audio.removeAttribute('src');audio.load();}
  say($('endingCreditsStatus'),data?.setting_value?'Saved master ending credits and media references loaded.':'Default master ending credits loaded. Customize and save to keep your settings.');
 }
 $('endingCreditsForm').addEventListener('input',renderEndingCreditsPreview);
+function syncEndingAudioLength(){
+ const f=endingCreditsForm(),audio=$('endingMusicPreview'),field=f.elements.runtime_seconds,status=$('endingAudioMatchStatus');
+ if(!f.elements.match_audio_length.checked){status.textContent='Manual duration is active. Turn on “Match the full credits runtime” to use the music track length.';return;}
+ if(!Number.isFinite(audio.duration)||!audio.duration||!isFinite(audio.duration)){status.textContent='Select or upload an audio track and wait for its duration to load.';return;}
+ const seconds=Math.round(audio.duration);
+ if(seconds<30||seconds>600){status.textContent='The music is '+seconds+' seconds long. Credits matching supports tracks from 30 seconds to 10 minutes; adjust the music or use a manual runtime.';return;}
+ field.value=String(seconds);
+ status.textContent='Matched to music: '+Math.floor(seconds/60)+'m '+String(seconds%60).padStart(2,'0')+'s. The playback and video export will use this duration.';
+}
+$('endingMusicPreview').addEventListener('loadedmetadata',syncEndingAudioLength);
+$('endingMusicPreview').addEventListener('durationchange',syncEndingAudioLength);
+endingCreditsForm().elements.match_audio_length.addEventListener('change',syncEndingAudioLength);
+endingCreditsForm().elements.music_reference.addEventListener('change',e=>{const url=e.target.value.trim(),audio=$('endingMusicPreview');if(/^https:\/\//i.test(url)){audio.src=url;audio.load();}else if(!endingCreditsForm().elements.music_storage_path.value){audio.removeAttribute('src');audio.load();}});
+
 const endingCreditsOldMediaToDelete=new Set();
 async function uploadEndingCreditsMedia(kind,file){
  const isImage=kind==='background';
