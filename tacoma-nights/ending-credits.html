@@ -174,7 +174,7 @@ async function exportVideo(kind){
  exporting=true;stop();$('exportMp4').disabled=true;$('exportWebm').disabled=true;$('exportProgressBar').style.width='0%';$('exportStatus').textContent='Preparing ending credits for recording…';
  const original=current,originalElapsed=elapsed,stage=$('stage'),canvas=document.createElement('canvas');
  canvas.width=1920;canvas.height=1080;
- const ctx=canvas.getContext('2d',{alpha:false});let shots=[],recorder=null,stream=null,scrollFrame=null,scrollFrameAt=0;
+ const ctx=canvas.getContext('2d',{alpha:false});let shots=[],recorder=null,stream=null,scrollFrame=null,scrollFrameAt=0,recordingStartedAt=0,recordingDurationMs=0;
  const highlightVideos=[...$('highlightVideos').querySelectorAll('video')],originalHighlightMuted=highlightVideos.map(v=>v.muted);
  try{
   if(!stage.clientWidth||!stage.clientHeight)throw new Error('The ending credits stage is not visible. Refresh the page and try again.');
@@ -205,6 +205,7 @@ async function exportVideo(kind){
    recorder.onstop=resolve;
   });
   recorder.start(500);
+  recordingStartedAt=performance.now();
   await wait(250);
   if(audio.src){try{audio.loop=false;audio.currentTime=0;await audio.play();}catch(audioError){console.warn('Music playback was blocked during export:',audioError);}}
   const exportStart=performance.now();let sceneOffset=0;
@@ -249,13 +250,22 @@ async function exportVideo(kind){
   }
   if(recorder.state!=='inactive')recorder.stop();
   await finished;
+  recordingDurationMs=Math.max(1,Math.round(performance.now()-recordingStartedAt));
   stream.getTracks().forEach(t=>t.stop());
   let blob=new Blob(chunks,{type:recorder.mimeType||mime});
   if(!blob.size||blob.size<10000||!chunks.length)throw new Error('The browser produced an empty recording ('+chunks.length+' data chunks, '+blob.size+' bytes). Try Download WebM in the latest Chrome or Edge.');
-  if(kind==='webm'&&window.fixWebmDuration){
+  if(kind==='webm'){
+   if(typeof window.ysFixWebmDuration!=='function')throw new Error('WebM duration repair library did not load. Refresh the page and try again.');
    try{
-    blob=await new Promise((resolve,reject)=>window.fixWebmDuration(blob,Math.round(total*1000),fixedBlob=>fixedBlob?resolve(fixedBlob):reject(new Error('WebM duration repair returned no file.'))));
-   }catch(durationError){console.warn('WebM duration metadata repair failed:',durationError);}
+    blob=await new Promise((resolve,reject)=>{
+     window.ysFixWebmDuration(blob,recordingDurationMs,fixedBlob=>{
+      if(fixedBlob&&fixedBlob.size)resolve(fixedBlob);
+      else reject(new Error('WebM duration repair returned an empty file.'));
+     },{logger:false});
+    });
+   }catch(durationError){
+    throw new Error('Could not add duration metadata to the WebM file: '+(durationError.message||durationError));
+   }
   }
   if(finishedExportUrl)URL.revokeObjectURL(finishedExportUrl);
   finishedExportUrl=URL.createObjectURL(blob);
