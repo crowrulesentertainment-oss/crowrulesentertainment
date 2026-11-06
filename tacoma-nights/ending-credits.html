@@ -131,11 +131,12 @@ button.primary{background:linear-gradient(135deg,#f1cb88,#d99d4f);color:#17120b;
  <aside class="export-panel">
   <div class="brand">DELIVERY / EXPORT</div><h2>Render final master</h2><p class="intro">Create a properly timestamped MP4 with a dedicated media encoder. Save straight to your device or use the download fallback.</p>
   <label class="field-label" for="outputFileName">OUTPUT FILE NAME</label><input id="outputFileName" type="text" value="Tacoma-Nights-Ending-Credits" maxlength="90">
-  <label class="field-label" for="qualityPreset">RENDER QUALITY</label><select id="qualityPreset"><option value="1080-high">1080p · High quality · 12 Mbps</option><option value="1080-balanced" selected>1080p · Balanced · 8 Mbps</option><option value="720-balanced">720p · Compact · 5 Mbps</option></select>
+  <label class="field-label" for="outputFormat">OUTPUT FORMAT</label><select id="outputFormat"><option value="mp4" selected>MP4 · H.264 / AAC</option><option value="webm">WebM · VP9 / Opus</option></select>
+   <label class="field-label" for="qualityPreset">RENDER QUALITY</label><select id="qualityPreset"><option value="1080-high">1080p · High quality · 20 Mbps</option><option value="1080-balanced" selected>1080p · Balanced · 12 Mbps</option><option value="720-balanced">720p · Compact · 8 Mbps</option></select>
   <label class="check-row"><input id="includeMusic" type="checkbox" checked><span><b>Include background music</b><small>Uses the saved music track, trimmed to the ending runtime.</small></span></label>
   <label class="check-row"><input id="includeHighlights" type="checkbox" checked><span><b>Include uploaded highlight clips</b><small>Plays the uploaded clips in the Episode Highlights scene. Clip audio is not mixed into this master.</small></span></label>
-  <div class="export-specs"><div class="export-spec"><strong id="exportDuration">01:50</strong><span>ESTIMATED RUNTIME</span></div><div class="export-spec"><strong id="exportResolution">1920×1080</strong><span>OUTPUT FRAME</span></div><div class="export-spec"><strong>MP4</strong><span>FILE FORMAT</span></div><div class="export-spec"><strong id="exportCodec">H.264</strong><span>VIDEO CODEC</span></div></div>
-  <div class="export-progress"><span id="exportProgressBar"></span></div><div class="status" id="exportStatus" role="status" aria-live="polite">Ready to render. The final file will be checked for a readable duration before delivery.</div>
+  <div class="export-specs"><div class="export-spec"><strong id="exportDuration">01:50</strong><span>ESTIMATED RUNTIME</span></div><div class="export-spec"><strong id="exportResolution">1920×1080</strong><span>OUTPUT FRAME</span></div><div class="export-spec"><strong id="exportFormatLabel">MP4</strong><span>FILE FORMAT</span></div><div class="export-spec"><strong id="exportCodec">H.264</strong><span>VIDEO CODEC</span></div></div>
+  <div class="export-progress"><span id="exportProgressBar"></span></div><div class="status" id="exportStatus" role="status" aria-live="polite">Ready to render MP4 or WebM. The finished file will be checked for a readable duration before delivery.</div>
   <button class="primary" id="exportMp4">⬇ Render & Save MP4</button><button id="saveFinishedVideo" class="primary" hidden>⬇ Download Finished MP4</button>
   <p class="export-help"><b>Direct save:</b> supported browsers let you choose the MP4 destination before rendering. Other browsers render the file first, verify its duration, then enable the download button. Large exports may require significant memory if direct save is unavailable.</p>
   <div class="notes"><b style="color:var(--gold)">MASTERING NOTES</b><br>Uploaded highlight clips are included visually. Their original audio and separately recorded voiceover are intentionally left out of this MP4 mix; add them in DaVinci Resolve for a final sound mix. Private images, music and highlight media are loaded through temporary signed storage links.</div>
@@ -151,7 +152,7 @@ const SUPABASE_URL="https://cevylpnoexugwgygvtgu.supabase.co";
 const SUPABASE_KEY="sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";
 const client=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const $=id=>document.getElementById(id);
-let scenes=[...document.querySelectorAll('.scene')],data={},current=0,playing=false,startedAt=0,elapsed=0,raf=0,exporting=false,previewOnly=false,finishedExportUrl='',finishedExportName='';
+let scenes=[...document.querySelectorAll('.scene')],data={},current=0,playing=false,startedAt=0,elapsed=0,raf=0,exporting=false,previewOnly=false,finishedExportUrl='',finishedExportName='',finishedExportMime='video/mp4';
 const fallback={runtime_seconds:110,match_audio_length:false,scroll_title_size:'medium',scroll_position:'top',show_highlights:true,show_guests:true,show_contributors:true,show_special_thanks:true,show_production:true,show_staff:true,show_episode_message:true,show_closing_voiceover:true,show_subscribe_message:true,staff_credits:'',highlight_assets:[],scroll_enabled:true,scroll_title:'THE PEOPLE BEHIND THE PRODUCTION',scroll_direction:'up',scroll_duration_seconds:28,scroll_font_size:'medium',scroll_text:'DIRECTED AND HOSTED BY\\nJonathan Riehle\\n\\nA CROWRULES ENTERTAINMENT PRODUCTION\\nProduced and edited by CrowRules Entertainment\\n\\nONE COMPANY. ONE UNIVERSE.',episode_number:'',episode_title:'',episode_highlights:'',guest_credits:'',contributor_credits:'',special_thanks:'',production_credits:'A CrowRules Entertainment Production\nCreated and hosted by Jonathan Riehle\nProduced and edited by CrowRules Entertainment',closing_headline:'UNTIL NEXT FRIDAY.',closing_tagline:"The conversation doesn't end here.",subscribe_message:'Subscribe, follow and keep the conversation going.',closing_voiceover:'Thank you for spending part of your week with us. Keep the conversation going, keep supporting one another, and remember — our stories are what bring us together.'};
 function setText(id,value){$(id).textContent=String(value||'').trim();}
 function syncRuntimeToMusic(){
@@ -267,8 +268,9 @@ async function captureStageForExport(stage,width){
   }
  });
 }
-function updateExportSummary(){if($('exportDuration'))$('exportDuration').textContent=exportClock(exportTotal());if($('qualityPreset'))$('exportResolution').textContent=$('qualityPreset').value==='720-balanced'?'1280×720':'1920×1080';}
-function exportFileName(){let name=String($('outputFileName').value||'Tacoma-Nights-Ending-Credits').trim().replace(/[^a-z0-9 _-]/gi,'').replace(/\s+/g,'-').replace(/-+/g,'-');return (name||'Tacoma-Nights-Ending-Credits').replace(/\.mp4$/i,'')+'.mp4';}
+function selectedFormat(){return $('outputFormat').value==='webm'?'webm':'mp4';}
+function updateExportSummary(){if($('exportDuration'))$('exportDuration').textContent=exportClock(exportTotal());if($('qualityPreset'))$('exportResolution').textContent=$('qualityPreset').value==='720-balanced'?'1280×720':'1920×1080';const webm=selectedFormat()==='webm';$('exportFormatLabel').textContent=webm?'WebM':'MP4';$('exportCodec').textContent=webm?'VP9':'H.264';$('exportMp4').textContent='⬇ Render & Save '+(webm?'WebM':'MP4');if(!$('saveFinishedVideo').hidden)$('saveFinishedVideo').textContent='⬇ Download Finished '+(webm?'WebM':'MP4');}
+function exportFileName(){let name=String($('outputFileName').value||'Tacoma-Nights-Ending-Credits').trim().replace(/\.[a-z0-9]+$/i,'').replace(/[^a-z0-9 _-]/gi,'').replace(/\s+/g,'-').replace(/-+/g,'-');return (name||'Tacoma-Nights-Ending-Credits')+'.'+(selectedFormat()==='webm'?'webm':'mp4');}
 async function makeMusicBuffer(url,maxSeconds){
  if(!url)return null;
  const response=await fetch(url,{mode:'cors',cache:'no-store'});
@@ -285,11 +287,12 @@ async function makeMusicBuffer(url,maxSeconds){
   return trimmed;
  }finally{try{await audioContext.close();}catch(e){}}
 }
-async function renderMp4(){
+async function renderVideo(){
  if(exporting)return;
  exporting=true;
  $('exportMp4').disabled=true;$('saveFinishedVideo').hidden=true;$('exportProgressBar').style.width='0%';
- $('exportStatus').textContent='Starting the MP4 render pipeline…';
+ const formatKind=selectedFormat(),formatLabel=formatKind.toUpperCase(),mimeType=formatKind==='webm'?'video/webm':'video/mp4',extension=formatKind==='webm'?'.webm':'.mp4';
+ $('exportStatus').textContent='Starting the '+formatLabel+' render pipeline…';
  const original=current,originalElapsed=elapsed,stage=$('stage'),canvas=document.createElement('canvas');
  canvas.width=1920;canvas.height=1080;
  const ctx=canvas.getContext('2d',{alpha:false});
@@ -305,7 +308,7 @@ async function renderMp4(){
   const name=exportFileName();
   if(typeof window.showSaveFilePicker==='function'){
    try{
-    fileHandle=await window.showSaveFilePicker({suggestedName:name,types:[{description:'MP4 video',accept:{'video/mp4':['.mp4']}}]});
+    fileHandle=await window.showSaveFilePicker({suggestedName:name,types:[{description:formatLabel+' video',accept:{[mimeType]:[extension]}}]});
     writable=await fileHandle.createWritable();directSave=true;
    }catch(pickerError){
     if(pickerError&&pickerError.name==='AbortError'){ $('exportStatus').textContent='Save cancelled. No video was rendered.';return; }
@@ -314,16 +317,17 @@ async function renderMp4(){
    }
   }
   const MB=await import('https://esm.sh/mediabunny@1.62.1');
-  const {Output,Mp4OutputFormat,BufferTarget,StreamTarget,CanvasSource,AudioBufferSource,Quality,getFirstEncodableVideoCodec,getFirstEncodableAudioCodec,Input,BufferSource,BlobSource,ALL_FORMATS}=MB;
-  const format=new Mp4OutputFormat();
-  videoCodec=await getFirstEncodableVideoCodec(['avc'],{width:1920,height:1080})||await getFirstEncodableVideoCodec(format.getSupportedVideoCodecs(),{width:1920,height:1080});
-  if(!videoCodec)throw new Error('No MP4-compatible video encoder is available in this browser.');
+  const {Output,Mp4OutputFormat,WebMOutputFormat,BufferTarget,StreamTarget,CanvasSource,AudioBufferSource,Quality,getFirstEncodableVideoCodec,getFirstEncodableAudioCodec,Input,BufferSource,BlobSource,ALL_FORMATS}=MB;
+  const format=formatKind==='webm'?new WebMOutputFormat():new Mp4OutputFormat();
+  const preferredVideoCodecs=formatKind==='webm'?['vp9','vp8']:['avc'];
+  videoCodec=await getFirstEncodableVideoCodec(preferredVideoCodecs,{width:1920,height:1080})||await getFirstEncodableVideoCodec(format.getSupportedVideoCodecs(),{width:1920,height:1080});
+  if(!videoCodec)throw new Error('No compatible '+formatLabel+' video encoder is available in this browser.');
   let audioCodec=null;
   if(includeMusic&&data.music_reference){
    try{
     audioBuffer=await makeMusicBuffer(data.music_reference,total);
-    audioCodec=await getFirstEncodableAudioCodec(['aac'])||await getFirstEncodableAudioCodec(format.getSupportedAudioCodecs());
-    if(!audioCodec)throw new Error('No MP4-compatible audio encoder is available.');
+    audioCodec=await getFirstEncodableAudioCodec(formatKind==='webm'?['opus']:['aac'])||await getFirstEncodableAudioCodec(format.getSupportedAudioCodecs());
+    if(!audioCodec)throw new Error('No compatible '+formatLabel+' audio encoder is available.');
    }catch(musicError){
     audioBuffer=null;
     $('exportStatus').textContent='Music could not be prepared; continuing with a silent video. '+musicError.message;
@@ -336,6 +340,7 @@ async function renderMp4(){
   const bitrate=preset==='1080-high'?20000000:preset==='720-balanced'?8000000:12000000;
   const width=preset==='720-balanced'?1280:1920,height=preset==='720-balanced'?720:1080;
   $('exportResolution').textContent=width+'×'+height;
+  $('exportFormatLabel').textContent=formatLabel;
   $('exportCodec').textContent=videoCodec==='avc'?'H.264':String(videoCodec).toUpperCase();
   canvas.width=width;canvas.height=height;
   videoSource=new CanvasSource(canvas,{codec:videoCodec,quality:new Quality({bitrate}),latencyMode:'quality',hardwareAcceleration:'no-preference'});
@@ -404,19 +409,19 @@ async function renderMp4(){
   }else{
    const buffer=target.buffer;
    if(!buffer||!buffer.byteLength)throw new Error('The MP4 encoder returned an empty file.');
-   const blob=new Blob([buffer],{type:'video/mp4'});fileSize=blob.size;
+   const blob=new Blob([buffer],{type:mimeType});fileSize=blob.size;
    const input=new Input({source:new BufferSource(buffer),formats:ALL_FORMATS});
    verifiedDuration=await input.computeDuration();input.dispose();
    if(finishedExportUrl)URL.revokeObjectURL(finishedExportUrl);
-   finishedExportUrl=URL.createObjectURL(blob);finishedExportName=name;
+   finishedExportUrl=URL.createObjectURL(blob);finishedExportName=name;finishedExportMime=mimeType;
    $('saveFinishedVideo').hidden=false;
   }
   if(!Number.isFinite(verifiedDuration)||verifiedDuration<Math.max(1,total*.85))throw new Error('MP4 validation failed: expected about '+total.toFixed(1)+' seconds, but the file reports '+(Number(verifiedDuration)||0).toFixed(2)+' seconds.');
   $('exportProgressBar').style.width='100%';
-  $('exportStatus').textContent='MP4 complete and verified · '+exportClock(verifiedDuration)+' · '+(fileSize/1024/1024).toFixed(1)+' MB · '+frameCount.toLocaleString()+' frames · '+(directSave?'saved to your selected location':'ready to download');
+  $('exportStatus').textContent=formatLabel+' complete and verified · '+exportClock(verifiedDuration)+' · '+(fileSize/1024/1024).toFixed(1)+' MB · '+frameCount.toLocaleString()+' frames · '+(directSave?'saved to your selected location':'ready to download');
  }catch(err){
   console.error('MP4 render failed:',err);
-  $('exportStatus').textContent='MP4 render failed: '+(err.message||'Unknown error')+'. No unverified file was offered for download.';
+  $('exportStatus').textContent=formatLabel+' render failed: '+(err.message||'Unknown error')+'. No unverified file was offered for download.';
   if(writable&&!finished){try{await writable.abort();}catch(e){}}
   if(output&&!finished){try{await output.cancel();}catch(e){}}
  }finally{
@@ -432,10 +437,11 @@ $('saveFinishedVideo').addEventListener('click',()=>{
  if(!finishedExportUrl){$('exportStatus').textContent='No finished recording is ready. Create the video first.';return;}
  const link=document.createElement('a');link.href=finishedExportUrl;link.download=finishedExportName;
  document.body.appendChild(link);link.click();link.remove();
- $('exportStatus').textContent='Download requested · '+finishedExportName;
+ $('exportStatus').textContent='Download requested · '+finishedExportName+' ('+finishedExportMime+').';
 });
-$('exportMp4').addEventListener('click',renderMp4);
+$('exportMp4').addEventListener('click',renderVideo);
 $('qualityPreset').addEventListener('change',updateExportSummary);
+$('outputFormat').addEventListener('change',()=>{if(finishedExportUrl){URL.revokeObjectURL(finishedExportUrl);finishedExportUrl='';$('saveFinishedVideo').hidden=true;}updateExportSummary();});
 $('play').addEventListener('click',play);
 $('pause').addEventListener('click',()=>{stop();$('playStatus').textContent='Paused · Scene '+(current+1);});
 $('next').addEventListener('click',()=>{stop();elapsed=0;showScene(current+1);updateProgress();});
