@@ -71,7 +71,7 @@ button,input{font:inherit}button{cursor:pointer;border:1px solid #ffffff35;borde
   <div class="controls"><label class="scene-picker">JUMP TO SCENE<select id="scenePicker"><option value="0">Opening identity</option><option value="1">Episode highlights</option><option value="2">Guests & contributors</option><option value="3">Production credits</option><option value="4">Scrolling credits</option><option value="5">CrowRules signature</option><option value="6">Closing message</option><option value="7">Until next Friday</option></select></label><label class="volume-control">MUSIC VOLUME <input id="musicVolume" type="range" min="0" max="1" step="0.01" value="0.8"></label></div>
   <div class="controls"><button class="primary" id="play">▶ Play ending</button><button id="pause">Ⅱ Pause</button><button id="prev">← Previous</button><button id="next">Next →</button><button id="previewScene">Preview this scene</button><button id="fullPreview">▶ Preview full ending</button><button id="restart">↺ Restart</button><button id="reload">Reload saved credits</button></div>
   <div class="status" id="playStatus" role="status" aria-live="polite">Ready · Tacoma Nights ending credits</div>
-  <div class="controls"><button class="primary" id="exportMp4">⬇ Download MP4</button><button id="exportWebm">⬇ Download WebM</button></div><div class="export-progress"><span id="exportProgressBar"></span></div><div class="status" id="exportStatus" role="status">Export the complete ending as a video file.</div>
+  <div class="controls"><button class="primary" id="exportMp4">⬇ Create MP4</button><button id="exportWebm">⬇ Create WebM</button><button id="saveFinishedVideo" class="primary" hidden>⬇ Save Finished Video</button></div><div class="export-progress"><span id="exportProgressBar"></span></div><div class="status" id="exportStatus" role="status">Export the complete ending as a video file.</div>
   <div class="small" style="text-align:center" id="episodeMeta"></div>
   <div class="notes"><b style="color:var(--gold)">PRODUCTION NOTE</b><br>Use Download MP4 when your browser supports MP4 recording, or Download WebM for broader compatibility. The export records the enabled credit scenes at 1920×1080 and includes the uploaded background and music when the browser can capture them. Uploaded episode highlight clips appear in the highlights scene and are included visually in browser video exports. Mix original clip audio and recorded voiceover in DaVinci Resolve for final audio mastering. Uploaded background images and music are loaded from the private Tacoma Nights media vault using temporary signed links.</div>
  </main>
@@ -85,7 +85,7 @@ const SUPABASE_URL="https://cevylpnoexugwgygvtgu.supabase.co";
 const SUPABASE_KEY="sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";
 const client=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const $=id=>document.getElementById(id);
-let scenes=[...document.querySelectorAll('.scene')],data={},current=0,playing=false,startedAt=0,elapsed=0,raf=0,exporting=false,previewOnly=false;
+let scenes=[...document.querySelectorAll('.scene')],data={},current=0,playing=false,startedAt=0,elapsed=0,raf=0,exporting=false,previewOnly=false,finishedExportUrl='',finishedExportName='';
 const fallback={runtime_seconds:110,match_audio_length:false,scroll_title_size:'medium',scroll_position:'top',show_highlights:true,show_guests:true,show_contributors:true,show_special_thanks:true,show_production:true,show_staff:true,show_episode_message:true,show_closing_voiceover:true,show_subscribe_message:true,staff_credits:'',highlight_assets:[],scroll_enabled:true,scroll_title:'THE PEOPLE BEHIND THE PRODUCTION',scroll_direction:'up',scroll_duration_seconds:28,scroll_font_size:'medium',scroll_text:'DIRECTED AND HOSTED BY\\nJonathan Riehle\\n\\nA CROWRULES ENTERTAINMENT PRODUCTION\\nProduced and edited by CrowRules Entertainment\\n\\nONE COMPANY. ONE UNIVERSE.',episode_number:'',episode_title:'',episode_highlights:'',guest_credits:'',contributor_credits:'',special_thanks:'',production_credits:'A CrowRules Entertainment Production\nCreated and hosted by Jonathan Riehle\nProduced and edited by CrowRules Entertainment',closing_headline:'UNTIL NEXT FRIDAY.',closing_tagline:"The conversation doesn't end here.",subscribe_message:'Subscribe, follow and keep the conversation going.',closing_voiceover:'Thank you for spending part of your week with us. Keep the conversation going, keep supporting one another, and remember — our stories are what bring us together.'};
 function setText(id,value){$(id).textContent=String(value||'').trim();}
 function syncRuntimeToMusic(){
@@ -248,12 +248,13 @@ async function exportVideo(kind){
   stream.getTracks().forEach(t=>t.stop());
   const blob=new Blob(chunks,{type:recorder.mimeType||mime});
   if(!blob.size||blob.size<10000)throw new Error('The browser produced an empty recording. Try Download WebM in the latest Chrome or Edge.');
-  const url=URL.createObjectURL(blob),a=document.createElement('a');
-  a.href=url;a.download='Tacoma-Nights-Ending-Credits.'+(kind==='mp4'?'mp4':'webm');
-  document.body.appendChild(a);a.click();a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),120000);
+  if(finishedExportUrl)URL.revokeObjectURL(finishedExportUrl);
+  finishedExportUrl=URL.createObjectURL(blob);
+  finishedExportName='Tacoma-Nights-Ending-Credits.'+(kind==='mp4'?'mp4':'webm');
+  $('saveFinishedVideo').hidden=false;
+  $('saveFinishedVideo').textContent='⬇ Save Finished '+(kind==='mp4'?'MP4':'WebM');
   $('exportProgressBar').style.width='100%';
-  $('exportStatus').textContent=(kind==='mp4'?'MP4':'WebM')+' export complete · '+clock(total)+' · '+(blob.size/1024/1024).toFixed(1)+' MB';
+  $('exportStatus').textContent='Recording complete · '+clock(total)+' · '+(blob.size/1024/1024).toFixed(1)+' MB · Click Save Finished Video to download.';
  }catch(err){
   $('exportStatus').textContent='Video export failed: '+(err.message||'Unknown error')+'. Try Download WebM in the latest Chrome or Edge.';
   if(recorder&&recorder.state!=='inactive'){try{recorder.stop();}catch(stopError){}}
@@ -268,6 +269,12 @@ async function exportVideo(kind){
 function stop(){playing=false;cancelAnimationFrame(raf);$('music').pause();syncHighlightPlayback(false);$('play').textContent='▶ Play ending';}function seekTo(seconds){stop();previewOnly=false;const total=Math.max(1,Number(data.runtime_seconds)||110);let t=Math.max(0,Math.min(total-.001,Number(seconds)||0)),index=0;while(index<scenes.length-1&&t>=duration(index)){t-=duration(index);index++;}elapsed=t;showScene(index);if(data.match_audio_length&&$('music').src){try{$('music').currentTime=Math.min(totalElapsed(),$('music').duration||totalElapsed());}catch(e){}}updateProgress();}function previewCurrentScene(){stop();previewOnly=true;elapsed=0;showScene(current);updateProgress();const audio=$('music');if(audio.src){const offset=Array.from({length:current},(_,i)=>duration(i)).reduce((x,y)=>x+y,0);try{audio.currentTime=Math.min(offset,audio.duration||offset);audio.play().catch(()=>{});}catch(e){}}playing=true;startedAt=performance.now();$('play').textContent='▶ Previewing scene';raf=requestAnimationFrame(tick);}
 function play(){if(playing)return;playing=true;startedAt=performance.now()-elapsed*1000;syncHighlightPlayback(current===1&&data.show_highlights!==false);$('play').textContent='▶ Playing';const a=$('music');if(a.src){if(data.match_audio_length){const offset=Array.from({length:current},(_,i)=>duration(i)).reduce((x,y)=>x+y,0);try{a.currentTime=Math.min(offset+elapsed,a.duration||offset+elapsed);}catch(e){}}else{a.currentTime=0;}a.loop=false;a.play().catch(()=>{});}raf=requestAnimationFrame(tick);}
 $('music').addEventListener('loadedmetadata',()=>{if(data.match_audio_length)syncRuntimeToMusic();});$('music').volume=.8;$('musicVolume').addEventListener('input',e=>{$('music').volume=Number(e.target.value);});$('timelineScrubber').addEventListener('input',e=>seekTo(e.target.value));$('scenePicker').addEventListener('change',e=>seekTo(Array.from({length:Number(e.target.value)},(_,i)=>duration(i)).reduce((a,b)=>a+b,0)));$('previewScene').addEventListener('click',previewCurrentScene);$('fullPreview').addEventListener('click',()=>{stop();previewOnly=false;elapsed=0;showScene(0);updateProgress();play();});
+$('saveFinishedVideo').addEventListener('click',()=>{
+ if(!finishedExportUrl){$('exportStatus').textContent='No finished recording is ready. Create the video first.';return;}
+ const link=document.createElement('a');link.href=finishedExportUrl;link.download=finishedExportName;
+ document.body.appendChild(link);link.click();link.remove();
+ $('exportStatus').textContent='Download requested · '+finishedExportName;
+});
 $('exportMp4').addEventListener('click',()=>exportVideo('mp4'));
 $('exportWebm').addEventListener('click',()=>exportVideo('webm'));
 $('play').addEventListener('click',play);
