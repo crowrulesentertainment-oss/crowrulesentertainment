@@ -171,57 +171,100 @@ async function exportVideo(kind){
  const mime=supportedMime(kind);
  if(!mime){$('exportStatus').textContent=kind==='mp4'?'MP4 recording is not supported by this browser. Use Download WebM, then convert it to MP4 in DaVinci Resolve.':'This browser does not support WebM recording.';return;}
  if(!window.html2canvas||!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream){$('exportStatus').textContent='This browser is missing a required video export feature. Try the latest Chrome or Edge.';return;}
- exporting=true;stop();$('exportMp4').disabled=true;$('exportWebm').disabled=true;$('exportStatus').textContent='Preparing 1920 × 1080 scenes…';
- const original=current,originalElapsed=elapsed,stage=$('stage'),canvas=document.createElement('canvas');$('exportProgressBar').style.width='0%';canvas.width=1920;canvas.height=1080;
- const ctx=canvas.getContext('2d');let shots=[];const highlightVideosForExport=[...$('highlightVideos').querySelectorAll('video')];const originalHighlightMuted=highlightVideosForExport.map(v=>v.muted);
+ exporting=true;stop();$('exportMp4').disabled=true;$('exportWebm').disabled=true;$('exportProgressBar').style.width='0%';$('exportStatus').textContent='Preparing ending credits for recording…';
+ const original=current,originalElapsed=elapsed,stage=$('stage'),canvas=document.createElement('canvas');
+ canvas.width=1920;canvas.height=1080;
+ const ctx=canvas.getContext('2d',{alpha:false});let shots=[],recorder=null,stream=null,scrollFrame=null,scrollFrameAt=0;
+ const highlightVideos=[...$('highlightVideos').querySelectorAll('video')],originalHighlightMuted=highlightVideos.map(v=>v.muted);
  try{
+  if(!stage.clientWidth||!stage.clientHeight)throw new Error('The ending credits stage is not visible. Refresh the page and try again.');
   for(let i=0;i<scenes.length;i++){
-   showScene(i);await wait(900);
+   showScene(i);await wait(700);
    const shot=await html2canvas(stage,{backgroundColor:'#080b10',scale:1920/stage.clientWidth,width:stage.clientWidth,height:stage.clientHeight,useCORS:true,allowTaint:false,logging:false});
    shots.push(shot);
-   $('exportStatus').textContent='Prepared scene '+(i+1)+' of '+scenes.length+'…';$('exportProgressBar').style.width=((i+1)/scenes.length*15)+'%';
+   $('exportStatus').textContent='Preparing scene '+(i+1)+' of '+scenes.length+'…';
+   $('exportProgressBar').style.width=((i+1)/scenes.length*12)+'%';
   }
-  const stream=canvas.captureStream(30),audio=$('music');
-  try{if(audio.src&&audio.captureStream){audio.loop=false;const audioStream=audio.captureStream();audioStream.getAudioTracks().forEach(t=>stream.addTrack(t));}}catch(e){}
-  const chunks=[],recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:12000000,audioBitsPerSecond:192000});
-  const finished=new Promise((resolve,reject)=>{recorder.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};recorder.onerror=()=>reject(new Error('The browser could not finish recording this video.'));recorder.onstop=resolve;});
-  recorder.start(1000);
-  if(audio.src){try{audio.loop=false;audio.currentTime=0;await audio.play();}catch(e){}}
   const total=Math.max(1,Math.min(3600,Number(data.runtime_seconds)||110));
-  const exportStart=performance.now();let sceneOffset=0;const highlightVideos=highlightVideosForExport;
-  for(let i=0;i<shots.length;i++){
-   $('exportStatus').textContent='Recording scene '+(i+1)+' of '+shots.length+'…';$('exportProgressBar').style.width=(15+(i/shots.length)*80)+'%';
-   if(i===1&&highlightVideos.length){
-    highlightVideos.forEach(video=>{video.muted=true;try{video.currentTime=0;}catch(e){}video.play().catch(()=>{});});
-    const end=exportStart+(sceneOffset+duration(i))*1000,stageRect=stage.getBoundingClientRect(),scale=1920/stage.clientWidth;
-    while(performance.now()<end){
-     ctx.clearRect(0,0,1920,1080);ctx.drawImage(shots[i],0,0,1920,1080);
-     highlightVideos.forEach(video=>{if(video.readyState>=2){const r=video.getBoundingClientRect();const x=(r.left-stageRect.left)*scale,y=(r.top-stageRect.top)*scale,w=r.width*scale,h=r.height*scale;try{ctx.drawImage(video,x,y,w,h);}catch(e){}}});
-     await wait(33);
-    }
-    highlightVideos.forEach((video,index)=>{video.pause();video.muted=originalHighlightMuted[index];});
-   }else if(i===4&&data.scroll_enabled!==false){
-    const end=exportStart+(sceneOffset+duration(i))*1000;
-    while(performance.now()<end){
-     const frame=await html2canvas(stage,{backgroundColor:'#080b10',scale:1920/stage.clientWidth,width:stage.clientWidth,height:stage.clientHeight,useCORS:true,allowTaint:false,logging:false});
-     ctx.clearRect(0,0,1920,1080);ctx.drawImage(frame,0,0,1920,1080);
-    }
-   }else{
-    ctx.clearRect(0,0,1920,1080);ctx.drawImage(shots[i],0,0,1920,1080);
-    const sceneEnd=exportStart+(sceneOffset+duration(i))*1000;
-    await wait(Math.max(0,sceneEnd-performance.now()));
+  const audio=$('music');
+  ctx.drawImage(shots[0],0,0,1920,1080);
+  stream=canvas.captureStream(30);
+  const videoTrack=stream.getVideoTracks()[0];
+  if(videoTrack&&typeof videoTrack.requestFrame==='function')videoTrack.requestFrame();
+  try{
+   if(audio.src&&typeof audio.captureStream==='function'){
+    audio.loop=false;const audioStream=audio.captureStream();
+    audioStream.getAudioTracks().forEach(t=>stream.addTrack(t));
    }
-   sceneOffset+=duration(i);
+  }catch(audioError){console.warn('Music track could not be attached to the export:',audioError);}
+  const chunks=[];
+  recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:8000000,audioBitsPerSecond:192000});
+  const finished=new Promise((resolve,reject)=>{
+   recorder.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
+   recorder.onerror=e=>reject(e.error||new Error('The browser could not finish recording this video.'));
+   recorder.onstop=resolve;
+  });
+  recorder.start(500);
+  await wait(250);
+  if(audio.src){try{audio.loop=false;audio.currentTime=0;await audio.play();}catch(audioError){console.warn('Music playback was blocked during export:',audioError);}}
+  const exportStart=performance.now();let sceneOffset=0;
+  for(let i=0;i<shots.length;i++){
+   const sceneSeconds=Math.max(0,duration(i));
+   if(sceneSeconds<=0){sceneOffset+=sceneSeconds;continue;}
+   showScene(i);
+   if(i===4&&data.scroll_enabled!==false){
+    const el=$('scrollContent');el.style.animation='none';void el.offsetHeight;el.style.animation='';el.style.animationDuration=sceneSeconds+'s';
+    scrollFrame=await html2canvas(stage,{backgroundColor:'#080b10',scale:1920/stage.clientWidth,width:stage.clientWidth,height:stage.clientHeight,useCORS:true,allowTaint:false,logging:false});
+    scrollFrameAt=performance.now();
+   }
+   if(i===1&&highlightVideos.length){
+    highlightVideos.forEach(video=>{video.muted=true;video.loop=true;try{video.currentTime=0;}catch(e){}const p=video.play();if(p&&p.catch)p.catch(()=>{});});
+   }
+   const sceneStart=exportStart+sceneOffset*1000,sceneEnd=sceneStart+sceneSeconds*1000;
+   $('exportStatus').textContent='Recording '+['opening identity','episode highlights','guests and contributors','production credits','scrolling credits','CrowRules signature','closing message','final card'][i]+'…';
+   while(performance.now()<sceneEnd){
+    const now=performance.now();
+    if(i===4&&data.scroll_enabled!==false&&now-scrollFrameAt>=250){
+     try{scrollFrame=await html2canvas(stage,{backgroundColor:'#080b10',scale:1920/stage.clientWidth,width:stage.clientWidth,height:stage.clientHeight,useCORS:true,allowTaint:false,logging:false});scrollFrameAt=performance.now();}catch(renderError){console.warn('Scrolling credit frame refresh skipped:',renderError);}
+    }
+    const frame=(i===4&&scrollFrame)?scrollFrame:shots[i];
+    ctx.clearRect(0,0,1920,1080);ctx.drawImage(frame,0,0,1920,1080);
+    if(i===1&&highlightVideos.length){
+     const stageRect=stage.getBoundingClientRect(),scale=1920/stage.clientWidth;
+     highlightVideos.forEach(video=>{if(video.readyState>=2){const r=video.getBoundingClientRect();const x=(r.left-stageRect.left)*scale,y=(r.top-stageRect.top)*scale,w=r.width*scale,h=r.height*scale;try{ctx.drawImage(video,x,y,w,h);}catch(drawError){}}});
+    }
+    if(videoTrack&&typeof videoTrack.requestFrame==='function')videoTrack.requestFrame();
+    const progress=12+Math.min(85,((sceneOffset+(now-sceneStart)/1000)/total)*85);
+    $('exportProgressBar').style.width=Math.min(97,progress)+'%';
+    await wait(33);
+   }
+   if(i===1)highlightVideos.forEach((video,index)=>{video.pause();video.muted=originalHighlightMuted[index];});
+   sceneOffset+=sceneSeconds;
   }
-  await wait(Math.max(0,exportStart+total*1000-performance.now()));
-  recorder.stop();await finished;audio.pause();audio.loop=false;stream.getTracks().forEach(t=>t.stop());
-  const blob=new Blob(chunks,{type:mime}),url=URL.createObjectURL(blob),a=document.createElement('a');
-  a.href=url;a.download='Tacoma-Nights-Ending-Credits.'+(kind==='mp4'?'mp4':'webm');document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
-  $('exportProgressBar').style.width='100%';$('exportStatus').textContent=(kind==='mp4'?'MP4':'WebM')+' export complete · '+clock(total)+' · '+(blob.size/1024/1024).toFixed(1)+' MB';
- }catch(err){$('exportStatus').textContent='Video export failed: '+(err.message||'Unknown error')+'. Try WebM or use OBS/DaVinci Resolve.';}
- finally{highlightVideosForExport.forEach((video,index)=>{video.pause();video.muted=originalHighlightMuted[index];});showScene(original);elapsed=originalElapsed;updateProgress();if(!exporting)$('exportProgressBar').style.width='100%';exporting=false;$('exportMp4').disabled=false;$('exportWebm').disabled=false;}
+  if(audio.src){audio.pause();audio.loop=false;}
+  await wait(500);
+  if(recorder.state!=='inactive')recorder.stop();
+  await finished;
+  stream.getTracks().forEach(t=>t.stop());
+  const blob=new Blob(chunks,{type:recorder.mimeType||mime});
+  if(!blob.size||blob.size<10000)throw new Error('The browser produced an empty recording. Try Download WebM in the latest Chrome or Edge.');
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download='Tacoma-Nights-Ending-Credits.'+(kind==='mp4'?'mp4':'webm');
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),120000);
+  $('exportProgressBar').style.width='100%';
+  $('exportStatus').textContent=(kind==='mp4'?'MP4':'WebM')+' export complete · '+clock(total)+' · '+(blob.size/1024/1024).toFixed(1)+' MB';
+ }catch(err){
+  $('exportStatus').textContent='Video export failed: '+(err.message||'Unknown error')+'. Try Download WebM in the latest Chrome or Edge.';
+  if(recorder&&recorder.state!=='inactive'){try{recorder.stop();}catch(stopError){}}
+  if(stream)stream.getTracks().forEach(t=>t.stop());
+ }finally{
+  if($('music')){$('music').pause();$('music').loop=false;}
+  highlightVideos.forEach((video,index)=>{video.pause();video.muted=originalHighlightMuted[index];});
+  showScene(original);elapsed=originalElapsed;updateProgress();exporting=false;
+  $('exportMp4').disabled=false;$('exportWebm').disabled=false;
+ }
 }
-
 function stop(){playing=false;cancelAnimationFrame(raf);$('music').pause();syncHighlightPlayback(false);$('play').textContent='▶ Play ending';}function seekTo(seconds){stop();previewOnly=false;const total=Math.max(1,Number(data.runtime_seconds)||110);let t=Math.max(0,Math.min(total-.001,Number(seconds)||0)),index=0;while(index<scenes.length-1&&t>=duration(index)){t-=duration(index);index++;}elapsed=t;showScene(index);if(data.match_audio_length&&$('music').src){try{$('music').currentTime=Math.min(totalElapsed(),$('music').duration||totalElapsed());}catch(e){}}updateProgress();}function previewCurrentScene(){stop();previewOnly=true;elapsed=0;showScene(current);updateProgress();const audio=$('music');if(audio.src){const offset=Array.from({length:current},(_,i)=>duration(i)).reduce((x,y)=>x+y,0);try{audio.currentTime=Math.min(offset,audio.duration||offset);audio.play().catch(()=>{});}catch(e){}}playing=true;startedAt=performance.now();$('play').textContent='▶ Previewing scene';raf=requestAnimationFrame(tick);}
 function play(){if(playing)return;playing=true;startedAt=performance.now()-elapsed*1000;syncHighlightPlayback(current===1&&data.show_highlights!==false);$('play').textContent='▶ Playing';const a=$('music');if(a.src){if(data.match_audio_length){const offset=Array.from({length:current},(_,i)=>duration(i)).reduce((x,y)=>x+y,0);try{a.currentTime=Math.min(offset+elapsed,a.duration||offset+elapsed);}catch(e){}}else{a.currentTime=0;}a.loop=false;a.play().catch(()=>{});}raf=requestAnimationFrame(tick);}
 $('music').addEventListener('loadedmetadata',()=>{if(data.match_audio_length)syncRuntimeToMusic();});$('music').volume=.8;$('musicVolume').addEventListener('input',e=>{$('music').volume=Number(e.target.value);});$('timelineScrubber').addEventListener('input',e=>seekTo(e.target.value));$('scenePicker').addEventListener('change',e=>seekTo(Array.from({length:Number(e.target.value)},(_,i)=>duration(i)).reduce((a,b)=>a+b,0)));$('previewScene').addEventListener('click',previewCurrentScene);$('fullPreview').addEventListener('click',()=>{stop();previewOnly=false;elapsed=0;showScene(0);updateProgress();play();});
