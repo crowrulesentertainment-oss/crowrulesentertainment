@@ -463,6 +463,53 @@
       .live-dot, .hero-glow, .particle { animation: none !important; }
     }
 
+    /* Next episode countdown — hero feature */
+    .next-episode-countdown {
+      width: min(590px, 100%);
+      margin-top: 30px;
+      padding: 18px 20px 17px;
+      border: 1px solid rgba(196,230,188,.27);
+      border-radius: 18px;
+      background: linear-gradient(120deg, rgba(9,19,13,.86), rgba(22,35,25,.72));
+      box-shadow: 0 18px 48px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.05);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .countdown-heading {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; margin-bottom: 12px;
+    }
+    .countdown-heading strong {
+      color: var(--green-bright); font: 800 .76rem "Manrope",sans-serif;
+      letter-spacing: .16em; text-transform: uppercase;
+    }
+    .countdown-live-note { color: var(--muted); font-size: .72rem; }
+    .countdown-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 9px; }
+    .countdown-unit {
+      padding: 10px 7px 8px; text-align: center; border-radius: 11px;
+      border: 1px solid rgba(255,255,255,.09); background: rgba(255,255,255,.045);
+    }
+    .countdown-number {
+      display: block; color: #fff; font: 800 clamp(1.65rem,4vw,2.35rem)/1 "Manrope",sans-serif;
+      letter-spacing: -.06em; font-variant-numeric: tabular-nums;
+    }
+    .countdown-label {
+      display: block; margin-top: 6px; color: #b8c6b9;
+      font-size: .62rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase;
+    }
+    .countdown-date { margin: 12px 0 0; color: #d5dfd3; font-size: .79rem; }
+    .countdown-date strong { color: var(--gold); }
+    @media (max-width: 480px) {
+      .next-episode-countdown { padding: 15px 13px; margin-top: 24px; }
+      .countdown-grid { gap: 6px; }
+      .countdown-unit { padding: 9px 3px 7px; }
+      .countdown-label { font-size: .56rem; letter-spacing: .08em; }
+      .countdown-heading { align-items: flex-start; flex-direction: column; gap: 3px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .countdown-number { transition: none; }
+    }
+
     /* Feature strip */
     .feature-strip {
       position: relative;
@@ -1321,6 +1368,20 @@
             <span>⌁ Tacoma, Washington</span>
             <span>◉ Built from the ground up</span>
           </div>
+
+          <section class="next-episode-countdown" aria-label="Countdown to the next Back Deck Live episode">
+            <div class="countdown-heading">
+              <strong>Next episode begins in</strong>
+              <span class="countdown-live-note" id="countdownStatus">Every Saturday · 3 PM Pacific</span>
+            </div>
+            <div class="countdown-grid" id="nextEpisodeCountdown" role="timer" aria-live="off">
+              <div class="countdown-unit"><span class="countdown-number" id="countdownDays">--</span><span class="countdown-label">Days</span></div>
+              <div class="countdown-unit"><span class="countdown-number" id="countdownHours">--</span><span class="countdown-label">Hours</span></div>
+              <div class="countdown-unit"><span class="countdown-number" id="countdownMinutes">--</span><span class="countdown-label">Minutes</span></div>
+              <div class="countdown-unit"><span class="countdown-number" id="countdownSeconds">--</span><span class="countdown-label">Seconds</span></div>
+            </div>
+            <p class="countdown-date" id="countdownDate">Next show: <strong>Saturday at 3:00 PM Pacific</strong></p>
+          </section>
         </div>
       </div>
 
@@ -2908,6 +2969,70 @@
 
 
 
+      // Weekly Saturday 3 PM countdown, anchored to the show's Pacific time zone.
+      function setupNextEpisodeCountdown() {
+        const fields = {
+          days: $("#countdownDays"),
+          hours: $("#countdownHours"),
+          minutes: $("#countdownMinutes"),
+          seconds: $("#countdownSeconds")
+        };
+        const dateLabel = $("#countdownDate");
+        const status = $("#countdownStatus");
+        if (!fields.days || !dateLabel || !status) return;
+
+        const zone = "America/Los_Angeles";
+        const partsInZone = date => {
+          const parts = new Intl.DateTimeFormat("en-US", {
+            timeZone: zone, year: "numeric", month: "numeric", day: "numeric",
+            weekday: "short", hour: "numeric", minute: "numeric", second: "numeric",
+            hourCycle: "h23"
+          }).formatToParts(date);
+          return Object.fromEntries(parts.filter(p => p.type !== "literal").map(p => [p.type, p.value]));
+        };
+        const nextSaturdayAtThree = now => {
+          const p = partsInZone(now);
+          const weekday = new Date(Date.UTC(Number(p.year), Number(p.month)-1, Number(p.day))).getUTCDay();
+          let daysAhead = (6 - weekday + 7) % 7;
+          if (daysAhead === 0 && (Number(p.hour) > 15 ||
+              (Number(p.hour) === 15 && (Number(p.minute) > 0 || Number(p.second) > 0)))) daysAhead = 7;
+          const targetDay = new Date(Date.UTC(Number(p.year), Number(p.month)-1, Number(p.day) + daysAhead));
+          const targetDate = new Intl.DateTimeFormat("en-CA", {
+            timeZone: zone, year: "numeric", month: "2-digit", day: "2-digit"
+          }).format(targetDay);
+          // Resolve 3 PM Pacific correctly across PST/PDT transitions.
+          let guess = Date.UTC(targetDay.getUTCFullYear(), targetDay.getUTCMonth(), targetDay.getUTCDate(), 23, 0, 0);
+          for (let i = 0; i < 3; i++) {
+            const actual = partsInZone(new Date(guess));
+            const shown = Date.UTC(Number(actual.year), Number(actual.month)-1, Number(actual.day), Number(actual.hour), Number(actual.minute), Number(actual.second));
+            const wanted = Date.UTC(targetDay.getUTCFullYear(), targetDay.getUTCMonth(), targetDay.getUTCDate(), 15, 0, 0);
+            guess += wanted - shown;
+          }
+          return new Date(guess);
+        };
+        const render = () => {
+          const now = new Date();
+          const target = nextSaturdayAtThree(now);
+          const remaining = Math.max(0, target.getTime() - now.getTime());
+          const totalSeconds = Math.floor(remaining / 1000);
+          const values = {
+            days: Math.floor(totalSeconds / 86400),
+            hours: Math.floor((totalSeconds % 86400) / 3600),
+            minutes: Math.floor((totalSeconds % 3600) / 60),
+            seconds: totalSeconds % 60
+          };
+          Object.entries(fields).forEach(([key, el]) => { el.textContent = String(values[key]).padStart(2, "0"); });
+          const formatted = new Intl.DateTimeFormat("en-US", {
+            timeZone: zone, weekday: "long", month: "long", day: "numeric",
+            hour: "numeric", minute: "2-digit", timeZoneName: "short"
+          }).format(target);
+          dateLabel.innerHTML = "Next show: <strong>" + formatted + "</strong>";
+          status.textContent = "Every Saturday · 3 PM Pacific";
+        };
+        render();
+        window.setInterval(render, 1000);
+      }
+
       function setupEvents() {
         $("#episodeSearch").addEventListener("input", renderEpisodes);
         $("#categoryFilter").addEventListener("change", renderEpisodes);
@@ -2933,6 +3058,7 @@
         setupRevealAnimations();
         setupParticles();
         setupEvents();
+        setupNextEpisodeCountdown();
 
         // Load independently so a problem with one endpoint doesn't block the others.
         await Promise.allSettled([
