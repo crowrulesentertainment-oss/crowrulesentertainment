@@ -48,6 +48,7 @@ html{scroll-behavior:smooth;scroll-padding-top:96px}
 .media-detail,.media-notes{font-size:.8rem;color:var(--muted);overflow-wrap:anywhere;white-space:pre-wrap;margin:0}
 .media-card-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto;padding-top:6px}
 .media-card-actions .btn{display:inline-flex;align-items:center;justify-content:center;text-align:center}
+.community-preview{padding:14px;background:#080e12;border:1px solid #e8b45c55;border-radius:10px}.community-preview audio,.community-preview video{display:block;width:100%;max-height:420px}.media-card textarea.field{width:100%;min-height:76px;margin-top:7px;background:#090f14;border:1px solid #ffffff24;color:var(--paper);padding:10px}.media-card .media-note{margin-top:4px;flex-wrap:wrap}
 .media-empty{grid-column:1/-1;display:grid;gap:7px;place-items:center;text-align:center;min-height:150px;padding:30px;background:#0f1612;border:1px dashed #ffffff2c;color:var(--muted)}
 .media-empty strong{font:700 1.5rem "Barlow Condensed";text-transform:uppercase;color:var(--paper)}
 .media-empty span{font-size:.82rem;max-width:520px}
@@ -1273,7 +1274,7 @@ async function reviewCommunityClip(id,decision,button){
  try{
   const {data,error}=await db.from('tacoma_nights_clip_uploads').update({review_status:decision,reviewed_at:new Date().toISOString(),reviewed_by:currentUser?.id||null}).eq('id',id).select('id,review_status,reviewed_at,reviewed_by').maybeSingle();
   if(error)throw error;if(!data)throw Error('No recording was updated. Confirm your administrator role.');
-  Object.assign(a,data);renderAssets();say($('clipsStatus'),'Community recording '+verb+'d. It remains private and is not automatically published.');
+  Object.assign(a,data);renderAssets();say($('clipsStatus'),'Community recording '+(decision==='approved'?'approved':'rejected')+'. It remains private and is not automatically published.');
  }catch(err){say($('clipsStatus'),'Could not update review status: '+(err.message||'Check administrator permissions.'),true);}
  finally{button.disabled=false;button.textContent=decision==='approved'?'Approve':'Reject';}
 }
