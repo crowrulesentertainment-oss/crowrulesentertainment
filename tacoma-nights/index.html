@@ -3099,13 +3099,26 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
             if (!file.size || file.size > CLIP_MAX_BYTES) throw new Error("Choose a file smaller than 50 GB.");
             const mime = (file.type || "").toLowerCase();
             const extension = (file.name.split(".").pop() || "").toLowerCase();
-            const audioExtensions = ["mp3","wav","m4a","aac","ogg","oga","flac","opus","aiff","aif","wma"];
-            const videoExtensions = ["mp4","mov","webm","m4v","avi","mpeg","mpg","3gp","mkv"];
+            const audioExtensions = ["mp3","wav","m4a","aac","ogg"];
+            const videoExtensions = ["mp4","mov","webm"];
             const isAudio = mime.startsWith("audio/") || audioExtensions.includes(extension);
             const isVideo = mime.startsWith("video/") || videoExtensions.includes(extension);
-            if (!isAudio && !isVideo) throw new Error("Please choose a recognized audio or video recording.");
+            if (!isAudio && !isVideo) throw new Error("Supported formats are MP3, WAV, M4A, AAC, OGG, MP4, MOV, and WebM.");
             if ((type === "audio" && !isAudio) || (type === "video" && !isVideo)) {
               throw new Error("The selected file does not match the recording type you chose.");
+            }
+            const allowedMimeTypes = ["audio/aac","audio/mp3","audio/mp4","audio/mpeg","audio/ogg","audio/wav","audio/webm","audio/x-m4a","audio/x-wav","video/mp4","video/quicktime","video/webm"];
+            let contentType = mime;
+            if (!allowedMimeTypes.includes(contentType)) {
+              const fallbackTypes = {
+                mp3: "audio/mpeg", wav: "audio/wav", m4a: "audio/x-m4a",
+                aac: "audio/aac", ogg: "audio/ogg", mp4: isAudio ? "audio/mp4" : "video/mp4",
+                mov: "video/quicktime", webm: isAudio ? "audio/webm" : "video/webm"
+              };
+              contentType = fallbackTypes[extension] || "";
+            }
+            if (!allowedMimeTypes.includes(contentType)) {
+              throw new Error("This file's media type is not enabled for the private upload inbox. Use MP3, WAV, M4A, AAC, OGG, MP4, MOV, or WebM.");
             }
             if (!$("#communityMediaRights").checked) throw new Error("Please confirm you have permission to share this recording.");
             if (!window.tus?.Upload) throw new Error("The secure upload service did not load. Refresh the page and try again.");
@@ -3124,7 +3137,7 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
                 uploadDataDuringCreation: true,
                 removeFingerprintOnSuccess: true,
                 chunkSize: 6 * 1024 * 1024,
-                metadata: { bucketName: CLIP_BUCKET, objectName: path, contentType: file.type || "application/octet-stream", cacheControl: "3600" },
+                metadata: { bucketName: CLIP_BUCKET, objectName: path, contentType: contentType, cacheControl: "3600" },
                 onError: reject,
                 onProgress: (uploaded, total) => {
                   const pct = total ? Math.min(99, Math.round(uploaded / total * 100)) : 0;
@@ -3150,7 +3163,7 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
               storage_path: path,
               original_filename: file.name,
               file_size: file.size,
-              mime_type: file.type || null,
+              mime_type: contentType,
               rights_confirmed: true
             });
             if (error) {
