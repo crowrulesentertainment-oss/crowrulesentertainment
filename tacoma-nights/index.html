@@ -1805,6 +1805,54 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
           </div>
         </div>
       </div>
+
+      <div class="panel reveal community-media-panel" style="margin-top:26px">
+        <div class="panel-inner">
+          <span class="eyebrow">Share a recording</span>
+          <h3 style="margin-top:12px;font-size:1.45rem">Send us your audio or video.</h3>
+          <p class="muted">Have a message, community story, question, or short on-camera contribution? Record it and send it directly to the Tacoma Nights production team. Your file is uploaded to the existing private production inbox — it is not published automatically.</p>
+          <form id="communityMediaForm" class="form-grid">
+            <div class="form-row">
+              <div>
+                <label for="communityMediaName">Your name</label>
+                <input class="field" id="communityMediaName" maxlength="100" autocomplete="name" required placeholder="How should we introduce you?">
+              </div>
+              <div>
+                <label for="communityMediaEmail">Email address (optional)</label>
+                <input class="field" id="communityMediaEmail" type="email" maxlength="254" autocomplete="email" placeholder="you@example.com">
+              </div>
+            </div>
+            <div>
+              <label for="communityMediaTitle">What is your recording about?</label>
+              <input class="field" id="communityMediaTitle" maxlength="160" minlength="3" required placeholder="Example: A neighborhood project making a difference">
+            </div>
+            <div>
+              <label for="communityMediaType">Recording type</label>
+              <select class="field" id="communityMediaType" required>
+                <option value="audio">Audio message</option>
+                <option value="video">Video message</option>
+                <option value="either">Audio or video contribution</option>
+              </select>
+            </div>
+            <div>
+              <label for="communityMediaFile">Choose your audio or video file</label>
+              <input class="field" id="communityMediaFile" type="file" accept="audio/*,video/*,.mp3,.wav,.m4a,.aac,.ogg,.flac,.mp4,.mov,.webm,.m4v,.avi" required>
+              <p class="form-note">Audio: MP3, WAV, M4A, AAC, OGG, FLAC and other browser-recognized audio formats. Video: MP4, MOV, WebM, M4V and other browser-recognized video formats. Maximum 50 GB. Large uploads use resumable transfer.</p>
+            </div>
+            <div>
+              <label for="communityMediaNotes">Message or notes for the production team (optional)</label>
+              <textarea class="field" id="communityMediaNotes" maxlength="2000" placeholder="Tell us a little about your recording, the people or places mentioned, and anything we should know."></textarea>
+            </div>
+            <label class="consent-row" for="communityMediaRights">
+              <input id="communityMediaRights" type="checkbox" required>
+              <span>I created this recording or have permission to share it, and I give CrowRules Entertainment permission to review and edit it for possible use on Tacoma Nights. I understand that submitting does not guarantee publication.</span>
+            </label>
+            <button class="button button-primary" id="communityMediaSubmit" type="submit">Upload my recording securely ↗</button>
+            <div class="progress" aria-hidden="true"><span id="communityMediaProgress"></span></div>
+            <div id="communityMediaStatus" class="form-status" role="status" aria-live="polite">Choose a recording to get started. Your upload stays private for production review.</div>
+          </form>
+        </div>
+      </div>
     </section>
 
     
@@ -2929,6 +2977,7 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
         $("#refreshStats").addEventListener("click", loadSubscriberStats);
         $("#shareEpisode").addEventListener("click", shareEpisode);
         $("#communityForm").addEventListener("submit", submitCommunityForm);
+        setupCommunityMediaDrop();
         $("#submissionMessage").addEventListener("input", () => {
           $("#messageCounter").textContent = $("#submissionMessage").value.length.toLocaleString("en-US") + " / 4,000 characters";
         });
@@ -3025,6 +3074,101 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
         }catch(error){clipSetStatus((error.message||"Upload failed.")+" If this is a setup issue, check the bucket, table, and anonymous-upload policies.","error");}
         finally{button.disabled=false;button.textContent="Upload clip to the edit desk ↗";}
       }
+      // Public audio/video submissions from the "Your voice belongs here" section.
+      // Reuses the existing private Supabase bucket, resumable uploader, and production inbox table.
+      function setupCommunityMediaDrop() {
+        const form = $("#communityMediaForm");
+        if (!form) return;
+        const setStatus = (message, kind = "") => {
+          const node = $("#communityMediaStatus");
+          node.className = "form-status" + (kind ? " " + kind : "");
+          node.textContent = message;
+        };
+        form.addEventListener("submit", async event => {
+          event.preventDefault();
+          const button = $("#communityMediaSubmit");
+          const file = $("#communityMediaFile").files[0];
+          const name = $("#communityMediaName").value.trim();
+          const title = $("#communityMediaTitle").value.trim();
+          const email = $("#communityMediaEmail").value.trim();
+          const type = $("#communityMediaType").value;
+          try {
+            if (!name || name.length < 2 || !title || title.length < 3 || !file) {
+              throw new Error("Please enter your name, a recording title, and choose a file.");
+            }
+            if (!file.size || file.size > CLIP_MAX_BYTES) throw new Error("Choose a file smaller than 50 GB.");
+            const mime = (file.type || "").toLowerCase();
+            const extension = (file.name.split(".").pop() || "").toLowerCase();
+            const audioExtensions = ["mp3","wav","m4a","aac","ogg","oga","flac","opus","aiff","aif","wma"];
+            const videoExtensions = ["mp4","mov","webm","m4v","avi","mpeg","mpg","3gp","mkv"];
+            const isAudio = mime.startsWith("audio/") || audioExtensions.includes(extension);
+            const isVideo = mime.startsWith("video/") || videoExtensions.includes(extension);
+            if (!isAudio && !isVideo) throw new Error("Please choose a recognized audio or video recording.");
+            if ((type === "audio" && !isAudio) || (type === "video" && !isVideo)) {
+              throw new Error("The selected file does not match the recording type you chose.");
+            }
+            if (!$("#communityMediaRights").checked) throw new Error("Please confirm you have permission to share this recording.");
+            if (!window.tus?.Upload) throw new Error("The secure upload service did not load. Refresh the page and try again.");
+            const client = clipClient();
+            button.disabled = true;
+            button.textContent = "Uploading securely…";
+            $("#communityMediaProgress").style.width = "0%";
+            setStatus("Preparing private, resumable upload…");
+            const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-100);
+            const path = "public-inbox/" + crypto.randomUUID() + "-" + safeName;
+            await new Promise((resolve, reject) => {
+              const upload = new tus.Upload(file, {
+                endpoint: "https://cevylpnoexugwgygvtgu.storage.supabase.co/storage/v1/upload/resumable",
+                retryDelays: [0, 3000, 5000, 10000, 20000],
+                headers: { apikey: CLIP_SUPABASE_KEY, authorization: "Bearer " + CLIP_SUPABASE_KEY },
+                uploadDataDuringCreation: true,
+                removeFingerprintOnSuccess: true,
+                chunkSize: 6 * 1024 * 1024,
+                metadata: { bucketName: CLIP_BUCKET, objectName: path, contentType: file.type || "application/octet-stream", cacheControl: "3600" },
+                onError: reject,
+                onProgress: (uploaded, total) => {
+                  const pct = total ? Math.min(99, Math.round(uploaded / total * 100)) : 0;
+                  $("#communityMediaProgress").style.width = pct + "%";
+                  setStatus("Uploading privately… " + pct + "% (" + clipFormatSize(uploaded) + " of " + clipFormatSize(total) + ")");
+                },
+                onSuccess: resolve
+              });
+              upload.start();
+            });
+            const editorNotes = [
+              "Public community recording submission",
+              "Format: " + (isAudio ? "Audio" : "Video"),
+              email ? "Contact email: " + email : "",
+              $("#communityMediaNotes").value.trim()
+            ].filter(Boolean).join("\n\n");
+            const { error } = await client.from(CLIP_TABLE).insert({
+              owner_id: null,
+              co_host_name: name,
+              title: title,
+              episode_label: "Community voice submission",
+              notes: editorNotes.slice(0, 2000),
+              storage_path: path,
+              original_filename: file.name,
+              file_size: file.size,
+              mime_type: file.type || null,
+              rights_confirmed: true
+            });
+            if (error) {
+              await client.storage.from(CLIP_BUCKET).remove([path]);
+              throw error;
+            }
+            $("#communityMediaProgress").style.width = "100%";
+            setStatus("Your recording has been received privately. Thank you for sharing your voice with Tacoma Nights!", "success");
+            form.reset();
+          } catch (error) {
+            setStatus((error?.message || "Your recording could not be uploaded.") + " Please try again or use the co-host upload workspace.", "error");
+          } finally {
+            button.disabled = false;
+            button.textContent = "Upload my recording securely ↗";
+          }
+        });
+      }
+
       function setupClipDrop() {
         $("#clipUploadForm").addEventListener("submit",clipUpload);
         $("#clipOwnerSignIn").addEventListener("click",async()=>{try{const email=$("#clipOwnerEmail").value.trim().toLowerCase();if(!email||email!==CLIP_OWNER_EMAIL.toLowerCase())throw new Error("Enter the configured production-owner email address.");const {error}=await clipClient().auth.signInWithOtp({email,options:{emailRedirectTo:window.location.href.split("#")[0].split("?")[0]}});if(error)throw error;clipSetStatus("Owner sign-in link sent. Open it on this device to review and download clips.","success");}catch(e){clipSetStatus(e.message||"Could not send owner sign-in link.","error");}});
