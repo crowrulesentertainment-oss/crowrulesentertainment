@@ -45,7 +45,7 @@
         <div class="field-group"><label for="clipTitle">Segment title</label><input class="field" id="clipTitle" required maxlength="120" placeholder="Example: Tacoma Sports Roundup"></div>
         <div class="field-group"><label for="clipEpisode">Episode / intended air date (optional)</label><input class="field" id="clipEpisode" maxlength="120" placeholder="Example: Friday, November 6"></div>
         <div class="field-group"><label for="clipNotes">Notes for the editor (optional)</label><textarea class="field" id="clipNotes" maxlength="2000" placeholder="Names/pronunciations, suggested in/out points, source links, or editing notes."></textarea><span class="help">Up to 2,000 characters.</span></div>
-        <div class="field-group"><label for="clipFile">Video clip</label><input id="clipFile" type="file" accept="video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm" required><span class="help">Accepted formats: MP4, MOV, WebM. Maximum <strong>50 GB per clip</strong>. Large files use resumable upload so an interrupted connection can retry. Record in horizontal 16:9 landscape where possible.</span></div>
+        <div class="field-group"><label for="clipFile">Video clip</label><input id="clipFile" type="file" accept="video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm" required><span class="help">Accepted formats: MP4, MOV, WebM. Maximum <strong>50 GB per clip</strong>, subject to your Storage bucket limit. Uploads resume from the last confirmed chunk when you reselect the same file on this browser. Keep this tab open and your device awake during large uploads. Record in horizontal 16:9 landscape where possible.</span></div>
         <label class="check"><input id="clipRights" type="checkbox" required><span>I confirm I created this clip or have permission to submit it, and I grant CrowRules Entertainment permission to edit it for Tacoma Nights.</span></label>
         <button class="button primary" id="clipSubmit" type="submit">Upload clip to the edit desk ↗</button>
         <div class="progress" aria-hidden="true"><span id="clipProgressBar"></span></div>
@@ -104,20 +104,21 @@
           button.disabled=true;button.textContent="Uploading…";$("clipProgressBar").style.width="0%";status("Preparing secure resumable upload…");
           const cleanName=file.name.replace(/[^a-zA-Z0-9._-]/g,"_").slice(-100);
           const path="public-inbox/"+crypto.randomUUID()+"-"+cleanName;
+          let storagePath=path;
           const upload=new tus.Upload(file,{
             endpoint:"https://"+PROJECT_ID+".storage.supabase.co/storage/v1/upload/resumable",
-            retryDelays:[0,3000,5000,10000,20000],
+            retryDelays:[0,3000,5000,10000,20000,30000,60000,120000],
             headers:{apikey:SUPABASE_KEY,authorization:"Bearer "+SUPABASE_KEY},
             uploadDataDuringCreation:true,removeFingerprintOnSuccess:true,chunkSize:6*1024*1024,
             metadata:{bucketName:BUCKET,objectName:path,contentType:file.type||"application/octet-stream",cacheControl:"3600"},
-            onError:error=>{status((error?.message||"Upload interrupted.")+" You can select the same file again to retry.","error");button.disabled=false;button.textContent="Retry upload ↗";},
+            onError:error=>{const detail=String(error?.message||"").replace(/\\s+/g," ").slice(0,220);status("The connection to secure storage was interrupted. Your confirmed upload progress is saved in this browser. Select the same file again to resume."+(detail?" Details: "+detail:""),"error");button.disabled=false;button.textContent="Resume upload ↗";},
             onProgress:(uploaded,total)=>{const pct=total?Math.min(99,Math.round(uploaded/total*100)):0;$("clipProgressBar").style.width=pct+"%";status("Uploading privately… "+pct+"% ("+formatSize(uploaded)+" of "+formatSize(total)+")");},
             onSuccess:async()=>{
               try {
                 $("clipProgressBar").style.width="96%";
                 const {error}=await supabaseClient().from(TABLE).insert({
                   owner_id:null,co_host_name:name,title,episode_label:$("clipEpisode").value.trim()||null,
-                  notes:$("clipNotes").value.trim()||null,storage_path:path,original_filename:file.name,
+                  notes:$("clipNotes").value.trim()||null,storage_path:storagePath,original_filename:file.name,
                   file_size:file.size,mime_type:file.type||null,rights_confirmed:true
                 });
                 if(error){await supabaseClient().storage.from(BUCKET).remove([path]);throw error;}
@@ -127,7 +128,12 @@
             }
           });
           const previous=await upload.findPreviousUploads();
-          if(previous.length) upload.resumeFromPreviousUpload(previous[0]);
+          const resumable=previous.find(item=>item.metadata?.bucketName===BUCKET&&item.metadata?.objectName);
+          if(resumable){
+            storagePath=resumable.metadata.objectName;
+            upload.resumeFromPreviousUpload(resumable);
+            status("Found your previous upload. Resuming from the last confirmed chunk…");
+          }
           upload.start();
         } catch(error) { status(error.message||"Upload could not be started.","error");button.disabled=false;button.textContent="Upload clip to the edit desk ↗"; }
       }
