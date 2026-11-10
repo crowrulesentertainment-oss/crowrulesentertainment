@@ -111,7 +111,7 @@
             headers:{apikey:SUPABASE_KEY,authorization:"Bearer "+SUPABASE_KEY},
             uploadDataDuringCreation:true,removeFingerprintOnSuccess:true,chunkSize:6*1024*1024,
             metadata:{bucketName:BUCKET,objectName:path,contentType:file.type||"application/octet-stream",cacheControl:"3600"},
-            onError:error=>{const detail=String(error?.message||"").replace(/\\s+/g," ").slice(0,220);status("The connection to secure storage was interrupted. Your confirmed upload progress is saved in this browser. Select the same file again to resume."+(detail?" Details: "+detail:""),"error");button.disabled=false;button.textContent="Resume upload ↗";},
+            onError:error=>{status("The upload paused after repeated connection failures. Your confirmed progress is kept when this browser can recover the previous upload. Check your connection, then select the exact same file again to resume. If the upload was started more than 24 hours ago, a fresh upload may be required.","error");button.disabled=false;button.textContent="Resume upload ↗";},
             onProgress:(uploaded,total)=>{const pct=total?Math.min(99,Math.round(uploaded/total*100)):0;$("clipProgressBar").style.width=pct+"%";status("Uploading privately… "+pct+"% ("+formatSize(uploaded)+" of "+formatSize(total)+")");},
             onSuccess:async()=>{
               try {
