@@ -108,7 +108,8 @@
           const upload=new tus.Upload(file,{
             endpoint:"https://"+PROJECT_ID+".storage.supabase.co/storage/v1/upload/resumable",
             retryDelays:[0,3000,5000,10000,20000,30000,60000,120000],
-            headers:{apikey:SUPABASE_KEY,authorization:"Bearer "+SUPABASE_KEY},
+            // The publishable key authenticates the public app; do not send it as a user JWT.
+            headers:{apikey:SUPABASE_KEY},
             uploadDataDuringCreation:true,removeFingerprintOnSuccess:true,chunkSize:6*1024*1024,
             metadata:{bucketName:BUCKET,objectName:path,contentType:file.type||"application/octet-stream",cacheControl:"3600"},
             onError:error=>{status("The upload paused after repeated connection failures. Your confirmed progress is kept when this browser can recover the previous upload. Check your connection, then select the exact same file again to resume. If the upload was started more than 24 hours ago, a fresh upload may be required.","error");button.disabled=false;button.textContent="Resume upload ↗";},
