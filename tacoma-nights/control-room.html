@@ -352,7 +352,25 @@ body:before{opacity:.3;background:radial-gradient(ellipse at 50% 0%,#52677e22,tr
 
 </style><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
 
-<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=5" defer></script></head>
+<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=5" defer></script><style>
+/* 06 / POST-PRODUCTION — scrolling end credits only */
+.ending-studio .ending-ratio,.ending-studio .ending-meta{display:none!important}
+.ending-studio #endingCreditsForm .fields>*{display:none!important}
+.ending-studio #endingCreditsForm .fields>label:has([name^="scroll_"]){display:flex!important}
+.ending-studio #endingCreditsForm .fields>label:has([name="scroll_text"]){grid-column:1/-1}
+.ending-studio #endingCreditsForm .fields>label:has([name="scroll_text"]) textarea{min-height:260px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;line-height:1.65}
+.ending-studio #endingCreditsForm .fields>label:has([name="scroll_enabled"]){padding:14px;background:#e8b45c0c;border:1px solid #e8b45c38}
+.ending-studio #endingCreditsForm .fields>label:has([name^="scroll_"]){margin:0}
+.ending-studio .ending-preview{height:430px;min-height:430px;max-height:60vh;overflow:hidden;display:block;position:relative;background:radial-gradient(ellipse at 50% 15%,#26384a 0,#080d14 70%);border-color:#e8b45c55}
+.ending-scroll-preview{position:absolute;inset:0;overflow:hidden;padding:35px 12% 0;text-align:center}
+.ending-scroll-preview strong{display:block;position:relative;z-index:2;font:800 clamp(17px,2.5vw,30px)/1.2 "Barlow Condensed",sans-serif;letter-spacing:.14em;color:#f0c477;background:linear-gradient(#080d14 75%,transparent);padding:0 0 24px}
+.ending-scroll-preview p{white-space:pre-wrap;color:#f3f0e9;font:600 clamp(13px,1.55vw,19px)/1.85 "DM Sans",sans-serif;animation:ending-admin-roll var(--ending-preview-duration,28s) linear infinite;margin:0;text-shadow:0 3px 16px #000}
+.ending-preview[data-direction="down"] .ending-scroll-preview p{animation-name:ending-admin-roll-down}
+@keyframes ending-admin-roll{from{transform:translateY(100%)}to{transform:translateY(-115%)}}
+@keyframes ending-admin-roll-down{from{transform:translateY(-115%)}to{transform:translateY(100%)}}
+@media(prefers-reduced-motion:reduce){.ending-scroll-preview p{animation:none!important}}
+</style>
+</head>
 <body>
 <header class="top"><div class="wrap topinner"><a class="brand" href="./"><span class="mark">TN</span><span>TACOMA NIGHTS <span style="color:var(--lime)">/ CONTROL ROOM</span></span></a><div class="top-actions"><a class="btn ghost" href="./" target="_blank" rel="noopener">View public site ↗</a><button class="btn ghost hidden" id="signOutBtn">Sign out</button></div></div></header>
 <div class="visitor-strip" role="status" aria-live="polite" aria-atomic="true"><div class="wrap visitor-inner"><span class="visitor-live-dot" id="visitorLiveDot" aria-hidden="true"></span><span class="visitor-label">LIVE VISITORS</span><strong id="visitorCount">—</strong><span class="visitor-description" id="visitorStatus">Connecting to live presence…</span><span class="visitor-scope">SITEWIDE · PUBLIC + CONTROL ROOM</span></div></div>
@@ -507,7 +525,7 @@ body:before{opacity:.3;background:radial-gradient(ellipse at 50% 0%,#52677e22,tr
 <p id="featuredVideoStatus" class="small" role="status" aria-live="polite">Loading homepage video settings…</p></section>
 
 <section class="panel ending-studio" id="endingCreditsPanel">
- <div class="panelhead"><div><p class="micro">06 / POST-PRODUCTION · REUSABLE MASTER</p><h2>Ending credits studio</h2><p>Build and maintain the reusable Tacoma Nights closing sequence. Keep 70% of the identity consistent and customize the remaining 30% for each episode. Settings are private to administrators and save to the existing Supabase site-settings workspace.</p></div><span class="pill">70% signature · 30% weekly</span></div>
+ <div class="panelhead"><div><p class="micro">06 / POST-PRODUCTION · REUSABLE MASTER</p><h2>Ending credits studio</h2><p>Create one continuous, upward-scrolling film-style end-credit roll. Keep the reusable master structure and update the names and episode details for each release. This workspace is exclusively for scrolling end credits.</p></div><span class="pill">SCROLLING CREDITS ONLY</span></div>
  <div class="ending-ratio"><div><strong>70%</strong><span>Permanent branding, music, transitions and sign-off</span></div><div><strong>30%</strong><span>Episode highlights, guests, contributors and thanks</span></div></div>
  <div class="ending-meta"><div><b>1920 × 1080</b><small>RESOLUTION</small></div><div><b>16:9</b><small>ASPECT RATIO</small></div><div><b>30 FPS</b><small>FRAME RATE</small></div><div><b>MP4 · H.264</b><small>EXPORT FORMAT</small></div></div>
  <form id="endingCreditsForm">
@@ -1119,21 +1137,19 @@ function endingCreditsValues(){const f=endingCreditsForm(),out={};for(const [k,v
 function applyEndingCreditsValues(values){const f=endingCreditsForm(),v={...ENDING_CREDITS_DEFAULTS,...(values||{})};for(const k of Object.keys(ENDING_CREDITS_DEFAULTS)){if(k==='highlight_assets')continue;if(f.elements[k]){if(f.elements[k].type==='checkbox')f.elements[k].checked=!!v[k];else f.elements[k].value=v[k]??ENDING_CREDITS_DEFAULTS[k];}}renderStaffCreditRows(v.staff_credits);endingHighlightAssets=Array.isArray(v.highlight_assets)?v.highlight_assets.map(item=>({...item})):[];renderHighlightAssetList();renderEndingCreditsPreview();}
 function renderEndingCreditsPreview(){
  const v=endingCreditsValues(),lines=[];
- const add=(heading,value)=>{const clean=String(value||'').trim();if(clean){lines.push(heading);lines.push(clean);lines.push('');}};
- lines.push(v.episode_number||'TACOMA NIGHTS');if(v.episode_title)lines.push(v.episode_title);lines.push('');
- if(v.show_highlights)add('EPISODE HIGHLIGHTS',v.episode_highlights);
- if(v.show_guests)add('FEATURING',v.guest_credits);
- if(v.show_contributors)add('CONTRIBUTORS',v.contributor_credits);
- if(v.show_special_thanks)add('SPECIAL THANKS',v.special_thanks);
- if(v.show_production)add('PRODUCTION',v.production_credits);
- if(v.show_staff)add('STAFF & CREW',v.staff_credits);
- if(v.show_episode_message&&v.episode_message)add('THIS WEEK',v.episode_message);
- if(v.show_subscribe_message&&v.subscribe_message)lines.push(v.subscribe_message);
- lines.push('',v.closing_tagline,'',v.closing_headline,'','CROWRULES ENTERTAINMENT','ONE COMPANY. ONE UNIVERSE.');
+ if(v.episode_number)lines.push(v.episode_number);
+ if(v.episode_title)lines.push(v.episode_title);
+ if(lines.length)lines.push('');
+ lines.push(...String(v.scroll_text||'').split(/\r?\n/));
+ const content=lines.join('\n').trim()||'ADD YOUR SCROLLING END CREDITS TEXT';
  const box=$('endingCreditsPreview');box.replaceChildren();
- const wrap=document.createElement('div'),logo=document.createElement('strong');logo.textContent='TACOMA NIGHTS';wrap.append(logo);
- const copy=document.createElement('p');copy.textContent=lines.join('\n');wrap.append(copy);box.append(wrap);
- return lines.join('\n');
+ const wrap=document.createElement('div');wrap.className='ending-scroll-preview';
+ const heading=document.createElement('strong');heading.textContent=v.scroll_title||'THE PEOPLE BEHIND THE PRODUCTION';
+ const copy=document.createElement('p');copy.textContent=content;
+ wrap.append(heading,copy);box.append(wrap);
+ box.dataset.direction=v.scroll_direction||'up';
+ box.style.setProperty('--ending-preview-duration',Math.max(10,Math.min(300,Number(v.scroll_duration_seconds)||28))+'s');
+ return content;
 }
 async function loadEndingCredits(){
  const {data,error}=await db.from('tacoma_nights_ending_credits').select('setting_value').eq('setting_key','master').maybeSingle();
