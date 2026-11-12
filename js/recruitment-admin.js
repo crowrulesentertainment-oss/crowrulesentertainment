@@ -6,7 +6,7 @@ const $=s=>document.querySelector(s);
 const $$=s=>[...document.querySelectorAll(s)];
 const STATUS_LABELS={new:"New",reviewing:"Reviewing",intro_requested:"Intro requested",conversation_scheduled:"Conversation scheduled",follow_up:"Follow-up",funding_pipeline:"Future funding pipeline",closed:"Closed",spam:"Spam"};
 const MEETING_LABELS={scheduled:"Scheduled",completed:"Completed",cancelled:"Cancelled",no_show:"No show"};
-let db=null,currentUser=null,applications=[],interviews=[],positions=[],team=[],assignments=[],selectedApplication=null;
+let db=null,currentUser=null,applications=[],interviews=[],positions=[],team=[],assignments=[],selectedApplication=null,editingTeamId=null;
 function client(){if(!window.supabase?.createClient)throw Error("Supabase library did not load.");if(!db)db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});return db}
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function date(v,withTime=true){if(!v)return "—";const d=new Date(v);return Number.isNaN(d.getTime())?"—":new Intl.DateTimeFormat(undefined,withTime?{dateStyle:"medium",timeStyle:"short"}:{dateStyle:"medium"}).format(d)}
@@ -124,9 +124,40 @@ function renderPositions(){
 }
 function renderTeam(){
  $("#teamCount").textContent=team.length;
- $("#teamList").innerHTML=team.map(m=>'<article class="list-card"><div class="list-card-head"><strong>'+esc(m.full_name)+'</strong><span class="pill">'+esc(m.status)+'</span></div><small>'+esc(m.title)+' · '+esc(m.division||m.department||"Company-wide")+'</small><p>'+esc(m.bio||"No bio added.")+'</p><div class="inline-actions"><label class="compact-label">Status<select data-team-status="'+esc(m.id)+'"><option value="planned">Planned</option><option value="active">Active</option><option value="paused">Paused</option><option value="former">Former</option></select></label><label class="check-label"><input type="checkbox" data-team-public="'+esc(m.id)+'" '+(m.is_public?"checked":"")+'> Public profile</label></div></article>').join("")||'<div class="empty">No team profiles yet. Create initial leadership profiles to begin the chart.</div>';
- $$("[data-team-status]").forEach(s=>{const m=team.find(x=>x.id===s.dataset.teamStatus);s.value=m?.status||"planned";s.addEventListener("change",()=>updateRow("recruitment_team_members",s.dataset.teamStatus,{status:s.value,updated_at:new Date().toISOString()},"Team status updated."))});
- $$("[data-team-public]").forEach(c=>c.addEventListener("change",()=>updateRow("recruitment_team_members",c.dataset.teamPublic,{is_public:c.checked,updated_at:new Date().toISOString()},"Profile visibility updated.")));
+ $("#teamList").innerHTML=team.map(m=>'<article class="list-card team-member-card"><div class="list-card-head"><strong>'+esc(m.full_name)+'</strong><span class="pill">'+esc(m.status)+'</span></div><small>'+esc(m.title)+' · '+esc(m.division||m.department||"Company-wide")+'</small><p>'+esc(m.bio||"No bio added.")+'</p><div class="team-record-meta"><span>'+esc(m.department||"No department")+'</span><span>Order: '+esc(m.sort_order??0)+'</span><span>'+(m.is_public?"Public profile approved":"Private profile")+'</span></div><div class="inline-actions"><button class="btn btn-outline btn-small" type="button" data-edit-team="'+esc(m.id)+'">Edit profile</button><label class="compact-label">Status<select data-team-status="'+esc(m.id)+'"><option value="planned">Planned</option><option value="active">Active</option><option value="paused">Paused</option><option value="former">Former</option></select></label><label class="check-label"><input type="checkbox" data-team-public="'+esc(m.id)+'" '+(m.is_public?"checked":"")+'> Public profile</label></div></article>').join("")||'<div class="empty">No team profiles yet. Create initial leadership profiles to begin the chart.</div>';
+ $("[data-edit-team]").forEach(b=>b.addEventListener("click",()=>startTeamEdit(b.dataset.editTeam)));
+ $("[data-team-status]").forEach(s=>{const m=team.find(x=>x.id===s.dataset.teamStatus);s.value=m?.status||"planned";s.addEventListener("change",()=>updateRow("recruitment_team_members",s.dataset.teamStatus,{status:s.value,updated_at:new Date().toISOString()},"Team status updated."))});
+ $("[data-team-public]").forEach(c=>c.addEventListener("change",()=>updateRow("recruitment_team_members",c.dataset.teamPublic,{is_public:c.checked,updated_at:new Date().toISOString()},"Profile visibility updated.")));
+}
+function startTeamEdit(id){
+ const m=team.find(x=>x.id===id);if(!m)return;
+ editingTeamId=id;
+ const f=$("#teamForm");
+ f.elements.full_name.value=m.full_name||"";
+ f.elements.title.value=m.title||"";
+ f.elements.department.value=m.department||"";
+ f.elements.division.value=m.division||"";
+ f.elements.bio.value=m.bio||"";
+ f.elements.profile_url.value=m.profile_url||"";
+ f.elements.avatar_url.value=m.avatar_url||"";
+ f.elements.status.value=m.status||"planned";
+ f.elements.is_public.checked=!!m.is_public;
+ f.elements.sort_order.value=m.sort_order??0;
+ const reports=$("#reportsTo");
+ reports.innerHTML='<option value="">No reporting parent / owner</option>'+team.filter(x=>x.id!==id).map(x=>'<option value="'+esc(x.id)+'">'+esc(x.full_name)+' — '+esc(x.title)+'</option>').join("");
+ reports.value=m.reports_to_member_id||"";
+ $("#teamFormHeading").textContent="Edit team profile";
+ $("#teamSubmitButton").textContent="Save team changes";
+ $("#cancelTeamEdit").classList.remove("hidden");
+ f.scrollIntoView({behavior:"smooth",block:"start"});
+}
+function cancelTeamEdit(){
+ editingTeamId=null;
+ const f=$("#teamForm");f.reset();
+ $("#teamFormHeading").textContent="Add a team profile";
+ $("#teamSubmitButton").textContent="Create team profile";
+ $("#cancelTeamEdit").classList.add("hidden");
+ populateSelects();
 }
 function renderAssignments(){
  $("#assignmentList").innerHTML=assignments.map(a=>{const m=team.find(x=>x.id===a.team_member_id);return '<article class="list-card"><div class="list-card-head"><strong>'+esc(a.title)+'</strong><span class="pill">'+esc(a.status.replace("_"," "))+'</span></div><small>'+esc(m?.full_name||"Team member")+' · '+esc(a.division||"Company-wide")+'</small><p>'+esc(a.description||"No description.")+'</p><div class="inline-actions"><select data-assignment-status="'+esc(a.id)+'"><option value="planned">Planned</option><option value="active">Active</option><option value="on_hold">On hold</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select><button class="text-button" data-delete-assignment="'+esc(a.id)+'">Delete</button></div></article>'}).join("")||'<div class="empty">No assignment plans yet.</div>';
@@ -168,7 +199,7 @@ async function handleLogin(e){
 }
 async function handleLogout(){await client().auth.signOut();currentUser=null;applications=[];interviews=[];positions=[];team=[];assignments=[];selectedApplication=null;$("#adminView").classList.add("hidden");$("#loginView").classList.remove("hidden");$("#logoutButton").classList.add("hidden");$("#loginForm").reset();$("#loginStatus").textContent="You have signed out."}
 function wireForms(){
- $("#loginForm").addEventListener("submit",handleLogin);$("#logoutButton").addEventListener("click",handleLogout);
+ $("#loginForm").addEventListener("submit",handleLogin);$("#logoutButton").addEventListener("click",handleLogout);$("#cancelTeamEdit").addEventListener("click",cancelTeamEdit);
  $$(".tab").forEach(t=>t.addEventListener("click",()=>showTab(t.dataset.tab)));
  $$("[data-go]").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.go)));
  $("#appSearch").addEventListener("input",renderApplications);$("#appStatusFilter").addEventListener("change",renderApplications);
@@ -185,8 +216,13 @@ function wireForms(){
  });
  $("#teamForm").addEventListener("submit",async e=>{
   e.preventDefault();const f=e.currentTarget,v=formObject(f);setBusy(f,true);
-  const {error}=await client().from("recruitment_team_members").insert({full_name:v.full_name,title:v.title,department:v.department||null,division:v.division||null,bio:v.bio||null,profile_url:v.profile_url||null,avatar_url:v.avatar_url||null,reports_to_member_id:v.reports_to_member_id||null,status:v.status,is_public:isChecked(f,"is_public"),created_by:currentUser.id});
-  setBusy(f,false);if(error){notify("Could not create team profile: "+error.message,true);return}f.reset();notify("Team profile created.");await loadAll();
+  const patch={full_name:v.full_name.trim(),title:v.title.trim(),department:v.department||null,division:v.division||null,bio:v.bio||null,profile_url:v.profile_url||null,avatar_url:v.avatar_url||null,reports_to_member_id:v.reports_to_member_id||null,status:v.status,is_public:isChecked(f,"is_public"),sort_order:Number(v.sort_order)||0,updated_at:new Date().toISOString()};
+  const result=editingTeamId
+   ? await client().from("recruitment_team_members").update(patch).eq("id",editingTeamId)
+   : await client().from("recruitment_team_members").insert({...patch,created_by:currentUser.id});
+  setBusy(f,false);
+  if(result.error){notify("Could not "+(editingTeamId?"update":"create")+" team profile: "+result.error.message,true);return}
+  const wasEditing=!!editingTeamId;cancelTeamEdit();notify(wasEditing?"Team profile updated.":"Team profile created.");await loadAll();
  });
  $("#assignmentForm").addEventListener("submit",async e=>{
   e.preventDefault();const f=e.currentTarget,v=formObject(f);setBusy(f,true);
