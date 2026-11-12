@@ -60,9 +60,10 @@ async function openApplication(id){
  (a.message?'<div class="detail-block"><small>Additional information</small><p>'+esc(a.message).replace(/\n/g,"<br>")+'</p></div>':'')+
  '<form id="candidateUpdateForm" class="detail-edit"><h4>Candidate management</h4><label>Pipeline status<select name="status">'+Object.entries(STATUS_LABELS).map(([v,l])=>'<option value="'+v+'" '+(a.status===v?"selected":"")+'>'+l+'</option>').join("")+'</select></label><label>Private admin notes<textarea name="admin_notes" rows="4" maxlength="5000">'+esc(a.admin_notes||"")+'</textarea></label><label class="check-label"><input type="checkbox" name="mark_contacted"> Mark as contacted now</label><button class="btn btn-primary full" type="submit">Save candidate record</button></form>'+
  '<div class="detail-edit"><h4>Private communication log</h4><form id="messageForm"><label>Type<select name="channel"><option value="internal">Internal note</option><option value="email">Email (log only)</option><option value="phone">Phone call</option><option value="meeting">Meeting</option></select></label><label>Direction<select name="direction"><option value="internal">Internal</option><option value="outbound">Outbound</option><option value="inbound">Inbound</option></select></label><label>Subject<input name="subject" maxlength="180"></label><label>Summary / notes<textarea name="body" rows="3" required maxlength="4000"></textarea></label><button class="btn btn-outline full" type="submit">Add to communication history</button></form><div id="messageHistory" class="message-history">Loading history…</div></div>'+
- '<div class="detail-actions"><button class="btn btn-outline" id="createInterviewFromDetail">Schedule conversation</button></div>';
+ '<div class="detail-edit email-composer"><h4>Send candidate email</h4><p class="muted small">Sends directly to the email address on this application through Brevo. The sent message is added to the private communication history.</p><form id="candidateEmailForm"><label>Subject<input name="subject" maxlength="180" required placeholder="CrowRules Entertainment — application update"></label><label>Message<textarea name="body" rows="5" maxlength="8000" required placeholder="Write your message to the candidate…"></textarea></label><button class="btn btn-primary full" type="submit">Send email to candidate</button></form><p class="muted small">Sender: crowrulesentertainment@gmail.com · Replies go to this address.</p></div><div class="detail-actions"><button class="btn btn-outline" id="createInterviewFromDetail">Schedule conversation</button></div>';
  $("#candidateUpdateForm").addEventListener("submit",saveCandidate);
  $("#messageForm").addEventListener("submit",saveMessage);
+ $("#candidateEmailForm").addEventListener("submit",sendCandidateEmail);
  $("#createInterviewFromDetail").addEventListener("click",()=>{showTab("interviews");$("#interviewApplicant").value=id;$("#interviewForm").scrollIntoView({behavior:"smooth",block:"center"})});
  loadMessages(id);
 }
@@ -79,6 +80,22 @@ async function saveCandidate(e){
  const {error}=await client().from("recruitment_applications").update(payload).eq("id",a.id);
  setBusy(f,false);if(error){notify("Could not update applicant: "+error.message,true);return}
  notify("Candidate record updated.");await loadAll();await openApplication(a.id);
+}
+async function sendCandidateEmail(e){
+ e.preventDefault();
+ const f=e.currentTarget,a=applications.find(x=>x.id===selectedApplication);if(!a)return;
+ const v=formObject(f);setBusy(f,true);
+ try{
+  const {data,error}=await client().functions.invoke("recruitment-send-email",{body:{application_id:a.id,subject:v.subject,body:v.body}});
+  if(error)throw error;
+  if(!data?.sent)throw Error(data?.error||"Brevo did not confirm the email.");
+  f.reset();
+  notify(data.logged===false?"Email sent, but the history log needs attention.":"Email sent through Brevo and saved to candidate history.");
+  await loadMessages(a.id);
+ }catch(err){
+  const message=err?.context?.json?.error||err?.message||"Email delivery failed.";
+  notify(message,true);
+ }finally{setBusy(f,false)}
 }
 async function saveMessage(e){
  e.preventDefault();const f=e.currentTarget,a=applications.find(x=>x.id===selectedApplication);if(!a)return;const v=formObject(f);setBusy(f,true);
