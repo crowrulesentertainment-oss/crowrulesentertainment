@@ -1211,16 +1211,26 @@ async function exportEndingCreditsVideo(){
  const canvas=document.createElement('canvas');canvas.width=1920;canvas.height=1080;
  const ctx=canvas.getContext('2d');if(!ctx){say(status,'Could not initialize the 1080p renderer.',true);return;}
  setBusy(button,true,'Preparing 1080p render…');
- let recorder=null,raf=0,audioContext=null,audioStream=null;
+ let recorder=null,raf=0,audioContext=null,audioStream=null,audioSource=null;
  try{
   const bg=$('endingBackgroundPreview'),background=new Image();
   if(bg?.src&&!bg.hidden){background.crossOrigin='anonymous';background.src=bg.src;await new Promise((resolve,reject)=>{if(background.complete&&background.naturalWidth)return resolve();background.onload=resolve;background.onerror=()=>reject(new Error('Background image could not be loaded for export. Refresh its signed link or remove the background and retry.'));});}
-  const music=$('endingMusicPreview'),hasMusic=!!(music?.currentSrc||music?.src);
-  if(hasMusic&&music.readyState<2)await new Promise((resolve,reject)=>{const ok=()=>{clean();resolve();},bad=()=>{clean();reject(new Error('Music could not be loaded. Check its signed link or export without music.'));},clean=()=>{music.removeEventListener('canplay',ok);music.removeEventListener('error',bad);};music.addEventListener('canplay',ok,{once:true});music.addEventListener('error',bad,{once:true});music.load();});
+  const music=$('endingMusicPreview'),musicUrl=music?.currentSrc||music?.src||'',hasMusic=!!musicUrl;
   const stream=canvas.captureStream(30),tracks=[...stream.getVideoTracks()];
+  let decodedMusic=null,audioDestination=null;
   if(hasMusic){
-   if(music.captureStream||music.mozCaptureStream){audioStream=(music.captureStream||music.mozCaptureStream).call(music);tracks.push(...audioStream.getAudioTracks());}
-   else{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)throw new Error('This browser cannot capture music audio.');audioContext=new AC();const source=audioContext.createMediaElementSource(music),dest=audioContext.createMediaStreamDestination();source.connect(dest);source.connect(audioContext.destination);tracks.push(...dest.stream.getAudioTracks());}
+   const AC=window.AudioContext||window.webkitAudioContext;
+   if(!AC)throw new Error('This browser cannot decode the music track for video export.');
+   audioContext=new AC();
+   let response;
+   try{response=await fetch(musicUrl,{mode:'cors',credentials:'omit'});}
+   catch(_){throw new Error('The music file cannot be fetched with cross-origin permission. Check Supabase Storage CORS settings or export without music.');}
+   if(!response.ok)throw new Error('Music download failed (HTTP '+response.status+'). Refresh the signed music link and retry.');
+   const audioBytes=await response.arrayBuffer();
+   try{decodedMusic=await audioContext.decodeAudioData(audioBytes);}
+   catch(_){throw new Error('The music file could not be decoded by this browser. Try an MP3 or AAC audio file.');}
+   audioDestination=audioContext.createMediaStreamDestination();
+   tracks.push(...audioDestination.stream.getAudioTracks());
   }
   const types=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
   const mimeType=types.find(t=>MediaRecorder.isTypeSupported(t));if(!mimeType)throw new Error('No supported MP4 or WebM recording format was detected.');
@@ -1244,16 +1254,20 @@ async function exportEndingCreditsVideo(){
    if(elapsed<duration)raf=requestAnimationFrame(draw);else if(recorder.state==='recording')recorder.stop();
   };
   recorder.start(1000);
-  if(hasMusic){music.pause();music.currentTime=0;await music.play();}
+  if(hasMusic){
+   if(audioContext.state==='suspended')await audioContext.resume();
+   audioSource=audioContext.createBufferSource();audioSource.buffer=decodedMusic;audioSource.connect(audioDestination);
+   audioSource.start(0);
+  }
   raf=requestAnimationFrame(draw);await stopped;
-  if(hasMusic)music.pause();
+  if(audioSource)try{audioSource.stop();}catch(_){} 
   const blob=new Blob(chunks,{type:mimeType});if(!blob.size)throw new Error('The recorder produced an empty file. Try again in a supported desktop browser.');
   const url=URL.createObjectURL(blob),a=document.createElement('a'),base=[v.episode_number,v.episode_title].filter(Boolean).join('-')||'master';
   a.href=url;a.download='tacoma-nights-'+base.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'-ending-credits-1080p.'+(isMp4?'mp4':'webm');
   document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
   say(status,'1080p export complete · '+(isMp4?'MP4':'WebM fallback')+' · '+Math.round(blob.size/1048576)+' MB. '+(hasMusic?'Music included.':'No music selected.'));
  }catch(err){if(recorder&&recorder.state!=='inactive')try{recorder.stop();}catch(_){}say(status,err.message||'Video export failed.',true);}
- finally{cancelAnimationFrame(raf);if(audioContext)try{await audioContext.close();}catch(_){}if(audioStream)audioStream.getTracks().forEach(t=>t.stop());setBusy(button,false,'Export 1080p video ↓');}
+ finally{cancelAnimationFrame(raf);if(audioSource)try{audioSource.stop();}catch(_){}if(audioContext)try{await audioContext.close();}catch(_){}if(audioStream)audioStream.getTracks().forEach(t=>t.stop());setBusy(button,false,'Export 1080p video ↓');}
 }
 
 function renderEndingCreditsPreview(){
