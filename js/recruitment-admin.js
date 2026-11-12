@@ -117,7 +117,7 @@ function renderAssignments(){
  $$("[data-delete-assignment]").forEach(b=>b.addEventListener("click",()=>deleteRow("recruitment_assignments",b.dataset.deleteAssignment,"Delete this assignment plan?")));
 }
 function renderOrgChart(){
- const roots=team.filter(m=>!m.reports_to_member_id);
+ const owner=team.find(m=>m.title==="Founder & Owner"&&m.full_name==="Jonathan Riehle");\n const roots=team.filter(m=>m.id!==owner?.id&&(!m.reports_to_member_id||m.reports_to_member_id===owner?.id));
  function node(m,depth=0,seen=new Set()){
   if(seen.has(m.id))return "";const next=new Set(seen);next.add(m.id);
   const children=team.filter(x=>x.reports_to_member_id===m.id);
