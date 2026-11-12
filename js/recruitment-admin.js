@@ -125,9 +125,9 @@ function renderPositions(){
 function renderTeam(){
  $("#teamCount").textContent=team.length;
  $("#teamList").innerHTML=team.map(m=>'<article class="list-card team-member-card"><div class="list-card-head"><strong>'+esc(m.full_name)+'</strong><span class="pill">'+esc(m.status)+'</span></div><small>'+esc(m.title)+' · '+esc(m.division||m.department||"Company-wide")+'</small><p>'+esc(m.bio||"No bio added.")+'</p><div class="team-record-meta"><span>'+esc(m.department||"No department")+'</span><span>Order: '+esc(m.sort_order??0)+'</span><span>'+(m.is_public?"Public profile approved":"Private profile")+'</span></div><div class="inline-actions"><button class="btn btn-outline btn-small" type="button" data-edit-team="'+esc(m.id)+'">Edit profile</button><label class="compact-label">Status<select data-team-status="'+esc(m.id)+'"><option value="planned">Planned</option><option value="active">Active</option><option value="paused">Paused</option><option value="former">Former</option></select></label><label class="check-label"><input type="checkbox" data-team-public="'+esc(m.id)+'" '+(m.is_public?"checked":"")+'> Public profile</label></div></article>').join("")||'<div class="empty">No team profiles yet. Create initial leadership profiles to begin the chart.</div>';
- $("[data-edit-team]").forEach(b=>b.addEventListener("click",()=>startTeamEdit(b.dataset.editTeam)));
- $("[data-team-status]").forEach(s=>{const m=team.find(x=>x.id===s.dataset.teamStatus);s.value=m?.status||"planned";s.addEventListener("change",()=>updateRow("recruitment_team_members",s.dataset.teamStatus,{status:s.value,updated_at:new Date().toISOString()},"Team status updated."))});
- $("[data-team-public]").forEach(c=>c.addEventListener("change",()=>updateRow("recruitment_team_members",c.dataset.teamPublic,{is_public:c.checked,updated_at:new Date().toISOString()},"Profile visibility updated.")));
+ $$("[data-edit-team]").forEach(b=>b.addEventListener("click",()=>startTeamEdit(b.dataset.editTeam)));
+ $$("[data-team-status]").forEach(s=>{const m=team.find(x=>x.id===s.dataset.teamStatus);s.value=m?.status||"planned";s.addEventListener("change",()=>updateRow("recruitment_team_members",s.dataset.teamStatus,{status:s.value,updated_at:new Date().toISOString()},"Team status updated."))});
+ $$("[data-team-public]").forEach(c=>c.addEventListener("change",()=>updateRow("recruitment_team_members",c.dataset.teamPublic,{is_public:c.checked,updated_at:new Date().toISOString()},"Profile visibility updated.")));
 }
 function startTeamEdit(id){
  const m=team.find(x=>x.id===id);if(!m)return;
