@@ -650,11 +650,12 @@ I'm Jonathan Riehle. This is Tacoma Nights. Good night, everybody. And we'll see
    <p class="full small" id="endingAudioMatchStatus" role="status" aria-live="polite">Optional: enable this to set the credits duration from the selected music track automatically.</p>
   </div>
   <p class="ending-help">Permanent fields are reused each week. Replace only the episode-specific fields before exporting. Background images and music upload to the private Tacoma Nights media vault; the playback page uses temporary signed links. This editor does not render a final MP4.</p>
-  <div class="actions"><button class="btn" id="saveEndingCreditsBtn" type="submit">Save ending credits ↗</button><button class="btn ghost" id="reloadEndingCreditsBtn" type="button">Reload saved settings</button><button class="btn ghost" id="previewEndingCreditsBtn" type="button">Refresh preview</button><button class="btn ghost" id="copyEndingCreditsBtn" type="button">Copy credits text</button><button class="btn danger" id="resetEndingCreditsBtn" type="button">Reset defaults</button></div>
+  <div class="actions"><button class="btn" id="saveEndingCreditsBtn" type="submit">Save ending credits ↗</button><button class="btn ghost" id="reloadEndingCreditsBtn" type="button">Reload saved settings</button><button class="btn ghost" id="previewEndingCreditsBtn" type="button">Refresh preview</button><button class="btn ghost" id="copyEndingCreditsBtn" type="button">Copy credits text</button><button class="btn ghost" id="downloadEndingCreditsTxtBtn" type="button">Download credits (.TXT) ↓</button><button class="btn" id="exportEndingCreditsVideoBtn" type="button">Export 1080p video ↓</button><button class="btn danger" id="resetEndingCreditsBtn" type="button">Reset defaults</button></div>
  </form>
  <p id="endingCreditsStatus" class="notice" role="status" aria-live="polite">Ending credits settings will load after administrator sign-in.</p>
+ <p id="endingCreditsExportStatus" class="notice" role="status" aria-live="polite">TXT exports the current editable credits. Video exports render at 1920×1080; MP4 is used when supported by this browser, otherwise WebM is provided.</p>
  <div class="actions" style="margin-top:18px"><a class="btn" href="ending-credits.html" target="_blank" rel="noopener noreferrer">Open ending credits playback ↗</a><span class="small">Sign in again if prompted. Use this 16:9 playback page for preview or OBS capture.</span></div>
- <div class="panelhead" style="margin-top:22px;margin-bottom:12px"><div><p class="micro">LIVE TEXT PREVIEW · EDITABLE CONTENT</p><h3>Until next Friday</h3><p>Preview of the credit wording and sequence. Video editing and final MP4 rendering happen in your video editor.</p></div></div>
+ <div class="panelhead" style="margin-top:22px;margin-bottom:12px"><div><p class="micro">LIVE TEXT PREVIEW · EDITABLE CONTENT</p><h3>Until next Friday</h3><p>Preview of the credit wording and sequence. Download reusable TXT credits or export a 1920×1080 scrolling-credits video here. MP4 is used when supported; WebM is the browser fallback.</p></div></div>
  <div class="ending-preview" id="endingCreditsPreview"><div><strong>TACOMA NIGHTS</strong><p>THE CONVERSATION DOESN'T END HERE.</p><p>UNTIL NEXT FRIDAY.</p><p>CROWRULES ENTERTAINMENT · ONE COMPANY. ONE UNIVERSE.</p></div></div>
 </section>
 
@@ -1191,6 +1192,70 @@ function moveHighlightAsset(from,to){if(from<0||to<0||from>=endingHighlightAsset
 function renderHighlightAssetList(){const host=$('endingHighlightAssets');if(!host)return;host.replaceChildren();let dragIndex=-1;endingHighlightAssets.forEach((asset,index)=>{const row=document.createElement('div');row.className='highlight-asset-row';row.draggable=true;row.dataset.index=String(index);const handle=document.createElement('div');handle.className='highlight-drag-handle';handle.textContent='⠿';handle.title='Drag to reorder';handle.setAttribute('role','img');handle.setAttribute('aria-label','Drag clip to change its order');const info=document.createElement('div'),title=document.createElement('strong');title.textContent=asset.name||'Highlight clip';const meta=document.createElement('div');meta.className='highlight-asset-meta';meta.textContent='CLIP '+(index+1)+' · '+(asset.mime_type||'video')+' · '+(asset.size?((asset.size/1024/1024).toFixed(1)+' MB'):'private upload');info.append(title,meta);if(asset.preview_url){const player=document.createElement('video');player.className='highlight-video-preview';player.controls=true;player.playsInline=true;player.preload='metadata';player.setAttribute('aria-label','Preview '+(asset.name||'uploaded highlight clip'));player.src=asset.preview_url;player.addEventListener('error',()=>{const note=document.createElement('p');note.className='small';note.textContent='This browser could not decode this video format. MP4 (H.264 video + AAC audio) is recommended.';if(!info.querySelector('.highlight-preview-error')){note.classList.add('highlight-preview-error');info.append(note);}});info.append(player);}else{const note=document.createElement('p');note.className='small';note.textContent='Preparing secure video preview…';info.append(note);}const caption=document.createElement('input');caption.type='text';caption.maxLength=180;caption.placeholder='Caption shown with this clip';caption.value=asset.caption||asset.name||'';caption.addEventListener('input',()=>{endingHighlightAssets[index].caption=caption.value;});info.append(caption);const actions=document.createElement('div');actions.className='highlight-asset-actions';const up=document.createElement('button');up.type='button';up.className='btn';up.textContent='↑';up.title='Move clip up';up.setAttribute('aria-label','Move '+(asset.name||'clip')+' up');up.disabled=index===0;up.addEventListener('click',()=>moveHighlightAsset(index,index-1));const down=document.createElement('button');down.type='button';down.className='btn';down.textContent='↓';down.title='Move clip down';down.setAttribute('aria-label','Move '+(asset.name||'clip')+' down');down.disabled=index===endingHighlightAssets.length-1;down.addEventListener('click',()=>moveHighlightAsset(index,index+1));const remove=document.createElement('button');remove.type='button';remove.className='btn danger';remove.textContent='Remove';remove.addEventListener('click',()=>{if(asset.storage_path)endingCreditsOldMediaToDelete.add(asset.storage_path);endingHighlightAssets.splice(index,1);renderHighlightAssetList();});actions.append(up,down,remove);row.append(handle,info,actions);row.addEventListener('dragstart',event=>{dragIndex=index;row.classList.add('dragging');event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',String(index));});row.addEventListener('dragover',event=>{event.preventDefault();event.dataTransfer.dropEffect='move';row.classList.add('drag-over');});row.addEventListener('dragleave',()=>row.classList.remove('drag-over'));row.addEventListener('drop',event=>{event.preventDefault();row.classList.remove('drag-over');const from=dragIndex>=0?dragIndex:Number(event.dataTransfer.getData('text/plain'));const to=Number(row.dataset.index);dragIndex=-1;moveHighlightAsset(from,to);});row.addEventListener('dragend',()=>{dragIndex=-1;row.classList.remove('dragging');host.querySelectorAll('.drag-over').forEach(el=>el.classList.remove('drag-over'));});host.append(row);});if(!endingHighlightAssets.length)host.textContent='No uploaded highlight clips attached yet.';}
 function endingCreditsValues(){const f=endingCreditsForm(),out={};for(const [k,v] of Object.entries(ENDING_CREDITS_DEFAULTS)){const el=f.elements[k];out[k]=el?(el.type==='checkbox'?el.checked:(el.type==='number'?String(el.value||v):el.value.trim())):v;}syncStaffCredits();out.staff_credits=f.elements.staff_credits.value;out.highlight_assets=endingHighlightAssets.map(({preview_url,...item})=>({...item}));return out;}
 function applyEndingCreditsValues(values){const f=endingCreditsForm(),v={...ENDING_CREDITS_DEFAULTS,...(values||{})};for(const k of Object.keys(ENDING_CREDITS_DEFAULTS)){if(k==='highlight_assets')continue;if(f.elements[k]){if(f.elements[k].type==='checkbox')f.elements[k].checked=!!v[k];else f.elements[k].value=v[k]??ENDING_CREDITS_DEFAULTS[k];}}renderStaffCreditRows(v.staff_credits);endingHighlightAssets=Array.isArray(v.highlight_assets)?v.highlight_assets.map(item=>({...item})):[];renderHighlightAssetList();renderEndingCreditsPreview();}
+
+function downloadEndingCreditsText(){
+ const v=endingCreditsValues(),content=renderEndingCreditsPreview();
+ const blob=new Blob(['TACOMA NIGHTS — ENDING CREDITS\n'+(v.episode_number||'')+'\n'+(v.episode_title||'')+'\n\n'+content+'\n\nCROWRULES ENTERTAINMENT · ONE COMPANY. ONE UNIVERSE.'],{type:'text/plain;charset=utf-8'});
+ const url=URL.createObjectURL(blob),a=document.createElement('a'),base=[v.episode_number,v.episode_title].filter(Boolean).join('-')||'master';
+ a.href=url;a.download='tacoma-nights-'+base.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'-ending-credits.txt';
+ document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+ say($('endingCreditsExportStatus'),'TXT download prepared from the current editor values. Save the master if you want these edits to become the reusable default.');
+}
+function endingCreditsWrapLines(ctx,text,maxWidth){
+ const out=[];String(text||'').split(/\r?\n/).forEach(line=>{if(!line){out.push('');return;}let current='';line.split(/\s+/).forEach(word=>{const next=current?current+' '+word:word;if(current&&ctx.measureText(next).width>maxWidth){out.push(current);current=word;}else current=next;});out.push(current);});return out;
+}
+async function exportEndingCreditsVideo(){
+ const button=$('exportEndingCreditsVideoBtn'),status=$('endingCreditsExportStatus');
+ if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream){say(status,'Video export is not supported in this browser. Try the latest desktop Chrome or Edge.',true);return;}
+ const v=endingCreditsValues(),duration=Math.max(1,Math.min(3600,Number(v.scroll_duration_seconds)||28));
+ const canvas=document.createElement('canvas');canvas.width=1920;canvas.height=1080;
+ const ctx=canvas.getContext('2d');if(!ctx){say(status,'Could not initialize the 1080p renderer.',true);return;}
+ setBusy(button,true,'Preparing 1080p render…');
+ let recorder=null,raf=0,audioContext=null,audioStream=null;
+ try{
+  const bg=$('endingBackgroundPreview'),background=new Image();
+  if(bg?.src&&!bg.hidden){background.crossOrigin='anonymous';background.src=bg.src;await new Promise((resolve,reject)=>{if(background.complete&&background.naturalWidth)return resolve();background.onload=resolve;background.onerror=()=>reject(new Error('Background image could not be loaded for export. Refresh its signed link or remove the background and retry.'));});}
+  const music=$('endingMusicPreview'),hasMusic=!!(music?.currentSrc||music?.src);
+  if(hasMusic&&music.readyState<2)await new Promise((resolve,reject)=>{const ok=()=>{clean();resolve();},bad=()=>{clean();reject(new Error('Music could not be loaded. Check its signed link or export without music.'));},clean=()=>{music.removeEventListener('canplay',ok);music.removeEventListener('error',bad);};music.addEventListener('canplay',ok,{once:true});music.addEventListener('error',bad,{once:true});music.load();});
+  const stream=canvas.captureStream(30),tracks=[...stream.getVideoTracks()];
+  if(hasMusic){
+   if(music.captureStream||music.mozCaptureStream){audioStream=(music.captureStream||music.mozCaptureStream).call(music);tracks.push(...audioStream.getAudioTracks());}
+   else{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)throw new Error('This browser cannot capture music audio.');audioContext=new AC();const source=audioContext.createMediaElementSource(music),dest=audioContext.createMediaStreamDestination();source.connect(dest);source.connect(audioContext.destination);tracks.push(...dest.stream.getAudioTracks());}
+  }
+  const types=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
+  const mimeType=types.find(t=>MediaRecorder.isTypeSupported(t));if(!mimeType)throw new Error('No supported MP4 or WebM recording format was detected.');
+  const isMp4=mimeType.startsWith('video/mp4'),chunks=[];
+  recorder=new MediaRecorder(new MediaStream(tracks),{mimeType,videoBitsPerSecond:8000000,audioBitsPerSecond:192000});
+  recorder.ondataavailable=e=>{if(e.data?.size)chunks.push(e.data);};
+  const stopped=new Promise((resolve,reject)=>{recorder.onstop=resolve;recorder.onerror=e=>reject(e.error||new Error('Video recording failed.'));});
+  const content=[v.episode_number,v.episode_title,v.scroll_title||'TACOMA NIGHTS',v.scroll_text||''].filter(Boolean).join('\n\n');
+  const font=v.scroll_font_size==='small'?34:v.scroll_font_size==='large'?54:44;
+  ctx.font='600 '+font+'px Arial,sans-serif';const lines=endingCreditsWrapLines(ctx,content,1500),lineHeight=Math.round(font*1.7),totalHeight=lines.length*lineHeight;
+  const titleSize=v.scroll_title_size==='small'?48:v.scroll_title_size==='large'?82:64,start=performance.now();
+  const draw=now=>{
+   const elapsed=Math.min(duration,(now-start)/1000),p=elapsed/duration;
+   const grad=ctx.createLinearGradient(0,0,0,1080);grad.addColorStop(0,'#172638');grad.addColorStop(.52,'#080d14');grad.addColorStop(1,'#030609');ctx.fillStyle=grad;ctx.fillRect(0,0,1920,1080);
+   if(background.naturalWidth){ctx.save();ctx.globalAlpha=.72;const scale=Math.max(1920/background.width,1080/background.height),w=background.width*scale,h=background.height*scale;ctx.drawImage(background,(1920-w)/2,(1080-h)/2,w,h);ctx.restore();ctx.fillStyle='rgba(3,7,12,.48)';ctx.fillRect(0,0,1920,1080);}
+   const travel=1080+totalHeight+180,y0=v.scroll_direction==='down'?-totalHeight-90+p*travel:1080+90-p*travel;
+   ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='#000';ctx.shadowBlur=16;
+   lines.forEach((line,i)=>{const y=y0+i*lineHeight;if(y>-90&&y<1170){const heading=i===0||line.toUpperCase()==='TACOMA NIGHTS';ctx.font=(heading?'800 '+titleSize:'600 '+font)+'px Arial,sans-serif';ctx.fillStyle=heading?'#f0c477':'#f3f0e9';ctx.fillText(line,960,y,1600);}});
+   ctx.shadowBlur=0;ctx.fillStyle='#f0c477';ctx.font='700 24px Arial,sans-serif';ctx.fillText('CROWRULES ENTERTAINMENT',960,1035);
+   say(status,'Rendering 1080p video… '+Math.round(p*100)+'% · '+(isMp4?'MP4':'WebM fallback')+(hasMusic?' · music included':' · silent'));
+   if(elapsed<duration)raf=requestAnimationFrame(draw);else if(recorder.state==='recording')recorder.stop();
+  };
+  recorder.start(1000);
+  if(hasMusic){music.pause();music.currentTime=0;await music.play();}
+  raf=requestAnimationFrame(draw);await stopped;
+  if(hasMusic)music.pause();
+  const blob=new Blob(chunks,{type:mimeType});if(!blob.size)throw new Error('The recorder produced an empty file. Try again in a supported desktop browser.');
+  const url=URL.createObjectURL(blob),a=document.createElement('a'),base=[v.episode_number,v.episode_title].filter(Boolean).join('-')||'master';
+  a.href=url;a.download='tacoma-nights-'+base.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'-ending-credits-1080p.'+(isMp4?'mp4':'webm');
+  document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+  say(status,'1080p export complete · '+(isMp4?'MP4':'WebM fallback')+' · '+Math.round(blob.size/1048576)+' MB. '+(hasMusic?'Music included.':'No music selected.'));
+ }catch(err){if(recorder&&recorder.state!=='inactive')try{recorder.stop();}catch(_){}say(status,err.message||'Video export failed.',true);}
+ finally{cancelAnimationFrame(raf);if(audioContext)try{await audioContext.close();}catch(_){}if(audioStream)audioStream.getTracks().forEach(t=>t.stop());setBusy(button,false,'Export 1080p video ↓');}
+}
+
 function renderEndingCreditsPreview(){
  const v=endingCreditsValues(),lines=[];
  if(v.episode_number)lines.push(v.episode_number);
@@ -1315,6 +1380,8 @@ $('endingCreditsForm').addEventListener('submit',async e=>{
 $('reloadEndingCreditsBtn').addEventListener('click',async()=>{const b=$('reloadEndingCreditsBtn');setBusy(b,true,'Reload saved settings');try{await loadEndingCredits();}catch(e){say($('endingCreditsStatus'),e.message||'Could not reload settings.',true);}finally{setBusy(b,false,'Reload saved settings');}});
 $('previewEndingCreditsBtn').addEventListener('click',()=>{renderEndingCreditsPreview();say($('endingCreditsStatus'),'Preview refreshed from the current editable fields.');});
 $('copyEndingCreditsBtn').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(renderEndingCreditsPreview());say($('endingCreditsStatus'),'Credits text copied to clipboard.');}catch(e){say($('endingCreditsStatus'),'Clipboard access was unavailable. Select and copy the preview text instead.',true);}});
+$('downloadEndingCreditsTxtBtn').addEventListener('click',downloadEndingCreditsText);
+$('exportEndingCreditsVideoBtn').addEventListener('click',exportEndingCreditsVideo);
 $('resetEndingCreditsBtn').addEventListener('click',()=>{if(!confirm('Reset the editor to the original Tacoma Nights master defaults? Save afterward to replace the saved settings. Uploaded files already in storage will not be deleted.'))return;applyEndingCreditsValues(ENDING_CREDITS_DEFAULTS);$('endingBackgroundPreview').hidden=true;$('endingBackgroundPreview').removeAttribute('src');$('endingMusicPreview').removeAttribute('src');$('endingBackgroundFile').value='';$('endingMusicFile').value='';say($('endingCreditsStatus'),'Default values restored in the editor. Save to make this reset permanent.');});
 
 async function loadAll(){say($('globalStatus'),'Loading secure dashboard data…');try{await Promise.all([loadPremiere(),loadFeaturedVideoControl(),loadEndingCredits(),loadCrew(),loadSubmissions(),loadHostApplications(),loadAssets(),loadClipUploads(),loadProductionEpisodes()]);say($('globalStatus'),'Control room connected · premiere, production, crew, community inbox, remote host applications and media library loaded.');}catch(e){console.error(e);say($('globalStatus'),'Some data could not load. Confirm the admin role and Supabase policies, then refresh. '+(e.message||''),true);}}
