@@ -138,8 +138,8 @@ async function handleLogin(e){
   currentUser=userData.user;
   // The admin-only RLS policies are the actual gate. A successful signed-in session
   // alone is not enough to read or modify any recruitment records.
-  const {error:accessError}=await client().from("recruitment_positions").select("id").limit(1);
-  if(accessError)throw Error("Your account cannot access the recruitment admin records. Ask a CrowRules owner to verify your administrator role.");
+  const {data:isAdmin,error:accessError}=await client().rpc("recruitment_admin_access_check");
+  if(accessError||isAdmin!==true)throw Error("This account is signed in but is not authorized for CrowRules recruitment administration.");
   $("#loginView").classList.add("hidden");$("#adminView").classList.remove("hidden");$("#logoutButton").classList.remove("hidden");
   $("#signedInLabel").textContent="Signed in as "+(currentUser.email||"verified administrator");
   await loadAll();
@@ -184,8 +184,8 @@ async function init(){
    const {data:userData,error:userError}=await client().auth.getUser();
    if(!userError&&userData.user){
     currentUser=userData.user;
-    const {error:accessError}=await client().from("recruitment_positions").select("id").limit(1);
-    if(!accessError){$("#loginView").classList.add("hidden");$("#adminView").classList.remove("hidden");$("#logoutButton").classList.remove("hidden");$("#signedInLabel").textContent="Signed in as "+(currentUser.email||"verified administrator");await loadAll();}
+    const {data:isAdmin,error:accessError}=await client().rpc("recruitment_admin_access_check");
+    if(!accessError&&isAdmin===true){$("#loginView").classList.add("hidden");$("#adminView").classList.remove("hidden");$("#logoutButton").classList.remove("hidden");$("#signedInLabel").textContent="Signed in as "+(currentUser.email||"verified administrator");await loadAll();}
     else await client().auth.signOut();
    }
   }
