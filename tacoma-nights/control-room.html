@@ -935,7 +935,7 @@ function initVisitorCounter(){
   .on('presence',{event:'leave'},updateCount)
   .subscribe(async status=>{
    if(status==='SUBSCRIBED'){
-    try{const presencePayload={visitorId,pagePath:location.pathname,pageTitle:document.title,page:'control-room',onlineAt:new Date().toISOString()};window.__tnVisitorPresencePayload=presencePayload;const result=await visitorChannel.track(presencePayload);if(result?.status==='error')throw new Error('Presence tracking was rejected');updateCount();}
+    try{const presencePayload={visitorId,pagePath:location.pathname,pageTitle:document.title,page:'control-room',timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone||'unknown',onlineAt:new Date().toISOString()};window.__tnVisitorPresencePayload=presencePayload;const result=await visitorChannel.track(presencePayload);if(result?.status==='error')throw new Error('Presence tracking was rejected');updateCount();}
     catch(err){console.warn('Control-room visitor presence could not be tracked:',err);setState(null,'Live count unavailable · check Supabase Realtime',false);}
    }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
     setState(null,'Live count unavailable · reconnect or check Realtime',false);
