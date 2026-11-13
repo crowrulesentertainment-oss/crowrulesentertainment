@@ -14,12 +14,12 @@
  const payload=()=>({visitorId,pagePath:location.pathname,pageTitle:document.title,page:"tacoma-nights",timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone||"unknown",onlineAt:new Date().toISOString(),...(locationData?{approxLocation:locationData,locationShared:true}:{})});
  async function track(){if(channel)await channel.track(payload());}
  button.addEventListener("click",()=>{
-  if(locationData){locationData=null;button.textContent="Share approximate location";track().catch(()=>{});return;}
+  if(locationData){locationData=null;try{localStorage.removeItem("tn-share-approx-location-v1");}catch(_){}button.textContent="Share approximate location";track().catch(()=>{});return;}
   if(!navigator.geolocation){button.textContent="Location unavailable";return;}
   button.disabled=true;button.textContent="Requesting permission…";
   navigator.geolocation.getCurrentPosition(async p=>{
    locationData={latitude:Math.round(p.coords.latitude*10)/10,longitude:Math.round(p.coords.longitude*10)/10,accuracyKm:Math.max(5,Math.round((p.coords.accuracy||5000)/1000)),sharedAt:new Date().toISOString()};
-   try{await track();button.textContent="Location shared · click to stop";}catch(e){locationData=null;button.textContent="Share approximate location";}
+   try{try{localStorage.setItem("tn-share-approx-location-v1","yes");}catch(_){}await track();button.textContent="Location shared · click to stop";}catch(e){locationData=null;button.textContent="Share approximate location";}
    button.disabled=false;
   },e=>{button.disabled=false;button.textContent=e.code===1?"Location not shared":"Share approximate location";},{enableHighAccuracy:false,timeout:12000,maximumAge:300000});
  });
