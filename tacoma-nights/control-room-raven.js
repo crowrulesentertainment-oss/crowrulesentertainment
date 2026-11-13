@@ -13,9 +13,9 @@
   const dash=$("dashboard");if(!dash||dash.dataset.ravenRebuild==="ready")return;
   const oldMain=dash.querySelector(":scope > .tn-main");
   const original=oldMain?[...oldMain.children]:[...dash.children];
-  const sections=original.filter(n=>n.matches&&n.matches(".panel[id]"));
-  const extra=original.filter(n=>n!==oldMain&&n.matches&&n.matches(".panel[id]"));
-  const all=[...new Set([...sections,...extra])];
+  const contentNodes=original.filter(n=>!(n.classList&&n.classList.contains("tn-command-hero"))&&!(n.matches&&n.matches(".tn-topnav")));
+  const all=[...contentNodes];
+  const sections=all.filter(n=>n.matches&&n.matches(".panel[id]"));
   const nav=document.createElement("aside");nav.className="tn-raven-sidebar";nav.setAttribute("aria-label","Tacoma Nights operations navigation");
   nav.innerHTML='<div class="tn-raven-brand"><span class="tn-raven-mark" aria-hidden="true">R</span><span><strong>RAVEN OPERATIONS</strong><small>TACOMA NIGHTS · CONTROL ROOM</small></span></div><nav class="tn-raven-nav" aria-label="Production workspaces">'+groups.map((g,gi)=>'<section class="tn-raven-group"><h3>'+g.name+'</h3>'+g.items.map((it,ii)=>'<a href="#'+it[0]+'" data-target="'+it[0]+'"><span class="tn-nav-icon" aria-hidden="true">'+it[2]+'</span><span class="tn-nav-name">'+it[1]+'</span><span class="tn-nav-no">'+String(gi*3+ii+1).padStart(2,"0")+'</span></a>').join("")+'</section>').join("")+'</nav><div class="tn-raven-sidefoot"><b>PRIVATE PRODUCTION NETWORK</b><br>253 · TACOMA, WASHINGTON<br>ONE COMPANY. ONE UNIVERSE.</div>';
   const main=document.createElement("main");main.className="tn-raven-main";
