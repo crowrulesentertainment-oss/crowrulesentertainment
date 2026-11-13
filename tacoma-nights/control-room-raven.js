@@ -81,7 +81,7 @@
   function render(state){
    lastState=state;const ch=window.__tnVisitorChannel;if(!ch)return;
    const visitors=new Map(),presence=ch.presenceState();
-   Object.values(presence).forEach(arr=>(Array.isArray(arr)?arr:[]).forEach(meta=>{if(meta?.visitorId)visitors.set(meta.visitorId,meta);}));
+   Object.values(presence).forEach(arr=>(Array.isArray(arr)?arr:[]).forEach(meta=>{if(!meta?.visitorId)return;const prior=visitors.get(meta.visitorId);if(!prior||(!prior.approxLocation&&meta.approxLocation))visitors.set(meta.visitorId,meta);}));
    const located=[...visitors.values()].filter(v=>v.approxLocation&&Number.isFinite(v.approxLocation.latitude)&&Number.isFinite(v.approxLocation.longitude));
    $("tnMapLocated").textContent=String(located.length);$("tnMapPrivate").textContent=String(Math.max(0,visitors.size-located.length));$("tnMapRegions").textContent=String(new Set(located.map(v=>v.approxLocation.latitude.toFixed(1)+","+v.approxLocation.longitude.toFixed(1))).size);
    if(!window.L){$("tnMapStatus").textContent=visitors.size?located.length+" of "+visitors.size+" active visitors have shared an approximate location.":"Waiting for live visitor presence.";if(located.length)loadLeaflet();return;}
