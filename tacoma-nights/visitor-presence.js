@@ -11,7 +11,7 @@
  button.setAttribute("aria-label","Choose whether to share your approximate location with the Tacoma Nights live visitor map");
  button.style.cssText="position:fixed;z-index:99990;left:14px;bottom:14px;padding:9px 12px;border:1px solid #d7ad70aa;border-radius:3px;background:#0b111bf0;color:#f0d7ac;font:700 11px Arial,sans-serif;letter-spacing:.04em;box-shadow:0 6px 24px #0008;cursor:pointer";
  document.body.appendChild(button);
- const payload=()=>({visitorId,pagePath:location.pathname,pageTitle:document.title,page:"tacoma-nights",onlineAt:new Date().toISOString(),...(locationData?{approxLocation:locationData,locationShared:true}:{})});
+ const payload=()=>({visitorId,pagePath:location.pathname,pageTitle:document.title,page:"tacoma-nights",timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone||"unknown",onlineAt:new Date().toISOString(),...(locationData?{approxLocation:locationData,locationShared:true}:{})});
  async function track(){if(channel)await channel.track(payload());}
  button.addEventListener("click",()=>{
   if(locationData){locationData=null;button.textContent="Share approximate location";track().catch(()=>{});return;}
