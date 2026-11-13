@@ -352,7 +352,7 @@ body:before{opacity:.3;background:radial-gradient(ellipse at 50% 0%,#52677e22,tr
 
 
 /* Tacoma Nights visitor analytics center */
-.tn-analytics-stats{grid-template-columns:repeat(4,minmax(0,1fr));margin:14px 0 20px}.tn-analytics-list{display:grid;gap:8px;margin-top:12px}.tn-analytics-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;background:#080e15;border:1px solid #ffffff18}.tn-analytics-row strong{display:block;font-size:.83rem;overflow-wrap:anywhere}.tn-analytics-row small{display:block;color:var(--muted);font-size:.68rem}.tn-analytics-row b{font:800 1.45rem "Barlow Condensed";color:#f0c477}.tn-analytics-table{width:100%;font-size:.74rem;margin-top:12px}.tn-analytics-table th,.tn-analytics-table td{padding:9px 10px;border-bottom:1px solid #ffffff18;text-align:left;vertical-align:top}.tn-analytics-table th{color:#f0c477;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase}.tn-analytics-table td{color:#d8dee8;overflow-wrap:anywhere}.tn-analytics-table td small{color:var(--muted)}@media(max-width:800px){.tn-analytics-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){.tn-analytics-stats{grid-template-columns:1fr 1fr}.tn-analytics-table{min-width:620px}}
+.tn-analytics-stats{grid-template-columns:repeat(3,minmax(0,1fr));margin:14px 0 20px}.tn-analytics-list{display:grid;gap:8px;margin-top:12px}.tn-analytics-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;background:#080e15;border:1px solid #ffffff18}.tn-analytics-row strong{display:block;font-size:.83rem;overflow-wrap:anywhere}.tn-analytics-row small{display:block;color:var(--muted);font-size:.68rem}.tn-analytics-row b{font:800 1.45rem "Barlow Condensed";color:#f0c477}.tn-analytics-table{width:100%;font-size:.74rem;margin-top:12px}.tn-analytics-table th,.tn-analytics-table td{padding:9px 10px;border-bottom:1px solid #ffffff18;text-align:left;vertical-align:top}.tn-analytics-table th{color:#f0c477;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase}.tn-analytics-table td{color:#d8dee8;overflow-wrap:anywhere}.tn-analytics-table td small{color:var(--muted)}@media(max-width:800px){.tn-analytics-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){.tn-analytics-stats{grid-template-columns:1fr 1fr}.tn-analytics-table{min-width:620px}}
 </style><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
 
 <style>
@@ -393,7 +393,9 @@ body:before{opacity:.3;background:radial-gradient(ellipse at 50% 0%,#52677e22,tr
  <div class="panelhead"><div><p class="micro">00 / AUDIENCE INTELLIGENCE</p><h2>Visitor analytics center</h2><p>Live page-by-page visitor presence and permanent anonymous page-view records for Tacoma Nights.</p></div><button class="btn ghost" id="visitorAnalyticsRefresh" type="button">↻ Refresh records</button></div>
  <div class="stats tn-analytics-stats">
   <div class="stat"><strong id="tnAnalyticsTotalViews">—</strong><span>All-time page views</span></div>
-  <div class="stat"><strong id="tnAnalyticsViews24">—</strong><span>Page views · last 24 hours</span></div>
+  <div class="stat"><strong id="tnAnalyticsViews24">—</strong><span>Last 24 hours</span></div>
+  <div class="stat"><strong id="tnAnalyticsViews7">—</strong><span>Last 7 days</span></div>
+  <div class="stat"><strong id="tnAnalyticsViews30">—</strong><span>Last 30 days</span></div>
   <div class="stat"><strong id="tnAnalyticsUnique">—</strong><span>Unique visitors · per-page total</span></div>
   <div class="stat"><strong id="tnAnalyticsPages">—</strong><span>Pages recorded</span></div>
  </div>
@@ -825,15 +827,19 @@ async function loadVisitorAnalytics(){
  if(!db){say(status,'Analytics database client is unavailable.',true);return;}
  if(refresh){refresh.disabled=true;refresh.textContent='Loading…';}
  try{
-  const [summary,recent,last24]=await Promise.all([
+  const [summary,recent,last24,last7,last30]=await Promise.all([
    db.from('tacoma_nights_page_analytics').select('page_path,page_views,unique_visitors,last_viewed_at').order('page_views',{ascending:false}),
    db.from('tacoma_nights_page_views').select('id,page_path,page_title,session_hash,referrer_host,created_at').order('created_at',{ascending:false}).limit(30),
-   db.from('tacoma_nights_page_views').select('id',{count:'exact',head:true}).gte('created_at',new Date(Date.now()-86400000).toISOString())
+   db.from('tacoma_nights_page_views').select('id',{count:'exact',head:true}).gte('created_at',new Date(Date.now()-86400000).toISOString()),
+   db.from('tacoma_nights_page_views').select('id',{count:'exact',head:true}).gte('created_at',new Date(Date.now()-7*86400000).toISOString()),
+   db.from('tacoma_nights_page_views').select('id',{count:'exact',head:true}).gte('created_at',new Date(Date.now()-30*86400000).toISOString())
   ]);
-  if(summary.error)throw summary.error;if(recent.error)throw recent.error;if(last24.error)throw last24.error;
+  if(summary.error)throw summary.error;if(recent.error)throw recent.error;if(last24.error)throw last24.error;if(last7.error)throw last7.error;if(last30.error)throw last30.error;
   const pages=summary.data||[],records=recent.data||[];
   $('tnAnalyticsTotalViews').textContent=pages.reduce((n,p)=>n+Number(p.page_views||0),0).toLocaleString();
   $('tnAnalyticsViews24').textContent=Number(last24.count||0).toLocaleString();
+  $('tnAnalyticsViews7').textContent=Number(last7.count||0).toLocaleString();
+  $('tnAnalyticsViews30').textContent=Number(last30.count||0).toLocaleString();
   $('tnAnalyticsUnique').textContent=pages.reduce((n,p)=>n+Number(p.unique_visitors||0),0).toLocaleString();
   $('tnAnalyticsPages').textContent=pages.length.toLocaleString();
   $('tnTopPages').innerHTML=pages.length?pages.slice(0,12).map(p=>'<div class="tn-analytics-row"><div><strong>'+esc(p.page_path)+'</strong><small>'+Number(p.unique_visitors||0).toLocaleString()+' unique visitors · Last visit '+(p.last_viewed_at?new Date(p.last_viewed_at).toLocaleString('en-US',{timeZone:'America/Los_Angeles'}):'—')+'</small></div><b>'+Number(p.page_views||0).toLocaleString()+'</b></div>').join(''):'<p class="small">No page-view records yet. New visits will appear here.</p>';
