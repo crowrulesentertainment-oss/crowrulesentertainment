@@ -2308,26 +2308,66 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
         });
       }
 
-      // Keep homepage chat attached to the scheduled Tacoma Nights broadcast,
-      // not whichever archived episode is currently featured in the video player.
-      const TACOMA_NIGHTS_LIVE_CHAT_VIDEO_ID = "FsyCX-LTQT8";
+      // Resolve the chat target from the same published broadcast settings
+      // managed in the private control room. Never point chat at a stale archive ID.
+      let liveChatLoadPromise = null;
+      let liveChatVideoId = "";
 
-      function updateYouTubeLiveChat() {
+      async function updateYouTubeLiveChat() {
         const container = $("#youtubeLiveChat");
         if (!container) return;
-        const id = safeVideoId(TACOMA_NIGHTS_LIVE_CHAT_VIDEO_ID);
-        if (!id) {
-          container.innerHTML = '<div class="youtube-live-chat-empty"><div><strong>Join Tacoma Nights on YouTube</strong>Open the <a href="' + PLAYLIST_URL + '" target="_blank" rel="noopener noreferrer">Tacoma Nights playlist</a> to find the current broadcast.</div></div>';
-          return;
-        }
-        const iframe = document.createElement("iframe");
-        iframe.src = "https://www.youtube.com/live_chat?v=" + encodeURIComponent(id) +
-          "&embed_domain=crowrulesentertainment-oss.github.io&dark_theme=1";
-        iframe.title = "Tacoma Nights YouTube live chat";
-        iframe.loading = "lazy";
-        iframe.referrerPolicy = "strict-origin-when-cross-origin";
-        iframe.allow = "clipboard-write";
-        container.replaceChildren(iframe);
+        if (liveChatLoadPromise) return liveChatLoadPromise;
+
+        liveChatLoadPromise = (async () => {
+          container.innerHTML = '<div class="youtube-live-chat-empty"><div><strong>Connecting to Tacoma Nights…</strong>Checking the current broadcast settings.</div></div>';
+          try {
+            const endpoint = SUPABASE_URL + "/rest/v1/tacoma_nights_show_settings?select=show_title,youtube_video_id,status,is_published&setting_key=eq.premiere&limit=1";
+            const response = await fetch(endpoint, {
+              headers: {
+                "apikey": SUPABASE_PUBLISHABLE_KEY,
+                "Authorization": "Bearer " + SUPABASE_PUBLISHABLE_KEY
+              },
+              cache: "no-store"
+            });
+            if (!response.ok) throw new Error("Broadcast settings unavailable (" + response.status + ").");
+            const rows = await response.json();
+            const broadcast = Array.isArray(rows) ? rows[0] : null;
+            const id = safeVideoId(broadcast?.youtube_video_id);
+            const status = safeText(broadcast?.status, "playlist").toLowerCase();
+            const isPublished = broadcast?.is_published === true;
+
+            if (!id || !isPublished || !["scheduled", "live"].includes(status)) {
+              liveChatVideoId = "";
+              const message = !isPublished
+                ? "The Tacoma Nights broadcast has not been published yet."
+                : status === "ended"
+                  ? "This broadcast has ended. Live chat is available during scheduled and live broadcasts."
+                  : "The next Tacoma Nights broadcast has not been scheduled yet.";
+              container.innerHTML = '<div class="youtube-live-chat-empty"><div><strong>Live chat is between broadcasts</strong>' +
+                escapeText(message) +
+                ' <a href="' + PLAYLIST_URL + '" target="_blank" rel="noopener noreferrer">Browse Tacoma Nights on YouTube ↗</a></div></div>';
+              return;
+            }
+
+            liveChatVideoId = id;
+            const iframe = document.createElement("iframe");
+            iframe.src = "https://www.youtube.com/live_chat?v=" + encodeURIComponent(id) +
+              "&embed_domain=crowrulesentertainment-oss.github.io&dark_theme=1";
+            iframe.title = "Tacoma Nights YouTube live chat";
+            iframe.loading = "lazy";
+            iframe.referrerPolicy = "strict-origin-when-cross-origin";
+            iframe.allow = "clipboard-write";
+            container.replaceChildren(iframe);
+          } catch (error) {
+            console.warn("Tacoma Nights live chat could not load:", error);
+            container.innerHTML = '<div class="youtube-live-chat-empty"><div><strong>Open the Tacoma Nights conversation</strong>Live chat could not connect here. You can still join the conversation directly on <a href="' +
+              (liveChatVideoId ? "https://www.youtube.com/watch?v=" + encodeURIComponent(liveChatVideoId) : PLAYLIST_URL) +
+              '" target="_blank" rel="noopener noreferrer">YouTube ↗</a>.</div></div>';
+          } finally {
+            liveChatLoadPromise = null;
+          }
+        })();
+        return liveChatLoadPromise;
       }
 
       function setFeaturedFrame(videoId, title) {
