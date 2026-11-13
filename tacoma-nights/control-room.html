@@ -374,6 +374,18 @@ body:before{opacity:.3;background:radial-gradient(ellipse at 50% 0%,#52677e22,tr
 @media(prefers-reduced-motion:reduce){.ending-scroll-preview p{animation:none!important}}
 </style>
 <style>
+/* Compact Back Deck-style live status tiles for Tacoma Nights */
+.live-status-strip{border-bottom:1px solid #e8b45c3d;background:linear-gradient(90deg,#171d28,#090e15 72%);box-shadow:0 8px 24px #0005}
+.live-status-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding-top:13px;padding-bottom:13px}
+.live-status-tile{min-width:0;padding:13px 16px;background:linear-gradient(145deg,#151e2a,#0c121b);border:1px solid #ffffff1c;border-top:2px solid #e8b45c55;border-radius:10px}
+.live-status-label{display:flex;align-items:center;gap:8px;color:#aab2bd;font-size:.66rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.live-status-tile>strong{display:block;margin:8px 0 4px;color:#f0c477;font:800 clamp(1.45rem,2.3vw,2rem)/1.1 "Barlow Condensed";font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.live-status-tile>small{display:block;color:#aab2bd;font-size:.7rem;line-height:1.4}
+.live-status-tile .visitor-live-dot{width:7px;height:7px;border-radius:50%;background:#e8b45c;box-shadow:0 0 0 4px #e8b45c18;flex:0 0 7px}
+.live-status-tile .visitor-live-dot.offline{background:#c65b50;box-shadow:0 0 0 4px #c65b5018}
+@media(max-width:850px){.live-status-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){.live-status-grid{grid-template-columns:1fr}.live-status-tile{padding:12px 14px}}
+
 /* RAVEN CONTROL ROOM — complete visual and navigation rebuild */
 :root{--bg:#07090e;--panel:#10151e;--panel2:#171e2a;--paper:#f4f1eb;--muted:#a6afbd;--lime:#d8ad68;--rust:#a94b4b;--line:#dce5f01f;--max:1500px}
 body{background:radial-gradient(ellipse at 78% 0%,#263344 0,transparent 35%),radial-gradient(ellipse at 5% 40%,#28191d 0,transparent 32%),linear-gradient(180deg,#07090e,#0b1018 55%,#07090e);color:var(--paper)}
@@ -556,37 +568,21 @@ label{color:#dce5d8}
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=5" defer></script></head>
 <body>
 <header class="top"><div class="wrap topinner"><a class="brand" href="./"><span class="mark">R</span><span>TACOMA NIGHTS <span style="color:var(--lime)">/ RAVEN CONTROL ROOM</span></span></a><div class="top-actions"><a class="btn ghost" href="./" target="_blank" rel="noopener">View public site ↗</a><button class="btn ghost hidden" id="signOutBtn">Sign out</button></div></div></header>
-<div class="visitor-strip" role="status" aria-live="polite" aria-atomic="true"><div class="wrap visitor-inner"><span class="visitor-live-dot" id="visitorLiveDot" aria-hidden="true"></span><span class="visitor-label">LIVE VISITORS</span><strong id="visitorCount">—</strong><span class="visitor-description" id="visitorStatus">Connecting to live presence…</span><span class="visitor-scope">SITEWIDE · PUBLIC + CONTROL ROOM</span></div></div>
-<section class="local-info-strip" aria-label="Tacoma local time and weather"><div class="wrap local-info-inner">
-<div class="local-info-block"><span class="local-info-icon" aria-hidden="true">◷</span><div><span class="local-info-label">TACOMA · PACIFIC TIME</span><strong id="tacomaClock">--:--:-- --</strong><small id="tacomaDate">Loading local date…</small></div></div>
-<div class="local-info-divider" aria-hidden="true"></div>
-<div class="local-info-block weather-block"><span class="weather-icon" id="tacomaWeatherIcon" aria-hidden="true">☁</span><div><span class="local-info-label">TACOMA CURRENT WEATHER</span><strong id="tacomaWeather">Loading conditions…</strong><small id="tacomaWeatherDetails">Fetching latest observation…</small></div></div>
-<span class="weather-updated" id="weatherUpdated">Weather refreshes every 15 min</span>
-</div></section>
+<section class="live-status-strip" aria-label="Live visitors, Tacoma local time and weather">
+ <div class="wrap live-status-grid">
+  <article class="live-status-tile"><div class="live-status-label"><span class="visitor-live-dot" id="visitorLiveDot" aria-hidden="true"></span>Live visitors</div><strong id="visitorCount">—</strong><small id="visitorStatus">Connecting to live presence…</small></article>
+  <article class="live-status-tile"><div class="live-status-label"><span class="visitor-live-dot" aria-hidden="true"></span>Live website visitors</div><strong id="publicLiveVisitorCount">—</strong><small id="publicLiveVisitorDetail">Active sessions on the public homepage</small></article>
+  <article class="live-status-tile"><div class="live-status-label">◷ Tacoma local time</div><strong id="tacomaClock">--:--:-- --</strong><small id="tacomaDate">Loading local date…</small></article>
+  <article class="live-status-tile"><div class="live-status-label"><span id="tacomaWeatherIcon" aria-hidden="true">☁</span> Tacoma weather</div><strong id="tacomaWeather">Loading…</strong><small id="tacomaWeatherDetails">Current conditions · Tacoma, WA</small></article>
+ </div>
+</section>
 <main class="wrap">
 
 <div id="globalStatus" class="notice control-room-status" role="status" aria-live="polite">Connecting to secure operations…</div>
 <section id="authPanel" class="auth hidden"><p class="micro">ADMIN ACCESS</p><h2>Sign in.</h2><p class="small">Use your Tacoma Nights administrator account. Public visitors cannot access the private inbox or management controls.</p><form id="loginForm" class="fields"><label class="full">Email address<input name="email" type="email" autocomplete="username" required maxlength="254"></label><label class="full">Password<input name="password" type="password" autocomplete="current-password" required></label><div class="full actions"><button class="btn" id="loginBtn">Sign in securely ↗</button></div></form><p id="authMessage" class="small" role="status" aria-live="polite"></p></section>
 <div id="dashboard" class="hidden">
 
-<section class="panel" id="visitorAnalyticsPanel">
- <div class="panelhead"><div><p class="micro">00 / AUDIENCE INTELLIGENCE</p><h2>Visitor analytics center</h2><p>Live page-by-page visitor presence and permanent anonymous page-view records for Tacoma Nights.</p></div><button class="btn ghost" id="visitorAnalyticsRefresh" type="button">↻ Refresh records</button></div>
- <div class="stats tn-analytics-stats">
-  <div class="stat"><strong id="tnAnalyticsTotalViews">—</strong><span>All-time page views</span></div>
-  <div class="stat"><strong id="tnAnalyticsViews24">—</strong><span>Last 24 hours</span></div>
-  <div class="stat"><strong id="tnAnalyticsViews7">—</strong><span>Last 7 days</span></div>
-  <div class="stat"><strong id="tnAnalyticsViews30">—</strong><span>Last 30 days</span></div>
-  <div class="stat"><strong id="tnAnalyticsUnique">—</strong><span>Unique visitors · per-page total</span></div>
-  <div class="stat"><strong id="tnAnalyticsPages">—</strong><span>Pages recorded</span></div>
- </div>
- <div class="grid">
-  <div class="span6 item"><div class="itemtop"><div><span class="micro">LIVE RIGHT NOW</span><h3>Visitors by page</h3></div><span class="pill">REALTIME</span></div><div id="tnLivePageBreakdown" class="tn-analytics-list"><p class="small">Connecting to live page presence…</p></div></div>
-  <div class="span6 item"><div class="itemtop"><div><span class="micro">HISTORICAL PERFORMANCE</span><h3>Most visited pages</h3></div></div><div id="tnTopPages" class="tn-analytics-list"><p class="small">Loading page totals…</p></div></div>
-  <div class="span12 item"><div class="itemtop"><div><span class="micro">VISIT LOG</span><h3>Recent visitor records</h3></div><span class="small">Latest 30 page views</span></div><div class="table-wrap"><table class="tn-analytics-table"><thead><tr><th>Page</th><th>Visited · Pacific</th><th>Anonymous visitor</th><th>Referrer</th></tr></thead><tbody id="tnRecentPageViews"><tr><td colspan="4">Loading visitor records…</td></tr></tbody></table></div></div>
- </div>
- <p id="tnAnalyticsStatus" class="small" role="status" aria-live="polite">Visitor analytics will load after administrator sign-in.</p>
- <p class="small">Privacy: records contain a random anonymous browser identifier, page path, page title, referrer hostname and timestamp. No IP address, email address or full referrer URL is collected.</p>
-</section>
+
 <div class="stats"><div class="stat"><strong id="statNew">—</strong><span>New submissions</span></div><div class="stat"><strong id="statCrew">—</strong><span>Published crew</span></div><div class="stat"><strong id="statHostApps">—</strong><span>Remote host applications</span></div><div class="stat"><strong id="statShow">—</strong><span>Premiere status</span></div><div class="stat"><strong id="statMediaItems">—</strong><span>Media library items</span></div></div>
 
 <section class="panel topic-center" id="topicCenter">
@@ -993,24 +989,27 @@ function renderLivePageBreakdown(byPage){
 }
 function initVisitorCounter(){
  const countEl=$('visitorCount'),statusEl=$('visitorStatus'),dot=$('visitorLiveDot');
+ const publicCountEl=$('publicLiveVisitorCount'),publicDetailEl=$('publicLiveVisitorDetail');
  const setState=(count,message,online=true)=>{countEl.textContent=count==null?'—':String(count);statusEl.textContent=message;dot.classList.toggle('offline',!online);};
- if(!db?.channel){setState(null,'Live count unavailable · realtime client missing',false);return;}
+ if(!db?.channel){setState(null,'Live count unavailable · realtime client missing',false);publicCountEl.textContent='—';publicDetailEl.textContent='Realtime connection unavailable';return;}
  let visitorId,sessionId;
  try{visitorId=localStorage.getItem('tn-sitewide-visitor-id');if(!visitorId){visitorId=crypto.randomUUID();localStorage.setItem('tn-sitewide-visitor-id',visitorId);}}catch(_){visitorId=crypto.randomUUID();}
  try{sessionId=crypto.randomUUID();}catch(_){sessionId='session-'+Date.now()+'-'+Math.random().toString(36).slice(2);}
  setState(null,'Connecting to live presence…',false);
+ publicCountEl.textContent='—';publicDetailEl.textContent='Connecting to public homepage presence…';
  const updateCount=()=>{
   if(!visitorChannel)return;
-  const state=visitorChannel.presenceState(),visitors=new Set(),pages={};
+  const state=visitorChannel.presenceState(),visitors=new Set(),adminVisitors=new Set(),publicVisitors=new Set();
   Object.values(state).forEach(metas=>{(Array.isArray(metas)?metas:[]).forEach(meta=>{
    if(!meta||typeof meta.visitorId!=='string')return;
+   const path=String(meta.pagePath||meta.page||'/').split('?')[0].replace(/\/$/,'');
    visitors.add(meta.visitorId);
-   const path=String(meta.pagePath||meta.page||'/').slice(0,300);
-   (pages[path]||(pages[path]=new Set())).add(meta.visitorId);
+   if(path.endsWith('/control-room.html'))adminVisitors.add(meta.visitorId);
+   if(path==='/tacoma-nights'||path.endsWith('/tacoma-nights')||path.endsWith('/tacoma-nights/index.html'))publicVisitors.add(meta.visitorId);
   });});
-  const counts={};Object.entries(pages).forEach(([path,set])=>counts[path]=set.size);
-  setState(visitors.size,'Live · page-level updates automatically',true);
-  renderLivePageBreakdown(counts);
+  setState(adminVisitors.size,'active session'+(adminVisitors.size===1?'':'s')+' on this admin page',true);
+  publicCountEl.textContent=String(publicVisitors.size);
+  publicDetailEl.textContent=publicVisitors.size+' active session'+(publicVisitors.size===1?'':'s')+' on the public homepage';
   window.dispatchEvent(new Event("tn-presence-updated"));
  };
  visitorChannel=db.channel('tacoma-nights-sitewide-live-visitors',{config:{presence:{key:sessionId}}})
@@ -1022,7 +1021,7 @@ function initVisitorCounter(){
     try{const presencePayload={visitorId,pagePath:location.pathname,pageTitle:document.title,page:'control-room',timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone||'unknown',onlineAt:new Date().toISOString()};window.__tnVisitorPresencePayload=presencePayload;const result=await visitorChannel.track(presencePayload);if(result?.status==='error')throw new Error('Presence tracking was rejected');updateCount();}
     catch(err){console.warn('Control-room visitor presence could not be tracked:',err);setState(null,'Live count unavailable · check Supabase Realtime',false);}
    }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
-    setState(null,'Live count unavailable · reconnect or check Realtime',false);
+    setState(null,'Live count unavailable · reconnect or check Realtime',false);publicCountEl.textContent='—';publicDetailEl.textContent='Realtime connection unavailable';
    }
   });
  window.__tnVisitorChannel=visitorChannel;window.dispatchEvent(new Event('tn-presence-ready'));
@@ -1054,18 +1053,13 @@ async function loadVisitorAnalytics(){
  }catch(err){say(status,'Could not load visitor analytics: '+(err.message||'Check administrator access and Data API permissions.'),true);}
  finally{if(refresh){refresh.disabled=false;refresh.textContent='↻ Refresh records';}}
 }
-function initVisitorAnalytics(){
- $('visitorAnalyticsRefresh')?.addEventListener('click',loadVisitorAnalytics);
- loadVisitorAnalytics();
-}
-
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const say=(el,msg,bad=false)=>{el.textContent=msg;el.classList.toggle('error',!!bad);};
 function isAdmin(user){return user?.app_metadata?.role==='admin';}
 function localInputDate(value){if(!value)return '';const d=new Date(value);if(Number.isNaN(d.getTime()))return '';const parts=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Los_Angeles',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(d).replace(' ','T');return parts;}
 function utcFromLocal(value){if(!value)return null;const d=new Date(value);return Number.isNaN(d.getTime())?null:d.toISOString();}
 function setBusy(button,busy,label){button.disabled=busy;if(busy)button.dataset.label=button.textContent;button.textContent=busy?'Saving…':(label||button.dataset.label||'Save');}
-function showDashboard(user){currentUser=user;$('authPanel').classList.add('hidden');$('dashboard').classList.remove('hidden');$('signOutBtn').classList.remove('hidden');say($('globalStatus'),'Authenticated administrator session · '+(user.email||'admin'));loadAll();initVisitorAnalytics();}
+function showDashboard(user){currentUser=user;$('authPanel').classList.add('hidden');$('dashboard').classList.remove('hidden');$('signOutBtn').classList.remove('hidden');say($('globalStatus'),'Authenticated administrator session · '+(user.email||'admin'));loadAll();}
 function showSignedOut(){currentUser=null;$('dashboard').classList.add('hidden');$('signOutBtn').classList.add('hidden');$('authPanel').classList.remove('hidden');say($('globalStatus'),'Sign in with an administrator account to open the control room.');}
 function withTimeout(promise,ms,message){let timer;return Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error(message)),ms);})]).finally(()=>clearTimeout(timer));}
 async function verifySession(session){if(!session?.access_token){showSignedOut();return false;}if(authVerificationPromise)return authVerificationPromise;authVerificationPromise=(async()=>{try{const {data,error}=await withTimeout(db.auth.getUser(session.access_token),12000,'Supabase identity verification timed out. Check your connection and retry.');if(error||!data.user){showSignedOut();say($('authMessage'),error?.message||'Your session could not be verified. Please sign in again.',true);return false;}if(!isAdmin(data.user)){await db.auth.signOut({scope:'local'});showSignedOut();say($('authMessage'),'This account is signed in but is not authorized as a Tacoma Nights administrator. Ask the project owner to set app_metadata.role = admin.',true);return false;}showDashboard(data.user);return true;}catch(err){showSignedOut();say($('globalStatus'),err.message||'Secure session verification failed. Please retry.',true);return false;}})();try{return await authVerificationPromise;}finally{authVerificationPromise=null;}}
