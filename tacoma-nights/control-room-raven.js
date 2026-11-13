@@ -67,7 +67,9 @@
    layer=L.layerGroup().addTo(map);if(lastState)render(lastState);setTimeout(()=>map.invalidateSize(),200);
   }
   function shareCurrentLocation(){
-   const b=$("tnMapShareButton");if(!navigator.geolocation){$("tnMapStatus").textContent="This browser does not support location sharing.";return;}
+   const b=$("tnMapShareButton"),ch=window.__tnVisitorChannel,payload=window.__tnVisitorPresencePayload;
+   if(payload?.approxLocation&&ch){delete payload.approxLocation;delete payload.locationShared;try{localStorage.removeItem(consentKey);}catch(_){}ch.track(payload).then(()=>{b.textContent="Share my approximate location";$("tnMapStatus").textContent="Location sharing stopped. You remain included in live visitor totals.";}).catch(()=>{$("tnMapStatus").textContent="Could not update location sharing status.";});return;}
+   if(!navigator.geolocation){$("tnMapStatus").textContent="This browser does not support location sharing.";return;}
    b.disabled=true;b.textContent="Requesting permission…";
    navigator.geolocation.getCurrentPosition(async pos=>{
     const loc={latitude:Math.round(pos.coords.latitude*10)/10,longitude:Math.round(pos.coords.longitude*10)/10,accuracyKm:Math.max(5,Math.round((pos.coords.accuracy||5000)/1000)),sharedAt:new Date().toISOString()};
