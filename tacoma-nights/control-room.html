@@ -1686,31 +1686,92 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  const dash=document.getElementById('dashboard');
  if(!dash||dash.dataset.ravenShell==='ready')return;
  dash.dataset.ravenShell='ready';
- const sections=[
-  ['00','Command Center','dashboardHero'],
-  ['01','Editorial Studio','topicCenter'],
-  ['02','Show Blueprint','episodeFormat'],
-  ['03','Episode Production','productionWorkspace'],
-  ['04','Broadcast Operations','broadcastCenter'],
-  ['05','Premiere & Publishing','premierePanel'],
-  ['06','Crew & Contributors','crewPanel'],
-  ['07','Media Vault','clipsPanel'],
-  ['08','Community Inbox','inboxPanel'],
-  ['09','Talent Recruitment','hostApplicationsPanel'],
-  ['10','Audience Intelligence','visitorAnalyticsPanel'],
-  ['11','System Status','globalStatus']
+ const groups=[
+  {title:'Command',hint:'Monitor & manage',items:[
+   ['00','Command Center','dashboardHero','⌂'],
+   ['01','Audience Intelligence','visitorAnalyticsPanel','◉']
+  ]},
+  {title:'Editorial & Planning',hint:'Develop the story',items:[
+   ['02','Topic Calendar','topicCenter','▦'],
+   ['03','Show Format','episodeFormat','≡'],
+   ['04','Episode Production','productionWorkspace','✎']
+  ]},
+  {title:'Studio & Broadcast',hint:'Make it happen',items:[
+   ['05','Broadcast Operations','broadcastCenter','◉'],
+   ['06','Premiere Management','premierePanel','▶']
+  ]},
+  {title:'People & Community',hint:'The voices of the 253',items:[
+   ['07','Crew & Contributors','crewPanel','♙'],
+   ['08','Host Applications','hostApplicationsPanel','＋'],
+   ['09','Community Inbox','inboxPanel','✉']
+  ]},
+  {title:'Media & Archive',hint:'Production assets',items:[
+   ['10','Media Vault','clipsPanel','▤']
+  ]}
  ];
- const original=[...dash.children];
+  const original=[...dash.children];
  const side=document.createElement('aside');side.className='tn-sidebar';side.setAttribute('aria-label','Control Room navigation');
- side.innerHTML='<div class="tn-side-brand"><strong>RAVEN OPERATIONS</strong><span>TACOMA NIGHTS · PRIVATE</span></div><div class="tn-nav-label">Production departments</div><nav class="tn-nav">'+sections.map(([n,label,id])=>'<a href="#'+id+'"><span class="tn-num">'+n+'</span><span>'+label+'</span></a>').join('')+'</nav><div class="tn-nav-foot">CROWRULES ENTERTAINMENT<br>ONE COMPANY. ONE UNIVERSE.</div>';
+ side.innerHTML='<div class="tn-side-brand"><strong>RAVEN OPERATIONS</strong><span>TACOMA NIGHTS · PRIVATE</span></div><div class="tn-nav-heading"><span class="tn-nav-label">WORKSPACES</span><span class="tn-nav-count">11 MODULES</span></div><nav class="tn-nav" aria-label="Production workspaces">'+groups.map((group,index)=>'<section class="tn-nav-group"><div class="tn-nav-group-head"><span>'+group.title+'</span><small>'+group.hint+'</small></div>'+group.items.map(([n,label,id,icon])=>'<a href="#'+id+'" data-nav-target="'+id+'"><span class="tn-nav-icon" aria-hidden="true">'+icon+'</span><span class="tn-nav-linktext">'+label+'</span><span class="tn-nav-index">'+n+'</span></a>').join('')+'</section>').join('')+'</nav><div class="tn-nav-foot"><span class="tn-nav-status-dot"></span> PRIVATE PRODUCTION NETWORK<br><strong>ONE COMPANY. ONE UNIVERSE.</strong></div>';
  const main=document.createElement('main');main.className='tn-main';
  const hero=document.createElement('section');hero.className='tn-command-hero';hero.id='dashboardHero';
  hero.innerHTML='<div class="tn-hero-copy"><p class="micro">CROWRULES ENTERTAINMENT · TACOMA, WASHINGTON</p><p class="tn-hero-kicker">THE CITY. THE PEOPLE. THE STORIES.</p><h2>THE RAVEN<br><em>CONTROL ROOM</em></h2><p class="tn-hero-description">Your private television production headquarters. Develop the stories, coordinate the voices, shape every episode and prepare the broadcast — all from the heart of the South Sound.</p><div class="tn-hero-meta"><span><i></i> PRIVATE PRODUCTION NETWORK</span><span>EST. TACOMA · PACIFIC NORTHWEST</span></div><div class="tn-command-links"><a href="#productionWorkspace">Enter production desk ↗</a><a href="#broadcastCenter">Prepare broadcast ↗</a><a href="#clipsPanel">Open media vault ↗</a></div><small class="tn-photo-credit">Raven: YosemiteYamper / Wikimedia Commons · CC BY-SA · Tacoma &amp; Mount Rainier: public-domain photography</small></div>';
  dash.replaceChildren(side,main);main.append(hero);original.forEach(node=>main.append(node));
  const links=[...side.querySelectorAll('.tn-nav a')];
- const activate=()=>{const hash=location.hash;links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')===hash));};
- links.forEach(a=>a.addEventListener('click',()=>{links.forEach(x=>x.classList.remove('active'));a.classList.add('active');}));
+ const activate=()=>{const hash=location.hash;links.forEach(a=>{const active=a.getAttribute('href')===hash;a.classList.toggle('active',active);if(active)a.closest('.tn-nav-group')?.classList.add('is-current');else if(!a.closest('.tn-nav-group')?.querySelector('.active'))a.closest('.tn-nav-group')?.classList.remove('is-current');});};
+ links.forEach(a=>a.addEventListener('click',()=>{links.forEach(x=>x.classList.remove('active'));a.classList.add('active');links.forEach(x=>x.closest('.tn-nav-group')?.classList.toggle('is-current',!!x.closest('.tn-nav-group')?.querySelector('.active')));}));
  window.addEventListener('hashchange',activate);activate();
+ const targets=links.map(a=>document.getElementById(a.dataset.navTarget)).filter(Boolean);
+ if('IntersectionObserver' in window){const observer=new IntersectionObserver(entries=>{const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(visible){const link=links.find(a=>a.dataset.navTarget===visible.target.id);if(link){links.forEach(a=>a.classList.toggle('active',a===link));links.forEach(a=>a.closest('.tn-nav-group')?.classList.toggle('is-current',!!a.closest('.tn-nav-group')?.querySelector('.active')));}}},{rootMargin:'-18% 0px -68% 0px',threshold:[0,.15,.35]});targets.forEach(target=>observer.observe(target));}
 })();
 </script>
+
+<style id="tn-navigation-redesign">
+/* Raven Control Room — grouped, task-oriented navigation */
+#dashboard.tn-shell{grid-template-columns:278px minmax(0,1fr);gap:22px}
+.tn-sidebar{padding:17px 13px 14px;background:linear-gradient(180deg,#111a27f8,#080d15f8);border:1px solid #d8ad6845}
+.tn-side-brand{padding:7px 9px 16px}
+.tn-side-brand:before{height:76px;margin-bottom:12px;filter:saturate(.58) contrast(1.13)}
+.tn-side-brand strong{font-size:1.48rem;letter-spacing:.12em}
+.tn-nav-heading{display:flex;align-items:center;justify-content:space-between;padding:14px 9px 9px}
+.tn-nav-heading .tn-nav-label{padding:0;font-size:.59rem;letter-spacing:.2em}
+.tn-nav-count{font-size:.55rem;font-weight:900;letter-spacing:.12em;color:#8793a3;border:1px solid #ffffff20;border-radius:20px;padding:4px 7px}
+.tn-nav{display:grid;gap:13px}
+.tn-nav-group{padding:0 0 10px;border-bottom:1px solid #ffffff12}
+.tn-nav-group:last-child{border-bottom:0;padding-bottom:0}
+.tn-nav-group-head{display:flex;align-items:baseline;justify-content:space-between;gap:7px;padding:0 8px 6px}
+.tn-nav-group-head>span{font-size:.63rem;font-weight:900;letter-spacing:.13em;text-transform:uppercase;color:#e1bd82}
+.tn-nav-group-head small{font-size:.55rem;color:#7e8b9b;text-align:right}
+.tn-nav-group>a{display:flex;align-items:center;gap:10px;min-height:39px;padding:8px 9px;margin:2px 0;border:1px solid transparent;border-radius:7px;color:#c2cbd6;font-size:.73rem;font-weight:700;letter-spacing:.005em;transition:background .18s,border-color .18s,color .18s,transform .18s}
+.tn-nav-group>a:hover{background:#ffffff09;border-color:#ffffff18;color:#fff;transform:translateX(2px)}
+.tn-nav-group>a.active{background:linear-gradient(90deg,#d8ad6822,#d8ad6808);border-color:#d8ad6855;color:#f5d9a9;box-shadow:inset 3px 0 #d8ad68}
+.tn-nav-icon{display:grid;place-items:center;width:25px;height:25px;flex:0 0 25px;border-radius:6px;background:#ffffff0a;color:#d8ad68;font-size:.9rem}
+.tn-nav-group>a.active .tn-nav-icon{background:#d8ad6820;color:#f0d19a}
+.tn-nav-linktext{min-width:0;flex:1}
+.tn-nav-index{font:700 .58rem "DM Sans",sans-serif;color:#718094;letter-spacing:.08em}
+.tn-nav-group>a.active .tn-nav-index{color:#d8ad68}
+.tn-nav-foot{margin:13px 5px 0;padding:13px 8px 2px;border-top:1px solid #ffffff18;font-size:.55rem;line-height:1.9;letter-spacing:.12em}
+.tn-nav-foot strong{color:#d8ad68;font-size:.57rem}
+.tn-nav-status-dot{display:inline-block;width:6px;height:6px;margin-right:6px;border-radius:50%;background:#d8ad68;box-shadow:0 0 10px #d8ad68}
+@media(max-width:1050px){#dashboard.tn-shell{grid-template-columns:235px minmax(0,1fr);gap:14px}.tn-nav-group-head small{display:none}}
+@media(max-width:760px){
+ #dashboard.tn-shell{display:block}
+ .tn-sidebar{position:relative;top:auto;max-height:none;padding:10px;margin-bottom:14px}
+ .tn-side-brand{display:flex;align-items:center;gap:12px;padding:5px 7px 10px;margin-bottom:5px}
+ .tn-side-brand:before{width:76px;height:45px;flex:0 0 76px;margin:0;background-position:center 35%}
+ .tn-side-brand strong{font-size:1.15rem}
+ .tn-side-brand span{font-size:.53rem}
+ .tn-nav-heading{padding:8px 7px}
+ .tn-nav{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 12px}
+ .tn-nav-group{padding-bottom:8px}
+ .tn-nav-group-head{min-height:27px;padding:0 5px 5px;display:block}
+ .tn-nav-group-head>span{font-size:.57rem}
+ .tn-nav-group-head small{display:block;font-size:.49rem;text-align:left;margin-top:2px}
+ .tn-nav-group>a{min-height:36px;padding:6px 6px;gap:6px;font-size:.65rem}
+ .tn-nav-icon{width:22px;height:22px;flex-basis:22px}
+ .tn-nav-index{font-size:.51rem}
+ .tn-nav-foot{display:block;margin-top:8px;padding-top:8px}
+}
+@media(max-width:420px){.tn-nav{grid-template-columns:1fr 1fr;gap:7px}.tn-nav-group-head>span{font-size:.53rem}.tn-nav-group>a{font-size:.61rem}.tn-nav-index{display:none}}
+@media(prefers-reduced-motion:reduce){.tn-nav-group>a{transition:none}}
+</style>
 </body></html>
