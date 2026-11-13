@@ -912,9 +912,11 @@ function initVisitorCounter(){
  if(!db?.channel){setState(null,'Live count unavailable · realtime client missing',false);publicCountEl.textContent='—';publicDetailEl.textContent='Realtime connection unavailable';return;}
  let visitorId,sessionId;
  try{visitorId=localStorage.getItem('tn-sitewide-visitor-id');if(!visitorId){visitorId=crypto.randomUUID();localStorage.setItem('tn-sitewide-visitor-id',visitorId);}}catch(_){visitorId=crypto.randomUUID();}
- try{sessionId=crypto.randomUUID();}catch(_){sessionId='session-'+Date.now()+'-'+Math.random().toString(36).slice(2);}
+ const makeSessionId=()=>{try{return crypto.randomUUID();}catch(_){return 'session-'+Date.now()+'-'+Math.random().toString(36).slice(2);}};
+ sessionId=makeSessionId();
  setState(null,'Connecting to live presence…',false);
  publicCountEl.textContent='—';publicDetailEl.textContent='Connecting to public homepage presence…';
+ let connecting=false;
  const updateCount=()=>{
   if(!visitorChannel)return;
   const state=visitorChannel.presenceState(),visitors=new Set(),adminVisitors=new Set(),publicVisitors=new Set();
@@ -928,22 +930,61 @@ function initVisitorCounter(){
   setState(adminVisitors.size,'active session'+(adminVisitors.size===1?'':'s')+' on this admin page',true);
   publicCountEl.textContent=String(publicVisitors.size);
   publicDetailEl.textContent=publicVisitors.size+' active session'+(publicVisitors.size===1?'':'s')+' on the public homepage';
-  window.dispatchEvent(new Event("tn-presence-updated"));
+  window.dispatchEvent(new Event('tn-presence-updated'));
  };
- visitorChannel=db.channel('tacoma-nights-sitewide-live-visitors',{config:{presence:{key:sessionId}}})
-  .on('presence',{event:'sync'},updateCount)
-  .on('presence',{event:'join'},updateCount)
-  .on('presence',{event:'leave'},updateCount)
-  .subscribe(async status=>{
-   if(status==='SUBSCRIBED'){
-    try{const presencePayload={visitorId,pagePath:location.pathname,pageTitle:document.title,page:'control-room',timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone||'unknown',onlineAt:new Date().toISOString()};window.__tnVisitorPresencePayload=presencePayload;const result=await visitorChannel.track(presencePayload);if(result?.status==='error')throw new Error('Presence tracking was rejected');updateCount();}
-    catch(err){console.warn('Control-room visitor presence could not be tracked:',err);setState(null,'Live count unavailable · check Supabase Realtime',false);}
-   }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
-    setState(null,'Live count unavailable · reconnect or check Realtime',false);publicCountEl.textContent='—';publicDetailEl.textContent='Realtime connection unavailable';
-   }
-  });
- window.__tnVisitorChannel=visitorChannel;window.dispatchEvent(new Event('tn-presence-ready'));
- window.addEventListener('pagehide',()=>{if(visitorChannel&&db)db.removeChannel(visitorChannel);},{once:true});
+ const connectPresence=()=>{
+  if(connecting||visitorChannel)return;
+  connecting=true;sessionId=makeSessionId();
+  try{
+   const channel=db.channel('tacoma-nights-sitewide-live-visitors',{config:{presence:{key:sessionId}}});
+   visitorChannel=channel;
+   channel.on('presence',{event:'sync'},updateCount)
+    .on('presence',{event:'join'},updateCount)
+    .on('presence',{event:'leave'},updateCount)
+    .subscribe(async status=>{
+     if(visitorChannel!==channel)return;
+     if(status==='SUBSCRIBED'){
+      connecting=false;
+      try{
+       const presencePayload={visitorId,pagePath:location.pathname,pageTitle:document.title,page:'control-room',timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone||'unknown',onlineAt:new Date().toISOString()};
+       window.__tnVisitorPresencePayload=presencePayload;
+       const result=await channel.track(presencePayload);
+       if(result?.status==='error')throw new Error('Presence tracking was rejected');
+       updateCount();
+      }catch(err){console.warn('Control-room visitor presence could not be tracked:',err);setState(null,'Live count unavailable · check Supabase Realtime',false);}
+     }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
+      connecting=false;
+      setState(null,'Live count unavailable · reconnect or check Realtime',false);
+      publicCountEl.textContent='—';publicDetailEl.textContent='Realtime connection unavailable';
+     }
+    });
+   window.__tnVisitorChannel=channel;window.dispatchEvent(new Event('tn-presence-ready'));
+  }catch(err){
+   connecting=false;visitorChannel=null;window.__tnVisitorChannel=null;
+   console.warn('Control-room visitor presence could not connect:',err);
+   setState(null,'Live count unavailable · reconnect or check Realtime',false);
+  }
+ };
+ const closePresence=()=>{
+  const channel=visitorChannel;
+  visitorChannel=null;window.__tnVisitorChannel=null;connecting=false;
+  if(channel&&db){
+   try{const removal=db.removeChannel(channel);if(removal?.catch)removal.catch(err=>console.warn('Realtime channel cleanup:',err));}
+   catch(err){console.warn('Realtime channel cleanup:',err);}
+  }
+  // The visitor counter is this page's Realtime feature. Close its socket before
+  // the browser snapshots the document into the back-forward cache.
+  try{db.realtime?.disconnect();}
+  catch(err){console.warn('Realtime socket shutdown before page cache:',err);}
+ };
+ window.addEventListener('pagehide',closePresence);
+ window.addEventListener('pageshow',event=>{
+  if(event.persisted){
+   try{db.realtime?.connect();}catch(err){console.warn('Realtime socket restore:',err);}
+   connectPresence();
+  }
+ });
+ connectPresence();
 }
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const say=(el,msg,bad=false)=>{el.textContent=msg;el.classList.toggle('error',!!bad);};
