@@ -912,7 +912,7 @@ function initVisitorCounter(){
  const setState=(count,message,online=true)=>{countEl.textContent=count==null?'—':String(count);statusEl.textContent=message;dot.classList.toggle('offline',!online);};
  if(!db?.channel){setState(null,'Live count unavailable · realtime client missing',false);return;}
  let visitorId,sessionId;
- try{visitorId=localStorage.getItem('tn-analytics-visitor-v1');if(!visitorId){visitorId=crypto.randomUUID();localStorage.setItem('tn-analytics-visitor-v1',visitorId);}}catch(_){visitorId=crypto.randomUUID();}
+ try{visitorId=localStorage.getItem('tn-sitewide-visitor-id');if(!visitorId){visitorId=crypto.randomUUID();localStorage.setItem('tn-sitewide-visitor-id',visitorId);}}catch(_){visitorId=crypto.randomUUID();}
  try{sessionId=crypto.randomUUID();}catch(_){sessionId='session-'+Date.now()+'-'+Math.random().toString(36).slice(2);}
  setState(null,'Connecting to live presence…',false);
  const updateCount=()=>{
@@ -934,12 +934,13 @@ function initVisitorCounter(){
   .on('presence',{event:'leave'},updateCount)
   .subscribe(async status=>{
    if(status==='SUBSCRIBED'){
-    try{const result=await visitorChannel.track({visitorId,pagePath:location.pathname,pageTitle:document.title,page:'control-room',onlineAt:new Date().toISOString()});if(result?.status==='error')throw new Error('Presence tracking was rejected');updateCount();}
+    try{const presencePayload={visitorId,pagePath:location.pathname,pageTitle:document.title,page:'control-room',onlineAt:new Date().toISOString()};window.__tnVisitorPresencePayload=presencePayload;const result=await visitorChannel.track(presencePayload);if(result?.status==='error')throw new Error('Presence tracking was rejected');updateCount();}
     catch(err){console.warn('Control-room visitor presence could not be tracked:',err);setState(null,'Live count unavailable · check Supabase Realtime',false);}
    }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
     setState(null,'Live count unavailable · reconnect or check Realtime',false);
    }
   });
+ window.__tnVisitorChannel=visitorChannel;window.dispatchEvent(new Event('tn-presence-ready'));
  window.addEventListener('pagehide',()=>{if(visitorChannel&&db)db.removeChannel(visitorChannel);},{once:true});
 }
 async function loadVisitorAnalytics(){
