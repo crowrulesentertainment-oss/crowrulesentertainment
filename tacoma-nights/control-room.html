@@ -1746,142 +1746,128 @@ window.addEventListener('unhandledrejection',event=>{console.error('Tacoma Night
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
 </script>
+
 <script>
-/* Tacoma Nights cinematic shell — navigation and presentation only.
-   Existing workspace nodes, event handlers, Supabase logic and stored data are preserved. */
+/* Tacoma Nights Control Room — unified command-center layout.
+   Presentation-only DOM composition. Existing workspace sections and application logic remain intact. */
 (function(){
  const dash=document.getElementById('dashboard');
- if(!dash||dash.dataset.ravenShell==='ready')return;
- dash.dataset.ravenShell='ready';
- const groups=[
-  {title:'Command',items:[['01','Command Center','dashboardHero'],['02','Live Status','liveStatusPanel']]},
-  {title:'Editorial',items:[['03','Topic Calendar','topicCenter'],['04','Show Format','episodeFormat'],['05','Episode Production','productionWorkspace']]},
-  {title:'Broadcast',items:[['06','Broadcast Operations','broadcastCenter'],['07','Premiere Management','premierePanel']]},
-  {title:'Community',items:[['08','Crew & Contributors','crewPanel'],['09','Host Applications','hostApplicationsPanel'],['10','Community Inbox','inboxPanel']]},
-  {title:'Media',items:[['11','Media Vault','clipsPanel']]}
- ];
+ if(!dash || dash.dataset.commandCenter==='ready') return;
+ dash.dataset.commandCenter='ready';
  const original=[...dash.children];
- const nav=document.createElement('nav');
- nav.className='tn-topnav';
- nav.setAttribute('aria-label','Tacoma Nights production workspaces');
- nav.innerHTML='<div class="tn-topnav-brand"><span class="tn-topnav-raven" aria-hidden="true">R</span><span><strong>RAVEN OPERATIONS</strong><small>CONTROL ROOM</small></span></div>'+groups.map(group=>'<div class="tn-topnav-group"><span class="tn-topnav-label">'+group.title+'</span><div class="tn-topnav-links">'+group.items.map(([n,label,id])=>'<a href="#'+id+'" data-nav-target="'+id+'"><span>'+n+'</span>'+label+'</a>').join('')+'</div></div>').join('')+'<a class="tn-topnav-home" href="./" target="_blank" rel="noopener">PUBLIC SITE ↗</a>';
- const main=document.createElement('main');main.className='tn-main';
- const hero=document.createElement('section');hero.className='tn-command-hero';hero.id='dashboardHero';
- hero.innerHTML='<div class="tn-hero-copy"><p class="micro">CROWRULES ENTERTAINMENT · TACOMA, WASHINGTON</p><p class="tn-hero-kicker">THE CITY. THE PEOPLE. THE STORIES.</p><h2>THE RAVEN<br><em>CONTROL ROOM</em></h2><p class="tn-hero-description">The production headquarters for Tacoma Nights. Build the stories, bring the voices together, shape every episode and prepare the broadcast — grounded in Tacoma and reaching beyond the South Sound.</p><div class="tn-hero-meta"><span><i></i> PRIVATE PRODUCTION NETWORK</span><span>EST. TACOMA · PACIFIC NORTHWEST</span><span>ONE COMPANY. ONE UNIVERSE.</span></div><div class="tn-command-links"><a href="#productionWorkspace">ENTER PRODUCTION DESK ↗</a><a href="#broadcastCenter">PREPARE BROADCAST ↗</a><a href="#clipsPanel">OPEN MEDIA VAULT ↗</a></div><small class="tn-photo-credit">Photographic atmosphere: real raven wildlife and Tacoma / Mount Rainier landscape imagery. Image sources are loaded remotely.</small></div><div class="tn-hero-caption"><span>FIELD NOTES / 253</span><strong>TACOMA<br>AFTER DARK</strong></div>';
- dash.replaceChildren(nav,main);
- main.append(hero);
- original.forEach(node=>main.append(node));
- const links=[...nav.querySelectorAll('[data-nav-target]')];
- const setActive=id=>{
-  links.forEach(a=>{const active=a.dataset.navTarget===id;a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current');});
+ const byId=id=>original.find(node=>node.id===id)||document.getElementById(id);
+ const navGroups=[
+  {label:'COMMAND',items:[['⌂','Overview','dashboardHero'],['◉','Live status','liveStatusPanel']]},
+  {label:'EDITORIAL',items:[['✎','Topic calendar','topicCenter'],['▤','Show format','episodeFormat'],['▣','Episode production','productionWorkspace']]},
+  {label:'BROADCAST',items:[['◌','Broadcast desk','broadcastCenter'],['▶','Premiere & on-air','premierePanel'],['✦','Featured video','featuredVideoPanel'],['♫','Closing credits','endingCreditsPanel']]},
+  {label:'PEOPLE & COMMUNITY',items:[['♟','Crew & contributors','crewPanel'],['＋','Host applications','hostApplicationsPanel'],['✉','Community inbox','inboxPanel']]},
+  {label:'MEDIA',items:[['▧','Media library','clipsPanel']]}
+ ];
+ const nav=document.createElement('aside');nav.className='tn-command-sidebar';nav.setAttribute('aria-label','Control room navigation');
+ nav.innerHTML='<a class="tn-side-identity" href="#dashboardHero"><span class="tn-side-emblem">R</span><span><strong>CROWRULES</strong><small>TACOMA NIGHTS / OPERATIONS</small></span></a><div class="tn-side-live"><i></i><span>PRIVATE PRODUCTION NETWORK</span></div>'+navGroups.map(g=>'<section class="tn-side-group"><p>'+g.label+'</p>'+g.items.map(([icon,label,id])=>'<a href="#'+id+'" data-target="'+id+'"><span class="tn-side-icon">'+icon+'</span><span>'+label+'</span><b>↗</b></a>').join('')+'</section>').join('')+'<a class="tn-side-public" href="./" target="_blank" rel="noopener">VIEW PUBLIC SHOW ↗</a><div class="tn-side-foot">TACOMA, WASHINGTON<br>ONE COMPANY. ONE UNIVERSE.</div>';
+ const main=document.createElement('main');main.className='tn-command-main';
+ const hero=document.createElement('header');hero.className='tn-command-hero';hero.id='dashboardHero';
+ hero.innerHTML='<div class="tn-hero-backdrop" aria-hidden="true"></div><div class="tn-hero-content"><p class="tn-eyebrow">CROWRULES ENTERTAINMENT <span>／</span> TACOMA, WASHINGTON</p><p class="tn-hero-overline">THE CITY. THE PEOPLE. THE STORIES.</p><h1>CONTROL<br><em>ROOM.</em></h1><p class="tn-hero-description">Your private production headquarters for Tacoma Nights. Shape the stories, coordinate the voices, manage the media and take every episode from first idea to final broadcast.</p><div class="tn-hero-actions"><a href="#productionWorkspace">OPEN PRODUCTION DESK <span>↗</span></a><a href="#broadcastCenter">PREPARE BROADCAST <span>↗</span></a></div><div class="tn-hero-foot"><span><i></i> OPERATIONS OVERVIEW</span><span>253 ／ PACIFIC NORTHWEST</span></div></div><div class="tn-hero-stamp"><span>FIELD OFFICE</span><strong>253</strong><small>TACOMA / WA</small></div>';
+ const intro=document.createElement('div');intro.className='tn-section-intro';intro.innerHTML='<div><p class="tn-eyebrow">YOUR SHOW. YOUR WORKSPACE.</p><h2>Production at a glance</h2></div><p>Live counts and quick access to the work moving Tacoma Nights forward.</p>';
+ const metricWrap=document.createElement('div');metricWrap.className='tn-metrics';
+ const stat=original.find(n=>n.classList&&n.classList.contains('stats'));
+ const live=byId('liveStatusPanel');
+ const sections={
+  editorial:['topicCenter','episodeFormat'],
+  production:['productionWorkspace'],
+  broadcast:['broadcastCenter','premierePanel','featuredVideoPanel','endingCreditsPanel'],
+  community:['crewPanel','hostApplicationsPanel','inboxPanel'],
+  media:['clipsPanel']
  };
- links.forEach(a=>a.addEventListener('click',()=>setActive(a.dataset.navTarget)));
- window.addEventListener('hashchange',()=>setActive(location.hash.slice(1)));
- const targets=links.map(a=>document.getElementById(a.dataset.navTarget)).filter(Boolean);
+ const sectionTitles={editorial:['01 / EDITORIAL','Ideas become episodes'],production:['02 / PRODUCTION','Build the show'],broadcast:['03 / BROADCAST','Take it on air'],community:['04 / PEOPLE & COMMUNITY','The voices behind the show'],media:['05 / MEDIA','Your production library']};
+ const shell=document.createElement('div');shell.className='tn-workspace-shell';
+ const liveSection=live;
+ dash.replaceChildren(nav,main);
+ main.append(hero,intro);
+ if(stat){metricWrap.append(stat);main.append(metricWrap);}
+ if(liveSection){liveSection.classList.add('tn-live-overview');main.append(liveSection);}
+ Object.entries(sections).forEach(([key,ids])=>{
+  const group=document.createElement('section');group.className='tn-workspace-group';group.id='group-'+key;
+  const [eyebrow,title]=sectionTitles[key];
+  group.innerHTML='<div class="tn-group-heading"><div><p class="tn-eyebrow">'+eyebrow+'</p><h2>'+title+'</h2></div><span class="tn-group-rule"></span></div>';
+  const body=document.createElement('div');body.className='tn-group-body tn-group-'+key;
+  ids.forEach(id=>{const node=byId(id);if(node){node.classList.add('tn-redesigned-panel');body.append(node);}});
+  group.append(body);shell.append(group);
+ });
+ main.append(shell);
+ const anchors=[...nav.querySelectorAll('[data-target]')];
+ const active=id=>anchors.forEach(a=>{const on=a.dataset.target===id||a.dataset.target==='group-'+id;a.classList.toggle('active',on);if(on)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current');});
+ anchors.forEach(a=>a.addEventListener('click',()=>{const target=document.getElementById(a.dataset.target);if(target)active(a.dataset.target);}));
  if('IntersectionObserver' in window){
-  const observer=new IntersectionObserver(entries=>{
-   const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
-   if(visible)setActive(visible.target.id);
-  },{rootMargin:'-22% 0px -66% 0px',threshold:[0,.15,.35]});
-  targets.forEach(target=>observer.observe(target));
+  const observer=new IntersectionObserver(entries=>{const e=entries.filter(x=>x.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(e)active(e.target.id);},{rootMargin:'-18% 0px -70% 0px',threshold:[0,.1,.35]});
+  [...anchors].forEach(a=>{const target=document.getElementById(a.dataset.target);if(target)observer.observe(target);});
+  if(liveSection)observer.observe(liveSection);
  }
- setActive(location.hash.slice(1)||'dashboardHero');
+ active('dashboardHero');
 })();
 </script>
-
-<style id="tn-cinematic-top-navigation">
-/* Full-width cinematic presentation — all production modules remain in their original DOM order. */
-#dashboard.tn-shell{display:block!important;width:min(1680px,calc(100% - 42px));max-width:1680px;margin:0 auto;padding:0 0 28px}
-.tn-topnav{position:sticky;top:72px;z-index:8;display:flex;align-items:stretch;gap:clamp(10px,1.5vw,24px);width:100%;margin:0 0 22px;padding:11px 15px;background:linear-gradient(105deg,#080e17f5,#111a27f2 58%,#080d15f5);border:1px solid #d8ad6855;border-top:0;box-shadow:0 16px 42px #0009;backdrop-filter:blur(18px);overflow-x:auto;scrollbar-width:thin;scrollbar-color:#d8ad6866 transparent}
-.tn-topnav-brand{display:flex;align-items:center;gap:9px;flex:0 0 auto;padding:0 16px 0 3px;border-right:1px solid #ffffff20}
-.tn-topnav-raven{display:grid;place-items:center;width:38px;height:38px;border:1px solid #d8ad6877;background:linear-gradient(145deg,#e8c58b,#9d633c);color:#0a1018;font:900 1.55rem "Barlow Condensed";box-shadow:0 0 25px #d8ad6826}
-.tn-topnav-brand strong,.tn-topnav-brand small{display:block;white-space:nowrap}
-.tn-topnav-brand strong{font:800 .86rem "Barlow Condensed";letter-spacing:.12em;color:#f3e5cd}
-.tn-topnav-brand small{margin-top:3px;color:#d8ad68;font-size:.53rem;font-weight:900;letter-spacing:.2em}
-.tn-topnav-group{display:flex;flex-direction:column;justify-content:center;gap:5px;flex:0 0 auto}
-.tn-topnav-label{color:#d8ad68;font-size:.53rem;font-weight:900;letter-spacing:.18em;text-transform:uppercase}
-.tn-topnav-links{display:flex;align-items:center;gap:4px}
-.tn-topnav-links a,.tn-topnav-home{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:6px 9px;border:1px solid transparent;border-radius:5px;color:#c5cfdb;font-size:.65rem;font-weight:700;white-space:nowrap;text-decoration:none;transition:background .18s,border-color .18s,color .18s}
-.tn-topnav-links a span{color:#d8ad68;font:800 .62rem "Barlow Condensed";letter-spacing:.05em}
-.tn-topnav-links a:hover,.tn-topnav-links a.active{background:#d8ad6819;border-color:#d8ad6855;color:#ffe1ad}
-.tn-topnav-links a.active{box-shadow:inset 0 -2px #d8ad68}
-.tn-topnav-home{align-self:center;margin-left:auto;border-color:#d8ad6855;color:#e8c58b!important;letter-spacing:.08em}
-.tn-topnav-home:hover{background:#d8ad681b}
-.tn-main{min-width:0;padding:0 0 20px}
-.tn-command-hero{isolation:isolate;position:relative;display:flex;align-items:center;min-height:clamp(440px,42vw,620px);overflow:hidden;margin:0 0 26px;padding:clamp(28px,5vw,72px);border:1px solid #d8ad6870;border-radius:4px;background-color:#080d15;background-image:linear-gradient(90deg,#050a12f5 0%,#07101bdc 34%,#09111a8a 63%,#080d1540 100%),linear-gradient(0deg,#080d15aa,transparent 35%),url("https://commons.wikimedia.org/wiki/Special:FilePath/Mount_Rainier_over_Tacoma.jpg?width=2200");background-position:center,center,center 48%;background-size:cover;box-shadow:0 28px 90px #000b,inset 0 1px #ffffff2b}
-.tn-command-hero:before{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(90deg,transparent 45%,#07101a38 100%),url("https://commons.wikimedia.org/wiki/Special:FilePath/Common_raven_in_a_tree.jpg?width=1600") right 34%/auto 112% no-repeat;opacity:.92;mix-blend-mode:screen;mask-image:linear-gradient(90deg,transparent 30%,#000 69%,#000 100%);pointer-events:none}
-.tn-command-hero:after{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(0deg,#050a12b8,transparent 32%),repeating-linear-gradient(0deg,transparent 0 3px,#ffffff05 4px);pointer-events:none}
-.tn-hero-copy{position:relative;z-index:2;max-width:790px}
-.tn-command-hero .micro{margin:0 0 13px;color:#f0c477;font-size:.66rem;font-weight:900;letter-spacing:.23em}
-.tn-command-hero .tn-hero-kicker{margin:0 0 13px;color:#e5c38d;font-size:.68rem;font-weight:900;letter-spacing:.28em}
-.tn-command-hero h2{margin:0 0 20px;color:#fff8ed;font:900 clamp(3.6rem,8.3vw,8rem)/.79 "Barlow Condensed";letter-spacing:.01em;text-shadow:0 10px 48px #000d}
-.tn-command-hero h2 em{color:#f0c477;font-style:normal}
-.tn-command-hero .tn-hero-description{max-width:650px;margin:0;color:#d5dce5;font-size:clamp(.9rem,1.25vw,1.06rem);line-height:1.8;text-shadow:0 2px 12px #000}
-.tn-hero-meta{display:flex;flex-wrap:wrap;gap:10px 22px;margin:22px 0 4px;color:#d2d7df;font-size:.59rem;font-weight:900;letter-spacing:.13em}
-.tn-hero-meta span{display:flex;align-items:center;gap:8px}
-.tn-hero-meta i{width:7px;height:7px;border-radius:50%;background:#e8b45c;box-shadow:0 0 13px #e8b45c}
-.tn-command-links{display:flex;flex-wrap:wrap;gap:9px;margin-top:21px}
-.tn-command-links a{padding:10px 13px;border:1px solid #e8b45c77;border-radius:3px;background:#080d15b8;color:#f3d7a7;font-size:.64rem;font-weight:900;letter-spacing:.09em;text-decoration:none;backdrop-filter:blur(8px)}
-.tn-command-links a:hover{background:#d8ad682b;border-color:#f0c477}
-.tn-photo-credit{display:block;margin-top:18px;color:#d2d7df99;font-size:.56rem;letter-spacing:.04em}
-.tn-hero-caption{position:absolute;right:clamp(18px,4vw,55px);bottom:28px;z-index:1;display:grid;gap:6px;text-align:right;color:#f0c477;text-shadow:0 3px 18px #000}
-.tn-hero-caption span{font-size:.55rem;font-weight:900;letter-spacing:.2em}
-.tn-hero-caption strong{font:900 clamp(1.3rem,2.5vw,2.4rem)/.86 "Barlow Condensed";letter-spacing:.08em}
-#dashboard .panel[id]{scroll-margin-top:170px}
-@media(max-width:1250px){.tn-topnav{gap:12px}.tn-topnav-brand{padding-right:10px}.tn-topnav-links a{padding:6px 7px;font-size:.61rem}.tn-topnav-home{display:none}}
-@media(max-width:900px){#dashboard.tn-shell{width:calc(100% - 28px)}.tn-topnav{top:70px;flex-wrap:wrap;gap:12px 18px;padding:10px 12px}.tn-topnav-brand{min-width:100%;border-right:0;border-bottom:1px solid #ffffff20;padding:0 0 9px}.tn-topnav-group{flex:1 1 auto}.tn-topnav-links{flex-wrap:wrap}.tn-topnav-links a{font-size:.63rem}.tn-command-hero{min-height:470px}.tn-hero-caption{display:none}}
-@media(max-width:560px){#dashboard.tn-shell{width:calc(100% - 18px)}.tn-topnav{top:66px;gap:10px;padding:9px}.tn-topnav-group{min-width:100%}.tn-topnav-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}.tn-topnav-links a{min-width:0;white-space:normal;min-height:36px}.tn-command-hero{min-height:490px;padding:25px 18px;background-position:center,center,58% center}.tn-command-hero:before{background-position:right 35%;background-size:auto 100%;opacity:.62}.tn-command-hero h2{font-size:clamp(3.2rem,15vw,5.2rem)}.tn-command-hero .tn-hero-kicker{font-size:.57rem;letter-spacing:.17em}.tn-hero-meta{gap:8px 13px}.tn-command-links{display:grid;grid-template-columns:1fr}.tn-command-links a{text-align:center}}
-@media(prefers-reduced-motion:reduce){.tn-topnav-links a{transition:none}}
-</style>
-
-<style id="tn-navigation-redesign">
-/* Raven Control Room — grouped, task-oriented navigation */
-#dashboard.tn-shell{grid-template-columns:278px minmax(0,1fr);gap:22px}
-.tn-sidebar{padding:17px 13px 14px;background:linear-gradient(180deg,#111a27f8,#080d15f8);border:1px solid #d8ad6845}
-.tn-side-brand{padding:7px 9px 16px}
-.tn-side-brand:before{height:76px;margin-bottom:12px;filter:saturate(.58) contrast(1.13)}
-.tn-side-brand strong{font-size:1.48rem;letter-spacing:.12em}
-.tn-nav-heading{display:flex;align-items:center;justify-content:space-between;padding:14px 9px 9px}
-.tn-nav-heading .tn-nav-label{padding:0;font-size:.59rem;letter-spacing:.2em}
-.tn-nav-count{font-size:.55rem;font-weight:900;letter-spacing:.12em;color:#8793a3;border:1px solid #ffffff20;border-radius:20px;padding:4px 7px}
-.tn-nav{display:grid;gap:13px}
-.tn-nav-group{padding:0 0 10px;border-bottom:1px solid #ffffff12}
-.tn-nav-group:last-child{border-bottom:0;padding-bottom:0}
-.tn-nav-group-head{display:flex;align-items:baseline;justify-content:space-between;gap:7px;padding:0 8px 6px}
-.tn-nav-group-head>span{font-size:.63rem;font-weight:900;letter-spacing:.13em;text-transform:uppercase;color:#e1bd82}
-.tn-nav-group-head small{font-size:.55rem;color:#7e8b9b;text-align:right}
-.tn-nav-group>a{display:flex;align-items:center;gap:10px;min-height:39px;padding:8px 9px;margin:2px 0;border:1px solid transparent;border-radius:7px;color:#c2cbd6;font-size:.73rem;font-weight:700;letter-spacing:.005em;transition:background .18s,border-color .18s,color .18s,transform .18s}
-.tn-nav-group>a:hover{background:#ffffff09;border-color:#ffffff18;color:#fff;transform:translateX(2px)}
-.tn-nav-group>a.active{background:linear-gradient(90deg,#d8ad6822,#d8ad6808);border-color:#d8ad6855;color:#f5d9a9;box-shadow:inset 3px 0 #d8ad68}
-.tn-nav-icon{display:grid;place-items:center;width:25px;height:25px;flex:0 0 25px;border-radius:6px;background:#ffffff0a;color:#d8ad68;font-size:.9rem}
-.tn-nav-group>a.active .tn-nav-icon{background:#d8ad6820;color:#f0d19a}
-.tn-nav-linktext{min-width:0;flex:1}
-.tn-nav-index{font:700 .58rem "DM Sans",sans-serif;color:#718094;letter-spacing:.08em}
-.tn-nav-group>a.active .tn-nav-index{color:#d8ad68}
-.tn-nav-foot{margin:13px 5px 0;padding:13px 8px 2px;border-top:1px solid #ffffff18;font-size:.55rem;line-height:1.9;letter-spacing:.12em}
-.tn-nav-foot strong{color:#d8ad68;font-size:.57rem}
-.tn-nav-status-dot{display:inline-block;width:6px;height:6px;margin-right:6px;border-radius:50%;background:#d8ad68;box-shadow:0 0 10px #d8ad68}
-@media(max-width:1050px){#dashboard.tn-shell{grid-template-columns:235px minmax(0,1fr);gap:14px}.tn-nav-group-head small{display:none}}
-@media(max-width:760px){
- #dashboard.tn-shell{display:block}
- .tn-sidebar{position:relative;top:auto;max-height:none;padding:10px;margin-bottom:14px}
- .tn-side-brand{display:flex;align-items:center;gap:12px;padding:5px 7px 10px;margin-bottom:5px}
- .tn-side-brand:before{width:76px;height:45px;flex:0 0 76px;margin:0;background-position:center 35%}
- .tn-side-brand strong{font-size:1.15rem}
- .tn-side-brand span{font-size:.53rem}
- .tn-nav-heading{padding:8px 7px}
- .tn-nav{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 12px}
- .tn-nav-group{padding-bottom:8px}
- .tn-nav-group-head{min-height:27px;padding:0 5px 5px;display:block}
- .tn-nav-group-head>span{font-size:.57rem}
- .tn-nav-group-head small{display:block;font-size:.49rem;text-align:left;margin-top:2px}
- .tn-nav-group>a{min-height:36px;padding:6px 6px;gap:6px;font-size:.65rem}
- .tn-nav-icon{width:22px;height:22px;flex-basis:22px}
- .tn-nav-index{font-size:.51rem}
- .tn-nav-foot{display:block;margin-top:8px;padding-top:8px}
-}
-@media(max-width:420px){.tn-nav{grid-template-columns:1fr 1fr;gap:7px}.tn-nav-group-head>span{font-size:.53rem}.tn-nav-group>a{font-size:.61rem}.tn-nav-index{display:none}}
-@media(prefers-reduced-motion:reduce){.tn-nav-group>a{transition:none}}
+<style id="tn-unified-command-center">
+:root{--tn-ink:#080d15;--tn-panel:#111b28;--tn-panel2:#172435;--tn-gold:#e7b96f;--tn-gold2:#b77b45;--tn-white:#f3f0e9;--tn-muted:#aeb8c5;--tn-line:#d8e0ea22}
+#dashboard.tn-shell,#dashboard{width:min(1680px,calc(100% - 44px));max-width:1680px;margin:0 auto;padding:0 0 60px;display:grid;grid-template-columns:264px minmax(0,1fr);gap:24px;align-items:start}
+#dashboard .tn-command-sidebar{position:sticky;top:18px;align-self:start;max-height:calc(100vh - 36px);overflow:auto;padding:17px 13px 15px;background:linear-gradient(180deg,#131e2cf7,#090f18f7);border:1px solid #d8ad6845;box-shadow:0 22px 65px #0008;scrollbar-width:thin;scrollbar-color:#d8ad6855 transparent}
+.tn-side-identity{display:flex;align-items:center;gap:11px;padding:5px 7px 17px;border-bottom:1px solid var(--tn-line);color:var(--tn-white)!important;text-decoration:none}
+.tn-side-emblem{display:grid;place-items:center;width:43px;height:43px;flex:0 0 43px;background:linear-gradient(145deg,#f1d39b,#a96d3e);color:#101722;font:900 1.9rem "Barlow Condensed";box-shadow:0 0 24px #e7b96f26}
+.tn-side-identity strong,.tn-side-identity small{display:block}.tn-side-identity strong{font:900 1rem "Barlow Condensed";letter-spacing:.17em}.tn-side-identity small{margin-top:4px;color:var(--tn-gold);font-size:.53rem;font-weight:900;letter-spacing:.12em}
+.tn-side-live{display:flex;align-items:center;gap:8px;padding:13px 8px;color:#9eacbb;font-size:.53rem;font-weight:900;letter-spacing:.12em}
+.tn-side-live i,.tn-hero-foot i{width:7px;height:7px;border-radius:50%;background:#d7b16e;box-shadow:0 0 12px #d7b16e;flex:0 0 auto}
+.tn-side-group{padding:11px 0 12px;border-top:1px solid #ffffff12}.tn-side-group>p{margin:0 8px 7px;color:#d6b47b;font-size:.55rem;font-weight:900;letter-spacing:.19em}
+.tn-side-group>a{display:flex;align-items:center;gap:9px;min-height:39px;margin:2px 0;padding:7px 8px;border:1px solid transparent;border-radius:5px;color:#c5cfda!important;font-size:.71rem;font-weight:700;text-decoration:none;transition:.18s}
+.tn-side-group>a:hover,.tn-side-group>a.active{background:#e7b96f12;border-color:#e7b96f45;color:#f6d9a8!important}
+.tn-side-group>a.active{box-shadow:inset 3px 0 var(--tn-gold)}
+.tn-side-group>a b{margin-left:auto;color:#d6b47b;font-size:.65rem;opacity:.6}
+.tn-side-icon{display:grid;place-items:center;width:25px;height:25px;flex:0 0 25px;border:1px solid #ffffff16;background:#ffffff08;color:var(--tn-gold);font-size:.9rem}
+.tn-side-public{display:block;margin:13px 3px 0;padding:11px 10px;border:1px solid #d8ad6855;color:#edca91!important;text-align:center;font-size:.62rem;font-weight:900;letter-spacing:.1em;text-decoration:none}
+.tn-side-foot{padding:13px 8px 0;margin-top:13px;border-top:1px solid var(--tn-line);color:#8290a1;font-size:.53rem;line-height:1.9;letter-spacing:.13em}
+.tn-command-main{min-width:0}
+.tn-command-hero{isolation:isolate;position:relative;display:flex;align-items:center;min-height:510px;overflow:hidden;padding:clamp(30px,4vw,58px);border:1px solid #d8ad6866;background:#080e17;box-shadow:0 28px 80px #0008}
+.tn-hero-backdrop{position:absolute;inset:0;z-index:-2;background:linear-gradient(90deg,#060b13f5 0%,#07101be8 39%,#07101b78 75%,#07101b45 100%),linear-gradient(0deg,#060b13a8,transparent 50%),url("https://commons.wikimedia.org/wiki/Special:FilePath/Mount_Rainier_over_Tacoma.jpg?width=2200") center 48%/cover}
+.tn-hero-backdrop:after{content:"";position:absolute;inset:0;background:url("https://commons.wikimedia.org/wiki/Special:FilePath/Common_raven_in_a_tree.jpg?width=1600") right 35%/auto 115% no-repeat;opacity:.82;mix-blend-mode:screen;mask-image:linear-gradient(90deg,transparent 20%,#000 75%)}
+.tn-hero-content{position:relative;z-index:1;max-width:690px}
+.tn-eyebrow{margin:0 0 12px;color:var(--tn-gold);font-size:.59rem;font-weight:900;letter-spacing:.22em}
+.tn-hero-overline{margin:0 0 13px;color:#f0d5a8;font-size:.65rem;font-weight:900;letter-spacing:.23em}
+.tn-command-hero h1{margin:0 0 18px;color:#fff9ef;font:900 clamp(4.4rem,8vw,7.5rem)/.78 "Barlow Condensed";letter-spacing:.01em;text-shadow:0 12px 40px #000}
+.tn-command-hero h1 em{color:var(--tn-gold);font-style:normal}
+.tn-hero-description{max-width:610px;color:#d0d8e2;font-size:.91rem;line-height:1.8}
+.tn-hero-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:22px}
+.tn-hero-actions a{padding:11px 14px;border:1px solid #e7b96f77;background:#111b28c9;color:#f3d9ad!important;font-size:.61rem;font-weight:900;letter-spacing:.09em;text-decoration:none}
+.tn-hero-actions a:first-child{background:linear-gradient(130deg,#f0cc8a,#bd854e);color:#101722!important}
+.tn-hero-actions a span{margin-left:10px}
+.tn-hero-foot{display:flex;flex-wrap:wrap;gap:17px;margin-top:28px;color:#aeb8c5;font-size:.53rem;font-weight:900;letter-spacing:.12em}
+.tn-hero-foot span{display:flex;align-items:center;gap:8px}
+.tn-hero-stamp{position:absolute;right:28px;bottom:25px;display:grid;gap:4px;text-align:right;color:#f1d39b;text-shadow:0 2px 18px #000}
+.tn-hero-stamp span,.tn-hero-stamp small{font-size:.52rem;font-weight:900;letter-spacing:.18em}.tn-hero-stamp strong{font:900 4.2rem/.8 "Barlow Condensed"}
+.tn-section-intro{display:flex;justify-content:space-between;align-items:end;gap:20px;padding:30px 3px 14px}
+.tn-section-intro h2,.tn-group-heading h2{margin:0;color:#f4f0e8;font:800 clamp(1.7rem,3vw,2.45rem)/1.05 "Barlow Condensed";text-transform:uppercase}
+.tn-section-intro>p{max-width:380px;margin:0;color:var(--tn-muted);font-size:.77rem}
+.tn-metrics>.stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:0 0 15px}
+.tn-metrics .stat{min-width:0;padding:16px;background:linear-gradient(145deg,#172435,#0e1621);border:1px solid #d8ad6830;border-top:2px solid var(--tn-gold)}
+.tn-metrics .stat strong{font-size:2.2rem;color:#f0c477}
+.tn-metrics .stat span{font-size:.58rem;line-height:1.5}
+#liveStatusPanel{margin:14px 0 30px}
+.tn-workspace-shell{display:grid;gap:37px}
+.tn-workspace-group{min-width:0}
+.tn-group-heading{display:flex;align-items:center;gap:18px;margin:0 0 14px;padding:0 2px}
+.tn-group-heading .tn-eyebrow{margin:0 0 5px}
+.tn-group-rule{height:1px;flex:1;background:linear-gradient(90deg,#d8ad684d,transparent)}
+.tn-group-body{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px;align-items:start}
+.tn-group-body>.panel{grid-column:span 12;min-width:0;margin:0;background:linear-gradient(145deg,#151f2d,#0d141e);border:1px solid #dce7f322;border-top:1px solid #d8ad6855;box-shadow:0 20px 54px #0005}
+.tn-group-body>.panel:hover{border-color:#e7b96f66}
+.tn-group-body .panelhead h2{font-size:clamp(1.8rem,3.5vw,2.7rem)}
+.tn-group-editorial>.panel:first-child{background:linear-gradient(145deg,#1a2738,#0e1724)}
+.tn-group-production>.panel{background:linear-gradient(145deg,#18283a,#0c1521)}
+.tn-group-broadcast>.panel{background:linear-gradient(145deg,#202535,#0e1520)}
+.tn-group-community>.panel{background:linear-gradient(145deg,#1b2930,#0d171c)}
+.tn-group-media>.panel{background:linear-gradient(145deg,#1b2633,#0c141e)}
+.tn-redesigned-panel{scroll-margin-top:24px}
+@media(max-width:1120px){#dashboard.tn-shell,#dashboard{grid-template-columns:230px minmax(0,1fr);gap:15px}.tn-command-hero{min-height:470px}.tn-metrics>.stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:820px){#dashboard.tn-shell,#dashboard{display:block;width:calc(100% - 28px)}#dashboard .tn-command-sidebar{position:relative;top:auto;max-height:none;margin:0 0 14px;padding:10px}.tn-side-identity{padding-bottom:10px}.tn-side-group{padding:8px 0}.tn-side-group>a{display:inline-flex;width:calc(50% - 5px);vertical-align:top}.tn-side-public,.tn-side-foot{display:none}.tn-command-hero{min-height:430px}.tn-section-intro{align-items:start;flex-direction:column;gap:5px}.tn-group-body{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:560px){#dashboard.tn-shell,#dashboard{width:calc(100% - 18px)}.tn-side-group>a{width:100%;min-height:35px}.tn-side-group{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 7px}.tn-side-group>p{grid-column:1/-1}.tn-command-hero{min-height:470px;padding:24px 18px}.tn-command-hero h1{font-size:clamp(4rem,17vw,5.4rem)}.tn-hero-stamp{display:none}.tn-hero-foot{gap:9px}.tn-metrics>.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.tn-group-heading{align-items:end}.tn-group-heading h2{font-size:1.75rem}.tn-group-body{display:grid;grid-template-columns:minmax(0,1fr);gap:11px}.tn-group-body>.panel{padding:17px}.tn-group-body .panelhead{align-items:flex-start}}
+@media(prefers-reduced-motion:reduce){.tn-side-group>a{transition:none}}
 </style>
 <script src="./control-room-raven.js?v=2" defer></script>
 </body></html>
