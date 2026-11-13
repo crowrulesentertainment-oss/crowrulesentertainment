@@ -38,13 +38,13 @@
   const navLabel=document.createElement("p");navLabel.className="tn-v4-nav-label";navLabel.textContent="WORKSPACES";sidebar.append(navLabel);
   const nav=document.createElement("nav");nav.className="tn-v4-nav";nav.setAttribute("aria-label","Five production workspaces");
   groups.forEach((g,i)=>{
-   const link=document.createElement("a");link.href="#"+g.id;link.dataset.target=g.id;
+   const link=document.createElement("a");link.href="#"+g.id;link.dataset.target=g.id;link.setAttribute("aria-label",g.icon+" "+g.label+" — "+g.sub);
    const number=document.createElement("span");number.className="tn-v4-nav-number";number.textContent=g.icon;
    const copy=document.createElement("span");copy.className="tn-v4-nav-copy";
    const title=document.createElement("strong");title.textContent=g.label;
    const sub=document.createElement("small");sub.textContent=g.sub;
    copy.append(title,sub);
-   const count=document.createElement("span");count.className="tn-v4-nav-count";count.textContent=String(g.node.querySelectorAll(":scope > .panel").length).padStart(2,"0");
+   const count=document.createElement("span");count.className="tn-v4-nav-count";count.textContent=String(g.node.querySelectorAll(":scope > .panel").length).padStart(2,"0");count.setAttribute("aria-label",count.textContent+" management panels");
    link.append(number,copy,count);nav.append(link);
   });
   sidebar.append(nav);
