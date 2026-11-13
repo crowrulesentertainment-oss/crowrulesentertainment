@@ -51,7 +51,7 @@
   const foot=document.createElement("div");foot.className="tn-v4-sidebar-foot";
   foot.innerHTML='<span class="tn-v4-foot-dot"></span><span>PRIVATE PRODUCTION NETWORK</span><small>253 · TACOMA, WASHINGTON</small>';
   sidebar.append(foot);
-  const main=document.createElement("main");main.className="tn-v4-main";
+  const main=document.createElement("div");main.className="tn-v4-main";
   const command=document.createElement("div");command.className="tn-v4-commandline";
   command.innerHTML='<div><span class="tn-v4-command-eyebrow">CROWRULES ENTERTAINMENT</span><strong>THE CITY · THE PEOPLE · THE STORIES</strong></div><span class="tn-v4-version">RAVEN CONTROL ROOM <b>V4</b></span>';
   main.append(command);
