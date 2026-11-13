@@ -113,6 +113,7 @@
             status("Preparing clip "+(index+1)+" of "+files.length+": "+file.name);
             const cleanName=file.name.replace(/[^a-zA-Z0-9._-]/g,"_").slice(-100);
             const path="public-inbox/"+crypto.randomUUID()+"-"+cleanName;
+            let storagePath=path;
             await new Promise(async(resolve,reject)=>{
               let settled=false;
               const finish=(error)=>{if(settled)return;settled=true;error?reject(error):resolve();};
@@ -133,10 +134,10 @@
                   try{
                     const {error}=await supabaseClient().from(TABLE).insert({
                       owner_id:null,co_host_name:name,title,episode_label:episode,notes,
-                      storage_path:path,original_filename:file.name,file_size:file.size,
+                      storage_path:storagePath,original_filename:file.name,file_size:file.size,
                       mime_type:file.type||null,rights_confirmed:true
                     });
-                    if(error){await supabaseClient().storage.from(BUCKET).remove([path]);throw error;}
+                    if(error){await supabaseClient().storage.from(BUCKET).remove([storagePath]);throw error;}
                     completedBytes+=file.size;
                     finish();
                   }catch(error){finish(new Error("The video "+file.name+" uploaded, but its submission record could not be saved: "+(error.message||"unknown error")));}
@@ -145,7 +146,7 @@
               try{
                 const previous=await upload.findPreviousUploads();
                 const resumable=previous.find(item=>item.metadata?.bucketName===BUCKET&&item.metadata?.objectName);
-                if(resumable){upload.resumeFromPreviousUpload(resumable);status("Resuming "+file.name+" from its last confirmed chunk…");}
+                if(resumable){storagePath=resumable.metadata.objectName;upload.resumeFromPreviousUpload(resumable);status("Resuming "+file.name+" from its last confirmed chunk…");}
                 upload.start();
               }catch(error){finish(error);}
             });
