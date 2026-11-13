@@ -62,7 +62,7 @@
   }
   function initMap(){
    if(map||!window.L)return;
-   map=L.map("tnVisitorMap",{worldCopyJump:true,scrollWheelZoom:false}).setView([25,0],2);
+   const mapNode=$("tnVisitorMap");if(mapNode)mapNode.innerHTML="";map=L.map("tnVisitorMap",{worldCopyJump:true,scrollWheelZoom:false}).setView([25,0],2);
    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:8,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}).addTo(map);
    layer=L.layerGroup().addTo(map);if(lastState)render(lastState);setTimeout(()=>map.invalidateSize(),200);
   }
@@ -88,7 +88,7 @@
    if(located.length){const bounds=L.latLngBounds(located.map(v=>[v.approxLocation.latitude,v.approxLocation.longitude]));map.fitBounds(bounds.pad(.35),{maxZoom:5});}
    $("tnMapStatus").textContent=located.length+" of "+visitors.size+" active visitors have chosen to share an approximate location.";
   }
-  const attach=()=>{const ch=window.__tnVisitorChannel;if(!ch||card.dataset.attached)return;card.dataset.attached="yes";const refresh=()=>render(true);ch.on("presence",{event:"sync"},refresh).on("presence",{event:"join"},refresh).on("presence",{event:"leave"},refresh);refresh();};
+  const attach=()=>{const ch=window.__tnVisitorChannel;if(!ch)return;const refresh=()=>render(true);if(!card.dataset.attached){card.dataset.attached="yes";window.addEventListener("tn-presence-updated",refresh);}refresh();};
   attach();window.addEventListener("tn-presence-ready",attach);window.addEventListener("tacoma-nights-db-ready",()=>setTimeout(attach,300));
  }
  function shareCurrentLocation(){/* location sharing is initiated by the map's explicit opt-in control */}
