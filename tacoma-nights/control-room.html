@@ -1681,49 +1681,92 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 <script>
-/* Raven Control Room shell: presentation-only DOM reorganization; existing modules and data remain intact. */
+/* Tacoma Nights cinematic shell — navigation and presentation only.
+   Existing workspace nodes, event handlers, Supabase logic and stored data are preserved. */
 (function(){
  const dash=document.getElementById('dashboard');
  if(!dash||dash.dataset.ravenShell==='ready')return;
  dash.dataset.ravenShell='ready';
  const groups=[
-  {title:'Command',hint:'Monitor & manage',items:[
-   ['00','Command Center','dashboardHero','⌂'],
-   ['01','Audience Intelligence','visitorAnalyticsPanel','◉']
-  ]},
-  {title:'Editorial & Planning',hint:'Develop the story',items:[
-   ['02','Topic Calendar','topicCenter','▦'],
-   ['03','Show Format','episodeFormat','≡'],
-   ['04','Episode Production','productionWorkspace','✎']
-  ]},
-  {title:'Studio & Broadcast',hint:'Make it happen',items:[
-   ['05','Broadcast Operations','broadcastCenter','◉'],
-   ['06','Premiere Management','premierePanel','▶']
-  ]},
-  {title:'People & Community',hint:'The voices of the 253',items:[
-   ['07','Crew & Contributors','crewPanel','♙'],
-   ['08','Host Applications','hostApplicationsPanel','＋'],
-   ['09','Community Inbox','inboxPanel','✉']
-  ]},
-  {title:'Media & Archive',hint:'Production assets',items:[
-   ['10','Media Vault','clipsPanel','▤']
-  ]}
+  {title:'Command',items:[['01','Command Center','dashboardHero'],['02','Audience Intelligence','visitorAnalyticsPanel']]},
+  {title:'Editorial',items:[['03','Topic Calendar','topicCenter'],['04','Show Format','episodeFormat'],['05','Episode Production','productionWorkspace']]},
+  {title:'Broadcast',items:[['06','Broadcast Operations','broadcastCenter'],['07','Premiere Management','premierePanel']]},
+  {title:'Community',items:[['08','Crew & Contributors','crewPanel'],['09','Host Applications','hostApplicationsPanel'],['10','Community Inbox','inboxPanel']]},
+  {title:'Media',items:[['11','Media Vault','clipsPanel']]}
  ];
-  const original=[...dash.children];
- const side=document.createElement('aside');side.className='tn-sidebar';side.setAttribute('aria-label','Control Room navigation');
- side.innerHTML='<div class="tn-side-brand"><strong>RAVEN OPERATIONS</strong><span>TACOMA NIGHTS · PRIVATE</span></div><div class="tn-nav-heading"><span class="tn-nav-label">WORKSPACES</span><span class="tn-nav-count">11 MODULES</span></div><nav class="tn-nav" aria-label="Production workspaces">'+groups.map((group,index)=>'<section class="tn-nav-group"><div class="tn-nav-group-head"><span>'+group.title+'</span><small>'+group.hint+'</small></div>'+group.items.map(([n,label,id,icon])=>'<a href="#'+id+'" data-nav-target="'+id+'"><span class="tn-nav-icon" aria-hidden="true">'+icon+'</span><span class="tn-nav-linktext">'+label+'</span><span class="tn-nav-index">'+n+'</span></a>').join('')+'</section>').join('')+'</nav><div class="tn-nav-foot"><span class="tn-nav-status-dot"></span> PRIVATE PRODUCTION NETWORK<br><strong>ONE COMPANY. ONE UNIVERSE.</strong></div>';
+ const original=[...dash.children];
+ const nav=document.createElement('nav');
+ nav.className='tn-topnav';
+ nav.setAttribute('aria-label','Tacoma Nights production workspaces');
+ nav.innerHTML='<div class="tn-topnav-brand"><span class="tn-topnav-raven" aria-hidden="true">R</span><span><strong>RAVEN OPERATIONS</strong><small>CONTROL ROOM</small></span></div>'+groups.map(group=>'<div class="tn-topnav-group"><span class="tn-topnav-label">'+group.title+'</span><div class="tn-topnav-links">'+group.items.map(([n,label,id])=>'<a href="#'+id+'" data-nav-target="'+id+'"><span>'+n+'</span>'+label+'</a>').join('')+'</div></div>').join('')+'<a class="tn-topnav-home" href="./" target="_blank" rel="noopener">PUBLIC SITE ↗</a>';
  const main=document.createElement('main');main.className='tn-main';
  const hero=document.createElement('section');hero.className='tn-command-hero';hero.id='dashboardHero';
- hero.innerHTML='<div class="tn-hero-copy"><p class="micro">CROWRULES ENTERTAINMENT · TACOMA, WASHINGTON</p><p class="tn-hero-kicker">THE CITY. THE PEOPLE. THE STORIES.</p><h2>THE RAVEN<br><em>CONTROL ROOM</em></h2><p class="tn-hero-description">Your private television production headquarters. Develop the stories, coordinate the voices, shape every episode and prepare the broadcast — all from the heart of the South Sound.</p><div class="tn-hero-meta"><span><i></i> PRIVATE PRODUCTION NETWORK</span><span>EST. TACOMA · PACIFIC NORTHWEST</span></div><div class="tn-command-links"><a href="#productionWorkspace">Enter production desk ↗</a><a href="#broadcastCenter">Prepare broadcast ↗</a><a href="#clipsPanel">Open media vault ↗</a></div><small class="tn-photo-credit">Raven: YosemiteYamper / Wikimedia Commons · CC BY-SA · Tacoma &amp; Mount Rainier: public-domain photography</small></div>';
- dash.replaceChildren(side,main);main.append(hero);original.forEach(node=>main.append(node));
- const links=[...side.querySelectorAll('.tn-nav a')];
- const activate=()=>{const hash=location.hash;links.forEach(a=>{const active=a.getAttribute('href')===hash;a.classList.toggle('active',active);if(active)a.closest('.tn-nav-group')?.classList.add('is-current');else if(!a.closest('.tn-nav-group')?.querySelector('.active'))a.closest('.tn-nav-group')?.classList.remove('is-current');});};
- links.forEach(a=>a.addEventListener('click',()=>{links.forEach(x=>x.classList.remove('active'));a.classList.add('active');links.forEach(x=>x.closest('.tn-nav-group')?.classList.toggle('is-current',!!x.closest('.tn-nav-group')?.querySelector('.active')));}));
- window.addEventListener('hashchange',activate);activate();
+ hero.innerHTML='<div class="tn-hero-copy"><p class="micro">CROWRULES ENTERTAINMENT · TACOMA, WASHINGTON</p><p class="tn-hero-kicker">THE CITY. THE PEOPLE. THE STORIES.</p><h2>THE RAVEN<br><em>CONTROL ROOM</em></h2><p class="tn-hero-description">The production headquarters for Tacoma Nights. Build the stories, bring the voices together, shape every episode and prepare the broadcast — grounded in Tacoma and reaching beyond the South Sound.</p><div class="tn-hero-meta"><span><i></i> PRIVATE PRODUCTION NETWORK</span><span>EST. TACOMA · PACIFIC NORTHWEST</span><span>ONE COMPANY. ONE UNIVERSE.</span></div><div class="tn-command-links"><a href="#productionWorkspace">ENTER PRODUCTION DESK ↗</a><a href="#broadcastCenter">PREPARE BROADCAST ↗</a><a href="#clipsPanel">OPEN MEDIA VAULT ↗</a></div><small class="tn-photo-credit">Photographic atmosphere: real raven wildlife and Tacoma / Mount Rainier landscape imagery. Image sources are loaded remotely.</small></div><div class="tn-hero-caption"><span>FIELD NOTES / 253</span><strong>TACOMA<br>AFTER DARK</strong></div>';
+ dash.replaceChildren(nav,main);
+ main.append(hero);
+ original.forEach(node=>main.append(node));
+ const links=[...nav.querySelectorAll('[data-nav-target]')];
+ const setActive=id=>{
+  links.forEach(a=>{const active=a.dataset.navTarget===id;a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current');});
+ };
+ links.forEach(a=>a.addEventListener('click',()=>setActive(a.dataset.navTarget)));
+ window.addEventListener('hashchange',()=>setActive(location.hash.slice(1)));
  const targets=links.map(a=>document.getElementById(a.dataset.navTarget)).filter(Boolean);
- if('IntersectionObserver' in window){const observer=new IntersectionObserver(entries=>{const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(visible){const link=links.find(a=>a.dataset.navTarget===visible.target.id);if(link){links.forEach(a=>a.classList.toggle('active',a===link));links.forEach(a=>a.closest('.tn-nav-group')?.classList.toggle('is-current',!!a.closest('.tn-nav-group')?.querySelector('.active')));}}},{rootMargin:'-18% 0px -68% 0px',threshold:[0,.15,.35]});targets.forEach(target=>observer.observe(target));}
+ if('IntersectionObserver' in window){
+  const observer=new IntersectionObserver(entries=>{
+   const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
+   if(visible)setActive(visible.target.id);
+  },{rootMargin:'-22% 0px -66% 0px',threshold:[0,.15,.35]});
+  targets.forEach(target=>observer.observe(target));
+ }
+ setActive(location.hash.slice(1)||'dashboardHero');
 })();
 </script>
+
+<style id="tn-cinematic-top-navigation">
+/* Full-width cinematic presentation — all production modules remain in their original DOM order. */
+#dashboard.tn-shell{display:block!important;width:min(1680px,calc(100% - 42px));max-width:1680px;margin:0 auto;padding:0 0 28px}
+.tn-topnav{position:sticky;top:72px;z-index:8;display:flex;align-items:stretch;gap:clamp(10px,1.5vw,24px);width:100%;margin:0 0 22px;padding:11px 15px;background:linear-gradient(105deg,#080e17f5,#111a27f2 58%,#080d15f5);border:1px solid #d8ad6855;border-top:0;box-shadow:0 16px 42px #0009;backdrop-filter:blur(18px);overflow-x:auto;scrollbar-width:thin;scrollbar-color:#d8ad6866 transparent}
+.tn-topnav-brand{display:flex;align-items:center;gap:9px;flex:0 0 auto;padding:0 16px 0 3px;border-right:1px solid #ffffff20}
+.tn-topnav-raven{display:grid;place-items:center;width:38px;height:38px;border:1px solid #d8ad6877;background:linear-gradient(145deg,#e8c58b,#9d633c);color:#0a1018;font:900 1.55rem "Barlow Condensed";box-shadow:0 0 25px #d8ad6826}
+.tn-topnav-brand strong,.tn-topnav-brand small{display:block;white-space:nowrap}
+.tn-topnav-brand strong{font:800 .86rem "Barlow Condensed";letter-spacing:.12em;color:#f3e5cd}
+.tn-topnav-brand small{margin-top:3px;color:#d8ad68;font-size:.53rem;font-weight:900;letter-spacing:.2em}
+.tn-topnav-group{display:flex;flex-direction:column;justify-content:center;gap:5px;flex:0 0 auto}
+.tn-topnav-label{color:#d8ad68;font-size:.53rem;font-weight:900;letter-spacing:.18em;text-transform:uppercase}
+.tn-topnav-links{display:flex;align-items:center;gap:4px}
+.tn-topnav-links a,.tn-topnav-home{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:6px 9px;border:1px solid transparent;border-radius:5px;color:#c5cfdb;font-size:.65rem;font-weight:700;white-space:nowrap;text-decoration:none;transition:background .18s,border-color .18s,color .18s}
+.tn-topnav-links a span{color:#d8ad68;font:800 .62rem "Barlow Condensed";letter-spacing:.05em}
+.tn-topnav-links a:hover,.tn-topnav-links a.active{background:#d8ad6819;border-color:#d8ad6855;color:#ffe1ad}
+.tn-topnav-links a.active{box-shadow:inset 0 -2px #d8ad68}
+.tn-topnav-home{align-self:center;margin-left:auto;border-color:#d8ad6855;color:#e8c58b!important;letter-spacing:.08em}
+.tn-topnav-home:hover{background:#d8ad681b}
+.tn-main{min-width:0;padding:0 0 20px}
+.tn-command-hero{isolation:isolate;position:relative;display:flex;align-items:center;min-height:clamp(440px,42vw,620px);overflow:hidden;margin:0 0 26px;padding:clamp(28px,5vw,72px);border:1px solid #d8ad6870;border-radius:4px;background-color:#080d15;background-image:linear-gradient(90deg,#050a12f5 0%,#07101bdc 34%,#09111a8a 63%,#080d1540 100%),linear-gradient(0deg,#080d15aa,transparent 35%),url("https://commons.wikimedia.org/wiki/Special:FilePath/Mount_Rainier_over_Tacoma.jpg?width=2200");background-position:center,center,center 48%;background-size:cover;box-shadow:0 28px 90px #000b,inset 0 1px #ffffff2b}
+.tn-command-hero:before{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(90deg,transparent 45%,#07101a38 100%),url("https://commons.wikimedia.org/wiki/Special:FilePath/Common_raven_in_a_tree.jpg?width=1600") right 34%/auto 112% no-repeat;opacity:.92;mix-blend-mode:screen;mask-image:linear-gradient(90deg,transparent 30%,#000 69%,#000 100%);pointer-events:none}
+.tn-command-hero:after{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(0deg,#050a12b8,transparent 32%),repeating-linear-gradient(0deg,transparent 0 3px,#ffffff05 4px);pointer-events:none}
+.tn-hero-copy{position:relative;z-index:2;max-width:790px}
+.tn-command-hero .micro{margin:0 0 13px;color:#f0c477;font-size:.66rem;font-weight:900;letter-spacing:.23em}
+.tn-command-hero .tn-hero-kicker{margin:0 0 13px;color:#e5c38d;font-size:.68rem;font-weight:900;letter-spacing:.28em}
+.tn-command-hero h2{margin:0 0 20px;color:#fff8ed;font:900 clamp(3.6rem,8.3vw,8rem)/.79 "Barlow Condensed";letter-spacing:.01em;text-shadow:0 10px 48px #000d}
+.tn-command-hero h2 em{color:#f0c477;font-style:normal}
+.tn-command-hero .tn-hero-description{max-width:650px;margin:0;color:#d5dce5;font-size:clamp(.9rem,1.25vw,1.06rem);line-height:1.8;text-shadow:0 2px 12px #000}
+.tn-hero-meta{display:flex;flex-wrap:wrap;gap:10px 22px;margin:22px 0 4px;color:#d2d7df;font-size:.59rem;font-weight:900;letter-spacing:.13em}
+.tn-hero-meta span{display:flex;align-items:center;gap:8px}
+.tn-hero-meta i{width:7px;height:7px;border-radius:50%;background:#e8b45c;box-shadow:0 0 13px #e8b45c}
+.tn-command-links{display:flex;flex-wrap:wrap;gap:9px;margin-top:21px}
+.tn-command-links a{padding:10px 13px;border:1px solid #e8b45c77;border-radius:3px;background:#080d15b8;color:#f3d7a7;font-size:.64rem;font-weight:900;letter-spacing:.09em;text-decoration:none;backdrop-filter:blur(8px)}
+.tn-command-links a:hover{background:#d8ad682b;border-color:#f0c477}
+.tn-photo-credit{display:block;margin-top:18px;color:#d2d7df99;font-size:.56rem;letter-spacing:.04em}
+.tn-hero-caption{position:absolute;right:clamp(18px,4vw,55px);bottom:28px;z-index:1;display:grid;gap:6px;text-align:right;color:#f0c477;text-shadow:0 3px 18px #000}
+.tn-hero-caption span{font-size:.55rem;font-weight:900;letter-spacing:.2em}
+.tn-hero-caption strong{font:900 clamp(1.3rem,2.5vw,2.4rem)/.86 "Barlow Condensed";letter-spacing:.08em}
+#dashboard .panel[id]{scroll-margin-top:170px}
+@media(max-width:1250px){.tn-topnav{gap:12px}.tn-topnav-brand{padding-right:10px}.tn-topnav-links a{padding:6px 7px;font-size:.61rem}.tn-topnav-home{display:none}}
+@media(max-width:900px){#dashboard.tn-shell{width:calc(100% - 28px)}.tn-topnav{top:70px;flex-wrap:wrap;gap:12px 18px;padding:10px 12px}.tn-topnav-brand{min-width:100%;border-right:0;border-bottom:1px solid #ffffff20;padding:0 0 9px}.tn-topnav-group{flex:1 1 auto}.tn-topnav-links{flex-wrap:wrap}.tn-topnav-links a{font-size:.63rem}.tn-command-hero{min-height:470px}.tn-hero-caption{display:none}}
+@media(max-width:560px){#dashboard.tn-shell{width:calc(100% - 18px)}.tn-topnav{top:66px;gap:10px;padding:9px}.tn-topnav-group{min-width:100%}.tn-topnav-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}.tn-topnav-links a{min-width:0;white-space:normal;min-height:36px}.tn-command-hero{min-height:490px;padding:25px 18px;background-position:center,center,58% center}.tn-command-hero:before{background-position:right 35%;background-size:auto 100%;opacity:.62}.tn-command-hero h2{font-size:clamp(3.2rem,15vw,5.2rem)}.tn-command-hero .tn-hero-kicker{font-size:.57rem;letter-spacing:.17em}.tn-hero-meta{gap:8px 13px}.tn-command-links{display:grid;grid-template-columns:1fr}.tn-command-links a{text-align:center}}
+@media(prefers-reduced-motion:reduce){.tn-topnav-links a{transition:none}}
+</style>
 
 <style id="tn-navigation-redesign">
 /* Raven Control Room — grouped, task-oriented navigation */
