@@ -30,17 +30,42 @@
 @media(max-width:1050px){.shell{grid-template-columns:220px minmax(0,1fr)}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.brand{min-width:205px}}
 @media(max-width:720px){body{overflow:auto}.shell{height:100dvh;min-height:560px;grid-template-columns:1fr;grid-template-rows:62px auto minmax(0,1fr)}.topbar{grid-column:1;padding:0 12px;gap:9px}.brand{min-width:0}.brand strong{font-size:16px}.brand small{font-size:8px}.top-title,.top-sub,.status{display:none}.sidebar{grid-row:2;overflow-x:auto;overflow-y:hidden;padding:7px 9px;border-right:0;border-bottom:1px solid var(--line)}.side-label,.side-foot{display:none}.nav{display:flex;gap:5px;width:max-content}.nav button{width:auto;padding:8px 10px;font-size:10px}.nav .num{display:none}.nav .nav-icon{font-size:12px}.main{grid-row:3;min-height:0}.toolbar{height:46px;flex-basis:46px;padding:0 10px}.search{width:34vw}.toolbtn{padding:7px}.home{padding:14px 12px 25px}.hero{min-height:210px;padding:18px}.hero h1{font-size:37px}.cards{grid-template-columns:1fr 1fr;gap:8px}.division{min-height:132px;padding:11px}.division h3{font-size:17px}.division p{font-size:9px}.metrics{gap:7px}.metric{padding:10px}.metric strong{font-size:23px}.frame-head{height:40px;flex-basis:40px}.frame-note{display:none}}
 @media(max-width:420px){.cards{grid-template-columns:1fr}.hero p{font-size:11px}.clock{display:none}}
+ .auth-gate{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:24px;background:linear-gradient(120deg,rgba(4,7,12,.94),rgba(5,10,16,.82)),url("https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=2000&q=85") center/cover}
+ .auth-card{width:min(430px,100%);padding:30px;border:1px solid rgba(200,173,121,.32);border-radius:18px;background:rgba(9,15,22,.94);box-shadow:0 24px 90px #0009;backdrop-filter:blur(18px)}
+ .auth-mark{font-size:30px;color:var(--gold)}.auth-card .eyebrow{margin-top:14px}.auth-card h1{font:600 34px/1 "Barlow Condensed",sans-serif;margin:10px 0}.auth-card p{font-size:12px;color:var(--muted);line-height:1.65}
+ .auth-card label{display:block;font-size:10px;color:#bac7d3;margin:15px 0 6px;letter-spacing:.7px}.auth-card input{width:100%;padding:12px;border:1px solid var(--line);border-radius:8px;background:#080e15;color:white;outline:none}.auth-card input:focus{border-color:var(--blue)}
+ .auth-submit{width:100%;margin-top:18px;padding:12px;border:0;border-radius:8px;background:linear-gradient(135deg,#c9b487,#a98d5d);color:#111820;font-weight:800}.auth-error{min-height:18px;color:#ffaaa4;font-size:11px;margin-top:12px}
+ .account-chip{display:flex;align-items:center;gap:9px;font-size:10px;color:#b9c8d5}.account-chip button{border:1px solid var(--line);border-radius:8px;background:#111b25;color:#dce5ec;padding:7px 10px;font-size:10px}
+ [hidden]{display:none!important}
+ @media(max-width:720px){.auth-card{padding:23px}.account-chip span{display:none}}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0"></script>
+<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/assets/js/universal-admin-auth.js?v=20261112-sso1"></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=5" defer></script></head>
 <body>
-<div class="shell">
+<section class="auth-gate" id="authGate" aria-label="Universal Admin sign in">
+ <form class="auth-card" id="universalLoginForm">
+  <div class="auth-mark" aria-hidden="true">🪶</div>
+  <div class="eyebrow">CROWRULES ENTERTAINMENT · SECURE ACCESS</div>
+  <h1>Universal Admin</h1>
+  <p>Sign in once to enter the CrowRules command headquarters. Your verified Supabase session is shared with the connected workspaces on this site.</p>
+  <label for="universalEmail">ADMINISTRATOR EMAIL</label>
+  <input id="universalEmail" name="email" type="email" autocomplete="username" required>
+  <label for="universalPassword">PASSWORD</label>
+  <input id="universalPassword" name="password" type="password" autocomplete="current-password" required>
+  <button class="auth-submit" id="universalSignIn" type="submit">SIGN IN SECURELY ↗</button>
+  <div class="auth-error" id="authError" role="alert"></div>
+  <p style="font-size:10px;margin-bottom:0">Access requires an active CrowRules administrator record. Workspace-specific permissions remain in force.</p>
+ </form>
+</section>
+<div class="shell" id="adminShell" hidden>
 <header class="topbar">
   <div class="brand"><div class="raven" aria-hidden="true">🪶</div><div><strong>CROWRULES ENTERTAINMENT</strong><small>ONE COMPANY · ONE UNIVERSE</small></div></div>
   <div class="top-title">Universal Admin</div><div class="top-sub">Command Headquarters</div>
   <div class="top-spacer"></div>
   <div class="status"><span class="dot"></span> Headquarters online</div>
-  <div class="clock" id="clock">--:--:--</div>
+  <div class="clock" id="clock">--:--:--</div><div class="account-chip"><span id="accountIdentity">Administrator</span><button id="universalSignOut" type="button">Sign out</button></div>
 </header>
 <aside class="sidebar">
   <div class="side-label">Headquarters</div>
@@ -75,7 +100,7 @@
         <div class="metric"><small>Connected workspaces</small><strong>10</strong><em>All ten destinations registered</em></div>
         <div class="metric"><small>Administrative model</small><strong>Embedded</strong><em>Original pages loaded in workspace frames</em></div>
         <div class="metric"><small>Standalone access</small><strong>Enabled</strong><em>Original URLs remain unchanged</em></div>
-        <div class="metric"><small>Authentication</small><strong>Existing</strong><em>Original admin sign-in controls retained</em></div>
+        <div class="metric"><small>Authentication</small><strong>Shared SSO</strong><em>One Supabase session across workspaces</em></div>
       </div>
       <div class="section-head"><h2>Administrative divisions</h2><span>Select a workspace to enter its full existing admin</span></div>
       <div class="cards" id="cards"></div>
@@ -99,7 +124,6 @@ const WORKSPACES=[
 {id:"back-deck",number:"07",name:"Back Deck Live",short:"Back Deck Live",description:"Live show administration, episodes, guests, crew and production planning.",icon:"▤",url:"/crowrulesentertainment/back-deck-live/admin.html",group:"Production"},
 {id:"holidays",number:"08",name:"Holiday Hub",short:"Holiday Hub",description:"Holiday calendars, seasonal programming, events and content.",icon:"✧",url:"/tacoma/holidays/admin.html",group:"Events"},
 {id:"dreamscapes",number:"09",name:"Dreamscapes",short:"Dreamscapes",description:"Dream submissions, creative projects, collaboration and development.",icon:"✦",url:"/dreamscapes/admin.html",group:"Creative"},
-{id:"memorials",number:"10",name:"Memorials Administration",short:"Memorials",description:"Memorial tributes, community submissions, partners, events and remembrance archive moderation.",icon:"🕯",url:"/tacoma/memorial-day/admin.html",group:"Community"},
 {id:"memorials",number:"10",name:"CrowRules Memorials Administration",short:"Memorials",description:"Memorial submissions, life stories, tributes, candles, guestbook memories and media review.",icon:"🕯",url:"/memorials/admin/",group:"Community"},
 ];
 const $=id=>document.getElementById(id);
@@ -148,7 +172,29 @@ $("search").addEventListener("input",e=>{const q=e.target.value.trim().toLowerCa
 document.addEventListener("keydown",e=>{if(e.key==="/"&&!/input|textarea/i.test(document.activeElement.tagName)){e.preventDefault();$("search").focus();}if(e.key==="Escape"&&document.activeElement===$("search")){$("search").value="";$("search").dispatchEvent(new Event("input"));$("search").blur();}});
 function tick(){$("clock").textContent=new Intl.DateTimeFormat(undefined,{hour:"2-digit",minute:"2-digit",second:"2-digit"}).format(new Date());}
 tick();setInterval(tick,1000);
-const savedActive=sessionStorage.getItem("cr-universal-active");if(savedActive&&openIds.includes(savedActive))openWorkspace(savedActive);else if(openIds.length)openWorkspace(openIds[openIds.length-1]);else setHome();
+function restoreWorkspace(){const savedActive=sessionStorage.getItem("cr-universal-active");if(savedActive&&openIds.includes(savedActive))openWorkspace(savedActive);else if(openIds.length)openWorkspace(openIds[openIds.length-1]);else setHome();}
+const authGate=$("authGate"),adminShell=$("adminShell"),authError=$("authError"),loginForm=$("universalLoginForm");
+function showLogin(message){adminShell.hidden=true;authGate.hidden=false;authError.textContent=message||"";}
+async function enterUniversalAdmin(){
+ try{
+  const result=await window.CrowRulesAdminAuth.authorize();
+  if(!result.ok){showLogin(result.message);return;}
+  $("accountIdentity").textContent=(result.user.email||"Administrator")+" · "+result.role;
+  authGate.hidden=true;adminShell.hidden=false;restoreWorkspace();
+ }catch(error){showLogin(error.message||"Could not verify administrator access.");}
+}
+loginForm.addEventListener("submit",async event=>{
+ event.preventDefault();const button=$("universalSignIn");button.disabled=true;button.textContent="VERIFYING ACCESS…";authError.textContent="";
+ try{const {error}=await window.CrowRulesAdminAuth.signIn($("universalEmail").value,$("universalPassword").value);if(error)throw error;await enterUniversalAdmin();}
+ catch(error){authError.textContent=error.message||"Sign-in failed. Please try again.";}
+ finally{button.disabled=false;button.textContent="SIGN IN SECURELY ↗";}
+});
+$("universalSignOut").addEventListener("click",async()=>{await window.CrowRulesAdminAuth.signOut();showLogin("You have signed out of CrowRules Universal Admin.");});
+window.CrowRulesAdminAuth.client.auth.onAuthStateChange((event,session)=>{
+ if(event==="SIGNED_OUT")showLogin("Your shared session has ended. Sign in to continue.");
+ else if(event==="SIGNED_IN"&&session)setTimeout(enterUniversalAdmin,0);
+});
+enterUniversalAdmin();
 </script>
 </body>
 </html>
