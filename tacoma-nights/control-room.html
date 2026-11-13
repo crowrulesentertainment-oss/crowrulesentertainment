@@ -350,6 +350,9 @@ body:before{opacity:.3;background:radial-gradient(ellipse at 50% 0%,#52677e22,tr
 .broadcast-script{min-height:95px}
 @media(max-width:760px){.broadcast-flow{grid-template-columns:1fr}.broadcast-hero{flex-direction:column}.broadcast-checks{grid-template-columns:1fr}}
 
+
+/* Tacoma Nights visitor analytics center */
+.tn-analytics-stats{grid-template-columns:repeat(4,minmax(0,1fr));margin:14px 0 20px}.tn-analytics-list{display:grid;gap:8px;margin-top:12px}.tn-analytics-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;background:#080e15;border:1px solid #ffffff18}.tn-analytics-row strong{display:block;font-size:.83rem;overflow-wrap:anywhere}.tn-analytics-row small{display:block;color:var(--muted);font-size:.68rem}.tn-analytics-row b{font:800 1.45rem "Barlow Condensed";color:#f0c477}.tn-analytics-table{width:100%;font-size:.74rem;margin-top:12px}.tn-analytics-table th,.tn-analytics-table td{padding:9px 10px;border-bottom:1px solid #ffffff18;text-align:left;vertical-align:top}.tn-analytics-table th{color:#f0c477;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase}.tn-analytics-table td{color:#d8dee8;overflow-wrap:anywhere}.tn-analytics-table td small{color:var(--muted)}@media(max-width:800px){.tn-analytics-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){.tn-analytics-stats{grid-template-columns:1fr 1fr}.tn-analytics-table{min-width:620px}}
 </style><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
 
 <style>
@@ -385,6 +388,23 @@ body:before{opacity:.3;background:radial-gradient(ellipse at 50% 0%,#52677e22,tr
 <section class="hero"><p class="micro">CROWRULES ENTERTAINMENT · PRIVATE OPERATIONS</p><h1>PREMIERE<br><span style="color:var(--lime)">CONTROL ROOM.</span></h1><p>Manage weekly episode development, scripts, contributors, recording, edit approvals, premieres, crew profiles and community submissions from one private production headquarters. This dashboard requires an authenticated Supabase user with an administrator role.</p><div id="globalStatus" class="notice" role="status" aria-live="polite">Connecting to secure operations…</div></section>
 <section id="authPanel" class="auth hidden"><p class="micro">ADMIN ACCESS</p><h2>Sign in.</h2><p class="small">Use your Tacoma Nights administrator account. Public visitors cannot access the private inbox or management controls.</p><form id="loginForm" class="fields"><label class="full">Email address<input name="email" type="email" autocomplete="username" required maxlength="254"></label><label class="full">Password<input name="password" type="password" autocomplete="current-password" required></label><div class="full actions"><button class="btn" id="loginBtn">Sign in securely ↗</button></div></form><p id="authMessage" class="small" role="status" aria-live="polite"></p></section>
 <div id="dashboard" class="hidden">
+
+<section class="panel" id="visitorAnalyticsPanel">
+ <div class="panelhead"><div><p class="micro">00 / AUDIENCE INTELLIGENCE</p><h2>Visitor analytics center</h2><p>Live page-by-page visitor presence and permanent anonymous page-view records for Tacoma Nights.</p></div><button class="btn ghost" id="visitorAnalyticsRefresh" type="button">↻ Refresh records</button></div>
+ <div class="stats tn-analytics-stats">
+  <div class="stat"><strong id="tnAnalyticsTotalViews">—</strong><span>All-time page views</span></div>
+  <div class="stat"><strong id="tnAnalyticsViews24">—</strong><span>Page views · last 24 hours</span></div>
+  <div class="stat"><strong id="tnAnalyticsUnique">—</strong><span>Unique visitors · per-page total</span></div>
+  <div class="stat"><strong id="tnAnalyticsPages">—</strong><span>Pages recorded</span></div>
+ </div>
+ <div class="grid">
+  <div class="span6 item"><div class="itemtop"><div><span class="micro">LIVE RIGHT NOW</span><h3>Visitors by page</h3></div><span class="pill">REALTIME</span></div><div id="tnLivePageBreakdown" class="tn-analytics-list"><p class="small">Connecting to live page presence…</p></div></div>
+  <div class="span6 item"><div class="itemtop"><div><span class="micro">HISTORICAL PERFORMANCE</span><h3>Most visited pages</h3></div></div><div id="tnTopPages" class="tn-analytics-list"><p class="small">Loading page totals…</p></div></div>
+  <div class="span12 item"><div class="itemtop"><div><span class="micro">VISIT LOG</span><h3>Recent visitor records</h3></div><span class="small">Latest 30 page views</span></div><div class="table-wrap"><table class="tn-analytics-table"><thead><tr><th>Page</th><th>Visited · Pacific</th><th>Anonymous visitor</th><th>Referrer</th></tr></thead><tbody id="tnRecentPageViews"><tr><td colspan="4">Loading visitor records…</td></tr></tbody></table></div></div>
+ </div>
+ <p id="tnAnalyticsStatus" class="small" role="status" aria-live="polite">Visitor analytics will load after administrator sign-in.</p>
+ <p class="small">Privacy: records contain a random anonymous browser identifier, page path, page title, referrer hostname and timestamp. No IP address, email address or full referrer URL is collected.</p>
+</section>
 <div class="stats"><div class="stat"><strong id="statNew">—</strong><span>New submissions</span></div><div class="stat"><strong id="statCrew">—</strong><span>Published crew</span></div><div class="stat"><strong id="statHostApps">—</strong><span>Remote host applications</span></div><div class="stat"><strong id="statShow">—</strong><span>Premiere status</span></div><div class="stat"><strong id="statMediaItems">—</strong><span>Media library items</span></div></div>
 
 <section class="panel topic-center" id="topicCenter">
@@ -759,19 +779,32 @@ function initTacomaLocalInfo(){
  };
  loadWeather();setInterval(loadWeather,15*60*1000);
 }
+function renderLivePageBreakdown(byPage){
+ const el=$('tnLivePageBreakdown');if(!el)return;
+ const rows=Object.entries(byPage||{}).sort((a,b)=>b[1]-a[1]);
+ if(!rows.length){el.innerHTML='<p class="small">No visitors are currently connected.</p>';return;}
+ el.innerHTML=rows.map(([path,count])=>'<div class="tn-analytics-row"><div><strong>'+esc(path)+'</strong><small>Active anonymous visitors</small></div><b>'+count+'</b></div>').join('');
+}
 function initVisitorCounter(){
  const countEl=$('visitorCount'),statusEl=$('visitorStatus'),dot=$('visitorLiveDot');
  const setState=(count,message,online=true)=>{countEl.textContent=count==null?'—':String(count);statusEl.textContent=message;dot.classList.toggle('offline',!online);};
  if(!db?.channel){setState(null,'Live count unavailable · realtime client missing',false);return;}
  let visitorId,sessionId;
- try{visitorId=localStorage.getItem('tn-sitewide-visitor-id');if(!visitorId){visitorId=crypto.randomUUID();localStorage.setItem('tn-sitewide-visitor-id',visitorId);}}catch(_){visitorId=crypto.randomUUID();}
+ try{visitorId=localStorage.getItem('tn-analytics-visitor-v1');if(!visitorId){visitorId=crypto.randomUUID();localStorage.setItem('tn-analytics-visitor-v1',visitorId);}}catch(_){visitorId=crypto.randomUUID();}
  try{sessionId=crypto.randomUUID();}catch(_){sessionId='session-'+Date.now()+'-'+Math.random().toString(36).slice(2);}
  setState(null,'Connecting to live presence…',false);
  const updateCount=()=>{
   if(!visitorChannel)return;
-  const state=visitorChannel.presenceState(),visitors=new Set();
-  Object.values(state).forEach(metas=>{(Array.isArray(metas)?metas:[]).forEach(meta=>{if(meta&&typeof meta.visitorId==='string')visitors.add(meta.visitorId);});});
-  setState(visitors.size,'Live · updates automatically',true);
+  const state=visitorChannel.presenceState(),visitors=new Set(),pages={};
+  Object.values(state).forEach(metas=>{(Array.isArray(metas)?metas:[]).forEach(meta=>{
+   if(!meta||typeof meta.visitorId!=='string')return;
+   visitors.add(meta.visitorId);
+   const path=String(meta.pagePath||meta.page||'/').slice(0,300);
+   (pages[path]||(pages[path]=new Set())).add(meta.visitorId);
+  });});
+  const counts={};Object.entries(pages).forEach(([path,set])=>counts[path]=set.size);
+  setState(visitors.size,'Live · page-level updates automatically',true);
+  renderLivePageBreakdown(counts);
  };
  visitorChannel=db.channel('tacoma-nights-sitewide-live-visitors',{config:{presence:{key:sessionId}}})
   .on('presence',{event:'sync'},updateCount)
@@ -779,7 +812,7 @@ function initVisitorCounter(){
   .on('presence',{event:'leave'},updateCount)
   .subscribe(async status=>{
    if(status==='SUBSCRIBED'){
-    try{const result=await visitorChannel.track({visitorId, page:'control-room', onlineAt:new Date().toISOString()});if(result?.status==='error')throw new Error('Presence tracking was rejected');updateCount();}
+    try{const result=await visitorChannel.track({visitorId,pagePath:location.pathname,pageTitle:document.title,page:'control-room',onlineAt:new Date().toISOString()});if(result?.status==='error')throw new Error('Presence tracking was rejected');updateCount();}
     catch(err){console.warn('Control-room visitor presence could not be tracked:',err);setState(null,'Live count unavailable · check Supabase Realtime',false);}
    }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
     setState(null,'Live count unavailable · reconnect or check Realtime',false);
@@ -787,13 +820,40 @@ function initVisitorCounter(){
   });
  window.addEventListener('pagehide',()=>{if(visitorChannel&&db)db.removeChannel(visitorChannel);},{once:true});
 }
+async function loadVisitorAnalytics(){
+ const status=$('tnAnalyticsStatus'),refresh=$('visitorAnalyticsRefresh');
+ if(!db){say(status,'Analytics database client is unavailable.',true);return;}
+ if(refresh){refresh.disabled=true;refresh.textContent='Loading…';}
+ try{
+  const [summary,recent,last24]=await Promise.all([
+   db.from('tacoma_nights_page_analytics').select('page_path,page_views,unique_visitors,last_viewed_at').order('page_views',{ascending:false}),
+   db.from('tacoma_nights_page_views').select('id,page_path,page_title,session_hash,referrer_host,created_at').order('created_at',{ascending:false}).limit(30),
+   db.from('tacoma_nights_page_views').select('id',{count:'exact',head:true}).gte('created_at',new Date(Date.now()-86400000).toISOString())
+  ]);
+  if(summary.error)throw summary.error;if(recent.error)throw recent.error;if(last24.error)throw last24.error;
+  const pages=summary.data||[],records=recent.data||[];
+  $('tnAnalyticsTotalViews').textContent=pages.reduce((n,p)=>n+Number(p.page_views||0),0).toLocaleString();
+  $('tnAnalyticsViews24').textContent=Number(last24.count||0).toLocaleString();
+  $('tnAnalyticsUnique').textContent=pages.reduce((n,p)=>n+Number(p.unique_visitors||0),0).toLocaleString();
+  $('tnAnalyticsPages').textContent=pages.length.toLocaleString();
+  $('tnTopPages').innerHTML=pages.length?pages.slice(0,12).map(p=>'<div class="tn-analytics-row"><div><strong>'+esc(p.page_path)+'</strong><small>'+Number(p.unique_visitors||0).toLocaleString()+' unique visitors · Last visit '+(p.last_viewed_at?new Date(p.last_viewed_at).toLocaleString('en-US',{timeZone:'America/Los_Angeles'}):'—')+'</small></div><b>'+Number(p.page_views||0).toLocaleString()+'</b></div>').join(''):'<p class="small">No page-view records yet. New visits will appear here.</p>';
+  $('tnRecentPageViews').innerHTML=records.length?records.map(v=>'<tr><td><strong>'+esc(v.page_title||v.page_path)+'</strong><br><small>'+esc(v.page_path)+'</small></td><td>'+new Date(v.created_at).toLocaleString('en-US',{timeZone:'America/Los_Angeles'})+'</td><td><code>'+esc(String(v.session_hash||'').slice(0,8))+'…</code></td><td>'+esc(v.referrer_host||'Direct / unknown')+'</td></tr>').join(''):'<tr><td colspan="4">No visitor records yet.</td></tr>';
+  say(status,'Analytics refreshed · '+records.length+' recent records loaded.');
+ }catch(err){say(status,'Could not load visitor analytics: '+(err.message||'Check administrator access and Data API permissions.'),true);}
+ finally{if(refresh){refresh.disabled=false;refresh.textContent='↻ Refresh records';}}
+}
+function initVisitorAnalytics(){
+ $('visitorAnalyticsRefresh')?.addEventListener('click',loadVisitorAnalytics);
+ loadVisitorAnalytics();
+}
+
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const say=(el,msg,bad=false)=>{el.textContent=msg;el.classList.toggle('error',!!bad);};
 function isAdmin(user){return user?.app_metadata?.role==='admin';}
 function localInputDate(value){if(!value)return '';const d=new Date(value);if(Number.isNaN(d.getTime()))return '';const parts=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Los_Angeles',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(d).replace(' ','T');return parts;}
 function utcFromLocal(value){if(!value)return null;const d=new Date(value);return Number.isNaN(d.getTime())?null:d.toISOString();}
 function setBusy(button,busy,label){button.disabled=busy;if(busy)button.dataset.label=button.textContent;button.textContent=busy?'Saving…':(label||button.dataset.label||'Save');}
-function showDashboard(user){currentUser=user;$('authPanel').classList.add('hidden');$('dashboard').classList.remove('hidden');$('signOutBtn').classList.remove('hidden');say($('globalStatus'),'Authenticated administrator session · '+(user.email||'admin'));loadAll();}
+function showDashboard(user){currentUser=user;$('authPanel').classList.add('hidden');$('dashboard').classList.remove('hidden');$('signOutBtn').classList.remove('hidden');say($('globalStatus'),'Authenticated administrator session · '+(user.email||'admin'));loadAll();initVisitorAnalytics();}
 function showSignedOut(){currentUser=null;$('dashboard').classList.add('hidden');$('signOutBtn').classList.add('hidden');$('authPanel').classList.remove('hidden');say($('globalStatus'),'Sign in with an administrator account to open the control room.');}
 function withTimeout(promise,ms,message){let timer;return Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error(message)),ms);})]).finally(()=>clearTimeout(timer));}
 async function verifySession(session){if(!session?.access_token){showSignedOut();return false;}if(authVerificationPromise)return authVerificationPromise;authVerificationPromise=(async()=>{try{const {data,error}=await withTimeout(db.auth.getUser(session.access_token),12000,'Supabase identity verification timed out. Check your connection and retry.');if(error||!data.user){showSignedOut();say($('authMessage'),error?.message||'Your session could not be verified. Please sign in again.',true);return false;}if(!isAdmin(data.user)){await db.auth.signOut({scope:'local'});showSignedOut();say($('authMessage'),'This account is signed in but is not authorized as a Tacoma Nights administrator. Ask the project owner to set app_metadata.role = admin.',true);return false;}showDashboard(data.user);return true;}catch(err){showSignedOut();say($('globalStatus'),err.message||'Secure session verification failed. Please retry.',true);return false;}})();try{return await authVerificationPromise;}finally{authVerificationPromise=null;}}
