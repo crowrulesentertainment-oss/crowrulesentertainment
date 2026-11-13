@@ -93,6 +93,9 @@
   }
   const attach=()=>{const ch=window.__tnVisitorChannel;if(!ch)return;const refresh=()=>render(true);if(!card.dataset.attached){card.dataset.attached="yes";window.addEventListener("tn-presence-updated",refresh);}refresh();};
   attach();window.addEventListener("tn-presence-ready",attach);window.addEventListener("tacoma-nights-db-ready",()=>setTimeout(attach,300));
+  const dashboard=panel.closest("#dashboard");
+  if(dashboard&&"MutationObserver"in window)new MutationObserver(()=>{if(!dashboard.classList.contains("hidden")&&map)setTimeout(()=>map.invalidateSize(),180);}).observe(dashboard,{attributes:true,attributeFilter:["class"]});
+  loadLeaflet();
  }
  function shareCurrentLocation(){/* location sharing is initiated by the map's explicit opt-in control */}
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",build,{once:true});else build();
