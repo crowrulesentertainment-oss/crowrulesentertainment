@@ -236,6 +236,42 @@ function installGlobalEvents(){
 
 
 async 
+
+function initTacomaNightsAnalytics(db){
+ if(!location.pathname.includes('/tacoma-nights/'))return;
+ if(window.__TacomaNightsAnalyticsStarted)return;
+ window.__TacomaNightsAnalyticsStarted=true;
+ if(!db?.channel||!db?.from)return;
+ let visitorId,sessionId;
+ try{
+  visitorId=localStorage.getItem('tn-analytics-visitor-v1');
+  if(!visitorId){visitorId=crypto.randomUUID();localStorage.setItem('tn-analytics-visitor-v1',visitorId);}
+ }catch(_){visitorId=crypto.randomUUID();}
+ try{sessionId=crypto.randomUUID();}catch(_){sessionId='tn-'+Date.now()+'-'+Math.random().toString(36).slice(2);}
+ const pagePath=(location.pathname||'/').slice(0,300);
+ const pageTitle=(document.title||'').slice(0,200);
+ let referrerHost='';
+ try{if(document.referrer)referrerHost=new URL(document.referrer).hostname.slice(0,200);}catch(_){}
+ // Store anonymous page-view records only: no IP address, email, or full referrer URL.
+ db.from('tacoma_nights_page_views').insert({
+  page_path:pagePath,page_title:pageTitle,session_hash:visitorId,referrer_host:referrerHost
+ }).then(({error})=>{if(error)console.warn('[Tacoma Nights analytics] Page view was not recorded:',error.message);});
+ let channel=null;
+ try{
+  channel=db.channel('tacoma-nights-sitewide-live-visitors',{config:{presence:{key:sessionId}}})
+   .subscribe(async status=>{
+    if(status==='SUBSCRIBED'){
+     try{
+      const result=await channel.track({visitorId,pagePath,pageTitle,onlineAt:new Date().toISOString()});
+      if(result?.status==='error')throw new Error('Presence tracking rejected');
+     }catch(err){console.warn('[Tacoma Nights analytics] Live presence unavailable:',err);}
+    }
+   });
+  window.__TacomaNightsAnalyticsChannel=channel;
+  window.addEventListener('pagehide',()=>{if(channel)db.removeChannel(channel);},{once:true});
+ }catch(err){console.warn('[Tacoma Nights analytics] Could not start live presence:',err);}
+}
+
 function loadSitewideThemes(){
  // The appearance selector belongs exclusively to the Tacoma Nights section.
  // Do not inject it into other CrowRules sites that share the universal shell.
@@ -287,6 +323,7 @@ async function boot(){
 
   window.CrowRulesAuth=window.CrowRulesAuth||{};
   Object.assign(window.CrowRulesAuth,{client:db,session,user,ready:Promise.resolve(db)});
+  initTacomaNightsAnalytics(db);
   mount({client:db,session,user});
 
   if(!window.__CrowRulesSitewideAuthBound){
