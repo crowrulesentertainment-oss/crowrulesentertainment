@@ -53,7 +53,7 @@
   const intro=card.querySelector(".itemtop");intro.append(btn);
   btn.addEventListener("click",shareCurrentLocation);
   const consentKey="tn-share-approx-location-v1";
-  if(localStorage.getItem(consentKey)==="yes")setTimeout(shareCurrentLocation,900);
+  try{if(localStorage.getItem(consentKey)==="yes")setTimeout(shareCurrentLocation,900);}catch(_){}
   let map=null,layer=null,leafletLoading=false,lastState=null;
   function loadLeaflet(){
    if(window.L){initMap();return;}if(leafletLoading)return;leafletLoading=true;
@@ -84,7 +84,8 @@
    $("tnMapLocated").textContent=String(located.length);$("tnMapPrivate").textContent=String(Math.max(0,visitors.size-located.length));$("tnMapRegions").textContent=String(new Set(located.map(v=>v.approxLocation.latitude.toFixed(1)+","+v.approxLocation.longitude.toFixed(1))).size);
    if(!window.L){$("tnMapStatus").textContent=visitors.size?located.length+" of "+visitors.size+" active visitors have shared an approximate location.":"Waiting for live visitor presence.";if(located.length)loadLeaflet();return;}
    if(!map)initMap();if(!layer)return;layer.clearLayers();
-   located.forEach(v=>{const p=v.approxLocation;L.circleMarker([p.latitude,p.longitude],{radius:9,color:"#f4c477",weight:2,fillColor:"#a7433e",fillOpacity:.9}).bindPopup('<strong>Approximate visitor location</strong><br>Rounded coordinates: '+p.latitude.toFixed(1)+', '+p.longitude.toFixed(1)+'<br><small>Accuracy radius at least 5 km</small>').addTo(layer);});
+   const clusters=new Map();located.forEach(v=>{const p=v.approxLocation,key=p.latitude.toFixed(1)+","+p.longitude.toFixed(1);if(!clusters.has(key))clusters.set(key,{p,count:0,accuracy:0});const c=clusters.get(key);c.count++;c.accuracy=Math.max(c.accuracy,Number(p.accuracyKm)||5);});
+   clusters.forEach(c=>{const p=c.p;L.circleMarker([p.latitude,p.longitude],{radius:8+Math.min(c.count,10),color:"#f4c477",weight:2,fillColor:"#a7433e",fillOpacity:.9}).bindPopup('<strong>'+c.count+' visitor'+(c.count===1?'':'s')+' near this area</strong><br>Approx. coordinates: '+p.latitude.toFixed(1)+', '+p.longitude.toFixed(1)+'<br><small>Rounded to ~11 km · device accuracy up to '+c.accuracy+' km</small>').addTo(layer);});
    if(located.length){const bounds=L.latLngBounds(located.map(v=>[v.approxLocation.latitude,v.approxLocation.longitude]));map.fitBounds(bounds.pad(.35),{maxZoom:5});}
    $("tnMapStatus").textContent=located.length+" of "+visitors.size+" active visitors have chosen to share an approximate location.";
   }
