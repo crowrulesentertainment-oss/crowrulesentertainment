@@ -235,8 +235,6 @@ function installGlobalEvents(){
 }
 
 
-async 
-
 function initTacomaNightsAnalytics(db){
  if(!location.pathname.includes('/tacoma-nights/'))return;
  if(window.__TacomaNightsAnalyticsStarted)return;
