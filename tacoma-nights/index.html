@@ -1438,6 +1438,7 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
       <strong id="siteVisitorCount">—</strong>
       <span class="site-visitor-status" id="siteVisitorStatus">Connecting to live visitors…</span>
       <span class="site-visitor-scope">ACROSS THE SHOW SITE</span>
+      <button type="button" id="siteVisitorShareLocation" aria-label="Share approximate location with Tacoma Nights audience map" style="margin-left:10px;padding:7px 10px;border:1px solid #d7ad7080;background:#d7ad7015;color:#f0d7ac;font-size:.62rem;font-weight:800;cursor:pointer">Share approximate location</button>
     </div>
   </div>
 
@@ -3555,7 +3556,14 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
         } catch (_) { visitorId = crypto.randomUUID(); }
         try { sessionId = crypto.randomUUID(); }
         catch (_) { sessionId = "session-" + Date.now() + "-" + Math.random().toString(36).slice(2); }
-        let visitorClient, channel;
+        let visitorClient, channel, sharedLocation = null;
+        const shareButton = document.getElementById("siteVisitorShareLocation");
+        const trackPresence = async () => {
+          if (!channel) return;
+          const payload = { visitorId, page: "public-site", pagePath: location.pathname, pageTitle: document.title, onlineAt: new Date().toISOString() };
+          if (sharedLocation) { payload.approxLocation = sharedLocation; payload.locationShared = true; }
+          await channel.track(payload);
+        };
         const updateCount = () => {
           if (!channel) return;
           const unique = new Set();
@@ -3585,7 +3593,7 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
             .subscribe(async connection => {
               if (connection === "SUBSCRIBED") {
                 try {
-                  const tracked = await channel.track({ visitorId, page: "public-site", onlineAt: new Date().toISOString() });
+                  const tracked = await trackPresence();
                   if (tracked?.status === "error") throw new Error("Presence tracking was rejected");
                   updateCount();
                 } catch (error) {
@@ -3596,6 +3604,41 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
                 setState(null, "Live count unavailable · reconnecting may help", false);
               }
             });
+          if (shareButton) shareButton.addEventListener("click", () => {
+            if (sharedLocation) {
+              sharedLocation = null;
+              try { localStorage.removeItem("tn-share-approx-location-v1"); } catch (_) {}
+              shareButton.textContent = "Share approximate location";
+              trackPresence().catch(error => console.warn("Could not stop location sharing:", error));
+              return;
+            }
+            if (!navigator.geolocation) { if (status) status.textContent = "Location sharing is not supported by this browser."; return; }
+            shareButton.disabled = true;
+            shareButton.textContent = "Requesting permission…";
+            navigator.geolocation.getCurrentPosition(async position => {
+              sharedLocation = {
+                latitude: Math.round(position.coords.latitude * 10) / 10,
+                longitude: Math.round(position.coords.longitude * 10) / 10,
+                accuracyKm: Math.max(5, Math.round((position.coords.accuracy || 5000) / 1000)),
+                sharedAt: new Date().toISOString()
+              };
+              try { localStorage.setItem("tn-share-approx-location-v1", "yes"); } catch (_) {}
+              try {
+                await trackPresence();
+                shareButton.textContent = "Location shared · click to stop";
+                if (status) status.textContent = "Your approximate location is shared with the live audience map.";
+              } catch (error) {
+                sharedLocation = null;
+                shareButton.textContent = "Share approximate location";
+                if (status) status.textContent = "Could not share location. You are still counted as a visitor.";
+              }
+              shareButton.disabled = false;
+            }, error => {
+              shareButton.disabled = false;
+              shareButton.textContent = "Share approximate location";
+              if (status) status.textContent = error.code === 1 ? "Location permission declined. You are still counted as a visitor." : "Location unavailable. You are still counted as a visitor.";
+            }, { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 });
+          });
           window.addEventListener("pagehide", () => {
             if (channel && visitorClient) visitorClient.removeChannel(channel);
           }, { once: true });
