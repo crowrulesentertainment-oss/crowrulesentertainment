@@ -17,33 +17,96 @@
   return clean(h?.textContent)||clean(node.getAttribute("aria-label"))||node.id.replace(/([A-Z])/g," $1").replace(/[-_]/g," ").replace(/^./,c=>c.toUpperCase());
  }
  function build(){
-  const dash=$("dashboard");if(!dash||dash.dataset.ravenRebuild==="ready")return;
-  const oldMain=dash.querySelector(":scope > .tn-main");
-  const original=oldMain?[...oldMain.children]:[...dash.children];
-  const content=original.filter(n=>!(n.classList&&n.classList.contains("tn-command-hero"))&&!(n.matches&&n.matches(".tn-topnav")));
-  const panels=content.filter(n=>n.matches&&n.matches(".panel[id]"));
-  const groups={};
-  panels.forEach(n=>{const g=groupFor(n.id,sectionLabel(n));(groups[g]||(groups[g]=[])).push({id:n.id,label:sectionLabel(n)});});
-  const order=["AUDIENCE & COMMAND","EDITORIAL & PRODUCTION","BROADCAST","PEOPLE & COMMUNITY","MEDIA & ASSETS","ADMINISTRATION"];
-  const nav=document.createElement("aside");nav.className="tn-raven-sidebar";nav.setAttribute("aria-label","Tacoma Nights operations navigation");
-  nav.innerHTML='<nav class="tn-raven-nav" aria-label="Production workspaces">'+order.filter(g=>groups[g]?.length).map((g,gi)=>'<details class="tn-raven-group" '+(gi<2?'open':'')+'><summary><span class="tn-group-icon">'+iconFor(g)+'</span><span>'+g+'</span><small>'+groups[g].length+'</small></summary><div class="tn-raven-group-links">'+groups[g].map((it,ii)=>'<a href="#'+it.id+'" data-target="'+it.id+'" data-search="'+(it.label+" "+it.id+" "+g).toLowerCase().replace(/"/g,"&quot;")+'"><span class="tn-nav-name">'+it.label+'</span><span class="tn-nav-no">'+String(ii+1).padStart(2,"0")+'</span></a>').join("")+'</div></details>').join("")+'</nav>';
-  const main=document.createElement("main");main.className="tn-raven-main";
-  const hero=document.createElement("section");hero.className="tn-raven-hero";hero.id="ravenCommandHero";
-  hero.innerHTML='<div class="tn-raven-hero-copy"><p class="tn-raven-eyebrow">CROWRULES ENTERTAINMENT · TACOMA, WASHINGTON</p><h1>THE RAVEN<span>CONTROL ROOM</span></h1><p>The production headquarters for Tacoma Nights. Shape the stories, bring the voices together and prepare every broadcast — grounded in Tacoma and reaching beyond the South Sound.</p><div class="tn-raven-hero-meta"><span>THE CITY · THE PEOPLE · THE STORIES</span></div><div class="tn-raven-actions"><a href="#productionWorkspace">OPEN PRODUCTION DESK ↗</a><a href="#broadcastCenter">PREPARE BROADCAST ↗</a><a href="#visitorAnalyticsPanel">AUDIENCE INTELLIGENCE ↗</a></div></div>';
-  const live=document.createElement("div");live.className="tn-raven-livebar";
-  live.innerHTML='<span class="live-dot" aria-hidden="true"></span><small>LIVE AUDIENCE</small><strong id="tnRavenLiveCount">—</strong><small id="tnRavenLiveStatus">Connecting to sitewide presence…</small><span class="tn-live-caption">SUPABASE REALTIME · LIVE PRESENCE</span>';
-  main.append(hero,live);content.forEach(n=>main.append(n));dash.replaceChildren(nav,main);dash.dataset.ravenRebuild="ready";
-  const count=$("visitorCount"),status=$("visitorStatus");
-  const sync=()=>{if($("tnRavenLiveCount")&&count)$("tnRavenLiveCount").textContent=count.textContent||"—";if($("tnRavenLiveStatus")&&status)$("tnRavenLiveStatus").textContent=status.textContent||"Live presence";};
-  if(count&&status){sync();new MutationObserver(sync).observe(count,{childList:true,characterData:true,subtree:true});new MutationObserver(sync).observe(status,{childList:true,characterData:true,subtree:true});}
+  const dash=$("dashboard");
+  if(!dash||dash.dataset.ravenRebuild==="ready")return;
+  const groups=[
+   {id:"workspace-editorial",label:"Editorial & Planning",sub:"Topics, calendar and episode direction",icon:"01"},
+   {id:"workspace-production",label:"Production Studio",sub:"Scripts, assignments and production tasks",icon:"02"},
+   {id:"workspace-broadcast",label:"Broadcast Operations",sub:"Premiere, livestream and show delivery",icon:"03"},
+   {id:"workspace-people",label:"People & Community",sub:"Crew, inbox and host applications",icon:"04"},
+   {id:"workspace-media",label:"Media & Assets",sub:"Uploads, clips and production library",icon:"05"}
+  ].map(g=>({...g,node:$(g.id)})).filter(g=>g.node);
+  const original=[...dash.children];
+  const content=original.filter(n=>!(n.id==="controlNavShell"));
+  const panels=groups.flatMap(g=>[...g.node.children].filter(n=>n.classList&&n.classList.contains("panel")));
+  const sidebar=document.createElement("aside");
+  sidebar.className="tn-v4-sidebar";
+  sidebar.setAttribute("aria-label","Tacoma Nights workspace navigation");
+  const brand=document.createElement("div");brand.className="tn-v4-brand";
+  brand.innerHTML='<span class="tn-v4-mark" aria-hidden="true">R</span><div><strong>RAVEN OPERATIONS</strong><small>CONTROL ROOM · VERSION 4</small></div>';
+  sidebar.append(brand);
+  const navLabel=document.createElement("p");navLabel.className="tn-v4-nav-label";navLabel.textContent="WORKSPACES";sidebar.append(navLabel);
+  const nav=document.createElement("nav");nav.className="tn-v4-nav";nav.setAttribute("aria-label","Five production workspaces");
+  groups.forEach((g,i)=>{
+   const link=document.createElement("a");link.href="#"+g.id;link.dataset.target=g.id;
+   const number=document.createElement("span");number.className="tn-v4-nav-number";number.textContent=g.icon;
+   const copy=document.createElement("span");copy.className="tn-v4-nav-copy";
+   const title=document.createElement("strong");title.textContent=g.label;
+   const sub=document.createElement("small");sub.textContent=g.sub;
+   copy.append(title,sub);
+   const count=document.createElement("span");count.className="tn-v4-nav-count";count.textContent=String(g.node.querySelectorAll(":scope > .panel").length).padStart(2,"0");
+   link.append(number,copy,count);nav.append(link);
+  });
+  sidebar.append(nav);
+  const foot=document.createElement("div");foot.className="tn-v4-sidebar-foot";
+  foot.innerHTML='<span class="tn-v4-foot-dot"></span><span>PRIVATE PRODUCTION NETWORK</span><small>253 · TACOMA, WASHINGTON</small>';
+  sidebar.append(foot);
+  const main=document.createElement("main");main.className="tn-v4-main";
+  const command=document.createElement("div");command.className="tn-v4-commandline";
+  command.innerHTML='<div><span class="tn-v4-command-eyebrow">CROWRULES ENTERTAINMENT</span><strong>THE CITY · THE PEOPLE · THE STORIES</strong></div><span class="tn-v4-version">RAVEN CONTROL ROOM <b>V4</b></span>';
+  main.append(command);
+  content.forEach(n=>main.append(n));
+  const intro=main.querySelector(".tn-workspace-intro");
+  if(intro){
+   const h=intro.querySelector("h1 span");if(h)h.textContent="Raven Operations · Production Workspace";
+   const p=intro.querySelector("p:not(.tn-kicker)");if(p)p.textContent="Your complete production headquarters. Plan the stories, coordinate the people, manage every asset, and prepare each Tacoma Nights broadcast.";
+  }
+  const stats=main.querySelector(".stats");
+  const tools=document.createElement("section");tools.className="tn-v4-workspace-tools";tools.setAttribute("aria-label","Workspace search and navigation");
+  tools.innerHTML='<div class="tn-v4-tools-copy"><span>WORKSPACE FINDER</span><strong>Find a tool, task or production record</strong><small>Search across all five workspaces without leaving this page.</small></div><div class="tn-v4-search-wrap"><label class="tn-v4-search-label" for="tnV4Search">SEARCH WORKSPACES</label><div class="tn-v4-search-controls"><input id="tnV4Search" type="search" autocomplete="off" placeholder="Try “episode”, “crew”, “premiere”…"><button type="button" id="tnV4ClearSearch">Clear</button></div><small id="tnV4SearchStatus" role="status" aria-live="polite">Showing all production tools</small></div>';
+  if(stats)stats.insertAdjacentElement("afterend",tools);else if(intro)intro.insertAdjacentElement("afterend",tools);else main.prepend(tools);
+  const total=document.createElement("div");total.className="tn-v4-system-summary";
+  total.innerHTML='<div><strong>'+groups.length+'</strong><span>Workspaces</span></div><div><strong>'+panels.length+'</strong><span>Management panels</span></div><div><strong>LIVE</strong><span>Existing Supabase systems</span></div><div><strong>V4</strong><span>Raven operations interface</span></div>';
+  tools.insertAdjacentElement("afterend",total);
+  groups.forEach(g=>{
+   const heading=g.node.querySelector(".tn-group-heading");
+   if(heading&&!heading.querySelector(".tn-v4-section-count")){
+    const count=document.createElement("span");count.className="tn-v4-section-count";
+    count.textContent=String(g.node.querySelectorAll(":scope > .panel").length).padStart(2,"0")+" TOOLS";
+    heading.append(count);
+   }
+   g.node.dataset.tnV4Workspace="true";
+  });
+  dash.replaceChildren(sidebar,main);dash.dataset.ravenRebuild="ready";dash.dataset.tnV4Ready="true";
+  const search=$("tnV4Search"),clear=$("tnV4ClearSearch"),status=$("tnV4SearchStatus");
+  function runSearch(){
+   const q=(search.value||"").trim().toLowerCase();let shown=0;
+   groups.forEach(g=>{
+    const sectionPanels=[...g.node.children].filter(n=>n.classList&&n.classList.contains("panel"));
+    let sectionShown=0;
+    sectionPanels.forEach(panel=>{
+     const match=!q||panel.textContent.toLowerCase().includes(q)||g.label.toLowerCase().includes(q);
+     panel.hidden=!match;if(match){shown++;sectionShown++;}
+    });
+    g.node.hidden=!!q&&sectionShown===0;
+   });
+   status.textContent=q?(shown+" matching panel"+(shown===1?"":"s")+" across "+groups.filter(g=>!g.node.hidden).length+" workspace"+(groups.filter(g=>!g.node.hidden).length===1?"":"s")):"Showing all "+panels.length+" production panels";
+   nav.querySelectorAll("[data-target]").forEach(a=>{const g=groups.find(x=>x.id===a.dataset.target);a.hidden=!!q&&(!g||g.node.hidden);});
+  }
+  search.addEventListener("input",runSearch);
+  clear.addEventListener("click",()=>{search.value="";runSearch();search.focus();});
+  search.addEventListener("keydown",e=>{if(e.key==="Escape"){search.value="";runSearch();search.blur();}});
+  document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"&&!e.altKey){e.preventDefault();search.focus();search.select();}});
   const links=[...nav.querySelectorAll("[data-target]")];
   const activate=id=>links.forEach(a=>{const on=a.dataset.target===id;a.classList.toggle("active",on);if(on)a.setAttribute("aria-current","location");else a.removeAttribute("aria-current");});
   links.forEach(a=>a.addEventListener("click",()=>activate(a.dataset.target)));
-  if("IntersectionObserver"in window){const io=new IntersectionObserver(entries=>{const v=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(v)activate(v.target.id);},{rootMargin:"-18% 0px -68% 0px",threshold:[0,.15,.4]});panels.forEach(n=>io.observe(n));}
-  activate(location.hash.slice(1)||"visitorAnalyticsPanel");
+  if("IntersectionObserver"in window){
+   const io=new IntersectionObserver(entries=>{const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(visible)activate(visible.target.id);},{rootMargin:"-12% 0px -72% 0px",threshold:[0,.12,.35]});
+   groups.forEach(g=>io.observe(g.node));
+  }
+  activate(location.hash.slice(1)||groups[0]?.id);
   buildVisitorMap();
- }
- function buildVisitorMap(){
+ } function buildVisitorMap(){
   const panel=$("visitorAnalyticsPanel");if(!panel||$("tnVisitorMapCard"))return;
   const card=document.createElement("div");card.id="tnVisitorMapCard";card.className="item tn-visitor-map-card";
   card.innerHTML='<div class="itemtop"><div><span class="micro">LIVE GEOGRAPHIC AUDIENCE</span><h3>Where visitors are sharing from</h3><p class="small">Only visitors who actively opt in to approximate location sharing appear as map markers.</p></div><span class="pill">CONSENT ONLY</span></div><div class="tn-map-stats"><div><strong id="tnMapLocated">0</strong><span>Located visitors</span></div><div><strong id="tnMapPrivate">—</strong><span>Location not shared</span></div><div><strong id="tnMapRegions">0</strong><span>Map locations</span></div></div><div id="tnVisitorMap" role="img" aria-label="Map of approximate locations shared by current visitors"><div class="tn-map-placeholder">Waiting for visitors who choose to share an approximate location…</div></div><div class="tn-map-foot"><span id="tnMapStatus">Waiting for live visitor presence.</span><span>Approximate locations are rounded to about 11 km · no IP address stored</span></div>';
