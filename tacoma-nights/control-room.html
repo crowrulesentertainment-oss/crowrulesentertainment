@@ -783,9 +783,33 @@ function initTacomaLocalInfo(){
 }
 function renderLivePageBreakdown(byPage){
  const el=$('tnLivePageBreakdown');if(!el)return;
- const rows=Object.entries(byPage||{}).sort((a,b)=>b[1]-a[1]);
- if(!rows.length){el.innerHTML='<p class="small">No visitors are currently connected.</p>';return;}
- el.innerHTML=rows.map(([path,count])=>'<div class="tn-analytics-row"><div><strong>'+esc(path)+'</strong><small>Active anonymous visitors</small></div><b>'+count+'</b></div>').join('');
+ const pageInventory=[
+  ['index.html','Tacoma Nights Homepage'],
+  ['admin.html','Administration'],
+  ['community.html','Community'],
+  ['control-room.html','Control Room'],
+  ['crew-chat.html','Crew Chat'],
+  ['ending-credits.html','Ending Credits Studio'],
+  ['episode-planner.html','Episode Planner'],
+  ['guest-portal.html','Guest Portal'],
+  ['insights.html','Insights'],
+  ['producer.html','Producer Desk'],
+  ['production-tracker.html','Production Tracker'],
+  ['remote-host-admin.html','Remote Host Administration'],
+  ['remote-host-operations.html','Remote Host Operations'],
+  ['remote-host.html','Remote Host Portal'],
+  ['team.html','Team'],
+  ['upload.html','Media Upload']
+ ];
+ const liveByFile={};
+ Object.entries(byPage||{}).forEach(([path,count])=>{
+  const clean=String(path).split('?')[0].replace(/\/$/,'');
+  const file=clean.split('/').pop()||'index.html';
+  liveByFile[file]=(liveByFile[file]||0)+Number(count||0);
+ });
+ const rows=pageInventory.map(([file,label])=>({file,label,count:liveByFile[file]||0}));
+ const total=rows.reduce((sum,row)=>sum+row.count,0);
+ el.innerHTML='<div class="tn-analytics-row tn-analytics-total"><div><strong>All Tacoma Nights pages</strong><small>Unique active visitors across the site</small></div><b>'+total+'</b></div>'+rows.map(row=>'<div class="tn-analytics-row"><div><strong>'+esc(row.label)+'</strong><small>/tacoma-nights/'+esc(row.file)+'</small></div><b>'+row.count+'</b></div>').join('');
 }
 function initVisitorCounter(){
  const countEl=$('visitorCount'),statusEl=$('visitorStatus'),dot=$('visitorLiveDot');
