@@ -3639,6 +3639,25 @@ h1,h2,h3,h4,p,a,label,small,strong,span{overflow-wrap:break-word}
               if (status) status.textContent = error.code === 1 ? "Location permission declined. You are still counted as a visitor." : "Location unavailable. You are still counted as a visitor.";
             }, { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 });
           });
+          try {
+            if (localStorage.getItem("tn-share-approx-location-v1") === "yes" && navigator.permissions?.query) {
+              navigator.permissions.query({ name: "geolocation" }).then(permission => {
+                if (permission.state !== "granted" || !navigator.geolocation) return;
+                navigator.geolocation.getCurrentPosition(async position => {
+                  sharedLocation = {
+                    latitude: Math.round(position.coords.latitude * 10) / 10,
+                    longitude: Math.round(position.coords.longitude * 10) / 10,
+                    accuracyKm: Math.max(5, Math.round((position.coords.accuracy || 5000) / 1000)),
+                    sharedAt: new Date().toISOString()
+                  };
+                  try {
+                    await trackPresence();
+                    if (shareButton) shareButton.textContent = "Location shared · click to stop";
+                  } catch (_) { sharedLocation = null; }
+                }, () => {}, { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 });
+              }).catch(() => {});
+            }
+          } catch (_) {}
           window.addEventListener("pagehide", () => {
             if (channel && visitorClient) visitorClient.removeChannel(channel);
           }, { once: true });
