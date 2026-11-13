@@ -351,8 +351,6 @@ body:before{opacity:.3;background:radial-gradient(ellipse at 50% 0%,#52677e22,tr
 @media(max-width:760px){.broadcast-flow{grid-template-columns:1fr}.broadcast-hero{flex-direction:column}.broadcast-checks{grid-template-columns:1fr}}
 
 
-/* Tacoma Nights visitor analytics center */
-.tn-analytics-stats{grid-template-columns:repeat(3,minmax(0,1fr));margin:14px 0 20px}.tn-analytics-list{display:grid;gap:8px;margin-top:12px}.tn-analytics-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;background:#080e15;border:1px solid #ffffff18}.tn-analytics-row strong{display:block;font-size:.83rem;overflow-wrap:anywhere}.tn-analytics-row small{display:block;color:var(--muted);font-size:.68rem}.tn-analytics-row b{font:800 1.45rem "Barlow Condensed";color:#f0c477}.tn-analytics-table{width:100%;font-size:.74rem;margin-top:12px}.tn-analytics-table th,.tn-analytics-table td{padding:9px 10px;border-bottom:1px solid #ffffff18;text-align:left;vertical-align:top}.tn-analytics-table th{color:#f0c477;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase}.tn-analytics-table td{color:#d8dee8;overflow-wrap:anywhere}.tn-analytics-table td small{color:var(--muted)}@media(max-width:800px){.tn-analytics-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){.tn-analytics-stats{grid-template-columns:1fr 1fr}.tn-analytics-table{min-width:620px}}
 </style><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
 
 <style>
@@ -957,36 +955,6 @@ function initTacomaLocalInfo(){
  };
  loadWeather();setInterval(loadWeather,15*60*1000);
 }
-function renderLivePageBreakdown(byPage){
- const el=$('tnLivePageBreakdown');if(!el)return;
- const pageInventory=[
-  ['index.html','Tacoma Nights Homepage'],
-  ['admin.html','Administration'],
-  ['community.html','Community'],
-  ['control-room.html','Control Room'],
-  ['crew-chat.html','Crew Chat'],
-  ['ending-credits.html','Ending Credits Studio'],
-  ['episode-planner.html','Episode Planner'],
-  ['guest-portal.html','Guest Portal'],
-  ['insights.html','Insights'],
-  ['producer.html','Producer Desk'],
-  ['production-tracker.html','Production Tracker'],
-  ['remote-host-admin.html','Remote Host Administration'],
-  ['remote-host-operations.html','Remote Host Operations'],
-  ['remote-host.html','Remote Host Portal'],
-  ['team.html','Team'],
-  ['upload.html','Media Upload']
- ];
- const liveByFile={};
- Object.entries(byPage||{}).forEach(([path,count])=>{
-  const clean=String(path).split('?')[0].replace(/\/$/,'');
-  const file=clean.split('/').pop()||'index.html';
-  liveByFile[file]=(liveByFile[file]||0)+Number(count||0);
- });
- const rows=pageInventory.map(([file,label])=>({file,label,count:liveByFile[file]||0}));
- const total=rows.reduce((sum,row)=>sum+row.count,0);
- el.innerHTML='<div class="tn-analytics-row tn-analytics-total"><div><strong>All Tacoma Nights pages</strong><small>Unique active visitors across the site</small></div><b>'+total+'</b></div>'+rows.map(row=>'<div class="tn-analytics-row"><div><strong>'+esc(row.label)+'</strong><small>/tacoma-nights/'+esc(row.file)+'</small></div><b>'+row.count+'</b></div>').join('');
-}
 function initVisitorCounter(){
  const countEl=$('visitorCount'),statusEl=$('visitorStatus'),dot=$('visitorLiveDot');
  const publicCountEl=$('publicLiveVisitorCount'),publicDetailEl=$('publicLiveVisitorDetail');
@@ -1026,32 +994,6 @@ function initVisitorCounter(){
   });
  window.__tnVisitorChannel=visitorChannel;window.dispatchEvent(new Event('tn-presence-ready'));
  window.addEventListener('pagehide',()=>{if(visitorChannel&&db)db.removeChannel(visitorChannel);},{once:true});
-}
-async function loadVisitorAnalytics(){
- const status=$('tnAnalyticsStatus'),refresh=$('visitorAnalyticsRefresh');
- if(!db){say(status,'Analytics database client is unavailable.',true);return;}
- if(refresh){refresh.disabled=true;refresh.textContent='Loading…';}
- try{
-  const [summary,recent,last24,last7,last30]=await Promise.all([
-   db.from('tacoma_nights_page_analytics').select('page_path,page_views,unique_visitors,last_viewed_at').order('page_views',{ascending:false}),
-   db.from('tacoma_nights_page_views').select('id,page_path,page_title,session_hash,referrer_host,created_at').order('created_at',{ascending:false}).limit(30),
-   db.from('tacoma_nights_page_views').select('id',{count:'exact',head:true}).gte('created_at',new Date(Date.now()-86400000).toISOString()),
-   db.from('tacoma_nights_page_views').select('id',{count:'exact',head:true}).gte('created_at',new Date(Date.now()-7*86400000).toISOString()),
-   db.from('tacoma_nights_page_views').select('id',{count:'exact',head:true}).gte('created_at',new Date(Date.now()-30*86400000).toISOString())
-  ]);
-  if(summary.error)throw summary.error;if(recent.error)throw recent.error;if(last24.error)throw last24.error;if(last7.error)throw last7.error;if(last30.error)throw last30.error;
-  const pages=summary.data||[],records=recent.data||[];
-  $('tnAnalyticsTotalViews').textContent=pages.reduce((n,p)=>n+Number(p.page_views||0),0).toLocaleString();
-  $('tnAnalyticsViews24').textContent=Number(last24.count||0).toLocaleString();
-  $('tnAnalyticsViews7').textContent=Number(last7.count||0).toLocaleString();
-  $('tnAnalyticsViews30').textContent=Number(last30.count||0).toLocaleString();
-  $('tnAnalyticsUnique').textContent=pages.reduce((n,p)=>n+Number(p.unique_visitors||0),0).toLocaleString();
-  $('tnAnalyticsPages').textContent=pages.length.toLocaleString();
-  $('tnTopPages').innerHTML=pages.length?pages.slice(0,12).map(p=>'<div class="tn-analytics-row"><div><strong>'+esc(p.page_path)+'</strong><small>'+Number(p.unique_visitors||0).toLocaleString()+' unique visitors · Last visit '+(p.last_viewed_at?new Date(p.last_viewed_at).toLocaleString('en-US',{timeZone:'America/Los_Angeles'}):'—')+'</small></div><b>'+Number(p.page_views||0).toLocaleString()+'</b></div>').join(''):'<p class="small">No page-view records yet. New visits will appear here.</p>';
-  $('tnRecentPageViews').innerHTML=records.length?records.map(v=>'<tr><td><strong>'+esc(v.page_title||v.page_path)+'</strong><br><small>'+esc(v.page_path)+'</small></td><td>'+new Date(v.created_at).toLocaleString('en-US',{timeZone:'America/Los_Angeles'})+'</td><td><code>'+esc(String(v.session_hash||'').slice(0,8))+'…</code></td><td>'+esc(v.referrer_host||'Direct / unknown')+'</td></tr>').join(''):'<tr><td colspan="4">No visitor records yet.</td></tr>';
-  say(status,'Analytics refreshed · '+records.length+' recent records loaded.');
- }catch(err){say(status,'Could not load visitor analytics: '+(err.message||'Check administrator access and Data API permissions.'),true);}
- finally{if(refresh){refresh.disabled=false;refresh.textContent='↻ Refresh records';}}
 }
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const say=(el,msg,bad=false)=>{el.textContent=msg;el.classList.toggle('error',!!bad);};
