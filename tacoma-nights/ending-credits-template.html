@@ -54,6 +54,27 @@ Produced in Tacoma, Washington</textarea>
 <div class="footer"><b>TACOMA NIGHTS</b> &nbsp; • &nbsp; THE CITY COMES ALIVE</div><div class="texture"></div>
 </div></div><div class="progress"><span id="bar"></span></div><div class="status"><span class="time" id="clock">00:00 / 04:24</span> · <span id="state">Ready</span></div></main>
 </div>
+<script type="module">
+(async()=>{
+ try{
+  const canvasModule=await import('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/+esm');
+  window.html2canvas=canvasModule.default;
+  const {FFmpeg}=await import('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js');
+  const {toBlobURL}=await import('https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/esm/index.js');
+  window.__loadMp4Encoder=async()=>{
+   if(window.__ffmpeg)return window.__ffmpeg;
+   const ff=new FFmpeg();
+   const base='https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd';
+   await ff.load({coreURL:await toBlobURL(base+'/ffmpeg-core.js','text/javascript'),wasmURL:await toBlobURL(base+'/ffmpeg-core.wasm','application/wasm')});
+   window.__ffmpeg=ff;return ff;
+  };
+  window.__creditsLibrariesReady=true;
+ }catch(error){
+  console.error('Credits export libraries failed to load:',error);
+  window.__creditsLibrariesError=error.message;
+ }
+})();
+</script>
 <script>
 (()=>{const $=id=>document.getElementById(id),TOTAL=264,OPEN=20,SCROLL=215,THANKS=19;let elapsed=0,startAt=0,running=false,raf=0,audioUrl=null,bgUrl=null,exporting=false,exportCancel=false;
 const stage=$('stage'),shell=$('shell');
@@ -78,8 +99,7 @@ $('music').addEventListener('change',e=>{const f=e.target.files&&e.target.files[
 $('background').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;if(bgUrl)URL.revokeObjectURL(bgUrl);bgUrl=URL.createObjectURL(f);$('backgroundImage').src=bgUrl;$('backgroundImage').style.display='block';});
 async function exportMp4(){
  if(exporting)return;
- if(!window.html2canvas){alert('The video renderer did not load. Check your internet connection and reload.');return;}
- if(!window.__loadMp4Encoder){alert('The MP4 encoder did not load. Check your internet connection and reload.');return;}
+ if(!window.html2canvas||!window.__loadMp4Encoder){alert('Video export libraries are still loading or could not load. Wait a few seconds and try again. '+(window.__creditsLibrariesError||''));return;}
  exporting=true;exportCancel=false;stop();elapsed=0;build();show(0);
  const btn=$('export');btn.disabled=true;btn.textContent='Preparing…';
  const status=$('exportStatus');let recorder=null,rafId=0,audioCtx=null,source=null,dest=null;
