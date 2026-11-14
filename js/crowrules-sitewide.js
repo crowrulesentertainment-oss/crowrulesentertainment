@@ -179,7 +179,7 @@ function renderAccount(menu,u,status){
  const accountUrl='https://crowrulesentertainment-oss.github.io/members/';
  const returnUrl=encodeURIComponent(location.href);
  menu.innerHTML=signed
-  ? '<a class="membership-link" href="'+CONFIG.membership+'">✦ Membership Center</a><a href="'+profileUrl+'">◉ My Profile</a><a href="'+accountUrl+'">⚙ Account</a><a href="'+CONFIG.crowspace+'settings.html">◌ Settings</a><div class="cr-sw-status">Signed in as '+esc(u.email||u.user_metadata?.display_name||'CrowRules member')+'</div><div class="cr-sw-divider"></div><button id="cr-sw-out" type="button">↪ Sign Out</button>'
+  ? '<a class="membership-link" href="'+CONFIG.membership+'">✦ Membership Center</a><a href="'+profileUrl+'">◉ My Profile</a><a href="'+accountUrl+'">⚙ Account</a><a href="'+accountUrl+'settings.html">◌ Settings</a><div class="cr-sw-status">Signed in as '+esc(u.email||u.user_metadata?.display_name||'CrowRules member')+'</div><div class="cr-sw-divider"></div><button id="cr-sw-out" type="button">↪ Sign Out</button>'
   : '<a class="membership-link" href="'+CONFIG.membership+'">✦ Explore Membership</a><a href="'+'https://crowrulesentertainment-oss.github.io/podcasting/login.html?redirect='+returnUrl+'">Log In</a><a href="'+'https://crowrulesentertainment-oss.github.io/podcasting/signup.html?redirect='+returnUrl+'">Create Universal Account</a><div class="cr-sw-status">'+esc(status||'Universal account ready')+'</div>';
 }
 
@@ -244,30 +244,43 @@ function initTacomaNightsAnalytics(db){
  try{
   visitorId=localStorage.getItem('tn-analytics-visitor-v1');
   if(!visitorId){visitorId=crypto.randomUUID();localStorage.setItem('tn-analytics-visitor-v1',visitorId);}
- }catch(_){visitorId=crypto.randomUUID();}
+ }catch(_){visitorId='tn-visitor-'+Date.now()+'-'+Math.random().toString(36).slice(2);}
  try{sessionId=crypto.randomUUID();}catch(_){sessionId='tn-'+Date.now()+'-'+Math.random().toString(36).slice(2);}
  const pagePath=(location.pathname||'/').slice(0,300);
  const pageTitle=(document.title||'').slice(0,200);
  let referrerHost='';
  try{if(document.referrer)referrerHost=new URL(document.referrer).hostname.slice(0,200);}catch(_){}
- // Store anonymous page-view records only: no IP address, email, or full referrer URL.
+ // Record one anonymous page view per actual document load, not on BFCache restoration.
  db.from('tacoma_nights_page_views').insert({
   page_path:pagePath,page_title:pageTitle,session_hash:visitorId,referrer_host:referrerHost
  }).then(({error})=>{if(error)console.warn('[Tacoma Nights analytics] Page view was not recorded:',error.message);});
  let channel=null;
- try{
-  channel=db.channel('tacoma-nights-sitewide-live-visitors',{config:{presence:{key:sessionId}}})
-   .subscribe(async status=>{
+ const joinPresence=()=>{
+  if(channel)return;
+  try{
+   const next=db.channel('tacoma-nights-live-'+sessionId,{config:{presence:{key:sessionId}}});
+   channel=next;
+   next.subscribe(async status=>{
     if(status==='SUBSCRIBED'){
      try{
-      const result=await channel.track({visitorId,pagePath,pageTitle,onlineAt:new Date().toISOString()});
+      const result=await next.track({visitorId,pagePath,pageTitle,onlineAt:new Date().toISOString()});
       if(result?.status==='error')throw new Error('Presence tracking rejected');
      }catch(err){console.warn('[Tacoma Nights analytics] Live presence unavailable:',err);}
     }
    });
-  window.__TacomaNightsAnalyticsChannel=channel;
-  window.addEventListener('pagehide',()=>{if(channel)db.removeChannel(channel);},{once:true});
- }catch(err){console.warn('[Tacoma Nights analytics] Could not start live presence:',err);}
+   window.__TacomaNightsAnalyticsChannel=next;
+  }catch(err){channel=null;console.warn('[Tacoma Nights analytics] Could not start live presence:',err);}
+ };
+ const leavePresence=()=>{
+  const previous=channel;channel=null;
+  if(window.__TacomaNightsAnalyticsChannel===previous)window.__TacomaNightsAnalyticsChannel=null;
+  if(previous)db.removeChannel(previous).catch(err=>console.warn('[Tacoma Nights analytics] Presence cleanup:',err));
+ };
+ joinPresence();
+ // BFCache suspends the document and its socket. Leave cleanly, then rejoin
+ // when the browser restores this document without inserting another page view.
+ window.addEventListener('pagehide',leavePresence);
+ window.addEventListener('pageshow',event=>{if(event.persisted)joinPresence();});
 }
 
 function loadSitewideThemes(){
