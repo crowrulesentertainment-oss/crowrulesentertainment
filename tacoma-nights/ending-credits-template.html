@@ -65,7 +65,22 @@ Produced in Tacoma, Washington</textarea>
    if(window.__ffmpeg)return window.__ffmpeg;
    const ff=new FFmpeg();
    const base='https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd';
-   await ff.load({coreURL:await toBlobURL(base+'/ffmpeg-core.js','text/javascript'),wasmURL:await toBlobURL(base+'/ffmpeg-core.wasm','application/wasm')});
+   const ffmpegPkg='https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm';
+   // FFmpeg's module worker must be created from this site's origin. Fetch its source,
+   // then make its helper-module imports absolute before creating a same-origin blob worker.
+   const workerResponse=await fetch(ffmpegPkg+'/worker.js');
+   if(!workerResponse.ok)throw new Error('Could not download FFmpeg worker ('+workerResponse.status+').');
+   let workerSource=await workerResponse.text();
+   workerSource=workerSource.replaceAll('"./const.js"','"'+ffmpegPkg+'/const.js"')
+                            .replaceAll("'./const.js'","'"+ffmpegPkg+"/const.js'")
+                            .replaceAll('"./errors.js"','"'+ffmpegPkg+'/errors.js"')
+                            .replaceAll("'./errors.js'","'"+ffmpegPkg+"/errors.js'");
+   const classWorkerURL=URL.createObjectURL(new Blob([workerSource],{type:'text/javascript'}));
+   await ff.load({
+    classWorkerURL,
+    coreURL:await toBlobURL(base+'/ffmpeg-core.js','text/javascript'),
+    wasmURL:await toBlobURL(base+'/ffmpeg-core.wasm','application/wasm')
+   });
    window.__ffmpeg=ff;return ff;
   };
   window.__creditsLibrariesReady=true;
