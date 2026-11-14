@@ -112,8 +112,9 @@ async function exportMp4(){
    const t=Math.min(264,(now-started)/1000);show(t);
    if(now-lastPaint>90){
     lastPaint=now;
-    const shot=await html2canvas(stage,{width:1920,height:1080,scale:1,backgroundColor:'#070609',logging:false});
-    ctx.drawImage(shot,0,0,1920,1080);
+    const previewTransform=stage.style.transform;stage.style.transform='none';
+    const shot=await html2canvas(stage,{width:1920,height:1080,scale:1,windowWidth:1920,windowHeight:1080,backgroundColor:'#070609',logging:false});
+    stage.style.transform=previewTransform;ctx.drawImage(shot,0,0,1920,1080);
     status.textContent='Rendering 1080p video… '+Math.floor(t/264*100)+'%';
    }
    if(audio&&Number($('fade').value)>0&&t>264-Number($('fade').value)){
