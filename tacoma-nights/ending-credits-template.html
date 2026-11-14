@@ -64,7 +64,7 @@ Produced in Tacoma, Washington</textarea>
   window.__loadMp4Encoder=async()=>{
    if(window.__ffmpeg)return window.__ffmpeg;
    const ff=new FFmpeg();
-   const base='https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd';
+   const base='https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm';
    const ffmpegPkg='https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm';
    // FFmpeg's module worker must be created from this site's origin. Fetch its source,
    // then make its helper-module imports absolute before creating a same-origin blob worker.
@@ -76,11 +76,14 @@ Produced in Tacoma, Washington</textarea>
                             .replaceAll('"./errors.js"','"'+ffmpegPkg+'/errors.js"')
                             .replaceAll("'./errors.js'","'"+ffmpegPkg+"/errors.js'");
    const classWorkerURL=URL.createObjectURL(new Blob([workerSource],{type:'text/javascript'}));
-   await ff.load({
-    classWorkerURL,
-    coreURL:await toBlobURL(base+'/ffmpeg-core.js','text/javascript'),
-    wasmURL:await toBlobURL(base+'/ffmpeg-core.wasm','application/wasm')
-   });
+   const coreURL=await toBlobURL(base+'/ffmpeg-core.js','text/javascript');
+   const wasmURL=await toBlobURL(base+'/ffmpeg-core.wasm','application/wasm');
+   try{
+    await ff.load({classWorkerURL,coreURL,wasmURL});
+   }catch(loadError){
+    console.error('FFmpeg core load diagnostics:',{coreURL,wasmURL,loadError});
+    throw new Error('FFmpeg core could not initialize. The matching 0.12.10 ESM core failed to load: '+(loadError?.message||loadError));
+   }
    window.__ffmpeg=ff;return ff;
   };
   window.__creditsLibrariesReady=true;
