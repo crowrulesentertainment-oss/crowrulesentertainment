@@ -108,33 +108,36 @@ if(elapsed<OPEN)setPhase('opening');else if(elapsed<OPEN+SCROLL){setPhase('scrol
 if(elapsed>=TOTAL){stop();$('state').textContent='Complete — 04:24';}}
 function stop(){running=false;cancelAnimationFrame(raf);const a=$('music')._audio;if(a)a.pause();}
 function tick(now){if(!running)return;const t=elapsed+(now-startAt)/1000;show(t);if(t>=TOTAL){stop();return;}raf=requestAnimationFrame(tick);}
-function start(){build();if(elapsed>=TOTAL)elapsed=0;startAt=performance.now();running=true;$('state').textContent='Playing';const a=$('music')._audio;if(a){a.currentTime=0;a.play().catch(()=>{});}cancelAnimationFrame(raf);raf=requestAnimationFrame(tick);}
+function start(){build();if(elapsed>=TOTAL)elapsed=0;startAt=performance.now();running=true;$('state').textContent='Playing';const a=$('music')._audio;if(a){a.currentTime=elapsed;a.volume=Number($('volume').value);a.play().catch(()=>{});}cancelAnimationFrame(raf);raf=requestAnimationFrame(tick);}
 $('update').onclick=()=>{build();show(elapsed);$('state').textContent='Preview updated';};$('start').onclick=start;
 $('pause').onclick=()=>{if(running){elapsed+=(performance.now()-startAt)/1000;stop();show(elapsed);$('state').textContent='Paused';}};
 $('reset').onclick=()=>{stop();elapsed=0;show(0);$('state').textContent='Ready';};
 $('capture').onclick=()=>{document.body.classList.toggle('capture');$('capture').textContent=document.body.classList.contains('capture')?'Exit recording view':'Recording view';fit();};
-$('music').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;if(audioUrl)URL.revokeObjectURL(audioUrl);audioUrl=URL.createObjectURL(f);const a=new Audio(audioUrl);a.preload='auto';a.loop=false;$('music')._audio=a;});
+$('music').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;if(audioUrl)URL.revokeObjectURL(audioUrl);audioUrl=URL.createObjectURL(f);const a=new Audio(audioUrl);a.preload='auto';a.loop=false;$('music')._audio=a;a.volume=Number($('volume').value);a.loop=true;});
+$('volume').addEventListener('input',()=>{const a=$('music')._audio;if(a)a.volume=Number($('volume').value);});
 $('background').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;if(bgUrl)URL.revokeObjectURL(bgUrl);bgUrl=URL.createObjectURL(f);$('backgroundImage').src=bgUrl;$('backgroundImage').style.display='block';});
 async function exportMp4(){
  if(exporting)return;
  if(!window.html2canvas||!window.__loadMp4Encoder){alert('Video export libraries are still loading or could not load. Wait a few seconds and try again. '+(window.__creditsLibrariesError||''));return;}
  exporting=true;exportCancel=false;stop();elapsed=0;build();show(0);
  const btn=$('export');btn.disabled=true;btn.textContent='Preparing…';
- const status=$('exportStatus');let recorder=null,rafId=0,audioCtx=null,source=null,dest=null;
+ const status=$('exportStatus');let recorder=null,rafId=0,audioCtx=null,source=null,dest=null,stream=null,renderError=null,exportAudio=null;
  try{
   status.textContent='Loading MP4 encoder (first use may take a minute)…';
   const ff=await window.__loadMp4Encoder();
   if(exportCancel)throw new Error('Export cancelled');
   const canvas=document.createElement('canvas');canvas.width=1920;canvas.height=1080;
   const ctx=canvas.getContext('2d',{alpha:false});
-  const stream=canvas.captureStream(30);
-  const audio=$('music')._audio;
+  stream=canvas.captureStream(30);
+  const audio=audioUrl?new Audio(audioUrl):null;exportAudio=audio;
   if(audio){
-   audio.pause();audio.currentTime=0;
+   audio.loop=true;audio.volume=1;audio.pause();audio.currentTime=0;
    audioCtx=new (window.AudioContext||window.webkitAudioContext)();
    source=audioCtx.createMediaElementSource(audio);dest=audioCtx.createMediaStreamDestination();
-   const gain=audioCtx.createGain();gain.gain.value=Number($('volume').value);
+   const gain=audioCtx.createGain();const musicVolume=Number($('volume').value);gain.gain.setValueAtTime(musicVolume,audioCtx.currentTime);
    source.connect(gain);gain.connect(dest);gain.connect(audioCtx.destination);
+   const fadeSeconds=Math.max(0,Math.min(60,Number($('fade').value)||0));
+   if(fadeSeconds>0){gain.gain.setValueAtTime(musicVolume,audioCtx.currentTime+264-fadeSeconds);gain.gain.linearRampToValueAtTime(0,audioCtx.currentTime+264);}
    dest.stream.getAudioTracks().forEach(t=>stream.addTrack(t));
    await audioCtx.resume();await audio.play();
   }
@@ -146,37 +149,33 @@ async function exportMp4(){
   recorder.start(1000);status.textContent='Rendering 1080p video… Keep this tab open. 0%';
   const started=performance.now();let lastPaint=0;
   const render=async now=>{
-   if(exportCancel){if(recorder.state!=='inactive')recorder.stop();return;}
-   const t=Math.min(264,(now-started)/1000);show(t);
-   if(now-lastPaint>90){
-    lastPaint=now;
-    const previewTransform=stage.style.transform;stage.style.transform='none';
-    const shot=await html2canvas(stage,{width:1920,height:1080,scale:1,windowWidth:1920,windowHeight:1080,backgroundColor:'#070609',logging:false});
-    stage.style.transform=previewTransform;ctx.drawImage(shot,0,0,1920,1080);
-    status.textContent='Rendering 1080p video… '+Math.floor(t/264*100)+'%';
-   }
-   if(audio&&Number($('fade').value)>0&&t>264-Number($('fade').value)){
-    const remaining=Math.max(0,(264-t)/Number($('fade').value));
-    const gain=audioCtx.createGain();
-    // Apply a smooth master fade to the media element output near the end.
-    if(!window.__creditsFadeGain){source.disconnect();source.connect(gain);gain.connect(dest);gain.connect(audioCtx.destination);window.__creditsFadeGain=gain;}
-    window.__creditsFadeGain.gain.setValueAtTime(Number($('volume').value)*remaining,audioCtx.currentTime);
-   }
-   if(t>=264){if(recorder.state!=='inactive')recorder.stop();return;}
-   rafId=requestAnimationFrame(render);
+   try{
+    if(exportCancel){if(recorder.state!=='inactive')recorder.stop();return;}
+    const t=Math.min(264,(now-started)/1000);show(t);
+    if(now-lastPaint>90){
+     lastPaint=now;
+     const previewTransform=stage.style.transform;stage.style.transform='none';
+     try{const shot=await html2canvas(stage,{width:1920,height:1080,scale:1,windowWidth:1920,windowHeight:1080,backgroundColor:'#070609',logging:false});ctx.drawImage(shot,0,0,1920,1080);}
+     finally{stage.style.transform=previewTransform;}
+     status.textContent='Rendering 1080p video… '+Math.floor(t/264*100)+'%';
+    }
+    if(t>=264){if(recorder.state!=='inactive')recorder.stop();return;}
+    rafId=requestAnimationFrame(render);
+   }catch(err){renderError=err;if(recorder.state!=='inactive')recorder.stop();}
   };
   ctx.fillStyle='#070609';ctx.fillRect(0,0,1920,1080);rafId=requestAnimationFrame(render);
   await finished;cancelAnimationFrame(rafId);stream.getTracks().forEach(t=>t.stop());
+  if(renderError)throw renderError;
   if(exportCancel)throw new Error('Export cancelled');
   status.textContent='Encoding MP4… This can take several minutes.';
   await ff.writeFile('credits.webm',new Uint8Array(await new Blob(chunks,{type:mime}).arrayBuffer()));
   await ff.exec(['-i','credits.webm','-c:v','libx264','-preset','ultrafast','-pix_fmt','yuv420p','-r','30','-c:a','aac','-b:a','192k','-movflags','+faststart','-t','264','tacoma-nights-credits.mp4']);
   const out=await ff.readFile('tacoma-nights-credits.mp4');
-  const url=URL.createObjectURL(new Blob([out.buffer],{type:'video/mp4'}));
+  const url=URL.createObjectURL(new Blob([out],{type:'video/mp4'}));
   const a=document.createElement('a');a.href=url;a.download='tacoma-nights-ending-credits.mp4';a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);
   status.textContent='MP4 ready — 1920×1080, 30 FPS, 4:24. Download started.';
  }catch(err){status.textContent=err.message==='Export cancelled'?'Export cancelled.':('Export error: '+err.message);if(err.message!=='Export cancelled')console.error(err);}
- finally{if(audioCtx)await audioCtx.close().catch(()=>{});if($('music')._audio){$('music')._audio.pause();$('music')._audio.currentTime=0;}elapsed=0;show(0);exporting=false;btn.disabled=false;btn.textContent='Export MP4 · 1080p';}
+ finally{cancelAnimationFrame(rafId);if(recorder&&recorder.state!=='inactive')recorder.stop();if(stream)stream.getTracks().forEach(t=>t.stop());if(exportAudio){exportAudio.pause();exportAudio.src='';}if(audioCtx)await audioCtx.close().catch(()=>{});if($('music')._audio){$('music')._audio.pause();$('music')._audio.currentTime=0;}elapsed=0;show(0);exporting=false;btn.disabled=false;btn.textContent='Export MP4 · 1080p';}
 }
 $('export').onclick=exportMp4;
 $('cancelExport').onclick=()=>{if(exporting){exportCancel=true;$('exportStatus').textContent='Cancelling export…';}};
