@@ -134,7 +134,26 @@ label{color:#dce5d8;font-size:.88rem;font-weight:600}
     <button class="btn secondary" id="showUploads" type="button">Crew uploads</button>
     <button class="btn secondary" id="showTheme" type="button">Theme changer</button>
     <button class="btn secondary" id="showVideo" type="button">Main video</button>
+    <button class="btn secondary" id="showWeeklyQuestion" type="button">Weekly question</button>
   </div>
+  <section id="weeklyQuestionSection" class="hidden">
+    <div class="results-head"><h2>Weekly community question</h2></div>
+    <p class="hint">Publish the question Tacoma Nights is asking the community this week. The public Community Voices page will display the saved question, episode label, and response deadline. Use this desk each week instead of editing the public page.</p>
+    <div class="panel submission">
+      <label for="weeklyQuestionLabel">Question label / episode reference</label>
+      <input class="field" id="weeklyQuestionLabel" type="text" maxlength="160" value="This week's community question" placeholder="EPISODE 007 — November 27">
+      <label for="weeklyQuestionText">Question for the community</label>
+      <textarea class="field" id="weeklyQuestionText" rows="4" maxlength="1200" required placeholder="Enter this week's question…">What do you believe is the single most important thing that makes a community strong, and what is one thing people can do to make their community better?</textarea>
+      <label for="weeklyQuestionDeadline">Response deadline</label>
+      <input class="field" id="weeklyQuestionDeadline" type="text" maxlength="120" value="Wednesday night" placeholder="Wednesday, November 25">
+      <p class="hint">The deadline appears on the public page as a reminder. Keep it clear and specific when possible.</p>
+      <div class="card-actions">
+        <button class="btn primary" id="publishWeeklyQuestion" type="button">Publish weekly question</button>
+        <button class="btn secondary" id="refreshWeeklyQuestion" type="button">↻ Load saved question</button>
+      </div>
+      <p id="weeklyQuestionStatus" class="statusline" role="status" aria-live="polite"></p>
+    </div>
+  </section>
   <section id="videoSection" class="hidden">
     <div class="results-head"><h2>Main homepage video</h2></div>
     <p class="hint">Choose the video shown in the featured video player on the public Tacoma Nights homepage. A manual selection takes priority over the newest episode until you clear it.</p>
@@ -329,16 +348,18 @@ label{color:#dce5d8;font-size:.88rem;font-weight:600}
     $("#uploadsSection").classList.toggle("hidden",name!=="uploads");
     $("#themeSection").classList.toggle("hidden",name!=="theme");
     $("#videoSection").classList.toggle("hidden",name!=="video");
+    $("#weeklyQuestionSection").classList.toggle("hidden",name!=="weeklyQuestion");
     $("#submissionCards").classList.toggle("hidden",!["submissions","audience"].includes(name));
     $("#submissionHeading").classList.toggle("hidden",!["submissions","audience"].includes(name));
     $(".stats").classList.toggle("hidden",!["submissions","audience"].includes(name));
     $("#submissionHeadingTitle").textContent=name==="audience"?"Audience submissions":"Incoming submissions";
     $("#typeFilter").value=name==="audience"?"":"";
-    document.querySelectorAll("#desk > .toolbar button").forEach(b=>b.classList.toggle("primary",b.id===(name==="crew"?"showCrew":name==="uploads"?"showUploads":name==="audience"?"showAudience":name==="theme"?"showTheme":name==="video"?"showVideo":"showSubmissions")));
+    document.querySelectorAll("#desk > .toolbar button").forEach(b=>b.classList.toggle("primary",b.id===(name==="crew"?"showCrew":name==="uploads"?"showUploads":name==="audience"?"showAudience":name==="theme"?"showTheme":name==="video"?"showVideo":name==="weeklyQuestion"?"showWeeklyQuestion":"showSubmissions")));
     if(name==="crew")loadCrew();
     if(name==="uploads")loadUploads();
     if(name==="theme")loadThemeControl();
     if(name==="video")loadFeaturedVideoControl();
+    if(name==="weeklyQuestion")loadWeeklyQuestionControl();
     if(name==="submissions"||name==="audience")loadRecords();
   }
   async function loadCrew(){
@@ -453,6 +474,7 @@ label{color:#dce5d8;font-size:.88rem;font-weight:600}
   $("#showUploads").addEventListener("click",()=>switchSection("uploads"));
   $("#showTheme").addEventListener("click",()=>switchSection("theme"));
   $("#showVideo").addEventListener("click",()=>switchSection("video"));
+  $("#showWeeklyQuestion").addEventListener("click",()=>switchSection("weeklyQuestion"));
   function extractYouTubeId(value){
     const raw=String(value||"").trim();
     if(/^[a-zA-Z0-9_-]{11}$/.test(raw))return raw;
@@ -522,6 +544,38 @@ label{color:#dce5d8;font-size:.88rem;font-weight:600}
     }catch(e){setStatus($("#featuredVideoStatus"),"Could not clear selection: "+e.message,"error");}
     finally{button.disabled=false;}
   });
+  const DEFAULT_WEEKLY_QUESTION = {
+    label: "This week's community question",
+    question: "What do you believe is the single most important thing that makes a community strong, and what is one thing people can do to make their community better?",
+    deadline: "Wednesday night"
+  };
+  async function loadWeeklyQuestionControl(){
+    setStatus($("#weeklyQuestionStatus"),"Loading saved weekly question…");
+    try{
+      const {data,error}=await client.from("tacoma_nights_site_settings").select("setting_value").eq("setting_key","weekly_question").maybeSingle();
+      if(error)throw error;
+      const value=data?.setting_value||DEFAULT_WEEKLY_QUESTION;
+      $("#weeklyQuestionLabel").value=value.label||DEFAULT_WEEKLY_QUESTION.label;
+      $("#weeklyQuestionText").value=value.question||DEFAULT_WEEKLY_QUESTION.question;
+      $("#weeklyQuestionDeadline").value=value.deadline||DEFAULT_WEEKLY_QUESTION.deadline;
+      setStatus($("#weeklyQuestionStatus"),data?.setting_value?"Loaded the currently published community question.":"No saved weekly question yet. The public page is using its built-in starter question.","ok");
+    }catch(e){setStatus($("#weeklyQuestionStatus"),"Could not load the saved question: "+e.message,"error");}
+  }
+  async function publishWeeklyQuestion(){
+    const button=$("#publishWeeklyQuestion");
+    const value={label:$("#weeklyQuestionLabel").value.trim()||DEFAULT_WEEKLY_QUESTION.label,question:$("#weeklyQuestionText").value.trim(),deadline:$("#weeklyQuestionDeadline").value.trim()||DEFAULT_WEEKLY_QUESTION.deadline,updated_at:new Date().toISOString()};
+    if(!value.question){setStatus($("#weeklyQuestionStatus"),"Enter a question before publishing.","error");return;}
+    button.disabled=true;setStatus($("#weeklyQuestionStatus"),"Publishing weekly question…");
+    try{
+      const {error}=await client.from("tacoma_nights_site_settings").upsert({setting_key:"weekly_question",setting_value:value,updated_at:new Date().toISOString()},{onConflict:"setting_key"});
+      if(error)throw error;
+      setStatus($("#weeklyQuestionStatus"),"Weekly question published. The public Community Voices page will display the updated question and deadline.","ok");
+    }catch(e){setStatus($("#weeklyQuestionStatus"),"Question was not published: "+e.message,"error");}
+    finally{button.disabled=false;}
+  }
+  $("#publishWeeklyQuestion").addEventListener("click",publishWeeklyQuestion);
+  $("#refreshWeeklyQuestion").addEventListener("click",loadWeeklyQuestionControl);
+
   async function loadThemeControl(){
     const select=$("#globalThemeSelect"),description=$("#themeDescription");
     if(!select.options.length){
