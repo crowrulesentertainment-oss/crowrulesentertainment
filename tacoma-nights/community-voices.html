@@ -95,7 +95,7 @@ if(type!=="all"&&type!==kind)throw new Error("The selected file does not match t
 if(file.size<1||file.size>MAX_BYTES)throw new Error("The file is empty or exceeds the 50 GB per-file limit.");
 button.disabled=true;button.textContent="Uploading securely…";$("progressBar").style.width="0%";uploadStatus("Preparing private upload…");
 const cleanName=file.name.replace(/[^a-zA-Z0-9._-]/g,"_").slice(-100);
-let storagePath="community-voices/"+crypto.randomUUID()+"-"+cleanName;
+let storagePath="public-inbox/"+crypto.randomUUID()+"-"+cleanName;
 await new Promise(async(resolve,reject)=>{
 let settled=false;const finish=error=>{if(settled)return;settled=true;error?reject(error):resolve();};
 const upload=new tus.Upload(file,{endpoint:"https://"+PROJECT_ID+".storage.supabase.co/storage/v1/upload/resumable",retryDelays:[0,3000,5000,10000,20000,30000,60000,120000],headers:{apikey:SUPABASE_KEY},uploadDataDuringCreation:true,removeFingerprintOnSuccess:true,chunkSize:6*1024*1024,metadata:{bucketName:BUCKET,objectName:storagePath,contentType:file.type||"application/octet-stream",cacheControl:"3600"},
