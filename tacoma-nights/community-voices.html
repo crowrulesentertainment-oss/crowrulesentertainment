@@ -23,11 +23,11 @@
 <main>
 <section class="hero"><div class="wrap"><span class="eyebrow">Tacoma · South Sound · Pacific Northwest</span><h1>Your voice belongs <span>here.</span></h1><p>Bring your voice to Tacoma Nights. Suggest a topic, nominate a person or local business, or share a Tacoma story for a future show. The conversations start with the community.</p><div class="hero-actions"><a class="btn primary" href="#suggestion">Share your idea ↗</a><a class="btn" href="#recording">Send a recording</a></div></div></section>
 <section class="section" id="weekly-question"><div class="wrap"><div class="weekly-card">
-<span class="eyebrow">This week's community question</span>
-<h2>What do you believe is the single most important thing that makes a community strong, and what is one thing people can do to make their community better?</h2>
+<span class="eyebrow" id="weeklyQuestionLabel">This week's community question</span>
+<h2 id="weeklyQuestionText">What do you believe is the single most important thing that makes a community strong, and what is one thing people can do to make their community better?</h2>
 <p class="prompt">We want to hear from people across Tacoma and the PNW. Share your perspective, a real-life example, or one practical action that could make a difference where you live. Your response may help shape an upcoming Tacoma Nights conversation.</p>
 <div class="hero-actions"><button class="btn primary" type="button" id="answerWeekly">Answer this week's question ↗</button><a class="btn" href="#recording">Send a voice or video response</a></div>
-<p class="help" style="margin-top:14px">Have your response in by Wednesday night to be considered for this week's production.</p>
+<p class="help" id="weeklyQuestionDeadline" style="margin-top:14px">Have your response in by Wednesday night to be considered for this week's production.</p>
 </div></div></section>
 <section class="section"><div class="wrap"><div class="head"><span class="eyebrow">Bring your voice to Tacoma Nights</span><h2>What should we talk about?</h2><p class="muted">We're interested in the conversations that matter to people in Tacoma and across the PNW.</p></div><div class="intro-grid">
 <article class="tile"><div class="num">01</div><h3>Suggest a topic</h3><p class="muted">What's happening that deserves a conversation?</p></article>
@@ -81,10 +81,25 @@ let client=null;
 $("year").textContent=new Date().getFullYear();
 function supabaseClient(){if(!window.supabase?.createClient)throw new Error("The secure upload service did not load. Refresh and try again.");if(!client)client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});return client;}
 $("message").addEventListener("input",()=>$("counter").textContent=$("message").value.length.toLocaleString()+" / 4,000 characters");
+let weeklyQuestion={label:"This week's community question",question:"What do you believe is the single most important thing that makes a community strong, and what is one thing people can do to make their community better?",deadline:"Wednesday night"};
+async function loadPublishedWeeklyQuestion(){
+ try{
+  const {data,error}=await supabaseClient().from("tacoma_nights_site_settings").select("setting_value").eq("setting_key","weekly_question").maybeSingle();
+  if(error)throw error;
+  const saved=data?.setting_value;
+  if(saved&&typeof saved==="object"&&typeof saved.question==="string"&&saved.question.trim()){
+   weeklyQuestion={...weeklyQuestion,...saved};
+   $("weeklyQuestionLabel").textContent=weeklyQuestion.label||"This week's community question";
+   $("weeklyQuestionText").textContent=weeklyQuestion.question;
+   $("weeklyQuestionDeadline").textContent="Have your response in by "+(weeklyQuestion.deadline||"Wednesday night")+" to be considered for this week's production.";
+  }
+ }catch(error){console.warn("Using the built-in weekly community question:",error.message);}
+}
+loadPublishedWeeklyQuestion();
 $("answerWeekly").addEventListener("click",()=>{
 $("kind").value="topic_suggestion";
-$("subject").value="This week's community question";
-$("message").value="What do you believe is the single most important thing that makes a community strong, and what is one thing people can do to make their community better?\\n\\nMy response: ";
+$("subject").value="Community question response — "+(weeklyQuestion.label||"This week's question");
+$("message").value=weeklyQuestion.question+"\\n\\nMy response: ";
 $("counter").textContent=$("message").value.length.toLocaleString()+" / 4,000 characters";
 $("suggestion").scrollIntoView({behavior:"smooth"});
 $("message").focus({preventScroll:true});
