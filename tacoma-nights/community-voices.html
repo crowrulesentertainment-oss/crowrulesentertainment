@@ -82,6 +82,7 @@ catch(error){status.className="status error";status.textContent=error.message||"
 });
 function fileKind(file){const name=file.name.toLowerCase();const ext=name.split(".").pop();if(["mp3","wav","m4a","aac","ogg"].includes(ext)||file.type.startsWith("audio/"))return "audio";if(["mp4","mov","webm"].includes(ext)||file.type.startsWith("video/"))return "video";return "";}
 function fileSize(bytes){if(bytes>=1024**3)return (bytes/1024**3).toFixed(2)+" GB";return (bytes/1024**2).toFixed(1)+" MB";}
+function normalizedMime(file,kind){const ext=file.name.toLowerCase().split(".").pop();const map={mp3:"audio/mpeg",wav:"audio/wav",m4a:"audio/x-m4a",aac:"audio/aac",ogg:"audio/ogg",mp4:kind==="audio"?"audio/mp4":"video/mp4",mov:"video/quicktime",webm:kind==="audio"?"audio/webm":"video/webm"};return map[ext]||file.type||"application/octet-stream";}
 function uploadStatus(message,kind=""){$("uploadStatus").textContent=message;$("uploadStatus").className="status"+(kind?" "+kind:"");}
 $("recordingForm").addEventListener("submit",async event=>{
 event.preventDefault();const button=$("uploadButton"),file=$("recordFile").files?.[0],name=$("recordName").value.trim(),title=$("recordTitle").value.trim(),email=$("recordEmail").value.trim(),type=$("recordType").value,notes=$("recordNotes").value.trim();
@@ -90,7 +91,7 @@ if($("recordWebsite").value.trim())throw new Error("Submission could not be acce
 if(!file||!name||!title)throw new Error("Enter your name, recording subject, and choose a file.");
 if(!$("recordRights").checked)throw new Error("Please confirm you have permission to share this recording.");
 if(!window.tus?.Upload)throw new Error("The resumable upload library did not load. Refresh and try again.");
-const kind=fileKind(file);if(!kind)throw new Error("Choose a supported audio or video file.");
+const kind=fileKind(file);if(!kind)throw new Error("Choose a supported audio or video file.");const uploadMime=normalizedMime(file,kind);
 if(type!=="all"&&type!==kind)throw new Error("The selected file does not match the recording type.");
 if(file.size<1||file.size>MAX_BYTES)throw new Error("The file is empty or exceeds the 50 GB per-file limit.");
 button.disabled=true;button.textContent="Uploading securely…";$("progressBar").style.width="0%";uploadStatus("Preparing private upload…");
@@ -98,10 +99,10 @@ const cleanName=file.name.replace(/[^a-zA-Z0-9._-]/g,"_").slice(-100);
 let storagePath="public-inbox/"+crypto.randomUUID()+"-"+cleanName;
 await new Promise(async(resolve,reject)=>{
 let settled=false;const finish=error=>{if(settled)return;settled=true;error?reject(error):resolve();};
-const upload=new tus.Upload(file,{endpoint:"https://"+PROJECT_ID+".storage.supabase.co/storage/v1/upload/resumable",retryDelays:[0,3000,5000,10000,20000,30000,60000,120000],headers:{apikey:SUPABASE_KEY},uploadDataDuringCreation:true,removeFingerprintOnSuccess:true,chunkSize:6*1024*1024,metadata:{bucketName:BUCKET,objectName:storagePath,contentType:file.type||"application/octet-stream",cacheControl:"3600"},
+const upload=new tus.Upload(file,{endpoint:"https://"+PROJECT_ID+".storage.supabase.co/storage/v1/upload/resumable",retryDelays:[0,3000,5000,10000,20000,30000,60000,120000],headers:{apikey:SUPABASE_KEY},uploadDataDuringCreation:true,removeFingerprintOnSuccess:true,chunkSize:6*1024*1024,metadata:{bucketName:BUCKET,objectName:storagePath,contentType:uploadMime,cacheControl:"3600"},
 onError:error=>finish(new Error("Upload interrupted. Reselect the same file in this browser to resume if the upload fingerprint is available. "+(error?.message||""))),
 onProgress:(uploaded,total)=>{const pct=total?Math.min(99,Math.round(uploaded/total*100)):0;$("progressBar").style.width=pct+"%";uploadStatus("Uploading "+file.name+" · "+pct+"% · "+fileSize(uploaded)+" of "+fileSize(total));},
-onSuccess:async()=>{try{const privateNotes=[email?"Contact email: "+email:"",notes,"Recording type: "+kind].filter(Boolean).join("\n\n");const {error}=await supabaseClient().from(TABLE).insert({owner_id:null,co_host_name:name,title,episode_label:"Community Voices — Tacoma Nights",notes:privateNotes||null,storage_path:storagePath,original_filename:file.name,file_size:file.size,mime_type:file.type||null,rights_confirmed:true});if(error){await supabaseClient().storage.from(BUCKET).remove([storagePath]);throw error;}finish();}catch(error){finish(new Error("The file uploaded but its private production record could not be saved: "+(error.message||"unknown error")));}}
+onSuccess:async()=>{try{const privateNotes=[email?"Contact email: "+email:"",notes,"Recording type: "+kind].filter(Boolean).join("\n\n");const {error}=await supabaseClient().from(TABLE).insert({owner_id:null,co_host_name:name,title,episode_label:"Community Voices — Tacoma Nights",notes:privateNotes||null,storage_path:storagePath,original_filename:file.name,file_size:file.size,mime_type:uploadMime,rights_confirmed:true});if(error){await supabaseClient().storage.from(BUCKET).remove([storagePath]);throw error;}finish();}catch(error){finish(new Error("The file uploaded but its private production record could not be saved: "+(error.message||"unknown error")));}}
 });
 try{const previous=await upload.findPreviousUploads();const resumable=previous.find(item=>item.metadata?.bucketName===BUCKET&&item.metadata?.objectName);if(resumable){storagePath=resumable.metadata.objectName;upload.resumeFromPreviousUpload(resumable);uploadStatus("Resuming from the last confirmed upload chunk…");}upload.start();}catch(error){finish(error);}
 });
