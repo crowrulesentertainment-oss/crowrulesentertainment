@@ -162,3 +162,145 @@
  function shareCurrentLocation(){/* location sharing is initiated by the map's explicit opt-in control */}
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",build,{once:true});else build();
 })();
+
+
+/* TACOMA NIGHTS CONTROL ROOM V5 — ten focused workspaces */
+(function(){
+ const start=()=>{
+  const dash=document.getElementById("dashboard");
+  if(!dash||dash.dataset.tnV5Ready==="true")return;
+  const main=dash.querySelector(".tn-v4-main");
+  const oldNav=dash.querySelector(".tn-v4-nav");
+  if(!main||!oldNav)return;
+  const specs=[
+   ["media","03 / MEDIA LIBRARY","Media library & clip vault","Review private recordings, episode assets and contributor clips.","Media & Assets","Find, preview and manage production files."],
+   ["people","02 / PEOPLE","Crew directory","Manage crew profiles, roles, permissions and public listings.","People","Keep the Tacoma Nights team organized."],
+   ["community","04 / COMMUNITY","Submission inbox","Review community ideas, questions, guest nominations and follow-ups.","Community","Keep audience voices moving into the show."],
+   ["talent","05 / TALENT & RECRUITMENT","Remote host applications","Review applications, samples, decisions and recruitment notes.","Talent","Discover and coordinate remote contributors."],
+   ["editorial","01 · EDITORIAL","Plan the conversations","Explore the editorial calendar and turn ideas into episode plans.","Editorial","Choose the stories and shape each conversation."],
+   ["blueprint","00B / SHOW BLUEPRINT","The weekly Tacoma Nights format","Maintain the recurring show structure, segments and weekly rhythm.","Show Blueprint","Keep the recognizable format consistent."],
+   ["build","02 · PRODUCTION","Build the episode","Develop the story, rundown, scripts, assignments and publishing package.","Production","Move the episode from idea to finished edit."],
+   ["desk","00 / WEEKLY PRODUCTION · PRIVATE","Episode production desk","Coordinate research, recording, tasks, approvals and episode status.","Production Desk","The private command center for each weekly episode."],
+   ["broadcast","03 · BROADCAST","Prepare the show","Prepare the broadcast rundown, OBS scenes and readiness checklist.","Broadcast","Get every part of show delivery ready."],
+   ["premiere","01 / ON AIR","Premiere settings","Manage the YouTube video, premiere schedule and public on-air status.","On Air","Control what viewers see and when they see it."]
+  ];
+  const normalize=s=>String(s||"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+  const allPanels=[...main.querySelectorAll(".panel")];
+  const used=new Set();
+  const destinations=document.createElement("div");
+  destinations.className="tn-v5-destinations";
+  destinations.id="tnV5Destinations";
+  specs.forEach((spec,i)=>{
+   const panel=allPanels.find(p=>!used.has(p)&&normalize(p.querySelector("h2")?.textContent)===normalize(spec[2]));
+   if(!panel)return;
+   used.add(panel);
+   const section=document.createElement("section");
+   section.className="tn-v5-destination";
+   section.id="tn-v5-"+spec[0];
+   section.dataset.workspace=spec[0];
+   const header=document.createElement("div");
+   header.className="tn-v5-destination-head";
+   header.innerHTML='<div class="tn-v5-destination-index">'+String(i+1).padStart(2,"0")+'</div><div class="tn-v5-destination-copy"><span>'+spec[1]+'</span><h2>'+spec[2]+'</h2><p>'+spec[3]+'</p></div><div class="tn-v5-destination-tag">'+spec[4]+'</div>';
+   section.append(header,panel);
+   destinations.append(section);
+  });
+  if(!destinations.children.length)return;
+  const summary=main.querySelector(".tn-v4-system-summary");
+  if(summary)summary.insertAdjacentElement("afterend",destinations);
+  else main.append(destinations);
+  const extras=document.createElement("details");
+  extras.className="tn-v5-extras";
+  extras.innerHTML='<summary><span><b>Additional production tools</b><small>Supporting tools, credits, homepage features and other existing workspaces</small></span><span class="tn-v5-extras-count">MORE TOOLS</span></summary>';
+  const extraBody=document.createElement("div");
+  extraBody.className="tn-v5-extras-body";
+  [...main.querySelectorAll('[id^="workspace-"]')].forEach(group=>{
+   const remaining=[...group.querySelectorAll(":scope > .panel")];
+   if(remaining.length){extraBody.append(group);}
+   else group.remove();
+  });
+  if(extraBody.children.length){extras.append(extraBody);destinations.insertAdjacentElement("afterend",extras);}
+  const nav=oldNav;
+  nav.replaceChildren();
+  nav.setAttribute("aria-label","Ten Tacoma Nights workspaces");
+  const navLabel=dash.querySelector(".tn-v4-nav-label");
+  if(navLabel)navLabel.textContent="PRODUCTION WORKSPACES";
+  specs.forEach((spec,i)=>{
+   const target=document.getElementById("tn-v5-"+spec[0]);
+   if(!target)return;
+   const a=document.createElement("a");
+   a.href="#"+target.id;
+   a.dataset.target=target.id;
+   a.className="tn-v5-nav-link";
+   a.innerHTML='<span class="tn-v5-nav-number">'+String(i+1).padStart(2,"0")+'</span><span class="tn-v5-nav-copy"><b>'+spec[2]+'</b><small>'+spec[4]+'</small></span>';
+   nav.append(a);
+  });
+  const sidebar=dash.querySelector(".tn-v4-sidebar");
+  if(sidebar){
+   const foot=sidebar.querySelector(".tn-v4-sidebar-foot");
+   if(foot)foot.innerHTML='<span class="tn-v4-foot-dot"></span><span>PRIVATE PRODUCTION NETWORK</span><small>ONE COMPANY · ONE UNIVERSE</small>';
+   const brand=sidebar.querySelector(".tn-v4-brand");
+   if(brand)brand.innerHTML='<span class="tn-v4-mark" aria-hidden="true">R</span><div><strong>TACOMA NIGHTS</strong><small>PRODUCTION CONTROL ROOM</small></div>';
+  }
+  const activate=id=>nav.querySelectorAll("a").forEach(a=>{
+   const active=a.dataset.target===id;
+   a.classList.toggle("active",active);
+   if(active)a.setAttribute("aria-current","location");else a.removeAttribute("aria-current");
+  });
+  nav.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>activate(a.dataset.target)));
+  if("IntersectionObserver"in window){
+   const observer=new IntersectionObserver(entries=>{
+    const top=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
+    if(top)activate(top.target.id);
+   },{rootMargin:"-18% 0px -68% 0px",threshold:[0,.15,.4]});
+   destinations.querySelectorAll(".tn-v5-destination").forEach(s=>observer.observe(s));
+  }
+  const search=document.getElementById("tnV4Search");
+  if(search)search.addEventListener("input",()=>{
+   const q=normalize(search.value);
+   destinations.querySelectorAll(".tn-v5-destination").forEach(section=>{
+    section.hidden=!!q&&!normalize(section.textContent).includes(q);
+   });
+  });
+  const clear=document.getElementById("tnV4ClearSearch");
+  if(clear)clear.addEventListener("click",()=>destinations.querySelectorAll(".tn-v5-destination").forEach(s=>s.hidden=false));
+  activate(location.hash&&document.getElementById(location.hash.slice(1))?location.hash.slice(1):"tn-v5-media");
+  dash.dataset.tnV5Ready="true";
+ };
+ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>setTimeout(start,0),{once:true});
+ else setTimeout(start,0);
+})();
+(function(){
+ if(document.getElementById("tn-v5-styles"))return;
+ const style=document.createElement("style");style.id="tn-v5-styles";
+ style.textContent=`
+ #dashboard.tn-v5-ready{display:grid;grid-template-columns:285px minmax(0,1fr);gap:0;align-items:start}
+ .tn-v4-sidebar{position:sticky!important;top:18px!important;max-height:calc(100vh - 36px);overflow:auto;border:1px solid #e8b45c35!important;background:linear-gradient(180deg,#121b27,#090e15)!important;padding:18px!important}
+ .tn-v4-nav-label{margin:25px 0 10px!important}
+ .tn-v5-nav-link{display:flex!important;align-items:center;gap:10px;padding:11px 9px!important;border:1px solid transparent!important;border-radius:7px!important;color:#dfe4eb!important;text-decoration:none!important}
+ .tn-v5-nav-link:hover,.tn-v5-nav-link.active{background:#e8b45c12!important;border-color:#e8b45c55!important;color:#f4ca82!important}
+ .tn-v5-nav-number{display:grid;place-items:center;flex:0 0 29px;height:29px;border:1px solid #e8b45c55;color:#e8b45c;font:800 .75rem "DM Sans",sans-serif}
+ .tn-v5-nav-copy{display:grid;gap:3px;min-width:0}.tn-v5-nav-copy b{font-size:.76rem;line-height:1.2}.tn-v5-nav-copy small{font-size:.62rem;color:#aab2bd}
+ .tn-v4-main{min-width:0!important;padding-left:clamp(16px,3vw,38px)!important}
+ .tn-v5-destinations{display:grid;gap:22px;margin:25px 0}
+ .tn-v5-destination{scroll-margin-top:24px;min-width:0}
+ .tn-v5-destination-head{display:flex;align-items:center;gap:15px;padding:18px 20px;margin-bottom:10px;border:1px solid #e8b45c35;background:linear-gradient(100deg,#1a2635,#101721 78%);position:relative;overflow:hidden}
+ .tn-v5-destination-head:after{content:"";position:absolute;right:12px;top:-25px;width:120px;height:120px;border:1px solid #e8b45c15;border-radius:50%;box-shadow:0 0 0 18px #e8b45c08,0 0 0 38px #e8b45c05;pointer-events:none}
+ .tn-v5-destination-index{font:900 2.4rem/1 "Barlow Condensed",sans-serif;color:#e8b45c;min-width:38px}
+ .tn-v5-destination-copy{min-width:0;flex:1}.tn-v5-destination-copy>span{font-size:.62rem;font-weight:800;letter-spacing:.16em;color:#e8b45c}
+ .tn-v5-destination-copy h2{font-size:clamp(1.8rem,3vw,2.7rem);margin:5px 0;color:#f3f0e9}
+ .tn-v5-destination-copy p{margin:0;color:#aab2bd;font-size:.8rem}
+ .tn-v5-destination-tag{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:#e8b45c;border:1px solid #e8b45c40;padding:7px 9px;white-space:nowrap}
+ .tn-v5-destination>.panel{margin:0!important}
+ .tn-v5-extras{border:1px solid #ffffff25;background:#101721;margin:24px 0}
+ .tn-v5-extras>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 20px;cursor:pointer;list-style:none}
+ .tn-v5-extras>summary::-webkit-details-marker{display:none}
+ .tn-v5-extras>summary span:first-child{display:grid;gap:4px}.tn-v5-extras>summary b{font:700 1.45rem "Barlow Condensed";text-transform:uppercase;color:#f3f0e9}
+ .tn-v5-extras>summary small{font-size:.74rem;color:#aab2bd}.tn-v5-extras-count{font-size:.62rem;letter-spacing:.13em;color:#e8b45c}
+ .tn-v5-extras-body{padding:12px;border-top:1px solid #ffffff1a}
+ .tn-v5-extras-body>[id^="workspace-"]{margin:0 0 15px}
+ @media(max-width:1000px){#dashboard.tn-v5-ready{grid-template-columns:230px minmax(0,1fr)}.tn-v4-main{padding-left:16px!important}.tn-v5-destination-tag{display:none}}
+ @media(max-width:760px){#dashboard.tn-v5-ready{display:block}.tn-v4-sidebar{position:relative!important;top:auto!important;max-height:none;margin-bottom:18px}.tn-v4-sidebar .tn-v4-nav{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.tn-v4-main{padding-left:0!important}.tn-v5-destination-head{padding:14px}.tn-v5-destination-index{font-size:1.8rem}}
+ @media(max-width:440px){.tn-v4-sidebar .tn-v4-nav{grid-template-columns:1fr}.tn-v5-destination-copy h2{font-size:1.65rem}.tn-v5-destination-head{gap:10px}.tn-v5-destination-copy p{font-size:.72rem}}
+ `;
+ document.head.append(style);
+})();
