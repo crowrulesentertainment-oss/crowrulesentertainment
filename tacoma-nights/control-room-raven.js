@@ -229,7 +229,7 @@
    if(!target)return;
    const a=document.createElement("a");
    a.href="#"+target.id;
-   a.dataset.target=target.id;
+   a.dataset.v5Target=target.id;
    a.className="tn-v5-nav-link";
    a.innerHTML='<span class="tn-v5-nav-number">'+String(i+1).padStart(2,"0")+'</span><span class="tn-v5-nav-copy"><b>'+spec[2]+'</b><small>'+spec[4]+'</small></span>';
    nav.append(a);
@@ -264,7 +264,7 @@
   const clear=document.getElementById("tnV4ClearSearch");
   if(clear)clear.addEventListener("click",()=>destinations.querySelectorAll(".tn-v5-destination").forEach(s=>s.hidden=false));
   activate(location.hash&&document.getElementById(location.hash.slice(1))?location.hash.slice(1):"tn-v5-media");
-  dash.dataset.tnV5Ready="true";
+  dash.dataset.tnV5Ready="true";dash.classList.add("tn-v5-ready");
  };
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>setTimeout(start,0),{once:true});
  else setTimeout(start,0);
