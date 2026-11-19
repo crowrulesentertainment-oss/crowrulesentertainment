@@ -67,11 +67,13 @@
 <div class="s4"><div class="panel"><div class="sectionhead"><div><span class="micro">02 / Episode archive</span><h3>Weekly episodes</h3></div><button class="btn ghost" id="refreshButton" type="button">Refresh</button></div><div class="list" id="episodeList"><p class="small">Loading episode plans…</p></div><div class="actions"><button class="btn" id="newEpisodeButton" type="button">+ New episode</button></div></div></div>
 <div class="s8"><div class="panel"><div class="sectionhead"><div><span class="micro">03 / Editorial planning</span><h2>Build the weekly brief</h2><p>Generate an AI-assisted first draft, then review and edit every field before saving it to the existing episode plan.</p></div></div>
 <div class="notice" style="border-color:#e8b45c66">
-<strong style="color:var(--gold)">AI EDITORIAL ASSISTANT</strong>
-<p class="small" style="margin:5px 0 10px">Create a complete weekly brief from the episode details and your direction. AI output is a working draft: verify facts, sources, dates and names before publishing.</p>
-<label class="full">Additional direction for the AI (optional)<textarea id="aiBriefDirection" rows="3" maxlength="3000" placeholder="What angle should this episode take? Any must-cover Tacoma stories, guest perspectives, boundaries or priorities?"></textarea></label>
-<div class="actions"><button class="btn" id="generateBriefButton" type="button">✦ Generate weekly brief with AI</button><button class="btn ghost" id="clearAIDirectionButton" type="button">Clear AI direction</button></div>
-<p class="status" id="aiBriefStatus" role="status" aria-live="polite">AI drafts are editable and are not saved until you choose Save episode plan.</p>
+<strong style="color:var(--gold)">CHATGPT EDITORIAL ASSISTANT</strong>
+<p class="small" style="margin:5px 0 10px">Prepare a detailed prompt from the selected episode and your direction. Copy it into ChatGPT, then paste the completed brief into the editable episode-plan fields below. No API key or API billing is used.</p>
+<label class="full">Additional direction for ChatGPT (optional)<textarea id="aiBriefDirection" rows="3" maxlength="3000" placeholder="What angle should this episode take? Any must-cover Tacoma stories, guest perspectives, boundaries or priorities?"></textarea></label>
+<div class="actions"><button class="btn" id="prepareBriefPromptButton" type="button">✦ Prepare ChatGPT brief prompt</button><button class="btn ghost" id="clearAIDirectionButton" type="button">Clear direction</button></div>
+<label class="full hidden" id="chatGPTPromptWrap">Prompt to paste into ChatGPT<textarea id="chatGPTBriefPrompt" rows="10" readonly></textarea></label>
+<div class="actions"><button class="btn ghost hidden" id="copyBriefPromptButton" type="button">Copy prompt</button><a class="btn ghost" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">Open ChatGPT ↗</a></div>
+<p class="status" id="aiBriefStatus" role="status" aria-live="polite">The prompt is prepared here; ChatGPT creates the brief. Review and save the completed content below.</p>
 </div>
 <form id="episodeForm"><input type="hidden" name="id"><div class="fields">
 <label class="full">Episode title<input name="title" maxlength="180" required placeholder="The People Behind the 253"></label>
@@ -176,31 +178,34 @@ function setBriefField(name,value){
  const f=form(),el=f.elements[name];
  if(el&&typeof value==='string')el.value=value;
 }
-async function generateWeeklyBrief(){
- const button=$('generateBriefButton'),input=currentBriefInput();
- const names=['main_topic','objective','research_notes','guest_questions','rundown_text','talking_points_text','host_assignments','opening_notes','closing_notes','tech_notes','youtube_title','youtube_description','thumbnail_text'];
- const hasExisting=names.some(k=>String(input[k]||'').trim());
- if(hasExisting&&!window.confirm('Generate a new AI brief using the current episode details? Existing editorial fields will be replaced by the generated draft. You can review and edit it before saving.'))return;
- button.disabled=true;button.textContent='Generating AI brief…';say('aiBriefStatus','Creating the editorial draft. This may take a little while.');
+function prepareWeeklyBriefPrompt(){
+ const input=currentBriefInput();
+ const prompt=[
+  "You are the editorial planning assistant for Tacoma Nights, a CrowRules Entertainment original production.",
+  "Create a complete, practical weekly editorial brief using the episode information below.",
+  "Return the result in clearly labeled sections matching these existing Production Center fields:",
+  "Episode title; Main topic / story angle; Why this matters to viewers; Research & fact-check notes; Guest / audience questions; Episode rundown; Talking points; Host / contributor assignments; Opening notes; Closing notes; Technical / contingency notes; YouTube title; YouTube description; Thumbnail text / visual direction.",
+  "Make the brief specific to the supplied episode. Preserve supplied facts, dates, URLs, names and roles. Do not invent sources, quotes, statistics, organizations, guests or confirmed events. Clearly label research leads that need verification. Keep the tone conversational, community-focused and suitable for a filmed show.",
+  "Use the existing Tacoma Nights structure where relevant: Welcome / The City Comes Alive, Main Conversation, Triton segment, The Weekly Lineup with Kenneth, community spotlight or other fitting segments, Final Thoughts / Until Next Friday.",
+  "Do not claim that anything has been saved. The user will paste the finished content into the Production Center, edit it and save the episode plan.",
+  "ADDITIONAL DIRECTION:\n"+(input.additional_direction||"None supplied."),
+  "CURRENT EPISODE PLAN (JSON):\n"+JSON.stringify(input,null,2)
+ ].join("\n\n");
+ $('chatGPTBriefPrompt').value=prompt;
+ $('chatGPTPromptWrap').classList.remove('hidden');
+ $('copyBriefPromptButton').classList.remove('hidden');
+ say('aiBriefStatus','Prompt prepared. Copy it, open ChatGPT, and paste it to create the weekly brief. Then transfer the completed sections into the editable fields and save the episode plan.');
+}
+async function copyWeeklyBriefPrompt(){
+ const el=$('chatGPTBriefPrompt');
+ if(!el.value){say('aiBriefStatus','Prepare the ChatGPT prompt first.',true);return;}
  try{
-  const {data,error}=await db.functions.invoke('tacoma-nights-editorial-brief',{body:{episode:input}});
-  if(error)throw error;
-  if(!data?.brief)throw new Error(data?.error||'The AI service returned an empty brief.');
-  const b=data.brief;
-  const map={main_topic:'main_topic',objective:'objective',research_notes:'research_notes',guest_questions:'guest_questions',rundown_text:'rundown_text',talking_points_text:'talking_points_text',host_assignments:'host_assignments',opening_notes:'opening_notes',closing_notes:'closing_notes',tech_notes:'tech_notes',youtube_title:'youtube_title',youtube_description:'youtube_description',thumbnail_text:'thumbnail_text'};
-  Object.entries(map).forEach(([key,field])=>setBriefField(field,String(b[key]||'')));
-  if(b.title&&(!input.title||input.title=== ''))setBriefField('title',String(b.title));
-  if(b.main_topic&&!input.title)setBriefField('title',String(b.title||input.title));
-  say('aiBriefStatus','AI draft generated. Review and edit every field, then click Save episode plan to store it. Research items are leads to verify, not confirmed reporting.');
+  await navigator.clipboard.writeText(el.value);
+  say('aiBriefStatus','Prompt copied. Open ChatGPT and paste it into a new message.');
  }catch(e){
-  console.error('AI editorial brief error:',e);
-  let message=e?.message||'Could not generate the AI brief.';
-  if(e?.context&&typeof e.context.clone==='function'){
-   try{const payload=await e.context.clone().json();if(payload?.error)message=payload.error;}catch{}
-  }
-  if(/OPENAI_API_KEY|AI service is not configured/i.test(message))message='AI generation is not configured yet. Add OPENAI_API_KEY under Supabase → Edge Functions → Secrets. Your episode plan is safe; you can still edit and save it manually.';
-  say('aiBriefStatus',message,true);
- }finally{button.disabled=false;button.textContent='✦ Generate weekly brief with AI';}
+  el.focus();el.select();
+  say('aiBriefStatus','Your browser blocked automatic copying. The prompt is selected; press Ctrl+C, then paste it into ChatGPT.');
+ }
 }
 
 async function saveEpisode(e){e.preventDefault();const f=form(),b=$('saveEpisodeButton');b.disabled=true;try{const contributors=f.elements.contributors_text.value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean).map(line=>{const p=line.split(/\s+[—-]\s+/);return{name:p[0],role:p.slice(1).join(' — ')||'Contributor'};});const p={title:f.elements.title.value.trim(),main_topic:f.elements.main_topic.value.trim()||null,episode_number:f.elements.episode_number.value.trim()||null,episode_date:f.elements.episode_date.value||null,status:f.elements.status.value,objective:f.elements.objective.value.trim()||null,research_notes:f.elements.research_notes.value.trim()||null,guest_questions:f.elements.guest_questions.value.trim()||null,rundown_text:f.elements.rundown_text.value.trim()||null,talking_points_text:f.elements.talking_points_text.value.trim()||null,host_assignments:f.elements.host_assignments.value.trim()||null,opening_notes:f.elements.opening_notes.value.trim()||null,closing_notes:f.elements.closing_notes.value.trim()||null,tech_notes:f.elements.tech_notes.value.trim()||null,youtube_title:f.elements.youtube_title.value.trim()||null,youtube_description:f.elements.youtube_description.value.trim()||null,thumbnail_text:f.elements.thumbnail_text.value.trim()||null,script_status:f.elements.script_status.value,recording_status:f.elements.recording_status.value,editing_status:f.elements.editing_status.value,editing_approved:f.elements.editing_approved.checked,editing_approved_by:f.elements.editing_approved.checked?user.id:null,editing_approved_at:f.elements.editing_approved.checked?new Date().toISOString():null,contributors,approval_notes:f.elements.approval_notes.value.trim()||null,target_runtime:Number(f.elements.target_runtime.value)||60,updated_at:new Date().toISOString()};if(p.editing_approved){p.editing_status='approved';p.status='ready';}let result;if(f.elements.id.value)result=await db.from('tacoma_nights_episode_plans').update(p).eq('id',f.elements.id.value).select('*').single();else{p.created_by=user.id;result=await db.from('tacoma_nights_episode_plans').insert(p).select('*').single();}if(result.error)throw result.error;selected=result.data;await loadEpisodes();const fresh=episodes.find(x=>x.id===selected.id);if(fresh)selected=fresh;await loadTasks(selected.id);fillWithoutReload(selected);say('episodeStatus','Episode plan saved securely. The task board is shared with the full Control Room.');}catch(err){console.error(err);say('episodeStatus',err.message||'Could not save episode plan.',true);}finally{b.disabled=false;}}
@@ -212,7 +217,7 @@ async function init(){if(!window.supabase?.createClient){say('globalStatus','Sec
 $('loginForm').addEventListener('submit',async e=>{e.preventDefault();const b=$('loginButton'),f=e.currentTarget;b.disabled=true;try{const {data,error}=await db.auth.signInWithPassword({email:f.elements.email.value.trim(),password:f.elements.password.value});if(error)throw error;await verify(data.session);}catch(err){say('authMessage',err.message||'Sign-in failed.',true);}finally{b.disabled=false;}});
 $('signOutBtn').addEventListener('click',async()=>{await db.auth.signOut();showSignedOut();say('globalStatus','You have signed out.');});
 $('episodeForm').addEventListener('submit',saveEpisode);
-$('generateBriefButton').addEventListener('click',generateWeeklyBrief);
+$('prepareBriefPromptButton').addEventListener('click',prepareWeeklyBriefPrompt);\n$('copyBriefPromptButton').addEventListener('click',copyWeeklyBriefPrompt);
 $('clearAIDirectionButton').addEventListener('click',()=>{$('aiBriefDirection').value='';say('aiBriefStatus','AI direction cleared.');});
 $('adminClipForm').addEventListener('submit',uploadAdminClips);
 $('clipStatusFilter').addEventListener('change',renderClips);$('clipSearch').addEventListener('input',renderClips);
