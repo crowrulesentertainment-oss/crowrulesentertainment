@@ -73,7 +73,13 @@
 <div class="actions"><button class="btn" id="prepareBriefPromptButton" type="button">✦ Prepare ChatGPT brief prompt</button><button class="btn ghost" id="clearAIDirectionButton" type="button">Clear direction</button></div>
 <label class="full hidden" id="chatGPTPromptWrap">Prompt to paste into ChatGPT<textarea id="chatGPTBriefPrompt" rows="10" readonly></textarea></label>
 <div class="actions"><button class="btn ghost hidden" id="copyBriefPromptButton" type="button">Copy prompt</button><a class="btn ghost" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">Open ChatGPT ↗</a></div>
-<p class="status" id="aiBriefStatus" role="status" aria-live="polite">The prompt is prepared here; ChatGPT creates the brief. Review and save the completed content below.</p>
+<div class="notice" style="margin-top:16px">
+<strong style="color:var(--gold)">BRING THE BRIEF BACK</strong>
+<p class="small" style="margin:5px 0 10px">Ask ChatGPT to return the brief as JSON. Paste its complete response here and apply it to the form. Only fields included in the response are changed; review everything before saving.</p>
+<label class="full">Paste ChatGPT's completed brief<textarea id="chatGPTBriefResponse" rows="9" maxlength="40000" placeholder='Paste the JSON response from ChatGPT here…'></textarea></label>
+<div class="actions"><button class="btn" id="applyChatGPTBriefButton" type="button">Apply brief to episode fields</button><button class="btn ghost" id="clearChatGPTResponseButton" type="button">Clear pasted response</button></div>
+</div>
+<p class="status" id="aiBriefStatus" role="status" aria-live="polite">Prepare a prompt, work with ChatGPT, then paste its JSON response here to populate the editable fields. Nothing is saved until you select Save episode plan.</p>
 </div>
 <form id="episodeForm"><input type="hidden" name="id"><div class="fields">
 <label class="full">Episode title<input name="title" maxlength="180" required placeholder="The People Behind the 253"></label>
@@ -183,9 +189,9 @@ function prepareWeeklyBriefPrompt(){
  const prompt=[
   "You are the editorial planning assistant for Tacoma Nights, a CrowRules Entertainment original production.",
   "Create a complete, practical weekly editorial brief using the episode information below.",
-  "Return the result in clearly labeled sections matching these existing Production Center fields:",
-  "Episode title; Main topic / story angle; Why this matters to viewers; Research & fact-check notes; Guest / audience questions; Episode rundown; Talking points; Host / contributor assignments; Opening notes; Closing notes; Technical / contingency notes; YouTube title; YouTube description; Thumbnail text / visual direction.",
+  "Return ONLY one valid JSON object with no markdown fences and no text before or after it. Use these exact keys when applicable: title, main_topic, objective, research_notes, guest_questions, rundown_text, talking_points_text, host_assignments, opening_notes, closing_notes, tech_notes, youtube_title, youtube_description, thumbnail_text, contributors, target_runtime. Use strings for text fields and an array of {name, role} objects for contributors. Do not include database IDs, status fields or claims that the plan has been saved.",
   "Make the brief specific to the supplied episode. Preserve supplied facts, dates, URLs, names and roles. Do not invent sources, quotes, statistics, organizations, guests or confirmed events. Clearly label research leads that need verification. Keep the tone conversational, community-focused and suitable for a filmed show.",
+  "For research, distinguish verified facts, source-backed context, opinion and unverified leads. Include source URLs only when supplied or genuinely known; never fabricate citations. If current information is required but cannot be verified, state exactly what needs checking.",
   "Use the existing Tacoma Nights structure where relevant: Welcome / The City Comes Alive, Main Conversation, Triton segment, The Weekly Lineup with Kenneth, community spotlight or other fitting segments, Final Thoughts / Until Next Friday.",
   "Do not claim that anything has been saved. The user will paste the finished content into the Production Center, edit it and save the episode plan.",
   "ADDITIONAL DIRECTION:\n"+(input.additional_direction||"None supplied."),
@@ -194,7 +200,59 @@ function prepareWeeklyBriefPrompt(){
  $('chatGPTBriefPrompt').value=prompt;
  $('chatGPTPromptWrap').classList.remove('hidden');
  $('copyBriefPromptButton').classList.remove('hidden');
- say('aiBriefStatus','Prompt prepared. Copy it, open ChatGPT, and paste it to create the weekly brief. Then transfer the completed sections into the editable fields and save the episode plan.');
+ say('aiBriefStatus','Prompt prepared. Copy it, open ChatGPT and paste it into a chat. Ask ChatGPT to return only the requested JSON, then paste that response into Bring the brief back and apply it.');
+}
+function importWeeklyBriefResponse(){
+ const raw=$('chatGPTBriefResponse').value.trim();
+ if(!raw){say('aiBriefStatus','Paste ChatGPT’s JSON response first.',true);return;}
+ let parsed;
+ try{
+  const cleaned=raw.replace(/^\uFEFF/,'').replace(/^\s*```(?:json)?\s*/i,'').replace(/\s*```\s*$/,'').trim();
+  parsed=JSON.parse(cleaned);
+ }catch(e){
+  say('aiBriefStatus','I could not read that as JSON. Ask ChatGPT to return one valid JSON object only, then paste the complete response again.',true);return;
+ }
+ if(!parsed||typeof parsed!=='object'||Array.isArray(parsed)){
+  say('aiBriefStatus','The response must be one JSON object.',true);return;
+ }
+ const aliases={
+  title:['title','episode_title'],main_topic:['main_topic','topic','story_angle'],
+  objective:['objective','why_this_matters','viewer_takeaway'],
+  research_notes:['research_notes','research_and_fact_check_notes','research'],
+  guest_questions:['guest_questions','audience_questions','questions'],
+  rundown_text:['rundown_text','episode_rundown','rundown'],
+  talking_points_text:['talking_points_text','talking_points'],
+  host_assignments:['host_assignments','assignments','contributor_assignments'],
+  opening_notes:['opening_notes','opening'],closing_notes:['closing_notes','closing'],
+  tech_notes:['tech_notes','technical_notes','contingency_notes'],
+  youtube_title:['youtube_title'],youtube_description:['youtube_description'],
+  thumbnail_text:['thumbnail_text','thumbnail_direction','visual_direction'],
+  target_runtime:['target_runtime','target_runtime_minutes']
+ };
+ const f=form();let applied=0,skipped=0;
+ const hasExisting=Object.values(aliases).some(keys=>keys.some(k=>Object.prototype.hasOwnProperty.call(parsed,k)))&&Object.values(aliases).some(keys=>keys.some(k=>Object.prototype.hasOwnProperty.call(parsed,k)&&String(f.elements[Object.keys(aliases).find(n=>aliases[n]===keys)]?.value||'').trim()));
+ if(hasExisting&&!window.confirm('Applying this brief may replace existing episode-plan text in fields returned by ChatGPT. Continue?'))return;
+ for(const [field,keys] of Object.entries(aliases)){
+  const key=keys.find(k=>Object.prototype.hasOwnProperty.call(parsed,k));
+  if(!key)continue;
+  const value=parsed[key];
+  if(value===null||value===undefined)continue;
+  const el=f.elements[field];if(!el)continue;
+  if(field==='target_runtime'){const n=Number(value);if(Number.isFinite(n)&&n>=1&&n<=240){el.value=String(Math.round(n));applied++;}else skipped++;continue;}
+  if(typeof value==='string'||typeof value==='number'){el.value=String(value);applied++;}
+  else if(Array.isArray(value)){el.value=value.map(x=>typeof x==='string'?x:[x?.name,x?.role].filter(Boolean).join(' — ')).filter(Boolean).join('\n');applied++;}
+  else skipped++;
+ }
+ if(Object.prototype.hasOwnProperty.call(parsed,'contributors')){
+  const c=parsed.contributors;
+  if(Array.isArray(c)){
+   f.elements.contributors_text.value=c.map(x=>typeof x==='string'?x:[x?.name,x?.role].filter(Boolean).join(' — ')).filter(Boolean).join('\n');applied++;
+  }else if(typeof c==='string'){f.elements.contributors_text.value=c;applied++;}
+ }
+ if(!applied){say('aiBriefStatus','No recognized episode fields were found. Use the exact JSON keys listed in the prompt.',true);return;}
+ $('chatGPTBriefResponse').value='';
+ say('aiBriefStatus','Applied '+applied+' field(s)'+(skipped?' · '+skipped+' value(s) skipped':'')+'. Review the populated form, make edits, then select Save episode plan. The database has not been changed yet.');
+ $('episodeStatus').textContent='ChatGPT brief applied locally. Review all fields and save when ready.';
 }
 async function copyWeeklyBriefPrompt(){
  const el=$('chatGPTBriefPrompt');
@@ -218,6 +276,8 @@ $('loginForm').addEventListener('submit',async e=>{e.preventDefault();const b=$(
 $('signOutBtn').addEventListener('click',async()=>{await db.auth.signOut();showSignedOut();say('globalStatus','You have signed out.');});
 $('episodeForm').addEventListener('submit',saveEpisode);
 $('prepareBriefPromptButton').addEventListener('click',prepareWeeklyBriefPrompt);
+$('applyChatGPTBriefButton').addEventListener('click',importWeeklyBriefResponse);
+$('clearChatGPTResponseButton').addEventListener('click',()=>{$('chatGPTBriefResponse').value='';say('aiBriefStatus','Pasted ChatGPT response cleared.');});
 $('copyBriefPromptButton').addEventListener('click',copyWeeklyBriefPrompt);
 $('clearAIDirectionButton').addEventListener('click',()=>{$('aiBriefDirection').value='';say('aiBriefStatus','AI direction cleared.');});
 $('adminClipForm').addEventListener('submit',uploadAdminClips);
