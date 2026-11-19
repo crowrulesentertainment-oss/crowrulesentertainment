@@ -194,7 +194,12 @@ async function generateWeeklyBrief(){
   say('aiBriefStatus','AI draft generated. Review and edit every field, then click Save episode plan to store it. Research items are leads to verify, not confirmed reporting.');
  }catch(e){
   console.error('AI editorial brief error:',e);
-  say('aiBriefStatus',e.message||'Could not generate the AI brief. Check the AI function and OPENAI_API_KEY secret.',true);
+  let message=e?.message||'Could not generate the AI brief.';
+  if(e?.context&&typeof e.context.clone==='function'){
+   try{const payload=await e.context.clone().json();if(payload?.error)message=payload.error;}catch{}
+  }
+  if(/OPENAI_API_KEY|AI service is not configured/i.test(message))message='AI generation is not configured yet. Add OPENAI_API_KEY under Supabase → Edge Functions → Secrets. Your episode plan is safe; you can still edit and save it manually.';
+  say('aiBriefStatus',message,true);
  }finally{button.disabled=false;button.textContent='✦ Generate weekly brief with AI';}
 }
 
