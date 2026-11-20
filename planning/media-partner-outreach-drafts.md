@@ -160,6 +160,8 @@ CrowRules Podcasting: https://crowrulesentertainment-oss.github.io/podcasting/
 
 ## 6. KBTC Public Television — Community Engagement / Development / Partnerships
 
+**Published marketing contact:** Adrienne Loska, Associate Director of Marketing and Digital Assets — aloska@kbtc.org (verify current availability before sending).
+
 **Subject:** Tacoma Community Media Collaboration — KBTC × CrowRules Entertainment
 
 Hello KBTC Community Engagement and Partnerships Team,
@@ -291,3 +293,8 @@ Thank you again for your time.
 Jonathan Riehle  
 Founder, CrowRules Entertainment  
 crowrulesentertainment@gmail.com
+
+
+## Additional verified station contact route — Seattle 11 / KSTW
+
+Seattle 11's published contact page lists **seattle11@kstwtv.com** for programming, sales and general questions. This is a general station contact, not a confirmed advertising-sales direct address. Website: https://www.seattle11.com/about.html.
