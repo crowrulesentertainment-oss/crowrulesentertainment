@@ -276,6 +276,37 @@ Tacoma Nights: https://crowrulesentertainment-oss.github.io/crowrulesentertainme
 
 ---
 
+## 10. Seattle 11 / KSTW — Sales / Marketing
+
+**Published general contact:** seattle11@kstwtv.com (listed for programming, sales and general questions; not a direct sales-only address).
+
+**Subject:** Local Promotional Exchange Proposal — Seattle 11 × CrowRules Entertainment
+
+Hello Seattle 11 Team,
+
+My name is Jonathan Riehle, founder of CrowRules Entertainment, an independent entertainment company based in Tacoma, Washington.
+
+I am reaching out to explore a possible mutual promotional exchange with Seattle 11.
+
+CrowRules Podcasting is an emerging platform designed to support independent podcast creators and connect them with listeners. We also produce Tacoma Nights, a program focused on Tacoma, Pierce County, the South Sound and regional community conversations.
+
+We would like to ask whether Seattle 11 would consider a 90-day introductory promotional exchange. We are requesting consideration for complimentary advertising inventory available through your station, while CrowRules would provide agreed Seattle 11 recognition and links on our website and recurring promotional mentions during Tacoma Nights.
+
+We would define the exact placements, frequency, timing and creative approvals together and confirm them in writing before anything begins. No cash payment is requested during the proposed pilot.
+
+Would you be able to direct me to the person who handles local advertising sales or marketing partnerships?
+
+Thank you for your time,
+
+Jonathan Riehle  
+Founder, CrowRules Entertainment  
+crowrulesentertainment@gmail.com
+
+CrowRules Podcasting: https://crowrulesentertainment-oss.github.io/podcasting/  
+Tacoma Nights: https://crowrulesentertainment-oss.github.io/crowrulesentertainment/tacoma-nights/
+
+---
+
 ## Follow-up email (send once, about 7–10 business days later)
 
 **Subject:** Following Up — CrowRules Media Promotional Partnership
