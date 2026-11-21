@@ -26,6 +26,9 @@ const NAV_GROUPS=[
   ['Podcasting','https://crowrulesentertainment-oss.github.io/podcasting/'],
   ['Memorials','https://crowrulesentertainment-oss.github.io/memorials/']
  ]},
+ {label:'PARTNERSHIPS',items:[
+  ['Media Partners','https://crowrulesentertainment-oss.github.io/crowrulesentertainment/media-partners.html']
+ ]},
  {label:'COMMUNITY',items:[
   ['Yearbooks','https://crowrulesentertainment-oss.github.io/yearbooks/'],
   ['Records','https://crowrulesentertainment-oss.github.io/records/']
