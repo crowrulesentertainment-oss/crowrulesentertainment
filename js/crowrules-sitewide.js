@@ -186,8 +186,74 @@ function renderAccount(menu,u,status){
   : '<a class="membership-link" href="'+CONFIG.membership+'">✦ Explore Membership</a><a href="'+'https://crowrulesentertainment-oss.github.io/podcasting/login.html?redirect='+returnUrl+'">Log In</a><a href="'+'https://crowrulesentertainment-oss.github.io/podcasting/signup.html?redirect='+returnUrl+'">Create Universal Account</a><div class="cr-sw-status">'+esc(status||'Universal account ready')+'</div>';
 }
 
+
+function ensureCorporateFooter(){
+ let footer=document.querySelector('footer#cr-corporate-footer');
+ if(!footer){
+  footer=document.querySelector('body > footer, .home-shell > footer, body footer');
+  if(!footer){footer=document.createElement('footer');document.body.appendChild(footer);}
+  footer.id='cr-corporate-footer';
+ }
+ if(footer.dataset.crFooterReady==='1')return;
+ footer.classList.add('cr-corporate-footer');
+ footer.innerHTML=`
+  <div class="cr-footer-inner">
+   <div class="cr-footer-brand">
+    <a class="cr-footer-wordmark" href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/">CROW<span>RULES</span></a>
+    <p>One company. One universe.</p>
+    <p class="cr-footer-about">An independent entertainment company building stories, creative opportunities, media and community from the Pacific Northwest.</p>
+    <span class="cr-footer-location">TACOMA, WASHINGTON · PACIFIC NORTHWEST</span>
+   </div>
+   <div class="cr-footer-column"><h2>EXPLORE</h2>
+    <a href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/">Corporate Home</a>
+    <a href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/future.html">Our Future</a>
+    <a href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/media-partners.html">Media Partners</a>
+    <a href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/partnerships.html">Partnerships</a>
+   </div>
+   <div class="cr-footer-column"><h2>COMPANY</h2>
+    <a href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/mission.html">Our Mission</a>
+    <a href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/values.html">Our Values</a>
+    <a href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/employees.html">Our Team</a>
+    <a href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/contact.html">Contact</a>
+   </div>
+   <div class="cr-footer-column cr-footer-legal"><h2>LEGAL &amp; POLICIES</h2>
+    <a href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/legal-center.html">Legal Center <span aria-hidden="true">↗</span></a>
+    <a href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/legal-center.html#terms">Terms of Use</a>
+    <a href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/legal-center.html#privacy">Privacy Notice</a>
+    <a href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/legal-center.html#community">Community Guidelines</a>
+    <a href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/legal-center.html#accessibility">Accessibility</a>
+   </div>
+  </div>
+  <div class="cr-footer-bottom">
+   <span>© <span data-cr-year></span> CrowRules Entertainment. All rights reserved.</span>
+   <span class="cr-footer-tagline">ONE COMPANY. ONE UNIVERSE.</span>
+   <span class="cr-footer-visitors">VISITORS · <strong data-visitor-count>—</strong></span>
+  </div>`;
+ footer.dataset.crFooterReady='1';
+ const year=footer.querySelector('[data-cr-year]');if(year)year.textContent=String(new Date().getFullYear());
+}
+function ensureCorporateFooterStyles(){
+ if(document.getElementById('cr-corporate-footer-css'))return;
+ const style=document.createElement('style');style.id='cr-corporate-footer-css';
+ style.textContent=`
+ .cr-corporate-footer{position:relative;z-index:2;margin-top:70px;padding:0 24px!important;border-top:1px solid rgba(87,232,255,.2)!important;background:linear-gradient(180deg,rgba(8,11,22,.97),rgba(2,3,9,.99));color:#dce3f5!important;text-align:left!important;font:400 13px/1.6 Montserrat,Arial,sans-serif!important;letter-spacing:normal!important}
+ .cr-footer-inner{width:min(1240px,100%);margin:auto;padding:58px 0 42px;display:grid;grid-template-columns:1.6fr repeat(3,minmax(130px,1fr));gap:42px}
+ .cr-footer-wordmark{display:inline-block;color:#f7f8ff;text-decoration:none;font:900 23px/1 Orbitron,Arial,sans-serif;letter-spacing:.04em}.cr-footer-wordmark span{color:#57e8ff}
+ .cr-footer-brand>p{color:#a8b2c8;margin:14px 0 0}.cr-footer-brand .cr-footer-about{max-width:330px;font-size:12px;line-height:1.8;color:#8994ad;margin-top:12px}
+ .cr-footer-location{display:inline-block;margin-top:20px;color:#57e8ff;font:700 9px/1.5 Orbitron,Arial,sans-serif;letter-spacing:.14em}
+ .cr-footer-column{display:flex;flex-direction:column;align-items:flex-start;gap:12px}.cr-footer-column h2{margin:2px 0 8px;color:#57e8ff;font:800 10px/1.3 Orbitron,Arial,sans-serif;letter-spacing:.17em}
+ .cr-footer-column a{color:#aeb8cc;text-decoration:none;font-size:12px;transition:color .2s,transform .2s}.cr-footer-column a:hover,.cr-footer-column a:focus-visible{color:#fff;transform:translateX(3px);outline:none}.cr-footer-legal a:first-of-type{color:#fff;font-weight:800}
+ .cr-footer-bottom{width:min(1240px,100%);margin:auto;border-top:1px solid rgba(255,255,255,.09);padding:20px 0 24px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;color:#758099;font:700 9px/1.5 Orbitron,Arial,sans-serif;letter-spacing:.08em}
+ .cr-footer-tagline{color:#a9b5cb}.cr-footer-visitors strong{color:#57e8ff}
+ @media(max-width:850px){.cr-footer-inner{grid-template-columns:repeat(2,minmax(0,1fr));gap:34px}.cr-footer-brand{grid-column:1/-1}}
+ @media(max-width:520px){.cr-corporate-footer{padding:0 18px!important}.cr-footer-inner{padding:42px 0 32px;gap:28px 18px}.cr-footer-wordmark{font-size:20px}.cr-footer-column a{font-size:11px}.cr-footer-bottom{display:grid;gap:8px;font-size:8px}}
+ @media(prefers-reduced-motion:reduce){.cr-footer-column a{transition:none}}
+ `;
+ document.head.appendChild(style);
+}
+
 function mount(state){
- css();
+ css();ensureCorporateFooterStyles();ensureCorporateFooter();
  let bar=document.querySelector('.cr-sitewide');
  if(!bar){
   bar=document.createElement('div');
