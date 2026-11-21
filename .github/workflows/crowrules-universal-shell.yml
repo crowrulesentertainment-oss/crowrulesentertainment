@@ -22,6 +22,9 @@ jobs:
           changed=[]
           for p in Path('.').rglob('*.html'):
               if '.git' in p.parts: continue
+              # These show areas maintain their own navigation and must never receive the universal shell.
+              if any(part.lower() in {'back-deck-live', 'tacoma-nights'} for part in p.parts):
+                  continue
               s=p.read_text(encoding='utf-8')
               s=re.sub(r'<script[^>]+crowrules-sitewide\.js\?v=[^"\']+[^>]*></script>\s*', '', s, flags=re.I)
               if 'podcasting' in p.parts:
