@@ -227,7 +227,6 @@ function ensureCorporateFooter(){
   <div class="cr-footer-bottom">
    <span>© <span data-cr-year></span> CrowRules Entertainment. All rights reserved.</span>
    <span class="cr-footer-tagline">ONE COMPANY. ONE UNIVERSE.</span>
-   <span class="cr-footer-visitors">VISITORS · <strong data-visitor-count>—</strong></span>
   </div>`;
  footer.dataset.crFooterReady='1';
  const year=footer.querySelector('[data-cr-year]');if(year)year.textContent=String(new Date().getFullYear());
@@ -244,7 +243,7 @@ function ensureCorporateFooterStyles(){
  .cr-footer-column{display:flex;flex-direction:column;align-items:flex-start;gap:12px}.cr-footer-column h2{margin:2px 0 8px;color:#57e8ff;font:800 10px/1.3 Orbitron,Arial,sans-serif;letter-spacing:.17em}
  .cr-footer-column a{color:#aeb8cc;text-decoration:none;font-size:12px;transition:color .2s,transform .2s}.cr-footer-column a:hover,.cr-footer-column a:focus-visible{color:#fff;transform:translateX(3px);outline:none}.cr-footer-legal a:first-of-type{color:#fff;font-weight:800}
  .cr-footer-bottom{width:min(1240px,100%);margin:auto;border-top:1px solid rgba(255,255,255,.09);padding:20px 0 24px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;color:#758099;font:700 9px/1.5 Orbitron,Arial,sans-serif;letter-spacing:.08em}
- .cr-footer-tagline{color:#a9b5cb}.cr-footer-visitors strong{color:#57e8ff}
+ .cr-footer-tagline{color:#a9b5cb}
  @media(max-width:850px){.cr-footer-inner{grid-template-columns:repeat(2,minmax(0,1fr));gap:34px}.cr-footer-brand{grid-column:1/-1}}
  @media(max-width:520px){.cr-corporate-footer{padding:0 18px!important}.cr-footer-inner{padding:42px 0 32px;gap:28px 18px}.cr-footer-wordmark{font-size:20px}.cr-footer-column a{font-size:11px}.cr-footer-bottom{display:grid;gap:8px;font-size:8px}}
  @media(prefers-reduced-motion:reduce){.cr-footer-column a{transition:none}}
