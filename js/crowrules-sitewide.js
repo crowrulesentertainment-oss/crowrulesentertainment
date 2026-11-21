@@ -255,7 +255,9 @@ function ensureCorporateHeader(){
  if(location.pathname.includes('/tacoma-nights/')||location.pathname.includes('/back-deck-live/'))return;
  // Pages that already use the shared corporate header (including media-partners.html)
  // keep their existing markup; the universal bar remains independently mounted above it.
- if(document.querySelector('header.nav, #cr-corporate-header'))return;
+ const existingHeader=document.querySelector('header.nav');
+ if(existingHeader){existingHeader.style.marginTop='52px';existingHeader.style.top='52px';existingHeader.style.zIndex='900';return;}
+ if(document.querySelector('#cr-corporate-header'))return;
  if(document.getElementById('cr-corporate-header-css'))return;
  const style=document.createElement('style');
  style.id='cr-corporate-header-css';
