@@ -251,52 +251,13 @@ function ensureCorporateFooterStyles(){
  document.head.appendChild(style);
 }
 
-function ensureCorporateHeader(){
- if(location.pathname.includes('/tacoma-nights/')||location.pathname.includes('/back-deck-live/'))return;
- // Pages that already use the shared corporate header (including media-partners.html)
- // keep their existing markup; the universal bar remains independently mounted above it.
- const existingHeader=document.querySelector('header.nav');
- if(existingHeader){existingHeader.style.marginTop='52px';existingHeader.style.top='52px';existingHeader.style.zIndex='900';return;}
- if(document.querySelector('#cr-corporate-header'))return;
- if(document.getElementById('cr-corporate-header-css'))return;
- const style=document.createElement('style');
- style.id='cr-corporate-header-css';
- style.textContent=`
- .cr-corporate-header{position:relative;z-index:1000;margin-top:52px;width:100%;background:rgba(5,7,16,.97);border-bottom:1px solid rgba(120,239,255,.18);box-shadow:0 10px 28px rgba(0,0,0,.18);font-family:Montserrat,Arial,sans-serif}
- .cr-corporate-header .cr-corp-in{width:min(1440px,100%);min-height:62px;margin:auto;padding:10px 4vw;display:flex;align-items:center;gap:22px}
- .cr-corporate-header .cr-corp-logo{font:900 17px Orbitron,Arial,sans-serif;letter-spacing:-.06em;color:#fff;text-decoration:none;white-space:nowrap}
- .cr-corporate-header .cr-corp-logo b{background:linear-gradient(100deg,#55ecff,#9864ff,#ff4fd8);-webkit-background-clip:text;background-clip:text;color:transparent}
- .cr-corporate-header nav{display:flex;align-items:center;justify-content:flex-end;gap:clamp(8px,1.35vw,20px);flex:1;flex-wrap:wrap}
- .cr-corporate-header nav a{color:#d6dbea;text-decoration:none;font:800 10px Montserrat,Arial,sans-serif;letter-spacing:.1em;padding:9px 2px;white-space:nowrap}
- .cr-corporate-header nav a:hover,.cr-corporate-header nav a[aria-current=page]{color:#78efff}
- .cr-corporate-header nav a.cr-corp-member{padding:10px 13px;border:1px solid rgba(120,239,255,.4);border-radius:9px;background:linear-gradient(120deg,rgba(0,190,220,.12),rgba(130,80,220,.16))}
- .cr-corp-toggle{display:none;border:1px solid rgba(120,239,255,.3);border-radius:8px;background:transparent;color:#fff;padding:8px 11px;font-size:18px;cursor:pointer}
- @media(max-width:900px){.cr-corporate-header .cr-corp-in{flex-wrap:wrap;gap:12px}.cr-corp-toggle{display:block;margin-left:auto}.cr-corporate-header nav{display:none;flex-basis:100%;justify-content:flex-start;gap:5px 16px;padding:8px 0 5px}.cr-corporate-header nav.cr-corp-open{display:flex}}
- @media(max-width:520px){.cr-corporate-header .cr-corp-in{padding:10px 15px}.cr-corporate-header nav a{font-size:9px}}
- `;
- document.head.appendChild(style);
- const links=[
-  ['MISSION','mission.html'],['VALUES','values.html'],['VISION','vision.html'],['FUTURE','future.html'],
-  ['PARTNERS','partnerships.html'],['MEDIA','media-partners.html'],['SUPPORT','donate.html'],
-  ['TEAM','employees.html'],['CONTACT','contact.html'],['MEMBERSHIP','membership.html']
- ];
- const current=location.pathname.split('/').pop()||'home.html';
- const header=document.createElement('header');
- header.id='cr-corporate-header';header.className='cr-corporate-header';
- header.innerHTML='<div class="cr-corp-in"><a class="cr-corp-logo" href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/home.html">CROW<b>RULES</b></a><button class="cr-corp-toggle" type="button" aria-label="Open site navigation" aria-expanded="false">☰</button><nav aria-label="CrowRules site navigation">'+links.map(([label,path])=>'<a href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/'+path+'"'+(current===path?' aria-current="page"':'')+(path==='membership.html'?' class="cr-corp-member"':'')+'>'+label+'</a>').join('')+'</nav></div>';
- const nav=header.querySelector('nav'),toggle=header.querySelector('.cr-corp-toggle');
- toggle.addEventListener('click',()=>{const open=nav.classList.toggle('cr-corp-open');toggle.setAttribute('aria-expanded',String(open));toggle.setAttribute('aria-label',open?'Close site navigation':'Open site navigation');toggle.textContent=open?'×':'☰'});
- const bar=document.querySelector('.cr-sitewide');
- if(bar)bar.after(header);else document.body.prepend(header);
-}
-
 function mount(state){
- css();ensureCorporateFooterStyles();ensureCorporateFooter();ensureCorporateHeader();
+ css();ensureCorporateFooterStyles();ensureCorporateFooter();
  let bar=document.querySelector('.cr-sitewide');
  if(!bar){
   bar=document.createElement('div');
   bar.className='cr-sitewide';
-  bar.innerHTML='<div class="cr-sw-in"><a class="cr-sw-brand" href="'+CONFIG.home+'">CROW<b>RULES</b></a><nav class="cr-sw-nav" aria-label="CrowRules universal navigation"></nav><button class="cr-sw-close" id="cr-sw-close" type="button" aria-label="Close Universal CrowRules Membership navigation" title="Close navigation">×</button><button class="cr-sw-account" id="cr-sw-account" type="button" aria-haspopup="true" aria-expanded="false"><span class="cr-sw-dot"></span><span>CONNECTING</span></button></div>';
+  bar.innerHTML='<div class="cr-sw-in"><a class="cr-sw-brand" href="'+CONFIG.home+'">CROW<b>RULES</b></a><nav class="cr-sw-nav" aria-label="CrowRules universal navigation"></nav><button class="cr-sw-close" id="cr-sw-close" type="button" aria-label="Close Universal CrowRules Membership navigation" title="Close navigation">×</button><span class="cr-sw-visitor" aria-label="Sitewide visitor count"></span><button class="cr-sw-account" id="cr-sw-account" type="button" aria-haspopup="true" aria-expanded="false"><span class="cr-sw-dot"></span><span>CONNECTING</span></button></div>';
   document.body.prepend(bar);
  }
  const nav=bar.querySelector('.cr-sw-nav');
