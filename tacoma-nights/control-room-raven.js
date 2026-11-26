@@ -182,7 +182,8 @@
    ["build","02 · PRODUCTION","Build the episode","Develop the story, rundown, scripts, assignments and publishing package.","Production","Move the episode from idea to finished edit."],
    ["desk","00 / WEEKLY PRODUCTION · PRIVATE","Episode production desk","Coordinate research, recording, tasks, approvals and episode status.","Production Desk","The private command center for each weekly episode."],
    ["broadcast","03 · BROADCAST","Prepare the show","Prepare the broadcast rundown, OBS scenes and readiness checklist.","Broadcast","Get every part of show delivery ready."],
-   ["premiere","01 / ON AIR","Premiere settings","Manage the YouTube video, premiere schedule and public on-air status.","On Air","Control what viewers see and when they see it."]
+   ["premiere","01 / ON AIR","Premiere settings","Manage the YouTube video, premiere schedule and public on-air status.","On Air","Control what viewers see and when they see it."],
+   ["homepage","01A / HOMEPAGE FEATURE","On the air in Tacoma","Choose the YouTube video, title and description featured on the public Tacoma Nights homepage.","Homepage Video","Control the featured homepage player independently of the premiere countdown."]
   ];
   const normalize=s=>String(s||"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
   const allPanels=[...main.querySelectorAll(".panel")];
